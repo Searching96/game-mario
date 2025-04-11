@@ -53,6 +53,8 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 		OnCollisionWithCoin(e);
 	else if (dynamic_cast<CPortal*>(e->obj))
 		OnCollisionWithPortal(e);
+	else if (dynamic_cast<CQuestionBlock*>(e->obj))
+		OnCollisionWithQuestionBlock(e);
 }
 
 void CMario::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
@@ -99,6 +101,24 @@ void CMario::OnCollisionWithPortal(LPCOLLISIONEVENT e)
 {
 	CPortal* p = (CPortal*)e->obj;
 	CGame::GetInstance()->InitiateSwitchScene(p->GetSceneId());
+}
+
+void CMario::OnCollisionWithQuestionBlock(LPCOLLISIONEVENT e)
+{
+	CQuestionBlock* qb = dynamic_cast<CQuestionBlock*>(e->obj);
+
+	if (qb && e->ny > 0 && qb->GetState() == QUESTION_BLOCK_STATE_NOT_HIT)
+	{
+		qb->SetState(QUESTION_BLOCK_STATE_HIT);
+
+		//// Spawn a star when Mario hits the question block from below
+		//CGame* game = CGame::GetInstance();
+		//float qbX, qbY;
+		//questionBlock->GetPosition(qbX, qbY);
+
+		//LPGAMEOBJECT star = new CStar(qbX, qbY - STAR_BBOX_HEIGHT / 2 - 8);
+		//objects.push_back(star);
+	}
 }
 
 //
