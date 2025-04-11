@@ -1,0 +1,5 @@
+object gap: 10k
+state/color gap: 1k
+ani gap: 100
+right - left gap: 10
+sprite gap: 1
