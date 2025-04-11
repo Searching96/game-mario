@@ -9,6 +9,7 @@
 #include "Portal.h"
 #include "Coin.h"
 #include "Platform.h"
+#include "QuestionBlock.h"
 
 #include "SampleKeyEventHandler.h"
 
@@ -138,6 +139,8 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 
 		break;
 	}
+
+	case OBJECT_TYPE_QUESTION_BLOCK: obj = new CQuestionBlock(x, y); break;
 
 	case OBJECT_TYPE_PORTAL:
 	{
