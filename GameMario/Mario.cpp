@@ -125,9 +125,14 @@ void CMario::OnCollisionWithMushroom(LPCOLLISIONEVENT e)
 	CMushroom* mushroom = dynamic_cast<CMushroom*>(e->obj);
 	if (mushroom)
 	{
-		mushroom->Delete();
-		if (level == MARIO_LEVEL_SMALL)
-			SetLevel(MARIO_LEVEL_BIG);
+		if (mushroom->GetState() == MUSHROOM_STATE_NOT_HIT)
+			mushroom->SetState(MUSHROOM_STATE_HIT);
+		else if (mushroom->GetState() == MUSHROOM_STATE_HIT)
+		{
+			mushroom->Delete();
+			if (level == MARIO_LEVEL_SMALL)
+				SetLevel(MARIO_LEVEL_BIG);
+		}
 	}
 }
 

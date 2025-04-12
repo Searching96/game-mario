@@ -13,10 +13,17 @@
 #define MUSHROOM_GRAVITY 0.0003f
 #define MUSHROOM_WALKING_SPEED 0.05f
 
+#define MUSHROOM_STATE_NOT_HIT 100
+#define MUSHROOM_STATE_HIT 200
+
+#define MUSHROOM_SPAWN_TIME 2000
+
 class CMushroom : public CGameObject {
 protected:
     float ax;
     float ay;
+	ULONGLONG spawn_start;
+    int spawned;
 public:
     CMushroom(float x, float y);
     void Render();
@@ -26,4 +33,6 @@ public:
     int IsCollidable() { return 1; };
     void OnCollisionWith(LPCOLLISIONEVENT e);
     void OnNoCollision(DWORD dt);
+    void SetState(int state);
+    void SpawnStart() { spawned = 1; spawn_start = GetTickCount64(); }
 };
