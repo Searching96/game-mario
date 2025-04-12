@@ -33,8 +33,7 @@
 #define MARIO_STATE_SIT				600
 #define MARIO_STATE_SIT_RELEASE		601
 
-#define MARIO_STATE_POWER_UP_RIGHT	700
-#define MARIO_STATE_POWER_UP_LEFT	800
+#define MARIO_STATE_POWER_UP	700
 
 
 #pragma region ANIMATION_ID
@@ -80,6 +79,9 @@
 
 #define ID_ANI_MARIO_SMALL_JUMP_RUN_RIGHT 2500
 #define ID_ANI_MARIO_SMALL_JUMP_RUN_LEFT 2510
+
+#define ID_ANI_MARIO_SMALL_POWER_UP_RIGHT 2600
+#define ID_ANI_MARIO_SMALL_POWER_UP_LEFT 2610
 
 // TAIL MARIO
 #define ID_ANI_MARIO_TAIL_IDLE_RIGHT 6000
@@ -127,7 +129,7 @@
 
 
 #define MARIO_UNTOUCHABLE_TIME 2500
-#define MARIO_POWER_UP_TIME 1000
+#define MARIO_POWER_UP_TIME 2000
 
 class CMario : public CGameObject
 {
@@ -141,6 +143,9 @@ class CMario : public CGameObject
 	ULONGLONG untouchable_start;
 	BOOLEAN isOnPlatform;
 	int coin; 
+
+	int powerUp = 0;
+	ULONGLONG powerUpStart = -1;
 
 	void OnCollisionWithGoomba(LPCOLLISIONEVENT e);
 	void OnCollisionWithCoin(LPCOLLISIONEVENT e);
@@ -185,4 +190,6 @@ public:
 	void StartUntouchable() { untouchable = 1; untouchable_start = GetTickCount64(); }
 
 	void GetBoundingBox(float& left, float& top, float& right, float& bottom);
+
+	void StartPowerUp() { powerUp = 1; powerUpStart = GetTickCount64(); }
 };

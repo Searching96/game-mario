@@ -20,6 +20,19 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 
 	if (abs(vx) > abs(maxVx)) vx = maxVx;
 
+	if (state == MARIO_STATE_POWER_UP)
+	{
+		if (GetTickCount64() - powerUpStart > MARIO_POWER_UP_TIME)
+		{
+			powerUp = 0;
+			SetState(MARIO_STATE_IDLE);
+			SetLevel(MARIO_LEVEL_BIG);
+			vy = 0;
+			vx = 0;
+		}
+		return;
+	}
+
 	// reset untouchable timer if untouchable time has passed
 	if ( GetTickCount64() - untouchable_start > MARIO_UNTOUCHABLE_TIME) 
 	{
@@ -140,7 +153,9 @@ void CMario::OnCollisionWithMushroom(LPCOLLISIONEVENT e)
 		{
 			mushroom->Delete();
 			if (level == MARIO_LEVEL_SMALL)
-				SetLevel(MARIO_LEVEL_BIG);
+			{
+				this->SetState(MARIO_STATE_POWER_UP);
+			}
 		}
 	}
 }
@@ -211,6 +226,12 @@ int CMario::GetAniIdSmall()
 				else if (ax == -MARIO_ACCEL_WALK_X)
 					aniId = ID_ANI_MARIO_SMALL_WALKING_LEFT;
 			}
+
+	if (state == MARIO_STATE_POWER_UP)
+	{
+		if (nx > 0) aniId = ID_ANI_MARIO_SMALL_POWER_UP_RIGHT;
+		else aniId = ID_ANI_MARIO_SMALL_POWER_UP_LEFT;
+	}
 
 	if (aniId == -1) aniId = ID_ANI_MARIO_SMALL_IDLE_RIGHT;
 
@@ -366,6 +387,9 @@ void CMario::SetState(int state)
 	// DIE is the end state, cannot be changed! 
 	if (this->state == MARIO_STATE_DIE) return; 
 
+	if (this->state == MARIO_STATE_POWER_UP && (GetTickCount64() - powerUpStart <= MARIO_POWER_UP_TIME))
+		return;
+
 	switch (state)
 	{
 	case MARIO_STATE_RUNNING_RIGHT:
@@ -435,6 +459,10 @@ void CMario::SetState(int state)
 		vy = -MARIO_JUMP_DEFLECT_SPEED;
 		vx = 0;
 		ax = 0;
+		break;
+	case MARIO_STATE_POWER_UP:
+		if (level == MARIO_LEVEL_SMALL)
+			StartPowerUp();
 		break;
 	}
 
