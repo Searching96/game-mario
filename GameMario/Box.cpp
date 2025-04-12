@@ -1,4 +1,4 @@
-#include "Platform.h"
+#include "Box.h"
 
 #include "Sprite.h"
 #include "Sprites.h"
@@ -6,7 +6,7 @@
 #include "Textures.h"
 #include "Game.h"
 
-void CPlatform::RenderBoundingBox()
+void CBox::RenderBoundingBox()
 {
 	D3DXVECTOR3 p(x, y, 0);
 	RECT rect;
@@ -30,34 +30,49 @@ void CPlatform::RenderBoundingBox()
 	CGame::GetInstance()->Draw(xx - cx, yy - cy, bbox, nullptr, BBOX_ALPHA, rect.right - 1, rect.bottom - 1);
 }
 
-void CPlatform::Render()
+void CBox::Render()
 {
 	if (this->height <= 0 || this->width <= 0) return;
 	CSprites* s = CSprites::GetInstance();
 
 	for (int i = 0; i < this->height; i++)
 	{
-		for (int j = 0; j < this->width; j++)
+		for (int j = 0; j <= this->width; j++)
 		{
 			float xx = x + j * this->cellWidth;
 			float yy = y + i * this->cellHeight;
 			if (i == 0)
 			{
-				if (j == 0)
+				if (j==0)
 					s->Get(this->spriteIdTopLeft)->Draw(xx, yy);
 				else if (j == this->width - 1)
 					s->Get(this->spriteIdTopRight)->Draw(xx, yy);
+				else if (j == this->width)
+					s->Get(this->spriteIdTopShadow)->Draw(xx, yy);
 				else
 					s->Get(this->spriteIdTopCenter)->Draw(xx, yy);
+			}
+			else if (i == this->height - 1)
+			{
+				if (j==0)
+					s->Get(this->spriteIdBottomLeft)->Draw(xx, yy);
+				else if (j == this->width - 1)
+					s->Get(this->spriteIdBottomRight)->Draw(xx, yy);
+				else if (j == this->width)
+					s->Get(this->spriteIdBottomShadow)->Draw(xx, yy);
+				else
+					s->Get(this->spriteIdBottomCenter)->Draw(xx, yy);
 			}
 			else
 			{
 				if (j == 0)
-					s->Get(this->spriteIdBottomLeft)->Draw(xx, yy);
+					s->Get(this->spriteIdMiddleLeft)->Draw(xx, yy);
 				else if (j == this->width - 1)
-					s->Get(this->spriteIdBottomRight)->Draw(xx, yy);
+					s->Get(this->spriteIdMiddleRight)->Draw(xx, yy);
+				else if (j == this->width)
+					s->Get(this->spriteIdMiddleShadow)->Draw(xx, yy);
 				else
-					s->Get(this->spriteIdBottomCenter)->Draw(xx, yy);
+					s->Get(this->spriteIdMiddleCenter)->Draw(xx, yy);
 			}
 
 		}
@@ -66,7 +81,7 @@ void CPlatform::Render()
 	RenderBoundingBox();
 }
 
-void CPlatform::GetBoundingBox(float& l, float& t, float& r, float& b)
+void CBox::GetBoundingBox(float& l, float& t, float& r, float& b)
 {
 	l = x - this->cellWidth / 2;
 	t = y - this->cellHeight / 2;
@@ -74,7 +89,7 @@ void CPlatform::GetBoundingBox(float& l, float& t, float& r, float& b)
 	b = t + this->cellHeight * this->height;
 }
 
-int CPlatform::IsDirectionColliable(float nx, float ny)
+int CBox::IsDirectionColliable(float nx, float ny)
 {
 	if (nx == 0 && ny == -1) return 1;
 	else return 0;
