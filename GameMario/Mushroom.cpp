@@ -69,7 +69,7 @@ void CMushroom::GetBoundingBox(float& l, float& t, float& r, float& b)
     l = x - QUESTIONBLOCK_BBOX_WIDTH / 2;
     t = y - MUSHROOM_BBOX_HEIGHT / 2;
     r = l + QUESTIONBLOCK_BBOX_WIDTH;
-    b = t + MUSHROOM_BBOX_HEIGHT;
+    b = t + MUSHROOM_BBOX_HEIGHT + 3;
 }
 
 

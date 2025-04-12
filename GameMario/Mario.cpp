@@ -15,23 +15,20 @@
 
 void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 {
-	vy += ay * dt;
-	vx += ax * dt;
-
-	if (abs(vx) > abs(maxVx)) vx = maxVx;
-
-	if (state == MARIO_STATE_POWER_UP)
+	if (powerUp == 1)
 	{
 		if (GetTickCount64() - powerUpStart > MARIO_POWER_UP_TIME)
 		{
 			powerUp = 0;
-			SetState(MARIO_STATE_IDLE);
 			SetLevel(MARIO_LEVEL_BIG);
-			vy = 0;
-			vx = 0;
 		}
 		return;
 	}
+
+	vy += ay * dt;
+	vx += ax * dt;
+
+	if (abs(vx) > abs(maxVx)) vx = maxVx;
 
 	// reset untouchable timer if untouchable time has passed
 	if ( GetTickCount64() - untouchable_start > MARIO_UNTOUCHABLE_TIME) 
@@ -139,9 +136,9 @@ void CMario::OnCollisionWithMushroom(LPCOLLISIONEVENT e)
 
 	if (mushroom)
 	{
-		if (e->ny > 0 && mushroom->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
+		if (e->ny > 0 && mushroom->GetState() == MUSHROOM_STATE_NOT_HIT)
 		{
-			mushroom->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
+			mushroom->SetState(MUSHROOM_STATE_BOUNCE_UP);
 			float mX, mY;
 			mushroom->GetPosition(mX, mY);
 			if (x < mX)
@@ -460,9 +457,13 @@ void CMario::SetState(int state)
 		vx = 0;
 		ax = 0;
 		break;
+	
 	case MARIO_STATE_POWER_UP:
 		if (level == MARIO_LEVEL_SMALL)
+		{
 			StartPowerUp();
+			//SetLevel(MARIO_LEVEL_BIG);
+		}
 		break;
 	}
 
@@ -499,11 +500,12 @@ void CMario::GetBoundingBox(float &left, float &top, float &right, float &bottom
 
 void CMario::SetLevel(int l)
 {
+	level = l;
+
 	// Adjust position to avoid falling off platform
 	if (this->level == MARIO_LEVEL_SMALL)
 	{
 		y -= (MARIO_BIG_BBOX_HEIGHT - MARIO_SMALL_BBOX_HEIGHT) / 2;
 	}
-	level = l;
 }
 

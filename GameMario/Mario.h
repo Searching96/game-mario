@@ -33,7 +33,7 @@
 #define MARIO_STATE_SIT				600
 #define MARIO_STATE_SIT_RELEASE		601
 
-#define MARIO_STATE_POWER_UP	700
+#define MARIO_STATE_POWER_UP			700
 
 
 #pragma region ANIMATION_ID
