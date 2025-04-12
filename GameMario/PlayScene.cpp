@@ -10,6 +10,7 @@
 #include "Coin.h"
 #include "Platform.h"
 #include "QuestionBlock.h"
+#include "Mushroom.h"
 
 #include "SampleKeyEventHandler.h"
 
@@ -141,6 +142,7 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	}
 
 	case OBJECT_TYPE_QUESTION_BLOCK: obj = new CQuestionBlock(x, y); break;
+	case OBJECT_TYPE_MUSHROOM: obj = new CMushroom(x, y); break;
 
 	case OBJECT_TYPE_PORTAL:
 	{
