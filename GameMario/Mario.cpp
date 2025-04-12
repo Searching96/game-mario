@@ -126,8 +126,8 @@ void CMario::OnCollisionWithMushroom(LPCOLLISIONEVENT e)
 	if (mushroom)
 	{
 		if (mushroom->GetState() == MUSHROOM_STATE_NOT_HIT)
-			mushroom->SetState(MUSHROOM_STATE_HIT);
-		else if (mushroom->GetState() == MUSHROOM_STATE_HIT)
+			mushroom->SetState(MUSHROOM_STATE_BOUNCE_UP);
+		else if (mushroom->GetState() == MUSHROOM_STATE_BOUNCE_COMPLETE)
 		{
 			mushroom->Delete();
 			if (level == MARIO_LEVEL_SMALL)

@@ -26,8 +26,8 @@ protected:
 	bool isHit = false;
 	int bounceUp = 0;
 	int bounceDown = 0;
-	int bounceUpStart = -1;
-	int bounceDownStart = -1;
+	ULONGLONG bounceUpStart = -1;
+	ULONGLONG bounceDownStart = -1;
 
 public:
 	CQuestionBlock(float x, float y);

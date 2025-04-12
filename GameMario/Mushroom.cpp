@@ -5,11 +5,8 @@
 CMushroom::CMushroom(float x, float y) : CGameObject(x, y)
 {
     this->ax = 0;
-    this->ay = MUSHROOM_GRAVITY;
+    this->ay = 0;
 	this->SetState(MUSHROOM_STATE_NOT_HIT);
-
-	spawned = 0;
-	spawn_start = -1;
 }
 
 void CMushroom::Render()
@@ -22,14 +19,22 @@ void CMushroom::Render()
 
 void CMushroom::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
-    if (GetTickCount64() - spawn_start > MUSHROOM_SPAWN_TIME)
-    {
-		ay = MUSHROOM_GRAVITY;
-		vx = MUSHROOM_WALKING_SPEED;
-		spawn_start = -1;
-		spawned = 1;
-        return;
-    }
+	if (bounceUp == 1)
+	{
+		if (GetTickCount64() - bounceUpStart > MUSHROOM_BOUNCE_UP_TIME)
+		{
+			bounceUp = 0;
+			SetState(MUSHROOM_STATE_BOUNCE_DOWN);
+		}
+	}
+	else if (bounceDown == 1)
+	{
+		if (GetTickCount64() - bounceDownStart > MUSHROOM_BOUNCE_DOWN_TIME)
+		{
+			bounceDown = 0;
+			SetState(MUSHROOM_STATE_BOUNCE_COMPLETE);
+		}
+	}
 
     vy += ay * dt;
     vx += ax * dt;
@@ -47,18 +52,18 @@ void CMushroom::OnNoCollision(DWORD dt)
 void CMushroom::OnCollisionWith(LPCOLLISIONEVENT e)
 {
     if (!e->obj->IsBlocking()) return;
-    if (!dynamic_cast<CMario*>(e->obj)) return; // koopa will be at here later on
+    if (!dynamic_cast<CMario*>(e->obj)) return; // koopa will be added here later on
     if (dynamic_cast<CQuestionBlock*>(e->obj)) return;
 
-    if (e->ny != -1)
-    {
-        y -= 16; // RED ALERT
-        if (e->nx == -1)
-            vx = MUSHROOM_WALKING_SPEED;
-        else if (e->nx == 0)
-            vx = -MUSHROOM_WALKING_SPEED;
-		this->SetState(MUSHROOM_STATE_HIT);
-    }
+  //  if (e->ny != -1)
+  //  {
+  //      y -= 16; // RED ALERT
+  //      if (e->nx == -1)
+  //          vx = MUSHROOM_WALKING_SPEED;
+  //      else if (e->nx == 0)
+  //          vx = -MUSHROOM_WALKING_SPEED;
+		//this->SetState(MUSHROOM_STATE_BOUNCE_COMPLETE);
+  //  }
 }
 
 void CMushroom::GetBoundingBox(float& l, float& t, float& r, float& b)
@@ -75,15 +80,18 @@ void CMushroom::SetState(int state)
     CGameObject::SetState(state);
     switch (state)
     {
-    case MUSHROOM_STATE_HIT:
-        vy = -0.0002f;
-        SpawnStart();
-        //vx = MUSHROOM_WALKING_SPEED;
-        //ax = MUSHROOM_GRAVITY;
-        break;
     case MUSHROOM_STATE_NOT_HIT:
-        vy = 0;
-		vx = 0;
+        break;
+    case MUSHROOM_STATE_BOUNCE_UP:
+        vy = -0.1f;
+        StartBounceUp();
+        break;
+    case MUSHROOM_STATE_BOUNCE_DOWN:
+        vy = 0.1f;
+        StartBounceDown();
+        break;
+    case MUSHROOM_STATE_BOUNCE_COMPLETE:
+        vy = 0.0f;
         break;
     }
 }
