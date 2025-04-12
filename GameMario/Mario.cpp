@@ -7,6 +7,9 @@
 #include "Goomba.h"
 #include "Coin.h"
 #include "Portal.h"
+#include "QuestionBlock.h"
+#include "Mushroom.h"
+#include "SuperLeaf.h"
 
 #include "Collision.h"
 
@@ -55,6 +58,10 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 		OnCollisionWithPortal(e);
 	else if (dynamic_cast<CQuestionBlock*>(e->obj))
 		OnCollisionWithQuestionBlock(e);
+	else if (dynamic_cast<CMushroom*>(e->obj))
+		OnCollisionWithMushroom(e);
+	else if (dynamic_cast<CSuperLeaf*>(e->obj))
+		OnCollisionWithSuperLeaf(e);
 }
 
 void CMario::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
@@ -107,17 +114,31 @@ void CMario::OnCollisionWithQuestionBlock(LPCOLLISIONEVENT e)
 {
 	CQuestionBlock* qb = dynamic_cast<CQuestionBlock*>(e->obj);
 
-	if (qb && e->ny > 0 && qb->GetState() == QUESTION_BLOCK_STATE_NOT_HIT)
+	if (qb && e->ny > 0 && qb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
 	{
-		qb->SetState(QUESTION_BLOCK_STATE_HIT);
+		qb->SetState(QUESTIONBLOCK_STATE_HIT);
+	}
+}
 
-		//// Spawn a star when Mario hits the question block from below
-		//CGame* game = CGame::GetInstance();
-		//float qbX, qbY;
-		//questionBlock->GetPosition(qbX, qbY);
+void CMario::OnCollisionWithMushroom(LPCOLLISIONEVENT e)
+{
+	CMushroom* mushroom = dynamic_cast<CMushroom*>(e->obj);
+	if (mushroom)
+	{
+		mushroom->Delete();
+		if (level == MARIO_LEVEL_SMALL)
+			SetLevel(MARIO_LEVEL_BIG);
+	}
+}
 
-		//LPGAMEOBJECT star = new CStar(qbX, qbY - STAR_BBOX_HEIGHT / 2 - 8);
-		//objects.push_back(star);
+void CMario::OnCollisionWithSuperLeaf(LPCOLLISIONEVENT e)
+{
+	CSuperLeaf* superleaf = dynamic_cast<CSuperLeaf*>(e->obj);
+	if (superleaf)
+	{
+		superleaf->Delete();
+		if (level == MARIO_LEVEL_BIG)
+			SetLevel(MARIO_LEVEL_TAIL);
 	}
 }
 

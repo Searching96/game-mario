@@ -6,15 +6,15 @@ CQuestionBlock::CQuestionBlock(float x, float y) : CGameObject(x, y)
 {
 	this->x = x;
 	this->y = y;
-	SetState(QUESTION_BLOCK_STATE_NOT_HIT);
+	SetState(QUESTIONBLOCK_STATE_NOT_HIT);
 }
 
 void CQuestionBlock::Render()
 {
-	int aniId = ID_ANI_QUESTION_BLOCK;
-	if (state == QUESTION_BLOCK_STATE_HIT)
+	int aniId = ID_ANI_QUESTIONBLOCK;
+	if (state == QUESTIONBLOCK_STATE_HIT)
 	{
-		aniId = ID_ANI_QUESTION_BLOCK_HIT;
+		aniId = ID_ANI_QUESTIONBLOCK_HIT;
 	}
 
 	CAnimations::GetInstance()->Get(aniId)->Render(x, y);
@@ -29,10 +29,10 @@ void CQuestionBlock::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 void CQuestionBlock::GetBoundingBox(float& l, float& t, float& r, float& b)
 {
-	l = x - QUESTION_BLOCK_BBOX_WIDTH / 2;
-	t = y - QUESTION_BLOCK_BBOX_HEIGHT / 2;
-	r = l + QUESTION_BLOCK_BBOX_WIDTH;
-	b = t + QUESTION_BLOCK_BBOX_HEIGHT;
+	l = x - QUESTIONBLOCK_BBOX_WIDTH / 2;
+	t = y - QUESTIONBLOCK_BBOX_HEIGHT / 2;
+	r = l + QUESTIONBLOCK_BBOX_WIDTH;
+	b = t + QUESTIONBLOCK_BBOX_HEIGHT;
 }
 
 void CQuestionBlock::SetState(int state)
