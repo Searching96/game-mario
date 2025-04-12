@@ -32,7 +32,15 @@ void CMushroom::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		if (GetTickCount64() - bounceDownStart > MUSHROOM_BOUNCE_DOWN_TIME)
 		{
 			bounceDown = 0;
-			SetState(MUSHROOM_STATE_BOUNCE_COMPLETE);
+			SetState(MUSHROOM_STATE_RISE);
+		}
+	}
+	else if (rise == 1)
+	{
+		if (y0 - y > MUSHROOM_RISE_OFFSET)
+		{
+			rise = 0;
+			SetState(MUSHROOM_STATE_MOVING);
 		}
 	}
 
@@ -54,23 +62,13 @@ void CMushroom::OnCollisionWith(LPCOLLISIONEVENT e)
     if (!e->obj->IsBlocking()) return;
     if (!dynamic_cast<CMario*>(e->obj)) return; // koopa will be added here later on
     if (dynamic_cast<CQuestionBlock*>(e->obj)) return;
-
-  //  if (e->ny != -1)
-  //  {
-  //      y -= 16; // RED ALERT
-  //      if (e->nx == -1)
-  //          vx = MUSHROOM_WALKING_SPEED;
-  //      else if (e->nx == 0)
-  //          vx = -MUSHROOM_WALKING_SPEED;
-		//this->SetState(MUSHROOM_STATE_BOUNCE_COMPLETE);
-  //  }
 }
 
 void CMushroom::GetBoundingBox(float& l, float& t, float& r, float& b)
 {
-    l = x - MUSHROOM_BBOX_WIDTH / 2;
+    l = x - QUESTIONBLOCK_BBOX_WIDTH / 2;
     t = y - MUSHROOM_BBOX_HEIGHT / 2;
-    r = l + MUSHROOM_BBOX_WIDTH;
+    r = l + QUESTIONBLOCK_BBOX_WIDTH;
     b = t + MUSHROOM_BBOX_HEIGHT;
 }
 
@@ -90,8 +88,17 @@ void CMushroom::SetState(int state)
         vy = 0.1f;
         StartBounceDown();
         break;
-    case MUSHROOM_STATE_BOUNCE_COMPLETE:
-        vy = 0.0f;
+	case MUSHROOM_STATE_RISE:
+        y0 = y;
+		vy = -0.01f;
+		StartRise();
         break;
+	case MUSHROOM_STATE_MOVING:
+		ay = MUSHROOM_GRAVITY;
+		if (collisionNx > 0)
+			vx = MUSHROOM_WALKING_SPEED;
+		else
+			vx = -MUSHROOM_WALKING_SPEED;
+		break;
     }
 }

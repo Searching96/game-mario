@@ -33,6 +33,9 @@
 #define MARIO_STATE_SIT				600
 #define MARIO_STATE_SIT_RELEASE		601
 
+#define MARIO_STATE_POWER_UP_RIGHT	700
+#define MARIO_STATE_POWER_UP_LEFT	800
+
 
 #pragma region ANIMATION_ID
 // BIG MARIO
@@ -124,6 +127,7 @@
 
 
 #define MARIO_UNTOUCHABLE_TIME 2500
+#define MARIO_POWER_UP_TIME 1000
 
 class CMario : public CGameObject
 {

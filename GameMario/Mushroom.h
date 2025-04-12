@@ -16,10 +16,13 @@
 #define MUSHROOM_STATE_NOT_HIT 100
 #define MUSHROOM_STATE_BOUNCE_UP 200
 #define MUSHROOM_STATE_BOUNCE_DOWN 300
-#define MUSHROOM_STATE_BOUNCE_COMPLETE 400
+#define MUSHROOM_STATE_RISE 400
+#define MUSHROOM_STATE_MOVING 500
 
 #define MUSHROOM_BOUNCE_UP_TIME 200
 #define MUSHROOM_BOUNCE_DOWN_TIME 200
+
+#define MUSHROOM_RISE_OFFSET 16
 
 class CMushroom : public CGameObject {
 protected:
@@ -31,6 +34,10 @@ protected:
     ULONGLONG bounceUpStart = -1;
     ULONGLONG bounceDownStart = -1;
     ULONGLONG spawnStart = -1;
+
+    int rise = 0;
+    float y0;
+    int collisionNx;
 public:
     CMushroom(float x, float y);
     void Render();
@@ -44,4 +51,6 @@ public:
     void StartSpawn() { spawned = 1; spawnStart = GetTickCount64(); }
 	void StartBounceUp() { bounceUp = 1; bounceUpStart = GetTickCount64(); }
 	void StartBounceDown() { bounceDown = 1; bounceDownStart = GetTickCount64(); }
+	void StartRise() { rise = 1; }
+	void SetCollisionNx(int collisionNx) { this->collisionNx = collisionNx; }
 };

@@ -123,11 +123,20 @@ void CMario::OnCollisionWithQuestionBlock(LPCOLLISIONEVENT e)
 void CMario::OnCollisionWithMushroom(LPCOLLISIONEVENT e)
 {
 	CMushroom* mushroom = dynamic_cast<CMushroom*>(e->obj);
+
 	if (mushroom)
 	{
-		if (mushroom->GetState() == MUSHROOM_STATE_NOT_HIT)
-			mushroom->SetState(MUSHROOM_STATE_BOUNCE_UP);
-		else if (mushroom->GetState() == MUSHROOM_STATE_BOUNCE_COMPLETE)
+		if (e->ny > 0 && mushroom->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
+		{
+			mushroom->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
+			float mX, mY;
+			mushroom->GetPosition(mX, mY);
+			if (x < mX)
+				mushroom->SetCollisionNx(1);
+			else
+				mushroom->SetCollisionNx(-1);
+		}
+		if (mushroom->GetState() == MUSHROOM_STATE_MOVING)
 		{
 			mushroom->Delete();
 			if (level == MARIO_LEVEL_SMALL)

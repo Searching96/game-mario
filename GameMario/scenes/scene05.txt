@@ -38,11 +38,10 @@ assets\superleaf.txt
 4	160	80
 4	180	80
 
-#QuestionBlock
-6	160	80
-
 #Mushroom
 7	160	80
+#QuestionBlock
+6	160	80
 
 #Question Block
 #6	192	80
