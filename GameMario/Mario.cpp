@@ -116,7 +116,7 @@ void CMario::OnCollisionWithQuestionBlock(LPCOLLISIONEVENT e)
 
 	if (qb && e->ny > 0 && qb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
 	{
-		qb->SetState(QUESTIONBLOCK_STATE_HIT);
+		qb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
 	}
 }
 

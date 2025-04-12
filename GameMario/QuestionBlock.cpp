@@ -12,7 +12,7 @@ CQuestionBlock::CQuestionBlock(float x, float y) : CGameObject(x, y)
 void CQuestionBlock::Render()
 {
 	int aniId = ID_ANI_QUESTIONBLOCK;
-	if (state == QUESTIONBLOCK_STATE_HIT)
+	if (isHit)
 	{
 		aniId = ID_ANI_QUESTIONBLOCK_HIT;
 	}
@@ -23,6 +23,24 @@ void CQuestionBlock::Render()
 
 void CQuestionBlock::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
+	if (bounceUp == 1)
+	{
+		if (GetTickCount64() - bounceUpStart > QUESTIONBLOCK_BOUNCE_UP_TIME)
+		{
+			bounceUp = 0;
+			SetState(QUESTIONBLOCK_STATE_BOUNCE_DOWN);
+		}
+	}
+	else if (bounceDown == 1)
+	{
+		if (GetTickCount64() - bounceDownStart > QUESTIONBLOCK_BOUNCE_DOWN_TIME)
+		{
+			bounceDown = 0;
+			SetState(QUESTIONBLOCK_STATE_BOUNCE_COMPLETE);
+		}
+	}
+	x += vx * dt;
+	y += vy * dt;
 	CGameObject::Update(dt, coObjects);
 	CCollision::GetInstance()->Process(this, dt, coObjects);
 }
@@ -38,16 +56,23 @@ void CQuestionBlock::GetBoundingBox(float& l, float& t, float& r, float& b)
 void CQuestionBlock::SetState(int state)
 {
 	CGameObject::SetState(state);
+	switch (state)
+	{
+	case QUESTIONBLOCK_STATE_NOT_HIT:
+		isHit = false;
+		break;
+	case QUESTIONBLOCK_STATE_BOUNCE_UP:
+		isHit = true;
+		vy = -0.1f;
+		StartBounceUp();
+		break;
+	case QUESTIONBLOCK_STATE_BOUNCE_DOWN:
+		vy = 0.1f;
+		StartBounceDown();
+		break;
+	case QUESTIONBLOCK_STATE_BOUNCE_COMPLETE:
+		vy = 0.0f;
+		break;
+	}
 }
 
-//void CQuestionBlock::OnCollisionWith(LPCOLLISIONEVENT e)
-//{
-//	if (e->ny > 0 && state == QUESTION_BLOCK_STATE_NOT_HIT)
-//	{
-//		SetState(QUESTION_BLOCK_STATE_HIT);
-//
-//		CGame* game = CGame::GetInstance();
-//		LPGAMEOBJECT star = new CStar(x, y - STAR_BBOX_HEIGHT / 2);
-//		objects.push_back(star);
-//	}
-//}
