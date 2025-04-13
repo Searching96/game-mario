@@ -81,16 +81,16 @@ void CMushroom::SetState(int state)
     case MUSHROOM_STATE_NOT_HIT:
         break;
     case MUSHROOM_STATE_BOUNCE_UP:
-        vy = -0.1f;
+        vy = MUSHROOM_BOUNCE_SPEED;
         StartBounceUp();
         break;
     case MUSHROOM_STATE_BOUNCE_DOWN:
-        vy = 0.1f;
+        vy = -MUSHROOM_BOUNCE_SPEED;
         StartBounceDown();
         break;
 	case MUSHROOM_STATE_RISE:
         y0 = y;
-		vy = -0.01f;
+		vy = MUSHROOM_RISE_SPEED;
 		StartRise();
         break;
 	case MUSHROOM_STATE_MOVING:

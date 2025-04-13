@@ -63,11 +63,11 @@ void CQuestionBlock::SetState(int state)
 		break;
 	case QUESTIONBLOCK_STATE_BOUNCE_UP:
 		isHit = true;
-		vy = -0.1f;
+		vy = QUESTIONBLOCK_BOUNCE_SPEED;
 		StartBounceUp();
 		break;
 	case QUESTIONBLOCK_STATE_BOUNCE_DOWN:
-		vy = 0.1f;
+		vy = -QUESTIONBLOCK_BOUNCE_SPEED;
 		StartBounceDown();
 		break;
 	case QUESTIONBLOCK_STATE_BOUNCE_COMPLETE:

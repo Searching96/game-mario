@@ -18,6 +18,8 @@
 #define QUESTIONBLOCK_BOUNCE_UP_TIME 200
 #define QUESTIONBLOCK_BOUNCE_DOWN_TIME 200
 
+#define QUESTIONBLOCK_BOUNCE_SPEED -0.1f
+
 extern list<LPGAMEOBJECT> objects;
 
 class CQuestionBlock : public CGameObject

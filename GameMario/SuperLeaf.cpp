@@ -9,8 +9,11 @@ CSuperLeaf::CSuperLeaf(float x, float y) : CGameObject(x, y)
 
 void CSuperLeaf::Render()
 {
+	int aniId = ID_ANI_SUPERLEAF_RIGHT;
+	if (floatingLeft == 1)
+		aniId = ID_ANI_SUPERLEAF_LEFT;
     CAnimations* animations = CAnimations::GetInstance();
-    animations->Get(ID_ANI_SUPERLEAF)->Render(x, y);
+    animations->Get(aniId)->Render(x, y);
 
     RenderBoundingBox();
 }

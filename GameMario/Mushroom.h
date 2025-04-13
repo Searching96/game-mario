@@ -22,6 +22,10 @@
 #define MUSHROOM_BOUNCE_UP_TIME 200
 #define MUSHROOM_BOUNCE_DOWN_TIME 200
 
+#define MUSHROOM_BOUNCE_SPEED -0.1f
+#define MUSHROOM_RISE_SPEED -0.01f
+
+
 #define MUSHROOM_RISE_OFFSET 16
 
 class CMushroom : public CGameObject {

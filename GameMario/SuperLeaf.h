@@ -4,7 +4,8 @@
 #include "Animation.h"
 #include "Animations.h"
 
-#define ID_ANI_SUPERLEAF 120000
+#define ID_ANI_SUPERLEAF_RIGHT 120000
+#define ID_ANI_SUPERLEAF_LEFT 120010
 
 #define SUPERLEAF_WIDTH 16
 #define SUPERLEAF_BBOX_WIDTH 16
