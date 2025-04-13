@@ -13,6 +13,12 @@
 #include "Mushroom.h"
 #include "SuperLeaf.h"
 
+#include "Box.h"
+#include "Tree.h"
+#include "Pipe.h"
+#include "Bush.h"
+#include "Cloud.h"
+
 #include "SampleKeyEventHandler.h"
 
 using namespace std;
@@ -133,15 +139,21 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 
 		float cell_width = (float)atof(tokens[3].c_str());
 		float cell_height = (float)atof(tokens[4].c_str());
-		int length = atoi(tokens[5].c_str());
-		int sprite_begin = atoi(tokens[6].c_str());
-		int sprite_middle = atoi(tokens[7].c_str());
-		int sprite_end = atoi(tokens[8].c_str());
+		int width = atoi(tokens[5].c_str());
+		int height = atoi(tokens[6].c_str());
+		int sprite_top_left = atoi(tokens[7].c_str());
+		int sprite_top_center = atoi(tokens[8].c_str());
+		int sprite_top_right = atoi(tokens[9].c_str());
+		int sprite_bottom_left = atoi(tokens[10].c_str());
+		int sprite_bottom_center = atoi(tokens[11].c_str());
+		int sprite_bottom_right = atoi(tokens[12].c_str());
 
 		obj = new CPlatform(
 			x, y,
-			cell_width, cell_height, length,
-			sprite_begin, sprite_middle, sprite_end
+			cell_width, cell_height,
+			width, height,
+			sprite_top_left, sprite_top_center, sprite_top_right,
+			sprite_bottom_left, sprite_bottom_center, sprite_bottom_right
 		);
 
 		break;
@@ -150,6 +162,119 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	case OBJECT_TYPE_QUESTION_BLOCK: obj = new CQuestionBlock(x, y); break;
 	case OBJECT_TYPE_MUSHROOM: obj = new CMushroom(x, y); break;
 	case OBJECT_TYPE_SUPERLEAF: obj = new CSuperLeaf(x, y); break;
+
+	case OBJECT_TYPE_BOX:
+	{
+
+		float cell_width = (float)atof(tokens[3].c_str());
+		float cell_height = (float)atof(tokens[4].c_str());
+		int width = atoi(tokens[5].c_str());
+		int height = atoi(tokens[6].c_str());
+		int sprite_top_left = atoi(tokens[7].c_str());
+		int sprite_top_center = atoi(tokens[8].c_str());
+		int sprite_top_right = atoi(tokens[9].c_str());
+		int sprite_middle_left = atoi(tokens[10].c_str());
+		int sprite_middle_center = atoi(tokens[11].c_str());
+		int sprite_middle_right = atoi(tokens[12].c_str());
+		int sprite_bottom_left = atoi(tokens[13].c_str());
+		int sprite_bottom_center = atoi(tokens[14].c_str());
+		int sprite_bottom_right = atoi(tokens[15].c_str());
+		int sprite_top_shadow = atoi(tokens[16].c_str());
+		int sprite_bottom_shadow = atoi(tokens[17].c_str());
+
+		obj = new CBox(
+			x, y,
+			cell_width, cell_height,
+			width, height,
+			sprite_top_left, sprite_top_center, sprite_top_right,
+			sprite_middle_left, sprite_middle_center, sprite_middle_right,
+			sprite_bottom_left, sprite_bottom_center, sprite_bottom_right,
+			sprite_top_shadow, sprite_bottom_shadow
+		);
+
+		break;
+	}
+
+	case OBJECT_TYPE_TREE:
+	{
+
+		float cell_width = (float)atof(tokens[3].c_str());
+		float cell_height = (float)atof(tokens[4].c_str());
+		int height = atoi(tokens[5].c_str());
+		int sprite_top_left = atoi(tokens[6].c_str());
+		int sprite_top_right = atoi(tokens[7].c_str());
+		int sprite_bottom_left = atoi(tokens[8].c_str());
+		int sprite_bottom_right = atoi(tokens[9].c_str());
+
+		obj = new CTree(
+			x, y,
+			cell_width, cell_height, height,
+			sprite_top_left, sprite_top_right,
+			sprite_bottom_left, sprite_bottom_right
+		);
+
+		break;
+	}
+
+	case OBJECT_TYPE_PIPE:
+	{
+
+		float cell_width = (float)atof(tokens[3].c_str());
+		float cell_height = (float)atof(tokens[4].c_str());
+		int height = atoi(tokens[5].c_str());
+		int sprite_top_left = atoi(tokens[6].c_str());
+		int sprite_top_right = atoi(tokens[7].c_str());
+		int sprite_bottom_left = atoi(tokens[8].c_str());
+		int sprite_bottom_right = atoi(tokens[9].c_str());
+
+		obj = new CPipe(
+			x, y,
+			cell_width, cell_height, height,
+			sprite_top_left, sprite_top_right,
+			sprite_bottom_left, sprite_bottom_right
+		);
+
+		break;
+	}
+
+	case OBJECT_TYPE_BUSH:
+	{
+
+		float cell_width = (float)atof(tokens[3].c_str());
+		float cell_height = (float)atof(tokens[4].c_str());
+		int width = atoi(tokens[5].c_str());
+		int sprite_id = atoi(tokens[6].c_str());
+
+		obj = new CBush(
+			x, y,
+			cell_width, cell_height, width, sprite_id
+		);
+
+		break;
+	}
+
+	case OBJECT_TYPE_CLOUD:
+	{
+
+		float cell_width = (float)atof(tokens[3].c_str());
+		float cell_height = (float)atof(tokens[4].c_str());
+		int width = atoi(tokens[5].c_str());
+		int sprite_top_left = atoi(tokens[6].c_str());
+		int sprite_top_center = atoi(tokens[7].c_str());
+		int sprite_top_right = atoi(tokens[8].c_str());
+		int sprite_bottom_left = atoi(tokens[9].c_str());
+		int sprite_bottom_center = atoi(tokens[10].c_str());
+		int sprite_bottom_right = atoi(tokens[11].c_str());
+
+		obj = new CCloud(
+			x, y,
+			cell_width, cell_height, width,
+			sprite_top_left, sprite_top_center, sprite_top_right,
+			sprite_bottom_left, sprite_bottom_center, sprite_bottom_right
+		);
+
+		break;
+	}
 
 	case OBJECT_TYPE_PORTAL:
 	{
@@ -274,28 +399,53 @@ void CPlayScene::Update(DWORD dt)
 		objects[i]->Update(dt, &coObjects);
 	}
 
-	// skip the rest if scene was already unloaded (Mario::Update might trigger PlayScene::Unload)
-	if (player == NULL) return; 
+	// Skip the rest if the scene was already unloaded
+	if (player == NULL) return;
 
-	// Update camera to follow mario
+	// Update camera to follow Mario
 	float cx, cy;
 	player->GetPosition(cx, cy);
 
-	CGame *game = CGame::GetInstance();
+	CGame* game = CGame::GetInstance();
+
+	// Center the camera on the player
 	cx -= game->GetBackBufferWidth() / 2;
 	cy -= game->GetBackBufferHeight() / 2;
 
-	if (cx < 0) cx = 0;
+	// Clamp the camera's X position to start at 0 and not exceed the map width
+	float mapWidth = 2815.0f; // Replace with your actual map width
+	if (cx < -8) cx = -8;
+	if (cx > mapWidth - game->GetBackBufferWidth()) cx = mapWidth - game->GetBackBufferWidth();
 
-	CGame::GetInstance()->SetCamPos(cx, 0.0f /*cy*/);
+	// Clamp the camera's Y position to stay between 0 and the map height
+	float mapHeight = 432.0f; // Replace with your actual map height
+	if (cy < 0) cy = 0;
+	if (cy > mapHeight - game->GetBackBufferHeight() - 8) cy = mapHeight - game->GetBackBufferHeight() - 8;
 
+	// Set the camera position
+	game->SetCamPos(cx, cy);
+
+	// Purge deleted objects
 	PurgeDeletedObjects();
 }
 
+
 void CPlayScene::Render()
 {
+	// Render all objects except Mario
 	for (int i = 0; i < objects.size(); i++)
-		objects[i]->Render();
+	{
+		if (objects[i] != player) // Skip Mario
+		{
+			objects[i]->Render();
+		}
+	}
+
+	// Render Mario on top of everything else
+	if (player != NULL)
+	{
+		player->Render();
+	}
 }
 
 /*
