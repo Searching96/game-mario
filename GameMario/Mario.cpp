@@ -398,6 +398,12 @@ int CMario::GetAniIdTail()
 					aniId = ID_ANI_MARIO_TAIL_WALKING_LEFT;
 			}
 
+	if (jumpCount > 0)
+		if (nx > 0)
+			aniId = ID_ANI_MARIO_TAIL_MULTIJUMP_RIGHT;
+		else
+			aniId = ID_ANI_MARIO_TAIL_MULTIJUMP_LEFT;
+
 	if (aniId == -1) aniId = ID_ANI_MARIO_TAIL_IDLE_RIGHT;
 
 	return aniId;
