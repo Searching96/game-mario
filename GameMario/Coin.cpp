@@ -20,7 +20,7 @@ void CCoin::Render()
 	//RenderBoundingBox();
 }
 
-void CCoin::Update(DWORD dt)
+void CCoin::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
 	if (bounceUp == 1)
 	{
@@ -29,16 +29,14 @@ void CCoin::Update(DWORD dt)
 			bounceUp = 0;
 			SetState(COIN_STATE_BOUNCE_DOWN);
 		}
-		return;
 	}
-	else if (bounceDown == 1)
+	if (bounceDown == 1)
 	{
 		if (GetTickCount64() - bounceDownStart > COIN_BOUNCE_DOWN_TIME)
 		{
 			bounceDown = 0;
 			SetState(COIN_STATE_BOUNCE_COMPLETE);
 		}
-		return;
 	}
 	x += vx * dt;
 	y += vy * dt;
@@ -54,7 +52,6 @@ void CCoin::GetBoundingBox(float& l, float& t, float& r, float& b)
 
 void CCoin::SetState(int state)
 {
-	CGameObject::SetState(state);
 	switch (state)
 	{
 	case COIN_STATE_STATIC:
@@ -62,13 +59,18 @@ void CCoin::SetState(int state)
 	case COIN_STATE_DYNAMIC:
 		break;
 	case COIN_STATE_BOUNCE_UP:
+		vx = 0.0f;
 		vy = COIN_BOUNCE_SPEED;
+		StartBounceUp();
 		break;
 	case COIN_STATE_BOUNCE_DOWN:
+		vx = 0.0f;
 		vy = -COIN_BOUNCE_SPEED;
+		StartBounceDown();
 		break;
 	case COIN_STATE_BOUNCE_COMPLETE:
 		this->Delete();
 		break;
 	}
+	CGameObject::SetState(state);
 }

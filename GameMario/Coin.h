@@ -20,7 +20,7 @@
 #define COIN_BOUNCE_UP_TIME 200
 #define COIN_BOUNCE_DOWN_TIME 200
 
-#define COIN_BOUNCE_SPEED -0.4f
+#define COIN_BOUNCE_SPEED -0.3f
 
 class CCoin : public CGameObject {
 protected:
@@ -32,7 +32,7 @@ protected:
 public:
 	CCoin(float x, float y, int type);
 	void Render();
-	void Update(DWORD dt);
+	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 	void GetBoundingBox(float& l, float& t, float& r, float& b);
 	int IsBlocking() { return 0; }
 	void SetState(int state);
