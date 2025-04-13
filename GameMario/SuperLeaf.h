@@ -13,10 +13,17 @@
 #define SUPERLEAF_GRAVITY 0.0002f
 #define SUPERLEAF_FLOATING_SPEED 0.05f
 
+#define SUPERLEAF_STATE_NOT_HIT 100
+#define SUPERLEAF_STATE_BOUNCE_UP 200
+#define SUPERLEAF_STATE_FLOATING_DOWN 300
+
+#define MUSHROOM_BOUNCE_UP_TIME 200
+
 class CSuperLeaf : public CGameObject {
 protected:
     float ax;
     float ay;
+
 public:
     CSuperLeaf(float x, float y);
     void Render();

@@ -20,6 +20,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		if (GetTickCount64() - powerUpStart > MARIO_POWER_UP_TIME)
 		{
 			powerUp = 0;
+			y -= 6; // RED ALERT
 			SetLevel(MARIO_LEVEL_BIG);
 		}
 		return;

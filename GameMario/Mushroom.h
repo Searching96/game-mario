@@ -28,12 +28,10 @@ class CMushroom : public CGameObject {
 protected:
     float ax;
     float ay;
-    int spawned = 0;
 	int bounceUp = 0;
 	int bounceDown = 0;
     ULONGLONG bounceUpStart = -1;
     ULONGLONG bounceDownStart = -1;
-    ULONGLONG spawnStart = -1;
 
     int rise = 0;
     float y0;
@@ -48,7 +46,6 @@ public:
     void OnCollisionWith(LPCOLLISIONEVENT e);
     void OnNoCollision(DWORD dt);
     void SetState(int state);
-    void StartSpawn() { spawned = 1; spawnStart = GetTickCount64(); }
 	void StartBounceUp() { bounceUp = 1; bounceUpStart = GetTickCount64(); }
 	void StartBounceDown() { bounceDown = 1; bounceDownStart = GetTickCount64(); }
 	void StartRise() { rise = 1; }
