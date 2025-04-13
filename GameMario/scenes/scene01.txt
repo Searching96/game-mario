@@ -11,6 +11,8 @@ assets\cloud.txt
 assets\box.txt
 assets\platform.txt
 assets\tree.txt
+assets\pipe.txt
+assets\bush.txt
 #
 [OBJECTS]
 # type	x	y	extra_settings per object type
@@ -47,6 +49,14 @@ assets\tree.txt
 102	32	384	16	16	2	1080110	1080120	1080210	1080220
 102	112	384	16	16	2	1080110	1080120	1080200	1080220
 102	80	400	16	16	1	1080110	1080120	1080200	1080200
+
+#Pipe x, y, c_width, c_height, height, top_left, top_right, ...
+103	352	368	16	16	3	1090110	1090120	1090210	1090220
+
+#Bush x, y, c_width, c_height, width, sprite_id
+104	160	400	16	16	3	1100000
+104	672	384	16	16	6	1100000
+104	1040	384	16	16	2	1100000
 
 #Portal 
 50	300	400	316	140	2
