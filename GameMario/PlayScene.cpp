@@ -248,6 +248,18 @@ void CPlayScene::Update(DWORD dt)
 	// We know that Mario is the first object in the list hence we won't add him into the colliable object list
 	// TO-DO: This is a "dirty" way, need a more organized way 
 
+	// Chrono stop the game while Mario is transforming
+	// Get Mario
+	CMario* mario = NULL;
+	for (size_t i = 0; i < objects.size(); i++)
+	{
+		if (dynamic_cast<CMario*>(objects[i]))
+		{
+			mario = dynamic_cast<CMario*>(objects[i]);
+			break;
+		}
+	}
+
 	vector<LPGAMEOBJECT> coObjects;
 	for (size_t i = 1; i < objects.size(); i++)
 	{
@@ -256,6 +268,9 @@ void CPlayScene::Update(DWORD dt)
 
 	for (size_t i = 0; i < objects.size(); i++)
 	{
+		if (mario->GetState() == MARIO_STATE_POWER_UP)
+			continue;	// chrono stop the game
+
 		objects[i]->Update(dt, &coObjects);
 	}
 
