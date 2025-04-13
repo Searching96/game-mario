@@ -35,6 +35,8 @@
 
 #define MARIO_STATE_POWER_UP		700
 
+#define MARIO_STATE_TAIL_UP			800	// dont talk about my grammar
+
 
 #pragma region ANIMATION_ID
 // BIG MARIO
@@ -130,6 +132,7 @@
 
 #define MARIO_UNTOUCHABLE_TIME 2500
 #define MARIO_POWER_UP_TIME 2000
+#define MARIO_TAIL_UP_TIME 0
 
 class CMario : public CGameObject
 {
@@ -146,6 +149,8 @@ class CMario : public CGameObject
 
 	int powerUp = 0;
 	ULONGLONG powerUpStart = -1;
+	int tailUp = 0;
+	ULONGLONG tailUpStart = -1;
 
 	void OnCollisionWithGoomba(LPCOLLISIONEVENT e);
 	void OnCollisionWithCoin(LPCOLLISIONEVENT e);
@@ -192,4 +197,5 @@ public:
 	void GetBoundingBox(float& left, float& top, float& right, float& bottom);
 
 	void StartPowerUp() { powerUp = 1; powerUpStart = GetTickCount64(); }
+	void StartTailUp() { tailUp = 1; tailUpStart = GetTickCount64(); }
 };

@@ -2,8 +2,9 @@
 
 CSuperLeaf::CSuperLeaf(float x, float y) : CGameObject(x, y)
 {
-    this->ax = 0;
-    this->ay = SUPERLEAF_GRAVITY;
+	this->ax = 0;
+	this->ay = 0;
+	this->SetState(SUPERLEAF_STATE_NOT_HIT);
 }
 
 void CSuperLeaf::Render()
@@ -16,12 +17,36 @@ void CSuperLeaf::Render()
 
 void CSuperLeaf::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
+	if (bounceUp == 1)
+	{
+		if (GetTickCount64() - bounceUpStart > SUPERLEAF_BOUNCE_UP_TIME)
+		{
+			bounceUp = 0;
+			SetState(SUPERLEAF_STATE_FLOATING_RIGHT);
+		}
+	}
+	else if (floatingRight == 1)
+	{
+		if (GetTickCount64() - floatingRightStart > SUPERLEAF_FLOATING_TIME)
+		{
+			floatingRight = 0;
+			SetState(SUPERLEAF_STATE_FLOATING_LEFT);
+		}
+	}
+	else if (floatingLeft == 1)
+	{
+		if (GetTickCount64() - floatingLeftStart > SUPERLEAF_FLOATING_TIME)
+		{
+			floatingLeft = 0;
+			SetState(SUPERLEAF_STATE_FLOATING_RIGHT);
+		}
+	}
+
     vy += ay * dt;
     vx += ax * dt;
 
-    // just test
-    /*vx = vy = 0;*/
-    vx = SUPERLEAF_FLOATING_SPEED;
+	x += vx * dt;
+	y += vy * dt;
 
     CGameObject::Update(dt, coObjects);
     CCollision::GetInstance()->Process(this, dt, coObjects);
@@ -29,13 +54,12 @@ void CSuperLeaf::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 void CSuperLeaf::OnNoCollision(DWORD dt)
 {
-    x += vx * dt;
-    y += vy * dt;
+	return;
 }
 
 void CSuperLeaf::OnCollisionWith(LPCOLLISIONEVENT e)
 {
-    if (!e->obj->IsBlocking()) return;
+	return;
 }
 
 void CSuperLeaf::GetBoundingBox(float& l, float& t, float& r, float& b)
@@ -44,4 +68,30 @@ void CSuperLeaf::GetBoundingBox(float& l, float& t, float& r, float& b)
     t = y - SUPERLEAF_BBOX_HEIGHT / 2;
     r = l + SUPERLEAF_BBOX_WIDTH;
     b = t + SUPERLEAF_BBOX_HEIGHT;
+}
+
+
+void CSuperLeaf::SetState(int state)
+{
+    switch (state)
+    {
+    case SUPERLEAF_STATE_NOT_HIT:
+        break;
+	case SUPERLEAF_STATE_BOUNCE_UP:
+        vx = 0;
+        vy = SUPERLEAF_BOUNCE_UP_SPEED;
+		StartBounceUp();
+        break;
+	case SUPERLEAF_STATE_FLOATING_RIGHT:
+		vx = SUPERLEAF_FLOATING_X_SPEED;
+		vy = SUPERLEAF_FLOATING_Y_SPEED;
+		StartFloatingRight();
+		break;
+	case SUPERLEAF_STATE_FLOATING_LEFT:
+		vx = -SUPERLEAF_FLOATING_X_SPEED;
+		vy = SUPERLEAF_FLOATING_Y_SPEED;
+		StartFloatingLeft();
+		break;
+    }
+	CGameObject::SetState(state);
 }

@@ -26,6 +26,16 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		return;
 	}
 
+	if (tailUp == 1)
+	{
+		if (GetTickCount64() - tailUpStart > MARIO_TAIL_UP_TIME)
+		{
+			tailUp = 0;
+			SetLevel(MARIO_LEVEL_TAIL);
+		}
+		return;
+	}
+
 	vy += ay * dt;
 	vx += ax * dt;
 
@@ -161,11 +171,21 @@ void CMario::OnCollisionWithMushroom(LPCOLLISIONEVENT e)
 void CMario::OnCollisionWithSuperLeaf(LPCOLLISIONEVENT e)
 {
 	CSuperLeaf* superleaf = dynamic_cast<CSuperLeaf*>(e->obj);
+	
 	if (superleaf)
 	{
-		superleaf->Delete();
-		if (level == MARIO_LEVEL_BIG)
-			SetLevel(MARIO_LEVEL_TAIL);
+		if (e->ny > 0 && superleaf->GetState() == SUPERLEAF_STATE_NOT_HIT)
+		{
+			superleaf->SetState(SUPERLEAF_STATE_BOUNCE_UP);
+		}
+		if (superleaf->GetState() == SUPERLEAF_STATE_FLOATING_RIGHT || superleaf->GetState() == SUPERLEAF_STATE_FLOATING_LEFT)
+		{
+			superleaf->Delete();
+			if (level == MARIO_LEVEL_BIG)
+			{
+				this->SetState(MARIO_STATE_TAIL_UP);
+			}
+		}
 	}
 }
 
