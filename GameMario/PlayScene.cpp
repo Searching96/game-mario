@@ -298,9 +298,7 @@ void CPlayScene::Load()
 
 void CPlayScene::Update(DWORD dt)
 {
-	// We know that Mario is the first object in the list hence we won't add him into the colliable object list
-	// TO-DO: This is a "dirty" way, need a more organized way 
-
+	// Update all objects
 	vector<LPGAMEOBJECT> coObjects;
 	for (size_t i = 1; i < objects.size(); i++)
 	{
@@ -312,29 +310,55 @@ void CPlayScene::Update(DWORD dt)
 		objects[i]->Update(dt, &coObjects);
 	}
 
-	// skip the rest if scene was already unloaded (Mario::Update might trigger PlayScene::Unload)
-	if (player == NULL) return; 
+	// Skip the rest if the scene was already unloaded
+	if (player == NULL) return;
 
-	// Update camera to follow mario
+	// Update camera to follow Mario
 	float cx, cy;
 	player->GetPosition(cx, cy);
 
-	CGame *game = CGame::GetInstance();
+	CGame* game = CGame::GetInstance();
+
+	// Center the camera on the player
 	cx -= game->GetBackBufferWidth() / 2;
 	cy -= game->GetBackBufferHeight() / 2;
 
-	if (cx < 0) cx = 0;
+	// Clamp the camera's X position to start at 0 and not exceed the map width
+	float mapWidth = 1000.0f; // Replace with your actual map width
+	if (cx < -8) cx = -8;
+	if (cx > mapWidth - game->GetBackBufferWidth()) cx = mapWidth - game->GetBackBufferWidth();
 
-	CGame::GetInstance()->SetCamPos(cx, 0.0f /*cy*/);
+	// Clamp the camera's Y position to stay between 0 and the map height
+	float mapHeight = 432.0f; // Replace with your actual map height
+	if (cy < 0) cy = 0;
+	if (cy > mapHeight - game->GetBackBufferHeight() - 8) cy = mapHeight - game->GetBackBufferHeight() - 8;
 
+	// Set the camera position
+	game->SetCamPos(cx, cy);
+
+	// Purge deleted objects
 	PurgeDeletedObjects();
 }
 
+
 void CPlayScene::Render()
 {
+	// Render all objects except Mario
 	for (int i = 0; i < objects.size(); i++)
-		objects[i]->Render();
+	{
+		if (objects[i] != player) // Skip Mario
+		{
+			objects[i]->Render();
+		}
+	}
+
+	// Render Mario on top of everything else
+	if (player != NULL)
+	{
+		player->Render();
+	}
 }
+
 
 /*
 *	Clear all objects from this scene
