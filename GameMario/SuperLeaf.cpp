@@ -9,6 +9,8 @@ CSuperLeaf::CSuperLeaf(float x, float y) : CGameObject(x, y)
 
 void CSuperLeaf::Render()
 {
+	if (isVisible == 0) return;
+
 	int aniId = ID_ANI_SUPERLEAF_RIGHT;
 	if (floatingLeft == 1)
 		aniId = ID_ANI_SUPERLEAF_LEFT;
@@ -20,6 +22,8 @@ void CSuperLeaf::Render()
 
 void CSuperLeaf::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
+	if (isVisible == 0) return;
+
 	if (bounceUp == 1)
 	{
 		if (GetTickCount64() - bounceUpStart > SUPERLEAF_BOUNCE_UP_TIME)

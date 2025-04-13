@@ -11,6 +11,8 @@ CMushroom::CMushroom(float x, float y) : CGameObject(x, y)
 
 void CMushroom::Render()
 {
+	if (isVisible == 0) return;
+
     CAnimations* animations = CAnimations::GetInstance();
     animations->Get(ID_ANI_MUSHROOM)->Render(x, y);
 
@@ -19,6 +21,8 @@ void CMushroom::Render()
 
 void CMushroom::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
+	if (isVisible == 0) return;
+
 	if (bounceUp == 1)
 	{
 		if (GetTickCount64() - bounceUpStart > MUSHROOM_BOUNCE_UP_TIME)

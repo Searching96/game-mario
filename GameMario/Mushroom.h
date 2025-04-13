@@ -40,6 +40,8 @@ protected:
     int rise = 0;
     float y0;
     int collisionNx;
+    int isVisible = 0;
+
 public:
     CMushroom(float x, float y);
     void Render();
@@ -54,4 +56,5 @@ public:
 	void StartBounceDown() { bounceDown = 1; bounceDownStart = GetTickCount64(); }
 	void StartRise() { rise = 1; }
 	void SetCollisionNx(int collisionNx) { this->collisionNx = collisionNx; }
+	void SetVisible(int isVisible) { this->isVisible = isVisible; }
 };

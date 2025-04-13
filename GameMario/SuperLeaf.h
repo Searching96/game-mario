@@ -35,6 +35,8 @@ protected:
 	ULONGLONG floatingRightStart = -1;
 	ULONGLONG floatingLeftStart = -1;
 
+	int isVisible = 0;
+
 public:
     CSuperLeaf(float x, float y);
     void Render();
@@ -48,4 +50,5 @@ public:
 	void StartBounceUp() { bounceUp = 1; bounceUpStart = GetTickCount64(); }
 	void StartFloatingRight() { floatingRight = 1; floatingRightStart = GetTickCount64(); }
 	void StartFloatingLeft() { floatingLeft = 1; floatingLeftStart = GetTickCount64(); }
+	void SetVisible(int isVisible) { this->isVisible = isVisible; }
 };

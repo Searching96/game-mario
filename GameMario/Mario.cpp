@@ -143,10 +143,15 @@ void CMario::OnCollisionWithQuestionBlock(LPCOLLISIONEVENT e)
 
 void CMario::OnCollisionWithMushroom(LPCOLLISIONEVENT e)
 {
+	if (level != MARIO_LEVEL_SMALL)
+		return;
+
 	CMushroom* mushroom = dynamic_cast<CMushroom*>(e->obj);
 
 	if (mushroom)
 	{
+		mushroom->SetVisible(1);
+
 		if (e->ny > 0 && mushroom->GetState() == MUSHROOM_STATE_NOT_HIT)
 		{
 			mushroom->SetState(MUSHROOM_STATE_BOUNCE_UP);
@@ -160,20 +165,22 @@ void CMario::OnCollisionWithMushroom(LPCOLLISIONEVENT e)
 		if (mushroom->GetState() == MUSHROOM_STATE_MOVING)
 		{
 			mushroom->Delete();
-			if (level == MARIO_LEVEL_SMALL)
-			{
-				this->SetState(MARIO_STATE_POWER_UP);
-			}
+			this->SetState(MARIO_STATE_POWER_UP);
 		}
 	}
 }
 
 void CMario::OnCollisionWithSuperLeaf(LPCOLLISIONEVENT e)
 {
+	if (level != MARIO_LEVEL_BIG && level != MARIO_LEVEL_TAIL)
+		return;
+
 	CSuperLeaf* superleaf = dynamic_cast<CSuperLeaf*>(e->obj);
 	
 	if (superleaf)
 	{
+		superleaf->SetVisible(1);
+
 		if (e->ny > 0 && superleaf->GetState() == SUPERLEAF_STATE_NOT_HIT)
 		{
 			superleaf->SetState(SUPERLEAF_STATE_BOUNCE_UP);
@@ -182,9 +189,7 @@ void CMario::OnCollisionWithSuperLeaf(LPCOLLISIONEVENT e)
 		{
 			superleaf->Delete();
 			if (level == MARIO_LEVEL_BIG)
-			{
 				this->SetState(MARIO_STATE_TAIL_UP);
-			}
 		}
 	}
 }
