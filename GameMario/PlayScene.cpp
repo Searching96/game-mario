@@ -10,7 +10,9 @@
 #include "Coin.h"
 #include "Platform.h"
 #include "QuestionBlock.h"
+
 #include "Box.h"
+#include "Tree.h"
 
 #include "SampleKeyEventHandler.h"
 
@@ -176,6 +178,27 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 			sprite_middle_left, sprite_middle_center, sprite_middle_right,
 			sprite_bottom_left, sprite_bottom_center, sprite_bottom_right,
 			sprite_top_shadow, sprite_bottom_shadow
+		);
+
+		break;
+	}
+
+	case OBJECT_TYPE_TREE:
+	{
+
+		float cell_width = (float)atof(tokens[3].c_str());
+		float cell_height = (float)atof(tokens[4].c_str());
+		int height = atoi(tokens[5].c_str());
+		int sprite_top_left = atoi(tokens[6].c_str());
+		int sprite_top_right = atoi(tokens[7].c_str());
+		int sprite_bottom_left = atoi(tokens[8].c_str());
+		int sprite_bottom_right = atoi(tokens[9].c_str());
+
+		obj = new CTree(
+			x, y,
+			cell_width, cell_height, height,
+			sprite_top_left, sprite_top_right,
+			sprite_bottom_left, sprite_bottom_right
 		);
 
 		break;

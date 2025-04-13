@@ -1,3 +1,6 @@
+#higher will render first
+#next obj will overlap previous obj
+
 # list of object assets to load in this scene
 [ASSETS]
 assets\mario.txt
@@ -7,6 +10,7 @@ assets\goomba.txt
 assets\cloud.txt
 assets\box.txt
 assets\platform.txt
+assets\tree.txt
 #
 [OBJECTS]
 # type	x	y	extra_settings per object type
@@ -58,14 +62,14 @@ assets\platform.txt
 2	300	10
 
 #Platform x, y, c_width, c_height, width, height, top_left, top_center, top_right,
-5	32	136	16	16	40	1	1071001	1071002	1071003	1072001	1072002	1072003
+5	32	136	16	16	40	1	1070110	1070120	1070130	1070210	1070220	1070230
 
 #Box x, y, c_width, c_height, width, height, top_left, top_center, top_right, ...
-#higher will render first
-#next obj will overlap previous obj
 
-101	208	100	16	16	6	3	1061001	1061002	1061003	1061004	1061005	1061006	1061007	1061008	1061009	1061011	1061012
-101	208	68	16	16	3	5	1061001	1061002	1061003	1061004	1061005	1061006	1061007	1061008	1061009	1061011	1061012
+101	208	84	16	16	2	3	1061110	1061120	1061130	1061210	1061220	1061230	1061310	1061320	1061330	1060130	1060230
+
+#Tree x, y, c_width, c_height, height, top_left, top_right, ...
+102	260	36	16	16	3	1080110	1080120	1080210	1080220
 
 #Portal 
 50	300	110	316	140	2

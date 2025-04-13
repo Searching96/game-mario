@@ -21,6 +21,7 @@
 
 //Static objects
 #define OBJECT_TYPE_BOX 101
+#define OBJECT_TYPE_TREE 102
 
 #define OBJECT_TYPE_PORTAL	50
 
