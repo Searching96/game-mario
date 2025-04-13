@@ -15,6 +15,7 @@
 #include "Tree.h"
 #include "Pipe.h"
 #include "Bush.h"
+#include "Cloud.h"
 
 #include "SampleKeyEventHandler.h"
 
@@ -238,6 +239,29 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		obj = new CBush(
 			x, y,
 			cell_width, cell_height, width, sprite_id
+		);
+
+		break;
+	}
+
+	case OBJECT_TYPE_CLOUD:
+	{
+
+		float cell_width = (float)atof(tokens[3].c_str());
+		float cell_height = (float)atof(tokens[4].c_str());
+		int width = atoi(tokens[5].c_str());
+		int sprite_top_left = atoi(tokens[6].c_str());
+		int sprite_top_center = atoi(tokens[7].c_str());
+		int sprite_top_right = atoi(tokens[8].c_str());
+		int sprite_bottom_left = atoi(tokens[9].c_str());
+		int sprite_bottom_center = atoi(tokens[10].c_str());
+		int sprite_bottom_right = atoi(tokens[11].c_str());
+
+		obj = new CCloud(
+			x, y,
+			cell_width, cell_height, width,
+			sprite_top_left, sprite_top_center, sprite_top_right,
+			sprite_bottom_left, sprite_bottom_center, sprite_bottom_right
 		);
 
 		break;
