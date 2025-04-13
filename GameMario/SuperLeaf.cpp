@@ -17,7 +17,7 @@ void CSuperLeaf::Render()
     CAnimations* animations = CAnimations::GetInstance();
     animations->Get(aniId)->Render(x, y);
 
-    RenderBoundingBox();
+    //RenderBoundingBox();
 }
 
 void CSuperLeaf::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)

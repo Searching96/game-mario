@@ -54,12 +54,12 @@ assets\goomba.txt
 6	262	60
 
 #Coin
-4	287	79	1
+4	287	80	1
 #Question Block
 6	288	80
 
 #Coin
-4	340	79	1
+4	340	80	1
 #Question Block
 6	339	80
 
@@ -72,7 +72,7 @@ assets\goomba.txt
 
 #Brick
 1	164	164
-1	400	164
+1	580	164
 
 #Portal 
 50	200	160	216	180	1

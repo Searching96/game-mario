@@ -1,4 +1,5 @@
 #include "Coin.h"
+#include "QuestionBlock.h"
 
 CCoin::CCoin(float x, float y, int type) : CGameObject(x, y)
 {
@@ -12,7 +13,7 @@ CCoin::CCoin(float x, float y, int type) : CGameObject(x, y)
 void CCoin::Render()
 {
 	int aniId = ID_ANI_COIN_STATIC;
-	if (state != ID_ANI_COIN_STATIC)
+	if (state != COIN_STATE_STATIC)
 		aniId = ID_ANI_COIN_DYNAMIC;
 	CAnimations* animations = CAnimations::GetInstance();
 	animations->Get(aniId)->Render(x, y);
@@ -44,10 +45,20 @@ void CCoin::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 void CCoin::GetBoundingBox(float& l, float& t, float& r, float& b)
 {
-	l = x - COIN_BBOX_WIDTH / 2;
-	t = y - COIN_BBOX_HEIGHT / 2;
-	r = l + COIN_BBOX_WIDTH;
-	b = t + COIN_BBOX_HEIGHT;
+	if (type == 0)
+	{
+		l = x - COIN_BBOX_WIDTH / 2;
+		t = y - COIN_BBOX_HEIGHT / 2;
+		r = l + COIN_BBOX_WIDTH;
+		b = t + COIN_BBOX_HEIGHT;
+	}
+	else
+	{
+		l = x - QUESTIONBLOCK_BBOX_WIDTH / 2;
+		t = y - QUESTIONBLOCK_BBOX_HEIGHT / 2;
+		r = l + QUESTIONBLOCK_BBOX_WIDTH;
+		b = t + QUESTIONBLOCK_BBOX_HEIGHT;
+	}
 }
 
 void CCoin::SetState(int state)

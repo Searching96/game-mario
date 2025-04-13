@@ -127,7 +127,7 @@ void CMario::OnCollisionWithCoin(LPCOLLISIONEVENT e)
 	{
 		if (c->GetState() == COIN_STATE_STATIC)
 			c->Delete();
-		else if (c->GetState() == COIN_STATE_DYNAMIC)
+		else if (c->GetState() == COIN_STATE_DYNAMIC && e->ny > 0)
 			c->SetState(COIN_STATE_BOUNCE_UP);
 		
 		coin++;
