@@ -18,4 +18,5 @@ height	240
 10	textures\enemies.png
 20	textures\misc.png
 21	textures\misc-flipped-horizontally.png
+22	textures\misc-new-ver.png
 30	textures\mapsprites.png
