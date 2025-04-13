@@ -10,7 +10,7 @@ protected:
 	int spriteIdTopLeft, spriteIdTopCenter, spriteIdTopRight, 
 	spriteIdMiddleLeft, spriteIdMiddleCenter, spriteIdMiddleRight,
 	spriteIdBottomLeft, spriteIdBottomCenter, spriteIdBottomRight,
-	spriteIdTopShadow, spriteIdMiddleShadow, spriteIdBottomShadow;
+	spriteIdTopShadow, spriteIdBottomShadow;
 
 public:
 	CBox(float x, float y,
@@ -18,7 +18,7 @@ public:
 		int sprite_id_top_left, int sprite_id_top_center, int sprite_id_top_right,
 		int sprite_id_middle_left, int sprite_id_middle_center, int sprite_id_middle_right,
 		int sprite_id_bottom_left, int sprite_id_bottom_center, int sprite_id_bottom_right,
-		int sprite_id_top_shadow, int sprite_id_middle_shadow, int sprite_id_bottom_shadow)  : CGameObject(x, y)
+		int sprite_id_top_shadow, int sprite_id_bottom_shadow)  : CGameObject(x, y)
 	{
 		this->height = height;
 		this->width = width;
@@ -34,7 +34,6 @@ public:
 		this->spriteIdBottomCenter = sprite_id_bottom_center;
 		this->spriteIdBottomRight = sprite_id_bottom_right;
 		this->spriteIdTopShadow = sprite_id_top_shadow;
-		this->spriteIdMiddleShadow = sprite_id_middle_shadow;
 		this->spriteIdBottomShadow = sprite_id_bottom_shadow;
 	}
 

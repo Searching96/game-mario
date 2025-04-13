@@ -166,8 +166,7 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		int sprite_bottom_center = atoi(tokens[14].c_str());
 		int sprite_bottom_right = atoi(tokens[15].c_str());
 		int sprite_top_shadow = atoi(tokens[16].c_str());
-		int sprite_middle_shadow = atoi(tokens[17].c_str());
-		int sprite_bottom_shadow = atoi(tokens[18].c_str());
+		int sprite_bottom_shadow = atoi(tokens[17].c_str());
 
 		obj = new CBox(
 			x, y,
@@ -176,7 +175,7 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 			sprite_top_left, sprite_top_center, sprite_top_right,
 			sprite_middle_left, sprite_middle_center, sprite_middle_right,
 			sprite_bottom_left, sprite_bottom_center, sprite_bottom_right,
-			sprite_top_shadow, sprite_middle_shadow, sprite_bottom_shadow
+			sprite_top_shadow, sprite_bottom_shadow
 		);
 
 		break;

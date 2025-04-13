@@ -70,7 +70,7 @@ void CBox::Render()
 				else if (j == this->width - 1)
 					s->Get(this->spriteIdMiddleRight)->Draw(xx, yy);
 				else if (j == this->width)
-					s->Get(this->spriteIdMiddleShadow)->Draw(xx, yy);
+					s->Get(this->spriteIdBottomShadow)->Draw(xx, yy);
 				else
 					s->Get(this->spriteIdMiddleCenter)->Draw(xx, yy);
 			}
