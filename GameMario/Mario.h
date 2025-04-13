@@ -134,6 +134,8 @@
 #define MARIO_POWER_UP_TIME 2000
 #define MARIO_TAIL_UP_TIME 1000
 
+#define MAX_JUMP_COUNT 10
+
 class CMario : public CGameObject
 {
 	BOOLEAN isSitting;
@@ -151,6 +153,8 @@ class CMario : public CGameObject
 	ULONGLONG powerUpStart = -1;
 	int tailUp = 0;
 	ULONGLONG tailUpStart = -1;
+
+	int jumpCount = 0;
 
 	void OnCollisionWithGoomba(LPCOLLISIONEVENT e);
 	void OnCollisionWithCoin(LPCOLLISIONEVENT e);
@@ -176,6 +180,7 @@ public:
 		untouchable_start = -1;
 		isOnPlatform = false;
 		coin = 0;
+		jumpCount = 0;
 	}
 	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 	void Render();

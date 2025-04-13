@@ -42,11 +42,16 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	if (abs(vx) > abs(maxVx)) vx = maxVx;
 
 	// reset untouchable timer if untouchable time has passed
-	if ( GetTickCount64() - untouchable_start > MARIO_UNTOUCHABLE_TIME) 
+	if (GetTickCount64() - untouchable_start > MARIO_UNTOUCHABLE_TIME) 
 	{
 		untouchable_start = 0;
 		untouchable = 0;
 	}
+
+	if (isOnPlatform)
+		jumpCount = 0;
+
+	DebugOutTitle(L"Jump count: %d\n", jumpCount);
 
 	CCollision::GetInstance()->Process(this, dt, coObjects);
 }
@@ -455,12 +460,21 @@ void CMario::SetState(int state)
 		break;
 	case MARIO_STATE_JUMP:
 		if (isSitting) break;
-		if (isOnPlatform)
+		if (isOnPlatform || level == MARIO_LEVEL_TAIL)
 		{
+			if (jumpCount >= MAX_JUMP_COUNT)
+				break;
+
 			if (abs(this->vx) == MARIO_RUNNING_SPEED)
 				vy = -MARIO_JUMP_RUN_SPEED_Y;
 			else
 				vy = -MARIO_JUMP_SPEED_Y;
+
+			if (level == MARIO_LEVEL_TAIL)
+			{
+				jumpCount++;
+				vy = -MARIO_JUMP_SPEED_Y;
+			}
 		}
 		break;
 
