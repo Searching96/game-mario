@@ -121,8 +121,17 @@ void CMario::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
 
 void CMario::OnCollisionWithCoin(LPCOLLISIONEVENT e)
 {
-	e->obj->Delete();
-	coin++;
+	CCoin* c = dynamic_cast<CCoin*>(e->obj);
+
+	if (c)
+	{
+		if (c->GetState() == COIN_STATE_STATIC)
+			c->Delete();
+		else if (c->GetState() == COIN_STATE_DYNAMIC)
+			c->SetState(COIN_STATE_BOUNCE_UP);
+		
+		coin++;
+	}
 }
 
 void CMario::OnCollisionWithPortal(LPCOLLISIONEVENT e)
@@ -143,13 +152,16 @@ void CMario::OnCollisionWithQuestionBlock(LPCOLLISIONEVENT e)
 
 void CMario::OnCollisionWithMushroom(LPCOLLISIONEVENT e)
 {
-	if (level != MARIO_LEVEL_SMALL)
-		return;
-
 	CMushroom* mushroom = dynamic_cast<CMushroom*>(e->obj);
 
 	if (mushroom)
 	{
+		if (level != MARIO_LEVEL_SMALL)
+		{
+			mushroom->Delete();
+			return;
+		}
+
 		mushroom->SetVisible(1);
 
 		if (e->ny > 0 && mushroom->GetState() == MUSHROOM_STATE_NOT_HIT)
@@ -172,13 +184,16 @@ void CMario::OnCollisionWithMushroom(LPCOLLISIONEVENT e)
 
 void CMario::OnCollisionWithSuperLeaf(LPCOLLISIONEVENT e)
 {
-	if (level != MARIO_LEVEL_BIG && level != MARIO_LEVEL_TAIL)
-		return;
-
 	CSuperLeaf* superleaf = dynamic_cast<CSuperLeaf*>(e->obj);
 	
 	if (superleaf)
 	{
+		if (level != MARIO_LEVEL_BIG && level != MARIO_LEVEL_TAIL)
+		{
+			superleaf->Delete();
+			return;
+		}
+
 		superleaf->SetVisible(1);
 
 		if (e->ny > 0 && superleaf->GetState() == SUPERLEAF_STATE_NOT_HIT)

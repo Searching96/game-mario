@@ -25,19 +25,25 @@ void CQuestionBlock::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
 	if (bounceUp == 1)
 	{
+		x += vx * dt;
+		y += vy * dt;
 		if (GetTickCount64() - bounceUpStart > QUESTIONBLOCK_BOUNCE_UP_TIME)
 		{
 			bounceUp = 0;
 			SetState(QUESTIONBLOCK_STATE_BOUNCE_DOWN);
 		}
+		return;
 	}
 	else if (bounceDown == 1)
 	{
+		x += vx * dt;
+		y += vy * dt;
 		if (GetTickCount64() - bounceDownStart > QUESTIONBLOCK_BOUNCE_DOWN_TIME)
 		{
 			bounceDown = 0;
 			SetState(QUESTIONBLOCK_STATE_BOUNCE_COMPLETE);
 		}
+		return;
 	}
 	x += vx * dt;
 	y += vy * dt;
