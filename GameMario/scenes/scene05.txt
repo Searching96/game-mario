@@ -39,10 +39,8 @@ assets\goomba.txt
 #QuestionBlock
 6	200	80
 
-#Mushroom
-7	216	80
-#SuperLeaf
-8	216	80
+#Coin
+4	216	80	1
 #Question Block
 6	216	80
 
@@ -59,9 +57,14 @@ assets\goomba.txt
 6	288	80
 
 #Coin
-4	340	80	1
+4	339	80	1
 #Question Block
-6	339	80
+6	340	80
+
+#Coin
+4	355	80	1
+#Question Block
+6	356	80
 
 #Goomba
 2	262	164

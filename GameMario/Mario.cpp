@@ -127,7 +127,7 @@ void CMario::OnCollisionWithCoin(LPCOLLISIONEVENT e)
 	{
 		if (c->GetState() == COIN_STATE_STATIC)
 			c->Delete();
-		else if (c->GetState() == COIN_STATE_DYNAMIC && e->ny > 0)
+		else if (e->ny > 0 && e->nx == 0 && c->GetState() == COIN_STATE_DYNAMIC)
 			c->SetState(COIN_STATE_BOUNCE_UP);
 		
 		coin++;
@@ -144,10 +144,9 @@ void CMario::OnCollisionWithQuestionBlock(LPCOLLISIONEVENT e)
 {
 	CQuestionBlock* qb = dynamic_cast<CQuestionBlock*>(e->obj);
 
-	if (qb && e->ny > 0 && qb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
-	{
-		qb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
-	}
+	if (qb)
+		if (e->ny > 0 && e->nx == 0 && qb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
+			qb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
 }
 
 void CMario::OnCollisionWithMushroom(LPCOLLISIONEVENT e)
@@ -164,7 +163,7 @@ void CMario::OnCollisionWithMushroom(LPCOLLISIONEVENT e)
 
 		mushroom->SetVisible(1);
 
-		if (e->ny > 0 && mushroom->GetState() == MUSHROOM_STATE_NOT_HIT)
+		if (e->ny > 0 && e->nx == 0 && mushroom->GetState() == MUSHROOM_STATE_NOT_HIT)
 		{
 			mushroom->SetState(MUSHROOM_STATE_BOUNCE_UP);
 			float mX, mY;

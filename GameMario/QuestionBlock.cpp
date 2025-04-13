@@ -24,19 +24,21 @@ void CQuestionBlock::Render()
 
 void CQuestionBlock::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
-	if (bounceUp == 1)
+	if (bounceUp)
 	{
-		if (GetTickCount64() - bounceUpStart > QUESTIONBLOCK_BOUNCE_UP_TIME)
+		if (fabs(y - y0) >= QUESTIONBLOCK_BOUNCE_OFFSET)
 		{
 			bounceUp = 0;
+			y = y0 - QUESTIONBLOCK_BOUNCE_OFFSET;
 			SetState(QUESTIONBLOCK_STATE_BOUNCE_DOWN);
 		}
 	}
 	else if (bounceDown == 1)
 	{
-		if (GetTickCount64() - bounceDownStart > QUESTIONBLOCK_BOUNCE_DOWN_TIME)
+		if (fabs(y - y0) >= QUESTIONBLOCK_BOUNCE_OFFSET)
 		{
 			bounceDown = 0;
+			y = y0 + QUESTIONBLOCK_BOUNCE_OFFSET;
 			SetState(QUESTIONBLOCK_STATE_BOUNCE_COMPLETE);
 		}
 	}
@@ -64,10 +66,12 @@ void CQuestionBlock::SetState(int state)
 		break;
 	case QUESTIONBLOCK_STATE_BOUNCE_UP:
 		isHit = true;
+		y0 = y;
 		vy = QUESTIONBLOCK_BOUNCE_SPEED;
 		StartBounceUp();
 		break;
 	case QUESTIONBLOCK_STATE_BOUNCE_DOWN:
+		y0 = y;
 		vy = -QUESTIONBLOCK_BOUNCE_SPEED;
 		StartBounceDown();
 		break;

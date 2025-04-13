@@ -4,7 +4,7 @@
 #include <vector>
 #include <list>
 
-#define QUESTIONBLOCK_BBOX_WIDTH  16
+#define QUESTIONBLOCK_BBOX_WIDTH  14
 #define QUESTIONBLOCK_BBOX_HEIGHT 16
 
 #define ID_ANI_QUESTIONBLOCK 1030000
@@ -15,8 +15,7 @@
 #define QUESTIONBLOCK_STATE_BOUNCE_DOWN 300
 #define QUESTIONBLOCK_STATE_BOUNCE_COMPLETE 400
 
-#define QUESTIONBLOCK_BOUNCE_UP_TIME 200
-#define QUESTIONBLOCK_BOUNCE_DOWN_TIME 200
+#define QUESTIONBLOCK_BOUNCE_OFFSET 16
 
 #define QUESTIONBLOCK_BOUNCE_SPEED -0.1f
 
@@ -30,6 +29,7 @@ protected:
 	int bounceDown = 0;
 	ULONGLONG bounceUpStart = -1;
 	ULONGLONG bounceDownStart = -1;
+	float y0 = -1;
 
 public:
 	CQuestionBlock(float x, float y);
@@ -40,6 +40,5 @@ public:
 	void SetState(int state);
 	void StartBounceUp() { bounceUp = 1; bounceUpStart = GetTickCount64(); }
 	void StartBounceDown() { bounceDown = 1; bounceDownStart = GetTickCount64(); }
-	//void OnCollisionWith(LPCOLLISIONEVENT e);
 };
 

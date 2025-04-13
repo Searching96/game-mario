@@ -7,8 +7,8 @@
 #define ID_ANI_MUSHROOM 110000
 
 #define MUSHROOM_WIDTH 10
-#define MUSHROOM_BBOX_WIDTH 16
-#define MUSHROOM_BBOX_HEIGHT 14
+#define MUSHROOM_BBOX_WIDTH 14
+#define MUSHROOM_BBOX_HEIGHT 16
 
 #define MUSHROOM_GRAVITY 0.0003f
 #define MUSHROOM_WALKING_SPEED 0.05f
@@ -19,8 +19,7 @@
 #define MUSHROOM_STATE_RISE 400
 #define MUSHROOM_STATE_MOVING 500
 
-#define MUSHROOM_BOUNCE_UP_TIME 200
-#define MUSHROOM_BOUNCE_DOWN_TIME 200
+#define MUSHROOM_BOUNCE_OFFSET 16
 
 #define MUSHROOM_BOUNCE_SPEED -0.1f
 #define MUSHROOM_RISE_SPEED -0.01f
@@ -38,7 +37,7 @@ protected:
     ULONGLONG bounceDownStart = -1;
 
     int rise = 0;
-    float y0;
+    float y0 = - 1;
     int collisionNx;
     int isVisible = 0;
 
