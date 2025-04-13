@@ -480,11 +480,11 @@ void CMario::SetState(int state)
 		break;
 	
 	case MARIO_STATE_POWER_UP:
-		if (level == MARIO_LEVEL_SMALL)
-		{
-			StartPowerUp();
-			//SetLevel(MARIO_LEVEL_BIG);
-		}
+		StartPowerUp();
+		break;
+
+	case MARIO_STATE_TAIL_UP:
+		StartTailUp();
 		break;
 	}
 

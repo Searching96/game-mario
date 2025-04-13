@@ -132,7 +132,7 @@
 
 #define MARIO_UNTOUCHABLE_TIME 2500
 #define MARIO_POWER_UP_TIME 2000
-#define MARIO_TAIL_UP_TIME 0
+#define MARIO_TAIL_UP_TIME 1000
 
 class CMario : public CGameObject
 {
