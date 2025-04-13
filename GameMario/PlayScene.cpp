@@ -324,7 +324,7 @@ void CPlayScene::Update(DWORD dt)
 	cy -= game->GetBackBufferHeight() / 2;
 
 	// Clamp the camera's X position to start at 0 and not exceed the map width
-	float mapWidth = 1000.0f; // Replace with your actual map width
+	float mapWidth = 2815.0f; // Replace with your actual map width
 	if (cx < -8) cx = -8;
 	if (cx > mapWidth - game->GetBackBufferWidth()) cx = mapWidth - game->GetBackBufferWidth();
 
@@ -358,7 +358,6 @@ void CPlayScene::Render()
 		player->Render();
 	}
 }
-
 
 /*
 *	Clear all objects from this scene
