@@ -1,4 +1,4 @@
-#include "Bush.h"
+#include "Trinket.h"
 
 #include "Sprite.h"
 #include "Sprites.h"
@@ -6,7 +6,7 @@
 #include "Textures.h"
 #include "Game.h"
 
-void CBush::RenderBoundingBox()
+void CTrinket::RenderBoundingBox()
 {
 	D3DXVECTOR3 p(x, y, 0);
 	RECT rect;
@@ -30,28 +30,24 @@ void CBush::RenderBoundingBox()
 	CGame::GetInstance()->Draw(xx - cx, yy - cy, bbox, nullptr, BBOX_ALPHA, rect.right - 1, rect.bottom - 1);
 }
 
-void CBush::Render()
+void CTrinket::Render()
 {
 	CSprites* s = CSprites::GetInstance();
 
-	for (int j = 0; j < this->width; j++)
-	{
-		float xx = x + j * this->cellWidth;
-		s->Get(this->spriteId)->Draw(xx, y);
-	}
+	s->Get(this->spriteId)->Draw(x, y);
 
 	//RenderBoundingBox();
 }
 
-void CBush::GetBoundingBox(float& l, float& t, float& r, float& b)
+void CTrinket::GetBoundingBox(float& l, float& t, float& r, float& b)
 {
 	l = x - this->cellWidth / 2;
 	t = y - this->cellHeight / 2;
-	r = l + this->cellWidth * this->width;
+	r = l + this->cellWidth;
 	b = t + this->cellHeight;
 }
 
-int CBush::IsDirectionColliable(float nx, float ny)
+int CTrinket::IsDirectionColliable(float nx, float ny)
 {
 	return 0;
 }
