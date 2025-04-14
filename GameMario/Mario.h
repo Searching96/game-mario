@@ -6,10 +6,14 @@
 
 #include "debug.h"
 
-#define MARIO_WALKING_SPEED		0.15f
-#define MARIO_RUNNING_SPEED		0.3f
+#define MARIO_MAX_WALKING_SPEED		0.15f
+#define MARIO_MAX_RUNNING_SPEED		0.40f
+
+#define MARIO_WALKING_SPEED		0.10f
+#define MARIO_RUNNING_SPEED		0.2f
 
 #define MARIO_ACCEL_RUN_X	0.0002f
+#define MARIO_ACCEL_WALK_X	0.0001f
 #define MARIO_DECELERATION_X 0.0002f
 #define MARIO_FRICTION_X	0.0001f
 
@@ -161,6 +165,9 @@ class CMario : public CGameObject
 	int tailUp = 0;
 	ULONGLONG tailUpStart = -1;
 
+	int isBraking = 0;
+	int vSignOnBraking = 0;
+
 	int jumpCount = 0;
 
 	void OnCollisionWithGoomba(LPCOLLISIONEVENT e);
@@ -210,6 +217,7 @@ public:
 
 	void StartPowerUp() { powerUp = 1; powerUpStart = GetTickCount64(); }
 	void StartTailUp() { tailUp = 1; tailUpStart = GetTickCount64(); }
+	void StartBraking() { isBraking = 1; vSignOnBraking = (vx > 0) ? 1 : -1; }
 
 	int GetJumpCount() { return jumpCount; }
 	int GetLevel() { return level; }
