@@ -8,6 +8,7 @@
 
 #define MARIO_MAX_WALKING_SPEED		0.15f
 #define MARIO_MAX_RUNNING_SPEED		0.30f
+#define MARIO_MAX_FALLING_SPEED		0.30f
 
 #define MARIO_WALKING_SPEED			0.01f
 #define MARIO_RUNNING_SPEED			0.2f
@@ -18,13 +19,15 @@
 #define MARIO_DECELERATION_X		0.0002f
 #define MARIO_FRICTION_X			0.00005f
 
-#define MARIO_JUMP_SPEED_Y			0.5f
-#define MARIO_JUMP_RUN_SPEED_Y		0.6f
+#define MARIO_JUMP_SPEED_Y			0.6f
+#define MARIO_JUMP_RUN_SPEED_Y		0.7f
 #define MARIO_HOVER_SPEED_Y			0.05f
 
 #define MARIO_GRAVITY				0.002f
 
 #define MARIO_JUMP_DEFLECT_SPEED	0.4f
+
+#define MARIO_HALF_RUN_ACCEL_SPEED	(MARIO_MAX_RUNNING_SPEED + MARIO_RUNNING_SPEED) / 2
 
 #define MARIO_STATE_DIE				-10
 #define MARIO_STATE_IDLE			0
@@ -119,12 +122,13 @@
 #define ID_ANI_MARIO_TAIL_MULTIJUMP_RIGHT 6700
 #define ID_ANI_MARIO_TAIL_MULTIJUMP_LEFT 6710
 
+#define ID_ANI_MARIO_TAIL_HALF_RUN_ACCEL_RIGHT 6800
+#define ID_ANI_MARIO_TAIL_HALF_RUN_ACCEL_LEFT 6810
+
 
 #pragma endregion
 
 #define GROUND_Y 160.0f
-
-
 
 
 #define	MARIO_LEVEL_SMALL	1
@@ -145,6 +149,7 @@
 #define MARIO_UNTOUCHABLE_TIME 2500
 #define MARIO_POWER_UP_TIME 2000
 #define MARIO_TAIL_UP_TIME 1000
+#define MARIO_HOVER_TIME 100
 
 #define MAX_JUMP_COUNT 10
 
@@ -165,6 +170,8 @@ class CMario : public CGameObject
 	ULONGLONG powerUpStart = -1;
 	int tailUp = 0;
 	ULONGLONG tailUpStart = -1;
+	int isHovering = 0;
+	ULONGLONG hoveringStart = -1;
 
 	int isBraking = 0;
 	int vSignOnBraking = 0;
@@ -219,6 +226,7 @@ public:
 	void StartPowerUp() { powerUp = 1; powerUpStart = GetTickCount64(); }
 	void StartTailUp() { tailUp = 1; tailUpStart = GetTickCount64(); }
 	void StartBraking();
+	void StartHovering() { isHovering = 1; hoveringStart = GetTickCount64(); }
 
 	int GetJumpCount() { return jumpCount; }
 	int GetLevel() { return level; }

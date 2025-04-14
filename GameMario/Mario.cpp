@@ -39,17 +39,19 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	}
 
 	// Handle hover state for tail Mario
-	if (state == MARIO_STATE_HOVER && level == MARIO_LEVEL_TAIL)
+	if (isHovering == 1)
 	{
-		vy = MARIO_HOVER_SPEED_Y;
-	}
-	else
-	{
-		vy += ay * dt;
+		if (GetTickCount64() - hoveringStart > MARIO_HOVER_TIME)
+		{
+			isHovering = 0;
+			ay = MARIO_GRAVITY;
+		}
+		return;
 	}
 
 	// Apply acceleration
 	vx += ax * dt;
+	vy += ay * dt;
 
 	// Apply friction
 	if (vx > 0)
@@ -84,6 +86,8 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	
 	// Cap the velocity to the maximum velocity
 	if (fabs(vx) > fabs(maxVx)) vx = maxVx;
+	// Cap the vertical velocity to the maximum velocity
+	if (vy > MARIO_MAX_FALLING_SPEED) vy = MARIO_MAX_FALLING_SPEED;
 
 	// Reset untouchable timer if untouchable time has passed
 	if (GetTickCount64() - untouchable_start > MARIO_UNTOUCHABLE_TIME)
@@ -96,8 +100,8 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	if (isOnPlatform)
 		jumpCount = 0;
 
-	DebugOutTitle(L"vx=%f, ax=%f, mvx=%f, jc=%d\n", vx, ax, maxVx, jumpCount);
-	DebugOut(L"vx=%f, ax=%f, mvx=%f, jc=%d\n", vx, ax, maxVx, jumpCount);
+	DebugOutTitle(L"vx=%f, ax=%f, vy=%f, ay=%f, vsob=%d, jc=%d\n", vx, ax, vy, ay, vSignOnBraking, jumpCount);
+	//DebugOut(L"vx=%f, ax=%f, mvx=%f, jc=%d\n", vx, ax, maxVx, jumpCount);
 
 	// Process collisions
 	CCollision::GetInstance()->Process(this, dt, coObjects);
@@ -430,19 +434,23 @@ int CMario::GetAniIdTail()
 			{
 				if (isBraking)
 					aniId = ID_ANI_MARIO_TAIL_BRACE_RIGHT;
+				else if (fabs(vx) <= MARIO_HALF_RUN_ACCEL_SPEED)
+					aniId = ID_ANI_MARIO_TAIL_WALKING_RIGHT;
+				else if (fabs(vx) > MARIO_HALF_RUN_ACCEL_SPEED && fabs(vx) < MARIO_MAX_RUNNING_SPEED)
+					aniId = ID_ANI_MARIO_TAIL_HALF_RUN_ACCEL_RIGHT;
 				else if (fabs(vx) == MARIO_MAX_RUNNING_SPEED)
 					aniId = ID_ANI_MARIO_TAIL_RUNNING_RIGHT;
-				else // fabs(vx) != MARIO_RUNNING_SPEED
-					aniId = ID_ANI_MARIO_TAIL_WALKING_RIGHT;
 			}
 			else // vx < 0
 			{
 				if (isBraking)
 					aniId = ID_ANI_MARIO_TAIL_BRACE_LEFT;
+				else if (fabs(vx) <= MARIO_HALF_RUN_ACCEL_SPEED)
+					aniId = ID_ANI_MARIO_TAIL_WALKING_LEFT;
+				else if (fabs(vx) > MARIO_HALF_RUN_ACCEL_SPEED && fabs(vx) < MARIO_MAX_RUNNING_SPEED)
+					aniId = ID_ANI_MARIO_TAIL_HALF_RUN_ACCEL_LEFT;
 				else if (fabs(vx) == MARIO_MAX_RUNNING_SPEED)
 					aniId = ID_ANI_MARIO_TAIL_RUNNING_LEFT;
-				else // fabs(vx) != MARIO_RUNNING_SPEED
-					aniId = ID_ANI_MARIO_TAIL_WALKING_LEFT;
 			}
 
 	if (jumpCount > 0)
@@ -489,10 +497,13 @@ void CMario::SetState(int state)
 	{
 	case MARIO_STATE_RUNNING_RIGHT:
 		if (isSitting) break;
-		if (vx < 0 && isOnPlatform) // If Mario is moving left, set state to brake
+		if (vx < 0) // If Mario is moving left, set state to brake
 		{
-			SetState(MARIO_STATE_BRAKE);
-			break;
+			if (isOnPlatform)
+			{
+				SetState(MARIO_STATE_BRAKE);
+				break;
+			}
 		}
 		if (isBraking) break;
 		maxVx = MARIO_MAX_RUNNING_SPEED;
@@ -502,10 +513,13 @@ void CMario::SetState(int state)
 		break;
 	case MARIO_STATE_RUNNING_LEFT:
 		if (isSitting) break;
-		if (vx > 0 && isOnPlatform) // If Mario is moving right, set state to brake
+		if (vx > 0) // If Mario is moving right, set state to brake
 		{
-			SetState(MARIO_STATE_BRAKE);
-			break;
+			if (isOnPlatform)
+			{
+				SetState(MARIO_STATE_BRAKE);
+				break;
+			}
 		}
 		maxVx = -MARIO_MAX_RUNNING_SPEED;
 		if (fabs(vx) < fabs(MARIO_RUNNING_SPEED)) vx = -MARIO_RUNNING_SPEED;
@@ -538,20 +552,27 @@ void CMario::SetState(int state)
 		break;
 	case MARIO_STATE_JUMP:
 		if (isSitting) break;
-		if (isOnPlatform || level == MARIO_LEVEL_TAIL)
+		if (isOnPlatform)
 		{
-			if (jumpCount >= MAX_JUMP_COUNT)
-			{
-				state = MARIO_STATE_HOVER;
-				break;
-			}
-
 			if (fabs(vx) == MARIO_MAX_RUNNING_SPEED)
 				vy = -MARIO_JUMP_RUN_SPEED_Y;
 			else
 				vy = -MARIO_JUMP_SPEED_Y;
-
-			if (level == MARIO_LEVEL_TAIL && fabs(vx) == MARIO_MAX_RUNNING_SPEED)
+		}
+		else if (level == MARIO_LEVEL_TAIL)
+		{
+			if (jumpCount >= MAX_JUMP_COUNT)
+			{
+				SetState(MARIO_STATE_HOVER);
+				break;
+			}
+			
+			if (fabs(vx) == MARIO_MAX_RUNNING_SPEED)
+			{
+				jumpCount++;
+				vy = -MARIO_JUMP_SPEED_Y;
+			}
+			else if (jumpCount > 1)
 			{
 				jumpCount++;
 				vy = -MARIO_JUMP_SPEED_Y;
@@ -602,11 +623,17 @@ void CMario::SetState(int state)
 		break;
 
 	case MARIO_STATE_BRAKE:
+		StartBraking();
 		if (vx > MARIO_INSTANT_BRAKING_SPEED)
 			vx = MARIO_INSTANT_BRAKING_SPEED;
 		else if (vx < -MARIO_INSTANT_BRAKING_SPEED)
 			vx = -MARIO_INSTANT_BRAKING_SPEED;
-		StartBraking();
+		break;
+
+	case MARIO_STATE_HOVER:
+		vy = MARIO_HOVER_SPEED_Y;
+		ay = 0;
+		StartHovering();
 		break;
 	}
 
