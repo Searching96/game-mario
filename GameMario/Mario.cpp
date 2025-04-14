@@ -36,8 +36,44 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		return;
 	}
 
-	vy += ay * dt;
-	vx += ax * dt;
+	if (state == MARIO_STATE_BRAKE)
+	{
+		if (vx > 0)
+		{
+			if (vx - MARIO_DECELERATION_X * dt < 0) vx = 0;
+			else vx -= MARIO_DECELERATION_X * dt;
+		}
+		else if (vx < 0)
+		{
+			if (vx + MARIO_DECELERATION_X * dt > 0) vx = 0;
+			else vx += MARIO_DECELERATION_X * dt;
+		}
+	}
+	else
+	{
+		vx += ax * dt;
+	}
+
+	if (state == MARIO_STATE_HOVER && level == MARIO_LEVEL_TAIL)
+	{
+		vy = MARIO_HOVER_SPEED_Y;
+	}
+	else
+	{
+		vy += ay * dt;
+	}
+
+	// apply friction
+	if (vx > 0)
+		if (vx - MARIO_FRICTION_X < 0)
+			vx = 0;
+		else
+			vx -= MARIO_FRICTION_X * dt;
+	else if (vx < 0)
+		if (vx + MARIO_FRICTION_X > 0)
+			vx = 0;
+		else
+			vx += MARIO_FRICTION_X * dt;
 
 	if (abs(vx) > abs(maxVx)) vx = maxVx;
 
@@ -51,7 +87,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	if (isOnPlatform)
 		jumpCount = 0;
 
-	DebugOutTitle(L"Jump count: %d\n", jumpCount);
+	DebugOutTitle(L"vx=%f, vy=%f, ax=%f, ay=%f, jc=%d\n", vx, vy, ax, ay, jumpCount);
 
 	CCollision::GetInstance()->Process(this, dt, coObjects);
 }
@@ -256,7 +292,7 @@ int CMario::GetAniIdSmall()
 					aniId = ID_ANI_MARIO_SMALL_BRACE_RIGHT;
 				else if (ax == MARIO_ACCEL_RUN_X)
 					aniId = ID_ANI_MARIO_SMALL_RUNNING_RIGHT;
-				else if (ax == MARIO_ACCEL_WALK_X)
+				else if (ax == MARIO_ACCEL_RUN_X)
 					aniId = ID_ANI_MARIO_SMALL_WALKING_RIGHT;
 			}
 			else // vx < 0
@@ -265,7 +301,7 @@ int CMario::GetAniIdSmall()
 					aniId = ID_ANI_MARIO_SMALL_BRACE_LEFT;
 				else if (ax == -MARIO_ACCEL_RUN_X)
 					aniId = ID_ANI_MARIO_SMALL_RUNNING_LEFT;
-				else if (ax == -MARIO_ACCEL_WALK_X)
+				else if (ax == -MARIO_ACCEL_RUN_X)
 					aniId = ID_ANI_MARIO_SMALL_WALKING_LEFT;
 			}
 
@@ -324,7 +360,7 @@ int CMario::GetAniIdBig()
 					aniId = ID_ANI_MARIO_BRACE_RIGHT;
 				else if (ax == MARIO_ACCEL_RUN_X)
 					aniId = ID_ANI_MARIO_RUNNING_RIGHT;
-				else if (ax == MARIO_ACCEL_WALK_X)
+				else if (ax == MARIO_ACCEL_RUN_X)
 					aniId = ID_ANI_MARIO_WALKING_RIGHT;
 			}
 			else // vx < 0
@@ -333,7 +369,7 @@ int CMario::GetAniIdBig()
 					aniId = ID_ANI_MARIO_BRACE_LEFT;
 				else if (ax == -MARIO_ACCEL_RUN_X)
 					aniId = ID_ANI_MARIO_RUNNING_LEFT;
-				else if (ax == -MARIO_ACCEL_WALK_X)
+				else if (ax == -MARIO_ACCEL_RUN_X)
 					aniId = ID_ANI_MARIO_WALKING_LEFT;
 			}
 
@@ -350,7 +386,7 @@ int CMario::GetAniIdTail()
 	int aniId = -1;
 	if (!isOnPlatform)
 	{
-		if (abs(ax) == MARIO_ACCEL_RUN_X)
+		if (fabs(vx) == MARIO_RUNNING_SPEED)
 		{
 			if (nx >= 0)
 				aniId = ID_ANI_MARIO_TAIL_JUMP_RUN_RIGHT;
@@ -383,18 +419,18 @@ int CMario::GetAniIdTail()
 			{
 				if (ax < 0)
 					aniId = ID_ANI_MARIO_TAIL_BRACE_RIGHT;
-				else if (ax == MARIO_ACCEL_RUN_X)
+				else if (fabs(vx) == MARIO_RUNNING_SPEED)
 					aniId = ID_ANI_MARIO_TAIL_RUNNING_RIGHT;
-				else if (ax == MARIO_ACCEL_WALK_X)
+				else // fabs(vx) != MARIO_RUNNING_SPEED
 					aniId = ID_ANI_MARIO_TAIL_WALKING_RIGHT;
 			}
 			else // vx < 0
 			{
 				if (ax > 0)
 					aniId = ID_ANI_MARIO_TAIL_BRACE_LEFT;
-				else if (ax == -MARIO_ACCEL_RUN_X)
+				else if (fabs(vx) == MARIO_RUNNING_SPEED)
 					aniId = ID_ANI_MARIO_TAIL_RUNNING_LEFT;
-				else if (ax == -MARIO_ACCEL_WALK_X)
+				else // fabs(vx) != MARIO_RUNNING_SPEED
 					aniId = ID_ANI_MARIO_TAIL_WALKING_LEFT;
 			}
 
@@ -427,7 +463,7 @@ void CMario::Render()
 
 	//RenderBoundingBox();
 	
-	DebugOutTitle(L"Coins: %d", coin);
+	//DebugOutTitle(L"Coins: %d", coin);
 }
 
 void CMario::SetState(int state)
@@ -442,26 +478,46 @@ void CMario::SetState(int state)
 	{
 	case MARIO_STATE_RUNNING_RIGHT:
 		if (isSitting) break;
+		if (vx < 0) // If Mario is moving left, set state to brake
+		{
+			state = MARIO_STATE_BRAKE;
+			break;
+		}
 		maxVx = MARIO_RUNNING_SPEED;
 		ax = MARIO_ACCEL_RUN_X;
 		nx = 1;
 		break;
 	case MARIO_STATE_RUNNING_LEFT:
 		if (isSitting) break;
+		if (vx > 0) // If Mario is moving right, set state to brake
+		{
+			state = MARIO_STATE_BRAKE;
+			break;
+		}
 		maxVx = -MARIO_RUNNING_SPEED;
 		ax = -MARIO_ACCEL_RUN_X;
 		nx = -1;
 		break;
 	case MARIO_STATE_WALKING_RIGHT:
 		if (isSitting) break;
+		if (vx < 0) // If Mario is moving left, set state to brake
+		{
+			state = MARIO_STATE_BRAKE;
+			break;
+		}
 		maxVx = MARIO_WALKING_SPEED;
-		ax = MARIO_ACCEL_WALK_X;
+		vx = MARIO_WALKING_SPEED;
 		nx = 1;
 		break;
 	case MARIO_STATE_WALKING_LEFT:
 		if (isSitting) break;
+		if (vx > 0) // If Mario is moving right, set state to brake
+		{
+			state = MARIO_STATE_BRAKE;
+			break;
+		}
 		maxVx = -MARIO_WALKING_SPEED;
-		ax = -MARIO_ACCEL_WALK_X;
+		vx = -MARIO_WALKING_SPEED;
 		nx = -1;
 		break;
 	case MARIO_STATE_JUMP:
@@ -469,14 +525,17 @@ void CMario::SetState(int state)
 		if (isOnPlatform || level == MARIO_LEVEL_TAIL)
 		{
 			if (jumpCount >= MAX_JUMP_COUNT)
+			{
+				state = MARIO_STATE_HOVER;
 				break;
+			}
 
-			if (abs(this->vx) == MARIO_RUNNING_SPEED)
+			if (fabs(vx) == MARIO_RUNNING_SPEED)
 				vy = -MARIO_JUMP_RUN_SPEED_Y;
 			else
 				vy = -MARIO_JUMP_SPEED_Y;
 
-			if (level == MARIO_LEVEL_TAIL)
+			if (level == MARIO_LEVEL_TAIL && fabs(vx) == MARIO_RUNNING_SPEED)
 			{
 				jumpCount++;
 				vy = -MARIO_JUMP_SPEED_Y;
@@ -509,7 +568,7 @@ void CMario::SetState(int state)
 
 	case MARIO_STATE_IDLE:
 		ax = 0.0f;
-		vx = 0.0f;
+		//vx = 0.0f;
 		break;
 
 	case MARIO_STATE_DIE:

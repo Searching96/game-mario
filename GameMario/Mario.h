@@ -6,14 +6,16 @@
 
 #include "debug.h"
 
-#define MARIO_WALKING_SPEED		0.1f
+#define MARIO_WALKING_SPEED		0.15f
 #define MARIO_RUNNING_SPEED		0.3f
 
-#define MARIO_ACCEL_WALK_X	0.0005f
-#define MARIO_ACCEL_RUN_X	0.0007f
+#define MARIO_ACCEL_RUN_X	0.0002f
+#define MARIO_DECELERATION_X 0.0002f
+#define MARIO_FRICTION_X	0.0001f
 
 #define MARIO_JUMP_SPEED_Y		0.5f
 #define MARIO_JUMP_RUN_SPEED_Y	0.6f
+#define MARIO_HOVER_SPEED_Y		0.05f
 
 #define MARIO_GRAVITY			0.002f
 
@@ -34,8 +36,10 @@
 #define MARIO_STATE_SIT_RELEASE		601
 
 #define MARIO_STATE_POWER_UP		700
-
 #define MARIO_STATE_TAIL_UP			800	// dont talk about my grammar
+
+#define MARIO_STATE_HOVER			900
+#define MARIO_STATE_BRAKE			1000
 
 
 #pragma region ANIMATION_ID
@@ -206,4 +210,7 @@ public:
 
 	void StartPowerUp() { powerUp = 1; powerUpStart = GetTickCount64(); }
 	void StartTailUp() { tailUp = 1; tailUpStart = GetTickCount64(); }
+
+	int GetJumpCount() { return jumpCount; }
+	int GetLevel() { return level; }
 };
