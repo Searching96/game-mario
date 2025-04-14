@@ -7,23 +7,24 @@
 #include "debug.h"
 
 #define MARIO_MAX_WALKING_SPEED		0.15f
-#define MARIO_MAX_RUNNING_SPEED		0.40f
+#define MARIO_MAX_RUNNING_SPEED		0.30f
 
-#define MARIO_WALKING_SPEED		0.10f
-#define MARIO_RUNNING_SPEED		0.2f
+#define MARIO_WALKING_SPEED			0.01f
+#define MARIO_RUNNING_SPEED			0.2f
+#define MARIO_INSTANT_BRAKING_SPEED	0.04f
 
-#define MARIO_ACCEL_RUN_X	0.0002f
-#define MARIO_ACCEL_WALK_X	0.0001f
-#define MARIO_DECELERATION_X 0.0002f
-#define MARIO_FRICTION_X	0.0001f
+#define MARIO_ACCEL_RUN_X			0.0001f
+#define MARIO_ACCEL_WALK_X			0.0010f
+#define MARIO_DECELERATION_X		0.0002f
+#define MARIO_FRICTION_X			0.00005f
 
-#define MARIO_JUMP_SPEED_Y		0.5f
-#define MARIO_JUMP_RUN_SPEED_Y	0.6f
-#define MARIO_HOVER_SPEED_Y		0.05f
+#define MARIO_JUMP_SPEED_Y			0.5f
+#define MARIO_JUMP_RUN_SPEED_Y		0.6f
+#define MARIO_HOVER_SPEED_Y			0.05f
 
-#define MARIO_GRAVITY			0.002f
+#define MARIO_GRAVITY				0.002f
 
-#define MARIO_JUMP_DEFLECT_SPEED  0.4f
+#define MARIO_JUMP_DEFLECT_SPEED	0.4f
 
 #define MARIO_STATE_DIE				-10
 #define MARIO_STATE_IDLE			0
@@ -217,7 +218,7 @@ public:
 
 	void StartPowerUp() { powerUp = 1; powerUpStart = GetTickCount64(); }
 	void StartTailUp() { tailUp = 1; tailUpStart = GetTickCount64(); }
-	void StartBraking() { isBraking = 1; vSignOnBraking = (vx > 0) ? 1 : -1; }
+	void StartBraking();
 
 	int GetJumpCount() { return jumpCount; }
 	int GetLevel() { return level; }
