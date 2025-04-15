@@ -7,17 +7,17 @@
 #include "debug.h"
 
 #define MARIO_MAX_WALKING_SPEED		0.15f
-#define MARIO_MAX_RUNNING_SPEED		0.30f
-#define MARIO_MAX_FALLING_SPEED		0.30f
+#define MARIO_MAX_RUNNING_SPEED		0.35f
+#define MARIO_MAX_FALLING_SPEED		0.25f
 
-#define MARIO_WALKING_SPEED			0.01f
+#define MARIO_WALKING_SPEED			0.1f
 #define MARIO_RUNNING_SPEED			0.2f
 #define MARIO_INSTANT_BRAKING_SPEED	0.04f
 
 #define MARIO_ACCEL_RUN_X			0.0001f
-#define MARIO_ACCEL_WALK_X			0.0010f
+#define MARIO_ACCEL_WALK_X			0.0001f
 #define MARIO_DECELERATION_X		0.0002f
-#define MARIO_FRICTION_X			0.00005f
+#define MARIO_FRICTION_X			0.0003f
 
 #define MARIO_JUMP_SPEED_Y			0.6f
 #define MARIO_JUMP_RUN_SPEED_Y		0.7f
@@ -48,6 +48,8 @@
 
 #define MARIO_STATE_HOVER			900
 #define MARIO_STATE_BRAKE			1000
+
+#define MARIO_STATE_RELEASE_MOVE		1100
 
 
 #pragma region ANIMATION_ID
@@ -153,7 +155,7 @@
 #define MARIO_POWER_UP_TIME 2000
 #define MARIO_TAIL_UP_TIME 1000
 #define MARIO_HOVER_TIME 500
-#define MARIO_BRAKE_TIME 100
+#define MARIO_BRAKE_TIME 500
 
 #define MAX_JUMP_COUNT 10
 
@@ -163,6 +165,8 @@ class CMario : public CGameObject
 	float maxVx;
 	float ax;				// acceleration on x 
 	float ay;				// acceleration on y 
+
+	float frictionX;
 
 	int level; 
 	int untouchable; 
@@ -208,6 +212,7 @@ public:
 		isOnPlatform = false;
 		coin = 0;
 		jumpCount = 0;
+		frictionX = 0;
 	}
 	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 	void Render();

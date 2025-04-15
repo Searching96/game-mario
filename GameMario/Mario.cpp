@@ -63,27 +63,30 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	vx += ax * dt;
 	vy += ay * dt;
 
-	// Apply friction
-	if (vx > 0)
+	if (jumpCount < 1 && !isHovering)
 	{
-		if (vx - MARIO_FRICTION_X * dt < 0)
-			vx = 0;
-		else
-			vx -= MARIO_FRICTION_X * dt;
-	}
-	else if (vx < 0)
-	{
-		if (vx + MARIO_FRICTION_X * dt > 0)
-			vx = 0;
-		else
-			vx += MARIO_FRICTION_X * dt;
+		// Apply friction
+		if (vx > 0)
+		{
+			if (vx - frictionX * dt < 0)
+				vx = 0;
+			else
+				vx -= frictionX * dt;
+		}
+		else if (vx < 0)
+		{
+			if (vx + frictionX * dt > 0)
+				vx = 0;
+			else
+				vx += frictionX * dt;
+		}
 	}
 
 	// Handle braking - Modified for smoother braking
 	if (isBraking == 1)
 	{
 		// Apply stronger friction when braking
-		float brakeForce = MARIO_FRICTION_X * 5.0f;
+		float brakeForce = MARIO_DECELERATION_X / 2.0f;
 
 		if (vxBeforeBraking > 0) {
 			vx -= brakeForce * dt;
@@ -95,7 +98,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		}
 
 		// Check if braking time expired or velocity is close to zero
-		if (GetTickCount64() - brakingStart > MARIO_BRAKE_TIME || fabs(vx) < 0.01f)
+		if (GetTickCount64() - brakingStart > MARIO_BRAKE_TIME || fabs(vx) < 0.1f)
 		{
 			isBraking = 0;
 
@@ -138,7 +141,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	if (isOnPlatform)
 		jumpCount = 0;
 
-	DebugOutTitle(L"vx=%f, ax=%f, vy=%f, ay=%f, vsob=%f, jc=%d\n", vx, ax, vy, ay, vxBeforeBraking, jumpCount);
+	DebugOutTitle(L"vx=%f, ax=%f, vy=%f, ay=%f, jc=%d, fx=%f\n", vx, ax, vy, ay, jumpCount, frictionX);
 	//DebugOut(L"vx=%f, ax=%f, mvx=%f, jc=%d\n", vx, ax, maxVx, jumpCount);
 
 	// Process collisions
@@ -556,6 +559,7 @@ void CMario::SetState(int state)
 		maxVx = MARIO_MAX_RUNNING_SPEED;
 		if (fabs(vx) < fabs(MARIO_RUNNING_SPEED)) vx = MARIO_RUNNING_SPEED;
 		ax = MARIO_ACCEL_RUN_X;
+		frictionX = 0;
 		nx = 1;
 		break;
 	case MARIO_STATE_RUNNING_LEFT:
@@ -573,7 +577,7 @@ void CMario::SetState(int state)
 		maxVx = -MARIO_MAX_RUNNING_SPEED;
 		if (fabs(vx) < fabs(MARIO_RUNNING_SPEED)) vx = -MARIO_RUNNING_SPEED;
 		ax = -MARIO_ACCEL_RUN_X;
-		nx = -1;
+		frictionX = 0; nx = -1;
 		break;
 	case MARIO_STATE_WALKING_RIGHT:
 		if (isSitting) break;
@@ -590,6 +594,7 @@ void CMario::SetState(int state)
 		maxVx = MARIO_MAX_WALKING_SPEED;
 		if (fabs(vx) < fabs(MARIO_WALKING_SPEED)) vx = MARIO_WALKING_SPEED;
 		ax = MARIO_ACCEL_WALK_X;
+		frictionX = 0; 
 		nx = 1;
 		break;
 	case MARIO_STATE_WALKING_LEFT:
@@ -607,6 +612,7 @@ void CMario::SetState(int state)
 		maxVx = -MARIO_MAX_WALKING_SPEED;
 		if (fabs(vx) < fabs(MARIO_WALKING_SPEED)) vx = -MARIO_WALKING_SPEED;
 		ax = -MARIO_ACCEL_WALK_X;
+		frictionX = 0;
 		nx = -1;
 		break;
 	case MARIO_STATE_JUMP:
@@ -699,8 +705,13 @@ void CMario::SetState(int state)
 		}
 		// Maintain current horizontal velocity but apply slight deceleration
 		ax = 0.0f;
+		maxVx = MARIO_MAX_WALKING_SPEED;
 		// Keep some horizontal momentum but don't force a speed
 		StartHovering();
+		break;
+
+	case MARIO_STATE_RELEASE_MOVE:
+		frictionX = MARIO_FRICTION_X;
 		break;
 	}
 
