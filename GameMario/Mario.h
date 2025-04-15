@@ -16,7 +16,7 @@
 
 #define MARIO_ACCEL_RUN_X			0.0001f
 #define MARIO_ACCEL_WALK_X			0.0001f
-#define MARIO_DECELERATION_X		0.0002f
+#define MARIO_DECELERATION_X		0.0001f
 #define MARIO_FRICTION_X			0.0003f
 
 #define MARIO_JUMP_SPEED_Y			0.6f
@@ -158,6 +158,8 @@
 #define MARIO_BRAKE_TIME 500
 
 #define MAX_JUMP_COUNT 10
+
+#define SPEED_DIVISOR 4.0f;
 
 class CMario : public CGameObject
 {

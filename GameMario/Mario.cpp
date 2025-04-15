@@ -1,4 +1,4 @@
-#include <algorithm>
+﻿#include <algorithm>
 #include "debug.h"
 
 #include "Mario.h"
@@ -66,7 +66,6 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	if (jumpCount < 1 && !isHovering && isMoving == 0)
 	{
 		// Apply friction
-		frictionX = MARIO_FRICTION_X;
 		if (vx > 0)
 		{
 			if (vx - frictionX * dt < 0)
@@ -87,7 +86,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	if (isBraking == 1)
 	{
 		// Apply stronger friction when braking
-		float brakeForce = MARIO_DECELERATION_X / 2.0f;
+		float brakeForce = MARIO_DECELERATION_X;
 
 		if (vxBeforeBraking > 0) {
 			vx -= brakeForce * dt;
@@ -102,7 +101,6 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		if (GetTickCount64() - brakingStart > MARIO_BRAKE_TIME || fabs(vx) < 0.1f)
 		{
 			isBraking = 0;
-			isMoving = 0;
 
 			// When braking finishes, actually reverse Mario's direction
 			// This properly handles both animation and movement direction
@@ -546,14 +544,14 @@ void CMario::SetState(int state)
 	if (this->state == MARIO_STATE_POWER_UP && (GetTickCount64() - powerUpStart <= MARIO_POWER_UP_TIME))
 		return;
 
+	int previousState = this->state;
+
 	switch (state)
 	{
 	case MARIO_STATE_RUNNING_RIGHT:
 		if (isSitting) break;
 		if (isOnPlatform && vx < 0) // If Mario is moving left, set state to brake
 		{
-			//if (isHovering)
-			//	break;
 			if (isOnPlatform)
 			{
 				SetState(MARIO_STATE_BRAKE);
@@ -562,10 +560,16 @@ void CMario::SetState(int state)
 		}
 		if (isBraking) break;
 		maxVx = MARIO_MAX_RUNNING_SPEED;
-		if (!isOnPlatform && vx < 0)
+
+		// Kiểm tra rõ ràng hơn cho trạng thái nhảy và chuyển hướng
+		if (!isOnPlatform)
 		{
-			vx = MARIO_MAX_RUNNING_SPEED / 3;
-			ax = 0;
+			if (vx <= 0)  // Đang đứng im hoặc đang đi sang trái trong không trung
+			{
+				vx = MARIO_MAX_RUNNING_SPEED / SPEED_DIVISOR;
+				ax = 0.0f;  // Đặt ax thành 0 một cách rõ ràng
+				DebugOut(L"Air direction change - to right, ax set to 0\n");
+			}
 		}
 		else
 		{
@@ -576,12 +580,11 @@ void CMario::SetState(int state)
 		isMoving = 1;
 		nx = 1;
 		break;
+
 	case MARIO_STATE_RUNNING_LEFT:
 		if (isSitting) break;
 		if (isOnPlatform && vx > 0) // If Mario is moving right, set state to brake
 		{
-			//if (isHovering)
-			//	break;
 			if (isOnPlatform)
 			{
 				SetState(MARIO_STATE_BRAKE);
@@ -589,25 +592,31 @@ void CMario::SetState(int state)
 			}
 		}
 		maxVx = -MARIO_MAX_RUNNING_SPEED;
-		if (!isOnPlatform && vx > 0)
+
+		// Kiểm tra rõ ràng hơn cho trạng thái nhảy và chuyển hướng
+		if (!isOnPlatform)
 		{
-			vx = -MARIO_MAX_RUNNING_SPEED / 3;
-			ax = 0;
+			if (vx >= 0)  // Đang đứng im hoặc đang đi sang phải trong không trung
+			{
+				vx = -MARIO_MAX_RUNNING_SPEED / SPEED_DIVISOR;
+				ax = 0.0f;  // Đặt ax thành 0 một cách rõ ràng
+				DebugOut(L"Air direction change - to left, ax set to 0\n");
+			}
 		}
 		else
 		{
 			if (fabs(vx) < fabs(MARIO_RUNNING_SPEED)) vx = -MARIO_RUNNING_SPEED;
 			ax = -MARIO_ACCEL_RUN_X;
 		}
-		frictionX = 0; nx = -1;
+		frictionX = 0;
+		nx = -1;
 		isMoving = 1;
 		break;
+
 	case MARIO_STATE_WALKING_RIGHT:
 		if (isSitting) break;
 		if (isOnPlatform && vx < 0) // If Mario is moving left, set state to brake
 		{
-			//if (isHovering)
-			//	break;
 			if (isOnPlatform)
 			{
 				SetState(MARIO_STATE_BRAKE);
@@ -615,26 +624,31 @@ void CMario::SetState(int state)
 			}
 		}
 		maxVx = MARIO_MAX_WALKING_SPEED;
-		if (!isOnPlatform && vx < 0)
+
+		// Kiểm tra rõ ràng hơn cho trạng thái nhảy và chuyển hướng
+		if (!isOnPlatform)
 		{
-			vx = MARIO_MAX_WALKING_SPEED / 3;
-			ax = 0;
+			if (vx <= 0)  // Đang đứng im hoặc đang đi sang trái trong không trung
+			{
+				vx = MARIO_MAX_WALKING_SPEED / SPEED_DIVISOR;
+				ax = 0.0f;  // Đặt ax thành 0 một cách rõ ràng
+				DebugOut(L"Air direction change - to right, ax set to 0\n");
+			}
 		}
 		else
 		{
 			if (fabs(vx) < fabs(MARIO_WALKING_SPEED)) vx = MARIO_WALKING_SPEED;
 			ax = MARIO_ACCEL_WALK_X;
 		}
-		frictionX = 0; 
+		frictionX = 0;
 		isMoving = 1;
 		nx = 1;
 		break;
+
 	case MARIO_STATE_WALKING_LEFT:
 		if (isSitting) break;
 		if (isOnPlatform && vx > 0) // If Mario is moving right, set state to brake
 		{
-			//if (isHovering)
-			//	break;
 			if (isOnPlatform)
 			{
 				SetState(MARIO_STATE_BRAKE);
@@ -642,10 +656,16 @@ void CMario::SetState(int state)
 			}
 		}
 		maxVx = -MARIO_MAX_WALKING_SPEED;
-		if (!isOnPlatform && vx > 0)
+
+		// Kiểm tra rõ ràng hơn cho trạng thái nhảy và chuyển hướng
+		if (!isOnPlatform)
 		{
-			vx = -MARIO_MAX_WALKING_SPEED / 3;
-			ax = 0;
+			if (vx >= 0)  // Đang đứng im hoặc đang đi sang phải trong không trung
+			{
+				vx = -MARIO_MAX_WALKING_SPEED / SPEED_DIVISOR;
+				ax = 0.0f;  // Đặt ax thành 0 một cách rõ ràng
+				DebugOut(L"Air direction change - to left, ax set to 0\n");
+			}
 		}
 		else
 		{
@@ -656,6 +676,7 @@ void CMario::SetState(int state)
 		isMoving = 1;
 		nx = -1;
 		break;
+
 	case MARIO_STATE_JUMP:
 		if (isSitting) break;
 		if (isOnPlatform)
@@ -818,6 +839,3 @@ void CMario::StartBraking()
 		nx = 1;  // Face right when braking from left movement
 	}
 }
-
-
-
