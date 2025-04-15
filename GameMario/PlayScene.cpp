@@ -12,6 +12,7 @@
 #include "QuestionBlock.h"
 #include "Mushroom.h"
 #include "SuperLeaf.h"
+#include "PiranhaPlant.h"
 
 #include "Box.h"
 #include "Tree.h"
@@ -19,6 +20,7 @@
 #include "Bush.h"
 #include "Cloud.h"
 #include "Trinket.h"
+#include "SkyPlatform.h"
 
 #include "SampleKeyEventHandler.h"
 
@@ -127,6 +129,7 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		DebugOut(L"[INFO] Player object has been created!\n");
 		break;
 	case OBJECT_TYPE_GOOMBA: obj = new CGoomba(x, y); break;
+	case OBJECT_TYPE_PIRANHA_PLANT: obj = new CPiranhaPlant(x, y); break;
 	case OBJECT_TYPE_BRICK:
 	{
 
@@ -162,6 +165,31 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		int sprite_bottom_right = atoi(tokens[12].c_str());
 
 		obj = new CPlatform(
+			x, y,
+			cell_width, cell_height,
+			width, height,
+			sprite_top_left, sprite_top_center, sprite_top_right,
+			sprite_bottom_left, sprite_bottom_center, sprite_bottom_right
+		);
+
+		break;
+	}
+
+	case OBJECT_TYPE_SKYPLATFORM:
+	{
+
+		float cell_width = (float)atof(tokens[3].c_str());
+		float cell_height = (float)atof(tokens[4].c_str());
+		int width = atoi(tokens[5].c_str());
+		int height = atoi(tokens[6].c_str());
+		int sprite_top_left = atoi(tokens[7].c_str());
+		int sprite_top_center = atoi(tokens[8].c_str());
+		int sprite_top_right = atoi(tokens[9].c_str());
+		int sprite_bottom_left = atoi(tokens[10].c_str());
+		int sprite_bottom_center = atoi(tokens[11].c_str());
+		int sprite_bottom_right = atoi(tokens[12].c_str());
+
+		obj = new CSkyPlatform(
 			x, y,
 			cell_width, cell_height,
 			width, height,
