@@ -186,6 +186,8 @@ class CMario : public CGameObject
 	ULONGLONG brakingStart = -1;
 
 	int jumpCount = 0;
+	int tailWagged = 1;
+	int isMoving = 0;
 
 	void OnCollisionWithGoomba(LPCOLLISIONEVENT e);
 	void OnCollisionWithCoin(LPCOLLISIONEVENT e);
@@ -236,7 +238,7 @@ public:
 	void StartPowerUp() { powerUp = 1; powerUpStart = GetTickCount64(); }
 	void StartTailUp() { tailUp = 1; tailUpStart = GetTickCount64(); }
 	void StartBraking();
-	void StartHovering() { isHovering = 1; hoveringStart = GetTickCount64(); }
+	void StartHovering() { isHovering = 1; hoveringStart = GetTickCount64(); tailWagged = 0; }
 
 	int GetJumpCount() { return jumpCount; }
 	int GetLevel() { return level; }

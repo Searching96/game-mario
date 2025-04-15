@@ -63,9 +63,10 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	vx += ax * dt;
 	vy += ay * dt;
 
-	if (jumpCount < 1 && !isHovering)
+	if (jumpCount < 1 && !isHovering && isMoving == 0)
 	{
 		// Apply friction
+		frictionX = MARIO_FRICTION_X;
 		if (vx > 0)
 		{
 			if (vx - frictionX * dt < 0)
@@ -101,6 +102,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		if (GetTickCount64() - brakingStart > MARIO_BRAKE_TIME || fabs(vx) < 0.1f)
 		{
 			isBraking = 0;
+			isMoving = 0;
 
 			// When braking finishes, actually reverse Mario's direction
 			// This properly handles both animation and movement direction
@@ -117,11 +119,11 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				maxVx = MARIO_MAX_WALKING_SPEED;
 			}
 
-			// Set to walking state in the new direction
-			if (nx > 0)
-				SetState(MARIO_STATE_WALKING_RIGHT);
-			else
-				SetState(MARIO_STATE_WALKING_LEFT);
+			//// Set to walking state in the new direction
+			//if (nx > 0)
+			//	SetState(MARIO_STATE_WALKING_RIGHT);
+			//else
+			//	SetState(MARIO_STATE_WALKING_LEFT);
 		}
 	}
 
@@ -141,7 +143,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	if (isOnPlatform)
 		jumpCount = 0;
 
-	DebugOutTitle(L"vx=%f, ax=%f, vy=%f, ay=%f, jc=%d, fx=%f\n", vx, ax, vy, ay, jumpCount, frictionX);
+	DebugOutTitle(L"vx=%f, ax=%f, vy=%f, ay=%f, jc=%d, fx=%f, iop=%d, imv=%d\n", vx, ax, vy, ay, jumpCount, frictionX, isOnPlatform, isMoving);
 	//DebugOut(L"vx=%f, ax=%f, mvx=%f, jc=%d\n", vx, ax, maxVx, jumpCount);
 
 	// Process collisions
@@ -501,11 +503,14 @@ int CMario::GetAniIdTail()
 			aniId = ID_ANI_MARIO_TAIL_MULTIJUMP_LEFT;
 
 	if (isHovering)
+	{
 		if (nx > 0)
 			aniId = ID_ANI_MARIO_TAIL_HOVERING_RIGHT;
 		else
 			aniId = ID_ANI_MARIO_TAIL_HOVERING_LEFT;
-	
+		tailWagged = 1;
+	}
+		
 	if (aniId == -1) aniId = ID_ANI_MARIO_TAIL_IDLE_RIGHT;
 
 	return aniId;
@@ -527,7 +532,7 @@ void CMario::Render()
 
 	animations->Get(aniId)->Render(x, y);
 
-	//RenderBoundingBox();
+	RenderBoundingBox();
 	
 	//DebugOutTitle(L"Coins: %d", coin);
 }
@@ -545,10 +550,10 @@ void CMario::SetState(int state)
 	{
 	case MARIO_STATE_RUNNING_RIGHT:
 		if (isSitting) break;
-		if (vx < 0) // If Mario is moving left, set state to brake
+		if (isOnPlatform && vx < 0) // If Mario is moving left, set state to brake
 		{
-			if (isHovering)
-				break;
+			//if (isHovering)
+			//	break;
 			if (isOnPlatform)
 			{
 				SetState(MARIO_STATE_BRAKE);
@@ -557,17 +562,26 @@ void CMario::SetState(int state)
 		}
 		if (isBraking) break;
 		maxVx = MARIO_MAX_RUNNING_SPEED;
-		if (fabs(vx) < fabs(MARIO_RUNNING_SPEED)) vx = MARIO_RUNNING_SPEED;
-		ax = MARIO_ACCEL_RUN_X;
+		if (!isOnPlatform && vx < 0)
+		{
+			vx = MARIO_MAX_RUNNING_SPEED / 3;
+			ax = 0;
+		}
+		else
+		{
+			if (fabs(vx) < fabs(MARIO_RUNNING_SPEED)) vx = MARIO_RUNNING_SPEED;
+			ax = MARIO_ACCEL_RUN_X;
+		}
 		frictionX = 0;
+		isMoving = 1;
 		nx = 1;
 		break;
 	case MARIO_STATE_RUNNING_LEFT:
 		if (isSitting) break;
-		if (vx > 0) // If Mario is moving right, set state to brake
+		if (isOnPlatform && vx > 0) // If Mario is moving right, set state to brake
 		{
-			if (isHovering)
-				break;
+			//if (isHovering)
+			//	break;
 			if (isOnPlatform)
 			{
 				SetState(MARIO_STATE_BRAKE);
@@ -575,16 +589,25 @@ void CMario::SetState(int state)
 			}
 		}
 		maxVx = -MARIO_MAX_RUNNING_SPEED;
-		if (fabs(vx) < fabs(MARIO_RUNNING_SPEED)) vx = -MARIO_RUNNING_SPEED;
-		ax = -MARIO_ACCEL_RUN_X;
+		if (!isOnPlatform && vx > 0)
+		{
+			vx = -MARIO_MAX_RUNNING_SPEED / 3;
+			ax = 0;
+		}
+		else
+		{
+			if (fabs(vx) < fabs(MARIO_RUNNING_SPEED)) vx = -MARIO_RUNNING_SPEED;
+			ax = -MARIO_ACCEL_RUN_X;
+		}
 		frictionX = 0; nx = -1;
+		isMoving = 1;
 		break;
 	case MARIO_STATE_WALKING_RIGHT:
 		if (isSitting) break;
-		if (vx < 0) // If Mario is moving left, set state to brake
+		if (isOnPlatform && vx < 0) // If Mario is moving left, set state to brake
 		{
-			if (isHovering)
-				break;
+			//if (isHovering)
+			//	break;
 			if (isOnPlatform)
 			{
 				SetState(MARIO_STATE_BRAKE);
@@ -592,17 +615,26 @@ void CMario::SetState(int state)
 			}
 		}
 		maxVx = MARIO_MAX_WALKING_SPEED;
-		if (fabs(vx) < fabs(MARIO_WALKING_SPEED)) vx = MARIO_WALKING_SPEED;
-		ax = MARIO_ACCEL_WALK_X;
+		if (!isOnPlatform && vx < 0)
+		{
+			vx = MARIO_MAX_WALKING_SPEED / 3;
+			ax = 0;
+		}
+		else
+		{
+			if (fabs(vx) < fabs(MARIO_WALKING_SPEED)) vx = MARIO_WALKING_SPEED;
+			ax = MARIO_ACCEL_WALK_X;
+		}
 		frictionX = 0; 
+		isMoving = 1;
 		nx = 1;
 		break;
 	case MARIO_STATE_WALKING_LEFT:
 		if (isSitting) break;
-		if (vx > 0) // If Mario is moving right, set state to brake
+		if (isOnPlatform && vx > 0) // If Mario is moving right, set state to brake
 		{
-			if (isHovering)
-				break;
+			//if (isHovering)
+			//	break;
 			if (isOnPlatform)
 			{
 				SetState(MARIO_STATE_BRAKE);
@@ -610,9 +642,18 @@ void CMario::SetState(int state)
 			}
 		}
 		maxVx = -MARIO_MAX_WALKING_SPEED;
-		if (fabs(vx) < fabs(MARIO_WALKING_SPEED)) vx = -MARIO_WALKING_SPEED;
-		ax = -MARIO_ACCEL_WALK_X;
+		if (!isOnPlatform && vx > 0)
+		{
+			vx = -MARIO_MAX_WALKING_SPEED / 3;
+			ax = 0;
+		}
+		else
+		{
+			if (fabs(vx) < fabs(MARIO_WALKING_SPEED)) vx = -MARIO_WALKING_SPEED;
+			ax = -MARIO_ACCEL_WALK_X;
+		}
 		frictionX = 0;
+		isMoving = 1;
 		nx = -1;
 		break;
 	case MARIO_STATE_JUMP:
@@ -705,12 +746,13 @@ void CMario::SetState(int state)
 		}
 		// Maintain current horizontal velocity but apply slight deceleration
 		ax = 0.0f;
-		maxVx = MARIO_MAX_WALKING_SPEED;
+		maxVx = (nx > 0) ? MARIO_MAX_WALKING_SPEED : -MARIO_MAX_WALKING_SPEED;
 		// Keep some horizontal momentum but don't force a speed
 		StartHovering();
 		break;
 
 	case MARIO_STATE_RELEASE_MOVE:
+		isMoving = 0;
 		frictionX = MARIO_FRICTION_X;
 		break;
 	}
