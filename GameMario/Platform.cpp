@@ -63,7 +63,7 @@ void CPlatform::Render()
 		}
 	}
 
-	RenderBoundingBox();
+	//RenderBoundingBox();
 }
 
 void CPlatform::GetBoundingBox(float& l, float& t, float& r, float& b)
@@ -76,5 +76,6 @@ void CPlatform::GetBoundingBox(float& l, float& t, float& r, float& b)
 
 int CPlatform::IsDirectionColliable(float nx, float ny)
 {
-	return 1;
+	if (ny == 1) return 0;
+	else return 1;
 }

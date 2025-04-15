@@ -1,10 +1,8 @@
 #pragma once
-
 #include "GameObject.h"
-#include "Animation.h"
-#include "Animations.h"
-
-class CBrick : public CGameObject {
+class CTrinket :
+    public CGameObject
+{
 protected:
 	//int width; default = 1				// Unit: cell 
 	//int height; default = 1				// Unit: cell
@@ -13,7 +11,7 @@ protected:
 	int spriteId;
 
 public:
-	CBrick(float x, float y,
+	CTrinket(float x, float y,
 		float cell_width, float cell_height,
 		int sprite_id) : CGameObject(x, y)
 	{
@@ -26,9 +24,9 @@ public:
 	void Update(DWORD dt) {}
 	void GetBoundingBox(float& l, float& t, float& r, float& b);
 	void RenderBoundingBox();
-	int IsBlocking() { return 1; }
 
 	int IsDirectionColliable(float nx, float ny);
 };
 
-typedef CBrick* LPBRICK;
+typedef CTrinket* LPTRINKET;
+

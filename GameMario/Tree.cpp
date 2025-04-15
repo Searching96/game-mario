@@ -51,7 +51,7 @@ void CTree::Render()
 		}
 	}
 
-	RenderBoundingBox();
+	//RenderBoundingBox();
 }
 
 void CTree::GetBoundingBox(float& l, float& t, float& r, float& b)

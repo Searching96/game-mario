@@ -60,7 +60,7 @@ void CCloud::Render()
 		}
 	}
 
-	RenderBoundingBox();
+	//RenderBoundingBox();
 }
 
 void CCloud::GetBoundingBox(float& l, float& t, float& r, float& b)
