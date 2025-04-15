@@ -13,7 +13,7 @@ public:
 	{
 
 	};
-	int IsBlocking() { return 0; }
+	int IsBlocking() { return 1; }
 	int IsDirectionColliable(float nx, float ny);
 };
 

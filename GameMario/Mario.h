@@ -6,16 +6,16 @@
 
 #include "debug.h"
 
-#define MARIO_MAX_WALKING_SPEED		0.15f
-#define MARIO_MAX_RUNNING_SPEED		0.35f
+#define MARIO_MAX_WALKING_SPEED		0.125f
+#define MARIO_MAX_RUNNING_SPEED		0.20f
 #define MARIO_MAX_FALLING_SPEED		0.25f
 
 #define MARIO_WALKING_SPEED			0.1f
-#define MARIO_RUNNING_SPEED			0.2f
+#define MARIO_RUNNING_SPEED			0.165f
 #define MARIO_INSTANT_BRAKING_SPEED	0.04f
 
-#define MARIO_ACCEL_RUN_X			0.0001f
-#define MARIO_ACCEL_WALK_X			0.0001f
+#define MARIO_ACCEL_RUN_X			0.00002f
+#define MARIO_ACCEL_WALK_X			0.00005f
 #define MARIO_DECELERATION_X		0.0001f
 #define MARIO_FRICTION_X			0.0003f
 
@@ -75,6 +75,9 @@
 #define ID_ANI_MARIO_BRACE_RIGHT 600
 #define ID_ANI_MARIO_BRACE_LEFT 610
 
+#define ID_ANI_MARIO_HALF_RUN_ACCEL_RIGHT 700
+#define ID_ANI_MARIO_HALF_RUN_ACCEL_LEFT 710
+
 #define ID_ANI_MARIO_DIE 4000
 
 // SMALL MARIO
@@ -98,6 +101,9 @@
 
 #define ID_ANI_MARIO_SMALL_POWER_UP_RIGHT 2600
 #define ID_ANI_MARIO_SMALL_POWER_UP_LEFT 2610
+
+#define ID_ANI_MARIO_SMALL_HALF_RUN_ACCEL_RIGHT 2700
+#define ID_ANI_MARIO_SMALL_HALF_RUN_ACCEL_LEFT 2710
 
 // TAIL MARIO
 #define ID_ANI_MARIO_TAIL_IDLE_RIGHT 6000
@@ -204,21 +210,7 @@ class CMario : public CGameObject
 	int GetAniIdTail();
 
 public:
-	CMario(float x, float y) : CGameObject(x, y)
-	{
-		isSitting = false;
-		maxVx = 0.0f;
-		ax = 0.0f;
-		ay = MARIO_GRAVITY; 
-
-		level = MARIO_LEVEL_SMALL;
-		untouchable = 0;
-		untouchable_start = -1;
-		isOnPlatform = false;
-		coin = 0;
-		jumpCount = 0;
-		frictionX = 0;
-	}
+	CMario(float x, float y);
 	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 	void Render();
 	void SetState(int state);

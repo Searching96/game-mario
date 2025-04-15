@@ -14,6 +14,22 @@
 
 #include "Collision.h"
 
+CMario::CMario(float x, float y) : CGameObject(x, y)
+{
+	isSitting = false;
+	maxVx = 0.0f;
+	ax = 0.0f;
+	ay = MARIO_GRAVITY;
+
+	level = MARIO_LEVEL_SMALL;
+	untouchable = 0;
+	untouchable_start = -1;
+	isOnPlatform = false;
+	coin = 0;
+	jumpCount = 0;
+	frictionX = 0;
+}
+
 // In CMario::Update method, modify the hover handling
 void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
@@ -337,7 +353,7 @@ int CMario::GetAniIdSmall()
 	int aniId = -1;
 	if (!isOnPlatform)
 	{
-		if (abs(ax) == MARIO_ACCEL_RUN_X)
+		if (fabs(vx) == MARIO_MAX_RUNNING_SPEED)
 		{
 			if (nx >= 0)
 				aniId = ID_ANI_MARIO_SMALL_JUMP_RUN_RIGHT;
@@ -352,38 +368,40 @@ int CMario::GetAniIdSmall()
 				aniId = ID_ANI_MARIO_SMALL_JUMP_WALK_LEFT;
 		}
 	}
-	else
-		if (isSitting)
-		{
-			if (nx > 0)
-				aniId = ID_ANI_MARIO_SIT_RIGHT;
-			else
-				aniId = ID_ANI_MARIO_SIT_LEFT;
-		}
+	else if (isSitting)
+	{
+		if (nx > 0)
+			aniId = ID_ANI_MARIO_SIT_RIGHT;
 		else
-			if (vx == 0)
-			{
-				if (nx > 0) aniId = ID_ANI_MARIO_SMALL_IDLE_RIGHT;
-				else aniId = ID_ANI_MARIO_SMALL_IDLE_LEFT;
-			}
-			else if (vx > 0)
-			{
-				if (ax < 0)
-					aniId = ID_ANI_MARIO_SMALL_BRACE_RIGHT;
-				else if (ax == MARIO_ACCEL_RUN_X)
-					aniId = ID_ANI_MARIO_SMALL_RUNNING_RIGHT;
-				else if (ax == MARIO_ACCEL_RUN_X)
-					aniId = ID_ANI_MARIO_SMALL_WALKING_RIGHT;
-			}
-			else // vx < 0
-			{
-				if (ax > 0)
-					aniId = ID_ANI_MARIO_SMALL_BRACE_LEFT;
-				else if (ax == -MARIO_ACCEL_RUN_X)
-					aniId = ID_ANI_MARIO_SMALL_RUNNING_LEFT;
-				else if (ax == -MARIO_ACCEL_RUN_X)
-					aniId = ID_ANI_MARIO_SMALL_WALKING_LEFT;
-			}
+			aniId = ID_ANI_MARIO_SIT_LEFT;
+	}
+	else if (vx == 0)
+	{
+		if (nx > 0) aniId = ID_ANI_MARIO_SMALL_IDLE_RIGHT;
+		else aniId = ID_ANI_MARIO_SMALL_IDLE_LEFT;
+	}
+	else if (vx > 0)
+	{
+		if (isBraking)
+			aniId = ID_ANI_MARIO_SMALL_BRACE_RIGHT;
+		else if (fabs(vx) <= MARIO_HALF_RUN_ACCEL_SPEED)
+			aniId = ID_ANI_MARIO_SMALL_WALKING_RIGHT;
+		else if (fabs(vx) > MARIO_HALF_RUN_ACCEL_SPEED && fabs(vx) < MARIO_MAX_RUNNING_SPEED)
+			aniId = ID_ANI_MARIO_SMALL_HALF_RUN_ACCEL_RIGHT;
+		else if (fabs(vx) == MARIO_MAX_RUNNING_SPEED)
+			aniId = ID_ANI_MARIO_SMALL_RUNNING_RIGHT;
+	}
+	else // vx < 0
+	{
+		if (isBraking)
+			aniId = ID_ANI_MARIO_SMALL_BRACE_LEFT;
+		else if (fabs(vx) <= MARIO_HALF_RUN_ACCEL_SPEED)
+			aniId = ID_ANI_MARIO_SMALL_WALKING_LEFT;
+		else if (fabs(vx) > MARIO_HALF_RUN_ACCEL_SPEED && fabs(vx) < MARIO_MAX_RUNNING_SPEED)
+			aniId = ID_ANI_MARIO_SMALL_HALF_RUN_ACCEL_LEFT;
+		else if (fabs(vx) == MARIO_MAX_RUNNING_SPEED)
+			aniId = ID_ANI_MARIO_SMALL_RUNNING_LEFT;
+	}
 
 	if (state == MARIO_STATE_POWER_UP)
 	{
@@ -405,7 +423,7 @@ int CMario::GetAniIdBig()
 	int aniId = -1;
 	if (!isOnPlatform)
 	{
-		if (abs(ax) == MARIO_ACCEL_RUN_X)
+		if (fabs(vx) == MARIO_MAX_RUNNING_SPEED)
 		{
 			if (nx >= 0)
 				aniId = ID_ANI_MARIO_JUMP_RUN_RIGHT;
@@ -420,38 +438,40 @@ int CMario::GetAniIdBig()
 				aniId = ID_ANI_MARIO_JUMP_WALK_LEFT;
 		}
 	}
-	else
-		if (isSitting)
-		{
-			if (nx > 0)
-				aniId = ID_ANI_MARIO_SIT_RIGHT;
-			else
-				aniId = ID_ANI_MARIO_SIT_LEFT;
-		}
+	else if (isSitting)
+	{
+		if (nx > 0)
+			aniId = ID_ANI_MARIO_SIT_RIGHT;
 		else
-			if (vx == 0)
-			{
-				if (nx > 0) aniId = ID_ANI_MARIO_IDLE_RIGHT;
-				else aniId = ID_ANI_MARIO_IDLE_LEFT;
-			}
-			else if (vx > 0)
-			{
-				if (ax < 0)
-					aniId = ID_ANI_MARIO_BRACE_RIGHT;
-				else if (ax == MARIO_ACCEL_RUN_X)
-					aniId = ID_ANI_MARIO_RUNNING_RIGHT;
-				else if (ax == MARIO_ACCEL_RUN_X)
-					aniId = ID_ANI_MARIO_WALKING_RIGHT;
-			}
-			else // vx < 0
-			{
-				if (ax > 0)
-					aniId = ID_ANI_MARIO_BRACE_LEFT;
-				else if (ax == -MARIO_ACCEL_RUN_X)
-					aniId = ID_ANI_MARIO_RUNNING_LEFT;
-				else if (ax == -MARIO_ACCEL_RUN_X)
-					aniId = ID_ANI_MARIO_WALKING_LEFT;
-			}
+			aniId = ID_ANI_MARIO_SIT_LEFT;
+	}
+	else if (vx == 0)
+	{
+		if (nx > 0) aniId = ID_ANI_MARIO_IDLE_RIGHT;
+		else aniId = ID_ANI_MARIO_IDLE_LEFT;
+	}
+	else if (vx > 0)
+	{
+		if (isBraking)
+			aniId = ID_ANI_MARIO_BRACE_RIGHT;
+		else if (fabs(vx) <= MARIO_HALF_RUN_ACCEL_SPEED)
+			aniId = ID_ANI_MARIO_WALKING_RIGHT;
+		else if (fabs(vx) > MARIO_HALF_RUN_ACCEL_SPEED && fabs(vx) < MARIO_MAX_RUNNING_SPEED)
+			aniId = ID_ANI_MARIO_HALF_RUN_ACCEL_RIGHT;
+		else if (fabs(vx) == MARIO_MAX_RUNNING_SPEED)
+			aniId = ID_ANI_MARIO_RUNNING_RIGHT;
+	}
+	else // vx < 0
+	{
+		if (isBraking)
+			aniId = ID_ANI_MARIO_BRACE_LEFT;
+		else if (fabs(vx) <= MARIO_HALF_RUN_ACCEL_SPEED)
+			aniId = ID_ANI_MARIO_WALKING_LEFT;
+		else if (fabs(vx) > MARIO_HALF_RUN_ACCEL_SPEED && fabs(vx) < MARIO_MAX_RUNNING_SPEED)
+			aniId = ID_ANI_MARIO_HALF_RUN_ACCEL_LEFT;
+		else if (fabs(vx) == MARIO_MAX_RUNNING_SPEED)
+			aniId = ID_ANI_MARIO_RUNNING_LEFT;
+	}
 
 	if (aniId == -1) aniId = ID_ANI_MARIO_IDLE_RIGHT;
 
@@ -554,7 +574,7 @@ void CMario::Render()
 
 	animations->Get(aniId)->Render(x, y);
 
-	RenderBoundingBox();
+	//RenderBoundingBox();
 	
 	//DebugOutTitle(L"Coins: %d", coin);
 }
@@ -726,7 +746,7 @@ void CMario::SetState(int state)
 			else if (jumpCount >= 1)
 			{
 				jumpCount++;
-				vy = -MARIO_JUMP_SPEED_Y;
+				vy = -MARIO_JUMP_SPEED_Y / 2.0f;
 			}
 			else if (jumpCount == 0)
 			{
