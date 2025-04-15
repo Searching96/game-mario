@@ -23,6 +23,7 @@ assets\tree.txt
 assets\pipe.txt
 assets\bush.txt
 assets\trinket.txt
+assets\piranha.txt
 #
 [OBJECTS]
 # type	x	y	extra_settings per object type
@@ -178,6 +179,9 @@ assets\trinket.txt
 #Dark Cluster #1 1060002 dark
 102	2768	368	16	16	3	1081110	1081120	1081210	1081220
 102	2752	400	16	16	1	1081110	1081120	1064300	1064300
+
+#Piranha x, y
+9	360	364
 
 #Pipe x, y, c_width, c_height, height, top_left, top_right, ...
 #Map border
