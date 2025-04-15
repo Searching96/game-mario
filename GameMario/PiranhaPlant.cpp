@@ -14,7 +14,11 @@ void CPiranhaPlant::Render()
 	if (state == PIRANHA_PLANT_STATE_HIDDEN) return;
 	int aniId = ID_ANI_PIRANHA_PLANT_LEFT_MOVE;
 	int direction = GetAiming();
-	if (moveUp || moveDown)
+	if (state == PIRANHA_PLANT_STATE_DIED)
+	{
+		aniId = ID_ANI_PIRANHA_PLANT_DIED;
+	}
+	else if (moveUp || moveDown)
 	{
 		switch (direction)
 		{
@@ -84,6 +88,11 @@ int CPiranhaPlant::GetAiming()
 
 void CPiranhaPlant::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
+	if ((state == PIRANHA_PLANT_STATE_DIED) && (GetTickCount64() - die_start > PIRANHA_PLANT_DIE_TIMEOUT))
+	{
+		isDeleted = true;
+		return;
+	}
 
 	if (state == PIRANHA_PLANT_STATE_HOVER)
 	{
@@ -168,6 +177,9 @@ void CPiranhaPlant::SetState(int state)
 	case PIRANHA_PLANT_STATE_HOVER:
 		vy = 0.0f;
 		hoverStart = GetTickCount64();
+		break;
+	case PIRANHA_PLANT_STATE_DIED:
+		die_start = GetTickCount64();
 		break;
 	}
 }
