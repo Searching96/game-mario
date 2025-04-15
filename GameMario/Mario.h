@@ -21,7 +21,7 @@
 
 #define MARIO_JUMP_SPEED_Y			0.6f
 #define MARIO_JUMP_RUN_SPEED_Y		0.7f
-#define MARIO_HOVER_SPEED_Y			0.05f
+#define MARIO_HOVER_SPEED_Y			0.1f
 
 #define MARIO_GRAVITY				0.002f
 
@@ -125,6 +125,9 @@
 #define ID_ANI_MARIO_TAIL_HALF_RUN_ACCEL_RIGHT 6800
 #define ID_ANI_MARIO_TAIL_HALF_RUN_ACCEL_LEFT 6810
 
+#define ID_ANI_MARIO_TAIL_HOVERING_RIGHT 6900
+#define ID_ANI_MARIO_TAIL_HOVERING_LEFT 6910
+
 
 #pragma endregion
 
@@ -150,6 +153,7 @@
 #define MARIO_POWER_UP_TIME 2000
 #define MARIO_TAIL_UP_TIME 1000
 #define MARIO_HOVER_TIME 100
+#define MARIO_BRAKE_TIME 5000
 
 #define MAX_JUMP_COUNT 10
 
@@ -174,7 +178,8 @@ class CMario : public CGameObject
 	ULONGLONG hoveringStart = -1;
 
 	int isBraking = 0;
-	int vSignOnBraking = 0;
+	float vxBeforeBraking = 0;
+	ULONGLONG brakingStart = -1;
 
 	int jumpCount = 0;
 
