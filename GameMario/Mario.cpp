@@ -13,6 +13,7 @@
 
 #include "Collision.h"
 
+// In CMario::Update method, modify the hover handling
 void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
 	// Handle power-up state
@@ -38,14 +39,24 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		return;
 	}
 
-	// Handle hover state for tail Mario
+	// Handle hover state for tail Mario - Modified to allow physics updates
 	if (isHovering == 1)
 	{
+		// Apply reduced gravity during hovering
+		ay = MARIO_GRAVITY * 0.3f;
+
+		// Gradually decrease vertical velocity for smoother descent
+		if (vy > 0) {
+			vy = MARIO_HOVER_SPEED_Y;
+		}
+
+		// Check if hover time expired
 		if (GetTickCount64() - hoveringStart > MARIO_HOVER_TIME)
 		{
 			isHovering = 0;
 			ay = MARIO_GRAVITY;
 		}
+		// No return here - continue with normal physics processing
 	}
 
 	// Apply acceleration
@@ -68,22 +79,52 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			vx += MARIO_FRICTION_X * dt;
 	}
 
-	// Handle braking
+	// Handle braking - Modified for smoother braking
 	if (isBraking == 1)
 	{
-		if (GetTickCount64() - brakingStart > MARIO_BRAKE_TIME)
+		// Apply stronger friction when braking
+		float brakeForce = MARIO_FRICTION_X * 5.0f;
+
+		if (vxBeforeBraking > 0) {
+			vx -= brakeForce * dt;
+			if (vx < 0) vx = 0;
+		}
+		else if (vxBeforeBraking < 0) {
+			vx += brakeForce * dt;
+			if (vx > 0) vx = 0;
+		}
+
+		// Check if braking time expired or velocity is close to zero
+		if (GetTickCount64() - brakingStart > MARIO_BRAKE_TIME || fabs(vx) < 0.01f)
 		{
 			isBraking = 0;
-			vx = -vxBeforeBraking;
-			//nx = -1 * nx;
-			//ax = 0;
-			SetState(MARIO_STATE_IDLE);
+
+			// When braking finishes, actually reverse Mario's direction
+			// This properly handles both animation and movement direction
+			if (vxBeforeBraking > 0) {
+				// Was moving right, now face/move left
+				nx = -1;
+				vx = -MARIO_WALKING_SPEED * 0.5f; // Start with a small velocity in opposite direction
+				maxVx = -MARIO_MAX_WALKING_SPEED;
+			}
+			else if (vxBeforeBraking < 0) {
+				// Was moving left, now face/move right
+				nx = 1;
+				vx = MARIO_WALKING_SPEED * 0.5f; // Start with a small velocity in opposite direction
+				maxVx = MARIO_MAX_WALKING_SPEED;
+			}
+
+			// Set to walking state in the new direction
+			if (nx > 0)
+				SetState(MARIO_STATE_WALKING_RIGHT);
+			else
+				SetState(MARIO_STATE_WALKING_LEFT);
 		}
 	}
-	
+
 	// Cap the velocity to the maximum velocity
 	if (fabs(vx) > fabs(maxVx)) vx = maxVx;
-	// Cap the vertical velocity to the maximum velocity
+	// Cap the vertical velocity to the maximum falling speed
 	if (vy > MARIO_MAX_FALLING_SPEED) vy = MARIO_MAX_FALLING_SPEED;
 
 	// Reset untouchable timer if untouchable time has passed
@@ -488,10 +529,11 @@ void CMario::Render()
 	//DebugOutTitle(L"Coins: %d", coin);
 }
 
+// Modify the SetState method for improved braking and hovering handling
 void CMario::SetState(int state)
 {
 	// DIE is the end state, cannot be changed! 
-	if (this->state == MARIO_STATE_DIE) return; 
+	if (this->state == MARIO_STATE_DIE) return;
 
 	if (this->state == MARIO_STATE_POWER_UP && (GetTickCount64() - powerUpStart <= MARIO_POWER_UP_TIME))
 		return;
@@ -583,13 +625,13 @@ void CMario::SetState(int state)
 				SetState(MARIO_STATE_HOVER);
 				break;
 			}
-			
+
 			if (fabs(vx) == MARIO_MAX_RUNNING_SPEED)
 			{
 				jumpCount++;
 				vy = -MARIO_JUMP_SPEED_Y;
 			}
-			else if (jumpCount > 1)
+			else if (jumpCount >= 1)
 			{
 				jumpCount++;
 				vy = -MARIO_JUMP_SPEED_Y;
@@ -611,7 +653,7 @@ void CMario::SetState(int state)
 			state = MARIO_STATE_IDLE;
 			isSitting = true;
 			vx = 0; vy = 0.0f;
-			y +=MARIO_SIT_HEIGHT_ADJUST;
+			y += MARIO_SIT_HEIGHT_ADJUST;
 		}
 		break;
 
@@ -634,7 +676,7 @@ void CMario::SetState(int state)
 		vx = 0;
 		ax = 0;
 		break;
-	
+
 	case MARIO_STATE_POWER_UP:
 		StartPowerUp();
 		break;
@@ -645,16 +687,19 @@ void CMario::SetState(int state)
 
 	case MARIO_STATE_BRAKE:
 		StartBraking();
-		if (vx > MARIO_INSTANT_BRAKING_SPEED)
-			vx = MARIO_INSTANT_BRAKING_SPEED;
-		else if (vx < -MARIO_INSTANT_BRAKING_SPEED)
-			vx = -MARIO_INSTANT_BRAKING_SPEED;
+		// Modified braking behavior - don't force a specific velocity
+		// Let the braking friction in Update() handle slowing down
+		ax = 0.0f; // Stop acceleration while braking
 		break;
 
 	case MARIO_STATE_HOVER:
-		vy = MARIO_HOVER_SPEED_Y;
-		ay = 0;
-		vx = MARIO_RUNNING_SPEED * 3;
+		// Modified hovering - smoother transition
+		if (vy > 0) {  // Only hover when falling
+			vy = MARIO_HOVER_SPEED_Y;
+		}
+		// Maintain current horizontal velocity but apply slight deceleration
+		ax = 0.0f;
+		// Keep some horizontal momentum but don't force a speed
 		StartHovering();
 		break;
 	}
@@ -702,11 +747,24 @@ void CMario::SetLevel(int l)
 }
 
 
+// Modify the StartBraking function
 void CMario::StartBraking()
 {
+	if (isBraking) return; // Don't restart braking if already braking
+
 	isBraking = 1;
-	vxBeforeBraking = vx;
+	vxBeforeBraking = vx; // Store velocity before braking
 	brakingStart = GetTickCount64();
+
+	// When braking, we want to face the opposite direction
+	// This is for animation purposes
+	if (vx > 0) {
+		nx = -1; // Face left when braking from right movement
+	}
+	else if (vx < 0) {
+		nx = 1;  // Face right when braking from left movement
+	}
 }
+
 
 
