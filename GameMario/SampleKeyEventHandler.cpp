@@ -17,13 +17,19 @@ void CSampleKeyHandler::OnKeyDown(int KeyCode)
 		mario->SetState(MARIO_STATE_SIT);
 		break;
 	case DIK_S:
-		mario->SetState(MARIO_STATE_JUMP);
+		if (mario->GetJumpCount() >= MAX_JUMP_COUNT && mario->GetLevel() == MARIO_LEVEL_TAIL)
+			mario->SetState(MARIO_STATE_HOVER);
+		else
+			mario->SetState(MARIO_STATE_JUMP);
 		break;
 	case DIK_1:
 		mario->SetLevel(MARIO_LEVEL_SMALL);
 		break;
 	case DIK_2:
 		mario->SetLevel(MARIO_LEVEL_BIG);
+		break;
+	case DIK_3:
+		mario->SetLevel(MARIO_LEVEL_TAIL);
 		break;
 	case DIK_0:
 		mario->SetState(MARIO_STATE_DIE);
@@ -46,6 +52,12 @@ void CSampleKeyHandler::OnKeyUp(int KeyCode)
 		break;
 	case DIK_DOWN:
 		mario->SetState(MARIO_STATE_SIT_RELEASE);
+		break;
+	case DIK_LEFT:
+		mario->SetState(MARIO_STATE_RELEASE_MOVE);
+		break;
+	case DIK_RIGHT:
+		mario->SetState(MARIO_STATE_RELEASE_MOVE);
 		break;
 	}
 }
