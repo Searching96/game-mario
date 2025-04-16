@@ -19,7 +19,7 @@
 #define MARIO_ACCEL_WALK_X			0.00005f
 #define MARIO_DECELERATION_X		0.0001f
 #define MARIO_FRICTION_X			0.0003f
-#define MARIO_JUMP_GRAVITY		0.00005f
+#define MARIO_JUMP_GRAVITY			0.00005f
 
 #define MARIO_JUMP_SPEED_Y			0.55f
 #define MARIO_JUMP_RUN_SPEED_Y		0.65f
@@ -210,6 +210,12 @@ class CMario : public CGameObject
 	int GetAniIdBig();
 	int GetAniIdSmall();
 	int GetAniIdTail();
+
+	void HandleBraking(DWORD dt);
+	void HandlePowerUp(DWORD dt);
+	void HandleTailUp(DWORD dt);
+	void HandleUntouchable(DWORD dt);
+	void HandleHovering(DWORD dt);
 
 public:
 	CMario(float x, float y);

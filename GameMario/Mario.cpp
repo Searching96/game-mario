@@ -37,53 +37,16 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	static int lastJumpCount = 0;
 	int prevJumpCount = lastJumpCount;
 
-	// Handle power-up state
-	if (powerUp == 1)
-	{
-		if (GetTickCount64() - powerUpStart > MARIO_POWER_UP_TIME)
-		{
-			powerUp = 0;
-			y -= 6; // RED ALERT
-			SetLevel(MARIO_LEVEL_BIG);
-		}
-		return;
-	}
-
-	// Handle tail-up state
-	if (tailUp == 1)
-	{
-		if (GetTickCount64() - tailUpStart > MARIO_TAIL_UP_TIME)
-		{
-			tailUp = 0;
-			SetLevel(MARIO_LEVEL_TAIL);
-		}
-		return;
-	}
-
-	// Reset untouchable timer if untouchable time has passed
-	if (GetTickCount64() - untouchableStart > MARIO_UNTOUCHABLE_TIME)
-	{
-		untouchableStart = 0;
-		untouchable = 0;
-	}
-
-	// Handle hover state for tail Mario
-	if (isHovering)
-	{
-		ay = MARIO_GRAVITY * 0.3f;
-		if (vy > 0) vy = MARIO_HOVER_SPEED_Y;
-		if (GetTickCount64() - hoveringStart > MARIO_HOVER_TIME)
-		{
-			isHovering = 0;
-			ay = MARIO_GRAVITY;
-		}
-	}
-
+	HandlePowerUp(dt);
+	HandleTailUp(dt);
+	HandleUntouchable(dt);
+	HandleHovering(dt);
+	
 	// Multi-jump gravity scaling and horizontal cap
 	if (jumpCount > 0)
 	{
 		// Scale gravity when ascending
-		ay = (vy < 0) ? MARIO_GRAVITY * 0.3f : MARIO_GRAVITY * 0.5;
+		ay = (vy < 0) ? MARIO_GRAVITY * 0.25f : MARIO_GRAVITY * 0.4;
 
 		// Cap horizontal speed during multi-jump
 		float multiJumpMaxVx = MARIO_MAX_RUNNING_SPEED * 0.75f;
@@ -110,31 +73,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	}
 
 	// Handle braking
-	if (isBraking)
-	{
-		float brakeForce = MARIO_DECELERATION_X;
-		if (vxBeforeBraking > 0)
-			vx = max(0.0f, vx - brakeForce * dt);
-		else
-			vx = min(0.0f, vx + brakeForce * dt);
-
-		if (GetTickCount64() - brakingStart > MARIO_BRAKE_TIME || fabs(vx) < 0.1f)
-		{
-			isBraking = 0;
-			if (vxBeforeBraking > 0)
-			{
-				nx = -1;
-				vx = -MARIO_WALKING_SPEED * 0.5f;
-				maxVx = -MARIO_MAX_WALKING_SPEED;
-			}
-			else
-			{
-				nx = 1;
-				vx = MARIO_WALKING_SPEED * 0.5f;
-				maxVx = MARIO_MAX_WALKING_SPEED;
-			}
-		}
-	}
+	HandleBraking(dt);
 
 	// Cap horizontal velocity to maxVx
 	float absMaxVx = fabs(maxVx);
@@ -165,6 +104,85 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 	// Process collisions
 	CCollision::GetInstance()->Process(this, dt, coObjects);
+}
+
+void CMario::HandleBraking(DWORD dt)
+{
+	if (isBraking)
+	{
+		float brakeForce = MARIO_DECELERATION_X;
+		if (vxBeforeBraking > 0)
+			vx = max(0.0f, vx - brakeForce * dt);
+		else
+			vx = min(0.0f, vx + brakeForce * dt);
+
+		if (GetTickCount64() - brakingStart > MARIO_BRAKE_TIME || fabs(vx) < 0.1f)
+		{
+			isBraking = 0;
+			if (vxBeforeBraking > 0)
+			{
+				nx = -1;
+				vx = -MARIO_WALKING_SPEED * 0.5f;
+				maxVx = -MARIO_MAX_WALKING_SPEED;
+			}
+			else
+			{
+				nx = 1;
+				vx = MARIO_WALKING_SPEED * 0.5f;
+				maxVx = MARIO_MAX_WALKING_SPEED;
+			}
+		}
+	}
+}
+
+void CMario::HandlePowerUp(DWORD dt)
+{
+	if (powerUp == 1)
+	{
+		if (GetTickCount64() - powerUpStart > MARIO_POWER_UP_TIME)
+		{
+			powerUp = 0;
+			y -= 6; // RED ALERT
+			SetLevel(MARIO_LEVEL_BIG);
+		}
+		return;
+	}
+}
+
+void CMario::HandleTailUp(DWORD dt)
+{
+	if (tailUp == 1)
+	{
+		if (GetTickCount64() - tailUpStart > MARIO_TAIL_UP_TIME)
+		{
+			tailUp = 0;
+			SetLevel(MARIO_LEVEL_TAIL);
+		}
+		return;
+	}
+}
+
+void CMario::HandleUntouchable(DWORD dt)
+{
+	if (GetTickCount64() - untouchableStart > MARIO_UNTOUCHABLE_TIME)
+	{
+		untouchableStart = 0;
+		untouchable = 0;
+	}
+}
+
+void CMario::HandleHovering(DWORD dt)
+{
+	if (isHovering)
+	{
+		ay = MARIO_GRAVITY * 0.3f;
+		if (vy > 0) vy = MARIO_HOVER_SPEED_Y;
+		if (GetTickCount64() - hoveringStart > MARIO_HOVER_TIME)
+		{
+			isHovering = 0;
+			ay = MARIO_GRAVITY;
+		}
+	}
 }
 
 void CMario::OnNoCollision(DWORD dt)
