@@ -55,7 +55,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	}
 	else if (!isOnPlatform && isJumpButtonHeld && vy < 0)
 	{
-		ay = MARIO_GRAVITY * 0.2f; // Reduced gravity during ascent
+		ay = MARIO_GRAVITY * 0.225f; // Reduced gravity during ascent
 	}
 	else if (!isHovering)
 	{
