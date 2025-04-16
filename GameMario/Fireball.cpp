@@ -27,7 +27,7 @@ void CFireball::Render()
 	CAnimations* animations = CAnimations::GetInstance();
 	animations->Get(aniId)->Render(x, y);
 
-	RenderBoundingBox();
+	//RenderBoundingBox();
 }
 
 void CFireball::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
@@ -43,7 +43,7 @@ void CFireball::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
     if (state == FIREBALL_STATE_ASCEND)
     {
-        float targetY = y0 - PIRANHA_PLANT_BBOX_OFFSET;
+        float targetY = y0 - PIRANHA_PLANT_BBOX_HEIGHT;
         if (y <= targetY)
         {
             y = targetY;
@@ -52,7 +52,7 @@ void CFireball::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
     }
     else if (state == FIREBALL_STATE_DESCEND)
     {
-        float targetY = y0 + PIRANHA_PLANT_BBOX_OFFSET;
+        float targetY = y0 + PIRANHA_PLANT_BBOX_HEIGHT;
         if (y >= targetY)
         {
             y = targetY;
@@ -68,8 +68,6 @@ void CFireball::SetState(int state)
     switch (state)
     {
     case FIREBALL_STATE_STATIC:
-		x = x0;
-		y = y0;
         vx = 0;
         vy = 0;
         break;
@@ -82,19 +80,19 @@ void CFireball::SetState(int state)
         vy = -PIRANHA_PLANT_MOVE_SPEED;
         break;
     case FIREBALL_STATE_SHOOT_TOP_RIGHT:
-        vx = FIREBALL_SPEED;
+        vx = FIREBALL_SPEED * 2;
         vy = -FIREBALL_SPEED;
         break;
     case FIREBALL_STATE_SHOOT_TOP_LEFT:
-        vx = -FIREBALL_SPEED;
+        vx = -FIREBALL_SPEED * 2;
         vy = -FIREBALL_SPEED;
         break;
     case FIREBALL_STATE_SHOOT_BOTTOM_LEFT:
-        vx = -FIREBALL_SPEED;
+        vx = -FIREBALL_SPEED * 2;
         vy = FIREBALL_SPEED;
         break;
     case FIREBALL_STATE_SHOOT_BOTTOM_RIGHT:
-        vx = FIREBALL_SPEED;
+        vx = FIREBALL_SPEED * 2;
         vy = FIREBALL_SPEED;
         break;
     case FIREBALL_STATE_SHOOT_COMPLETE:

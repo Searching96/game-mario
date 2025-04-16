@@ -133,7 +133,7 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	case OBJECT_TYPE_PIRANHA_PLANT:
 	{
 		 
-		CGameObject* fireball = new CFireball(x, y - PIRANHA_PLANT_BBOX_OFFSET);
+		CGameObject* fireball = new CFireball(x, y);
 		obj = new CPiranhaPlant(x, y, (CFireball*)fireball);
 		objects.push_back(fireball);
 		break;
