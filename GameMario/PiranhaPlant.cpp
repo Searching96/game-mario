@@ -2,8 +2,9 @@
 #include "Game.h"
 #include "PlayScene.h"
 
-CPiranhaPlant::CPiranhaPlant(float x, float y) : CGameObject(x, y)
+CPiranhaPlant::CPiranhaPlant(float x, float y, CFireball* fireball) : CGameObject(x, y)
 {
+	this->fireball = fireball;
 	this->x = x;
 	this->y = y;
 	SetState(PIRANHA_PLANT_STATE_HIDDEN);
@@ -14,75 +15,107 @@ void CPiranhaPlant::Render()
 	if (state == PIRANHA_PLANT_STATE_HIDDEN) return;
 	int aniId = ID_ANI_PIRANHA_PLANT_LEFT_MOVE;
 	int direction = GetAiming();
-	if (state == PIRANHA_PLANT_STATE_DIED)
-	{
-		aniId = ID_ANI_PIRANHA_PLANT_DIED;
-	}
-	else if (moveUp || moveDown)
-	{
-		switch (direction)
+	if (moveUp || moveDown)
 		{
-		case 1:
-		case 2:
+			switch (direction)
+			{
+			case 1:
+			case 2:
 
-			aniId = ID_ANI_PIRANHA_PLANT_LEFT_MOVE;
-			break;
-		case 0:
-		case 3:
-			aniId = ID_ANI_PIRANHA_PLANT_RIGHT_MOVE;
-			break;
+				aniId = ID_ANI_PIRANHA_PLANT_LEFT_MOVE;
+				break;
+			case 0:
+			case 3:
+				aniId = ID_ANI_PIRANHA_PLANT_RIGHT_MOVE;
+				break;
+			}
 		}
-	}
-	else
-	{
-		switch (direction)
+		else
 		{
-		case 0:
-			aniId = ID_ANI_PIRANHA_PLANT_TOP_RIGHT_SHOOT;
-			break;
-		case 1:
-			aniId = ID_ANI_PIRANHA_PLANT_TOP_LEFT_SHOOT;
-			break;
-		case 2:
-			aniId = ID_ANI_PIRANHA_PLANT_BOTTOM_LEFT_SHOOT;
-			break;
-		case 3:
-			aniId = ID_ANI_PIRANHA_PLANT_BOTTOM_RIGHT_SHOOT;
-			break;
+			switch (direction)
+			{
+			case 0:
+				aniId = ID_ANI_PIRANHA_PLANT_TOP_RIGHT_SHOOT;
+				break;
+			case 1:
+				aniId = ID_ANI_PIRANHA_PLANT_TOP_LEFT_SHOOT;
+				break;
+			case 2:
+				aniId = ID_ANI_PIRANHA_PLANT_BOTTOM_LEFT_SHOOT;
+				break;
+			case 3:
+				aniId = ID_ANI_PIRANHA_PLANT_BOTTOM_RIGHT_SHOOT;
+				break;
+			}
 		}
-	}
 
-	CAnimations::GetInstance()->Get(aniId)->Render(x, y + PIRANHA_PLANT_BBOX_OFFSET);
+		CAnimations::GetInstance()->Get(aniId)->Render(x, y);
 
-	//RenderBoundingBox();
+		RenderBoundingBox();
 }
 
 int CPiranhaPlant::GetAiming()
 {
-	CMario* player = dynamic_cast<CMario*>(dynamic_cast<CPlayScene*>(CGame::GetInstance()->GetCurrentScene())->GetPlayer());
+	CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
 	float mario_X, mario_Y;
 	player->GetPosition(mario_X, mario_Y);
-	if (mario_X < this->x)
+	if (mario_Y < this->y - PIRANHA_PLANT_BBOX_OFFSET)
 	{
-		if (mario_Y < this->y)
-		{
-			return 1; // left up
-		}
-		else
-		{
-			return 2; // left down
-		}
-	}
-	else
-	{
-		if (mario_Y < this->y)
+		if (mario_X > this->x)
 		{
 			return 0; // right up
 		}
 		else
 		{
+			return 1; // left up
+		}
+	}
+	else
+	{
+		if (mario_X < this->x)
+		{
+			return 2; // left down
+		}
+		else
+		{
 			return 3; // right down
 		}
+	}
+}
+
+bool CPiranhaPlant::IsMarioInRange()
+{
+	CGame* game = CGame::GetInstance();
+	CMario* player = (CMario*)((LPPLAYSCENE)game->GetCurrentScene())->GetPlayer();
+	float mario_X, mario_Y;
+	player->GetPosition(mario_X, mario_Y);
+	return fabs(mario_X - this->x) < game->GetBackBufferWidth() / 2
+		&& fabs(mario_Y - this->y) < game->GetBackBufferHeight() / 2;
+}
+
+void CPiranhaPlant::Shoot(int direction)
+{
+	if (fireball == NULL) return;
+	switch (direction)
+	{
+	case 0:
+		fireball->SetState(FIREBALL_STATE_SHOOT_TOP_RIGHT);
+		DebugOut(L"[INFO] Shoot right up\n");
+		break;
+	case 1:
+		fireball->SetState(FIREBALL_STATE_SHOOT_TOP_LEFT);
+		DebugOut(L"[INFO] Shoot left up\n");
+		break;
+	case 2:
+		fireball->SetState(FIREBALL_STATE_SHOOT_BOTTOM_LEFT);
+		DebugOut(L"[INFO] Shoot left down\n");
+		break;
+	case 3:
+		fireball->SetState(FIREBALL_STATE_SHOOT_BOTTOM_RIGHT);
+		DebugOut(L"[INFO] Shoot right down\n");
+		break;
+	default:
+		break;
 	}
 }
 
@@ -96,24 +129,17 @@ void CPiranhaPlant::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 	if (state == PIRANHA_PLANT_STATE_HOVER)
 	{
-		if (GetTickCount64() - hoverStart > PIRANHA_PLANT_SHOOT_TIMEOUT)
+		if (!hasShot && GetTickCount64() - hoverStart > PIRANHA_PLANT_SHOOT_TIMEOUT)
 		{
 			//Shoot
-			switch (GetAiming())
+			if (IsMarioInRange())
 			{
-			case 0:
-				// shoot right up
-				break;
-			case 1:
-				// shoot left up
-				break;
-			case 2:
-				// shoot left down
-				break;
-			case 3:
-				// shoot right down
-				break;
+				Shoot(GetAiming());
+				hasShot = true;
 			}
+		}
+		if (GetTickCount64() - hoverStart > PIRANHA_PLANT_HOVER_TIMEOUT)
+		{
 			SetState(PIRANHA_PLANT_STATE_DESCEND);
 		}
 	}
@@ -150,7 +176,7 @@ void CPiranhaPlant::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 void CPiranhaPlant::GetBoundingBox(float& l, float& t, float& r, float& b)
 {
 	l = x - PIRANHA_PLANT_BBOX_WIDTH / 2;
-	t = y - PIRANHA_PLANT_BBOX_HEIGHT / 2 + PIRANHA_PLANT_BBOX_OFFSET;
+	t = y - PIRANHA_PLANT_BBOX_HEIGHT / 2;
 	r = l + PIRANHA_PLANT_BBOX_WIDTH;
 	b = t + PIRANHA_PLANT_BBOX_HEIGHT;
 }
@@ -162,16 +188,17 @@ void CPiranhaPlant::SetState(int state)
 	{
 	case PIRANHA_PLANT_STATE_HIDDEN:
 		vy = 0.0f;
+		hasShot = false;
 		lastMove = GetTickCount64();
 		break;
 	case PIRANHA_PLANT_STATE_ASCEND:
 		y0 = y;
-		vy = PIRANHA_PLANT_BOUNCE_SPEED;
+		vy = PIRANHA_PLANT_MOVE_SPEED;
 		StartMoveUp();
 		break;
 	case PIRANHA_PLANT_STATE_DESCEND:
 		y0 = y;
-		vy = -PIRANHA_PLANT_BOUNCE_SPEED;
+		vy = -PIRANHA_PLANT_MOVE_SPEED;
 		StartMoveDown();
 		break;
 	case PIRANHA_PLANT_STATE_HOVER:

@@ -13,6 +13,7 @@
 #include "Mushroom.h"
 #include "SuperLeaf.h"
 #include "PiranhaPlant.h"
+#include "Fireball.h"
 
 #include "Box.h"
 #include "Tree.h"
@@ -129,7 +130,14 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		DebugOut(L"[INFO] Player object has been created!\n");
 		break;
 	case OBJECT_TYPE_GOOMBA: obj = new CGoomba(x, y); break;
-	case OBJECT_TYPE_PIRANHA_PLANT: obj = new CPiranhaPlant(x, y); break;
+	case OBJECT_TYPE_PIRANHA_PLANT:
+	{
+		 
+		CGameObject* fireball = new CFireball(x, y - PIRANHA_PLANT_BBOX_OFFSET);
+		obj = new CPiranhaPlant(x, y, (CFireball*)fireball);
+		objects.push_back(fireball);
+		break;
+	}
 	case OBJECT_TYPE_BRICK:
 	{
 
@@ -464,7 +472,7 @@ void CPlayScene::Update(DWORD dt)
 	CGame* game = CGame::GetInstance();
 
 	// Define margin boundaries    
-	float marginX = 80.0f; // Horizontal margin    
+	float marginX = 136.0f; // Horizontal margin    
 	float marginY = 40.0f;  // Vertical margin    
 
 	float camX, camY;
@@ -473,16 +481,28 @@ void CPlayScene::Update(DWORD dt)
 	float mapWidth = 2815.0f;
 	float mapHeight = 432.0f;
 
+
 	// Only move camera if Mario pushes outside the margin
 	if (cx > camX + game->GetBackBufferWidth() - marginX)
 		camX = cx - (game->GetBackBufferWidth() - marginX);
 	else if (cx < camX + marginX)
 		camX = cx - marginX;
 
-	if (cy > camY + game->GetBackBufferHeight() - marginY)
-		camY = cy - (game->GetBackBufferHeight() - marginY);
-	else if (cy < camY + marginY)
-		camY = cy - marginY;
+    // Default camera to the ground
+    camY = mapHeight - game->GetBackBufferHeight();
+
+    // Only follow Mario vertically if his level is TAIL
+    if (mario->GetLevel() == MARIO_LEVEL_TAIL) {
+    if (cy > camY + game->GetBackBufferHeight() - marginY)
+    camY = cy - (game->GetBackBufferHeight() - marginY);
+    else if (cy < camY + marginY)
+    camY = cy - marginY;
+
+    // Clamp camera position to map boundaries
+    if (camY < 0) camY = 0;
+    if (camY > mapHeight - game->GetBackBufferHeight() - 8) 
+    camY = mapHeight - game->GetBackBufferHeight() - 8;
+    }
 
 	// Clamp camera position to map boundaries
 	if (camX < -8) camX = -8;

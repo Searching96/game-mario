@@ -150,6 +150,7 @@
     <ClCompile Include="Animations.cpp" />
     <ClCompile Include="Box.cpp" />
     <ClCompile Include="Brick.cpp" />
+    <ClCompile Include="Fireball.cpp" />
     <ClCompile Include="Bush.cpp" />
     <ClCompile Include="Cloud.cpp" />
     <ClCompile Include="Coin.cpp" />
@@ -184,6 +185,7 @@
     <ClInclude Include="AssetIDs.h" />
     <ClInclude Include="Box.h" />
     <ClInclude Include="Brick.h" />
+    <ClInclude Include="Fireball.h" />
     <ClInclude Include="Bush.h" />
     <ClInclude Include="Cloud.h" />
     <ClInclude Include="Coin.h" />
