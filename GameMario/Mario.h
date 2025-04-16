@@ -21,8 +21,8 @@
 #define MARIO_FRICTION_X			0.0003f
 #define MARIO_JUMP_GRAVITY			0.00005f
 
-#define MARIO_JUMP_SPEED_Y			0.55f
-#define MARIO_JUMP_RUN_SPEED_Y		0.65f
+#define MARIO_JUMP_SPEED_Y			0.275f
+#define MARIO_JUMP_RUN_SPEED_Y		0.350f
 #define MARIO_HOVER_SPEED_Y			0.05f
 
 #define MARIO_GRAVITY				0.002f
@@ -198,6 +198,7 @@ class CMario : public CGameObject
 	int jumpCount = 0;
 	int tailWagged = 1;
 	int isMoving = 0;
+	int isJumpButtonHeld = 0;
 
 	void OnCollisionWithGoomba(LPCOLLISIONEVENT e);
 	void OnCollisionWithCoin(LPCOLLISIONEVENT e);

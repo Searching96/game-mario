@@ -53,6 +53,10 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		if (vx > multiJumpMaxVx) vx = multiJumpMaxVx;
 		else if (vx < -multiJumpMaxVx) vx = -multiJumpMaxVx;
 	}
+	else if (!isOnPlatform && isJumpButtonHeld && vy < 0)
+	{
+		ay = MARIO_GRAVITY * 0.2f; // Reduced gravity during ascent
+	}
 	else if (!isHovering)
 	{
 		// Normal gravity
@@ -83,8 +87,8 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	// Apply jump impulse on button press: full first jump, reduced constant for multijumps
 	if (jumpCount > prevJumpCount)
 	{
-		const float multiJumpScale = 0.575f; // 75% of full jump speed for all subsequent jumps
-		float impulse = MARIO_JUMP_RUN_SPEED_Y * multiJumpScale;
+		const float multiJumpScale = 0.75f; // 75% of full jump speed for all subsequent jumps
+		float impulse = MARIO_JUMP_SPEED_Y * multiJumpScale;
 		vy = -impulse;
 	}
 
@@ -749,6 +753,7 @@ void CMario::SetState(int state)
 				vy = -MARIO_JUMP_RUN_SPEED_Y;
 			else
 				vy = -MARIO_JUMP_SPEED_Y;
+			isJumpButtonHeld = 1;
 		}
 		else if (level == MARIO_LEVEL_TAIL)
 		{
@@ -779,6 +784,7 @@ void CMario::SetState(int state)
 
 	case MARIO_STATE_RELEASE_JUMP:
 		if (vy < 0) vy += MARIO_JUMP_SPEED_Y / 2;
+		isJumpButtonHeld = 0;
 		break;
 
 	case MARIO_STATE_SIT:
