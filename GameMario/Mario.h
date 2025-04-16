@@ -9,18 +9,20 @@
 #define MARIO_MAX_WALKING_SPEED		0.125f
 #define MARIO_MAX_RUNNING_SPEED		0.20f
 #define MARIO_MAX_FALLING_SPEED		0.25f
+#define MARIO_MAX_JUMP_SPEED		-0.65f
 
 #define MARIO_WALKING_SPEED			0.1f
 #define MARIO_RUNNING_SPEED			0.165f
 #define MARIO_INSTANT_BRAKING_SPEED	0.04f
 
-#define MARIO_ACCEL_RUN_X			0.00002f
+#define MARIO_ACCEL_RUN_X			0.00003f
 #define MARIO_ACCEL_WALK_X			0.00005f
 #define MARIO_DECELERATION_X		0.0001f
 #define MARIO_FRICTION_X			0.0003f
+#define MARIO_JUMP_GRAVITY		0.00005f
 
-#define MARIO_JUMP_SPEED_Y			0.6f
-#define MARIO_JUMP_RUN_SPEED_Y		0.7f
+#define MARIO_JUMP_SPEED_Y			0.55f
+#define MARIO_JUMP_RUN_SPEED_Y		0.65f
 #define MARIO_HOVER_SPEED_Y			0.05f
 
 #define MARIO_GRAVITY				0.002f
@@ -49,7 +51,7 @@
 #define MARIO_STATE_HOVER			900
 #define MARIO_STATE_BRAKE			1000
 
-#define MARIO_STATE_RELEASE_MOVE		1100
+#define MARIO_STATE_RELEASE_MOVE	1100
 
 
 #pragma region ANIMATION_ID
@@ -178,7 +180,7 @@ class CMario : public CGameObject
 
 	int level; 
 	int untouchable; 
-	ULONGLONG untouchable_start;
+	ULONGLONG untouchableStart;
 	BOOLEAN isOnPlatform;
 	int coin; 
 
@@ -226,7 +228,7 @@ public:
 	void OnCollisionWith(LPCOLLISIONEVENT e);
 
 	void SetLevel(int l);
-	void StartUntouchable() { untouchable = 1; untouchable_start = GetTickCount64(); }
+	void StartUntouchable() { untouchable = 1; untouchableStart = GetTickCount64(); }
 
 	void GetBoundingBox(float& left, float& top, float& right, float& bottom);
 

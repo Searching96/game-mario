@@ -23,7 +23,7 @@ CMario::CMario(float x, float y) : CGameObject(x, y)
 
 	level = MARIO_LEVEL_SMALL;
 	untouchable = 0;
-	untouchable_start = -1;
+	untouchableStart = -1;
 	isOnPlatform = false;
 	coin = 0;
 	jumpCount = 0;
@@ -33,6 +33,10 @@ CMario::CMario(float x, float y) : CGameObject(x, y)
 // In CMario::Update method, modify the hover handling
 void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
+	// Track previous jump count to apply consistent jump impulse
+	static int lastJumpCount = 0;
+	int prevJumpCount = lastJumpCount;
+
 	// Handle power-up state
 	if (powerUp == 1)
 	{
@@ -56,110 +60,108 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		return;
 	}
 
-	// Handle hover state for tail Mario - Modified to allow physics updates
-	if (isHovering == 1)
+	// Reset untouchable timer if untouchable time has passed
+	if (GetTickCount64() - untouchableStart > MARIO_UNTOUCHABLE_TIME)
 	{
-		// Apply reduced gravity during hovering
+		untouchableStart = 0;
+		untouchable = 0;
+	}
+
+	// Handle hover state for tail Mario
+	if (isHovering)
+	{
 		ay = MARIO_GRAVITY * 0.3f;
-
-		// Gradually decrease vertical velocity for smoother descent
-		if (vy > 0) {
-			vy = MARIO_HOVER_SPEED_Y;
-		}
-
-		// Check if hover time expired
+		if (vy > 0) vy = MARIO_HOVER_SPEED_Y;
 		if (GetTickCount64() - hoveringStart > MARIO_HOVER_TIME)
 		{
 			isHovering = 0;
 			ay = MARIO_GRAVITY;
 		}
-		// No return here - continue with normal physics processing
 	}
 
-	// Apply acceleration
+	// Multi-jump gravity scaling and horizontal cap
+	if (jumpCount > 0)
+	{
+		// Scale gravity when ascending
+		ay = (vy < 0) ? MARIO_GRAVITY * 0.3f : MARIO_GRAVITY * 0.5;
+
+		// Cap horizontal speed during multi-jump
+		float multiJumpMaxVx = MARIO_MAX_RUNNING_SPEED * 0.75f;
+		if (vx > multiJumpMaxVx) vx = multiJumpMaxVx;
+		else if (vx < -multiJumpMaxVx) vx = -multiJumpMaxVx;
+	}
+	else if (!isHovering)
+	{
+		// Normal gravity
+		ay = MARIO_GRAVITY;
+	}
+
+	// Apply acceleration and gravity
 	vx += ax * dt;
 	vy += ay * dt;
 
+	// Friction when not moving and not jumping
 	if (jumpCount < 1 && !isHovering && isMoving == 0)
 	{
-		// Apply friction
 		if (vx > 0)
-		{
-			if (vx - frictionX * dt < 0)
-				vx = 0;
-			else
-				vx -= frictionX * dt;
-		}
+			vx = max(0.0f, vx - frictionX * dt);
 		else if (vx < 0)
-		{
-			if (vx + frictionX * dt > 0)
-				vx = 0;
-			else
-				vx += frictionX * dt;
-		}
+			vx = min(0.0f, vx + frictionX * dt);
 	}
 
-	// Handle braking - Modified for smoother braking
-	if (isBraking == 1)
+	// Handle braking
+	if (isBraking)
 	{
-		// Apply stronger friction when braking
 		float brakeForce = MARIO_DECELERATION_X;
+		if (vxBeforeBraking > 0)
+			vx = max(0.0f, vx - brakeForce * dt);
+		else
+			vx = min(0.0f, vx + brakeForce * dt);
 
-		if (vxBeforeBraking > 0) {
-			vx -= brakeForce * dt;
-			if (vx < 0) vx = 0;
-		}
-		else if (vxBeforeBraking < 0) {
-			vx += brakeForce * dt;
-			if (vx > 0) vx = 0;
-		}
-
-		// Check if braking time expired or velocity is close to zero
 		if (GetTickCount64() - brakingStart > MARIO_BRAKE_TIME || fabs(vx) < 0.1f)
 		{
 			isBraking = 0;
-
-			// When braking finishes, actually reverse Mario's direction
-			// This properly handles both animation and movement direction
-			if (vxBeforeBraking > 0) {
-				// Was moving right, now face/move left
+			if (vxBeforeBraking > 0)
+			{
 				nx = -1;
-				vx = -MARIO_WALKING_SPEED * 0.5f; // Start with a small velocity in opposite direction
+				vx = -MARIO_WALKING_SPEED * 0.5f;
 				maxVx = -MARIO_MAX_WALKING_SPEED;
 			}
-			else if (vxBeforeBraking < 0) {
-				// Was moving left, now face/move right
+			else
+			{
 				nx = 1;
-				vx = MARIO_WALKING_SPEED * 0.5f; // Start with a small velocity in opposite direction
+				vx = MARIO_WALKING_SPEED * 0.5f;
 				maxVx = MARIO_MAX_WALKING_SPEED;
 			}
-
-			//// Set to walking state in the new direction
-			//if (nx > 0)
-			//	SetState(MARIO_STATE_WALKING_RIGHT);
-			//else
-			//	SetState(MARIO_STATE_WALKING_LEFT);
 		}
 	}
 
-	// Cap the velocity to the maximum velocity
-	if (fabs(vx) > fabs(maxVx)) vx = maxVx;
-	// Cap the vertical velocity to the maximum falling speed
-	if (vy > MARIO_MAX_FALLING_SPEED) vy = MARIO_MAX_FALLING_SPEED;
+	// Cap horizontal velocity to maxVx
+	float absMaxVx = fabs(maxVx);
+	if (vx > absMaxVx) vx = absMaxVx;
+	else if (vx < -absMaxVx) vx = -absMaxVx;
 
-	// Reset untouchable timer if untouchable time has passed
-	if (GetTickCount64() - untouchable_start > MARIO_UNTOUCHABLE_TIME)
+	// Apply jump impulse on button press: full first jump, reduced constant for multijumps
+	if (jumpCount > prevJumpCount)
 	{
-		untouchable_start = 0;
-		untouchable = 0;
+		const float multiJumpScale = 0.575f; // 75% of full jump speed for all subsequent jumps
+		float impulse = MARIO_JUMP_RUN_SPEED_Y * multiJumpScale;
+		vy = -impulse;
 	}
 
-	// Reset jump count if Mario is on the platform
+	// Reset jump count when landing
 	if (isOnPlatform)
 		jumpCount = 0;
 
-	DebugOutTitle(L"vx=%f, ax=%f, vy=%f, ay=%f, jc=%d, fx=%f, iop=%d, imv=%d\n", vx, ax, vy, ay, jumpCount, frictionX, isOnPlatform, isMoving);
-	//DebugOut(L"vx=%f, ax=%f, mvx=%f, jc=%d\n", vx, ax, maxVx, jumpCount);
+	// Update lastJumpCount for next frame
+	lastJumpCount = jumpCount;
+
+	// Cap vertical falling speed
+	if (vy > MARIO_MAX_FALLING_SPEED) vy = MARIO_MAX_FALLING_SPEED;
+	if (vy < MARIO_MAX_JUMP_SPEED) vy = MARIO_MAX_JUMP_SPEED;
+
+	DebugOutTitle(L"vx=%f, ax=%f, vy=%f, ay=%f, jc=%d, fx=%f, iop=%d, imv=%d\n",
+		vx, ax, vy, ay, jumpCount, frictionX, isOnPlatform, isMoving);
 
 	// Process collisions
 	CCollision::GetInstance()->Process(this, dt, coObjects);
@@ -747,6 +749,8 @@ void CMario::SetState(int state)
 			{
 				jumpCount++;
 				vy = -MARIO_JUMP_SPEED_Y / 2.0f;
+				//vx = (nx > 0) ? MARIO_MAX_WALKING_SPEED : -MARIO_MAX_WALKING_SPEED;
+				maxVx = (nx > 0) ? MARIO_MAX_WALKING_SPEED : -MARIO_MAX_WALKING_SPEED;
 			}
 			else if (jumpCount == 0)
 			{

@@ -200,7 +200,9 @@
     <ClInclude Include="Trinket.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SkyPlatform.h">
+	<ClInclude Include="SkyPlatform.h">
+		<Filter>Header Files</Filter>
+	</ClInclude>
     <ClInclude Include="Mushroom.h">
       <Filter>Header Files</Filter>
     </ClInclude>
