@@ -12,13 +12,15 @@ CCoin::CCoin(float x, float y, int type) : CGameObject(x, y)
 
 void CCoin::Render()
 {
+	if (isVisible == 0)
+		return;
 	int aniId = ID_ANI_COIN_STATIC;
 	if (state != COIN_STATE_STATIC)
 		aniId = ID_ANI_COIN_DYNAMIC;
 	CAnimations* animations = CAnimations::GetInstance();
 	animations->Get(aniId)->Render(x, y);
 
-	RenderBoundingBox();
+	//RenderBoundingBox();
 }
 
 void CCoin::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
@@ -56,12 +58,15 @@ void CCoin::SetState(int state)
 	switch (state)
 	{
 	case COIN_STATE_STATIC:
+		isVisible = 1;
 		break;
 	case COIN_STATE_DYNAMIC:
+		isVisible = 0;
 		break;
 	case COIN_STATE_BOUNCE_UP:
 		vx = 0.0f;
 		vy = COIN_BOUNCE_SPEED;
+		isVisible = 1;
 		StartBounceUp();
 		break;
 	case COIN_STATE_BOUNCE_DOWN:

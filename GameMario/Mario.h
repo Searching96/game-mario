@@ -46,7 +46,10 @@
 #define MARIO_STATE_SIT_RELEASE		601
 
 #define MARIO_STATE_POWER_UP		700
-#define MARIO_STATE_TAIL_UP			800	// dont talk about my grammar
+#define MARIO_STATE_POWER_DOWN		701
+
+#define MARIO_STATE_TAIL_UP			800
+#define MARIO_STATE_TAIL_DOWN		801
 
 #define MARIO_STATE_HOVER			900
 #define MARIO_STATE_BRAKE			1000
@@ -79,6 +82,11 @@
 
 #define ID_ANI_MARIO_HALF_RUN_ACCEL_RIGHT 700
 #define ID_ANI_MARIO_HALF_RUN_ACCEL_LEFT 710
+
+#define ID_ANI_MARIO_TAIL_UP 800
+
+#define ID_ANI_MARIO_POWER_DOWN_RIGHT 900
+#define ID_ANI_MARIO_POWER_DOWN_LEFT 910
 
 #define ID_ANI_MARIO_DIE 4000
 
@@ -138,6 +146,8 @@
 #define ID_ANI_MARIO_TAIL_HOVERING_RIGHT 6900
 #define ID_ANI_MARIO_TAIL_HOVERING_LEFT 6910
 
+#define ID_ANI_MARIO_TAIL_DOWN 7000
+
 
 #pragma endregion
 
@@ -160,8 +170,10 @@
 
 
 #define MARIO_UNTOUCHABLE_TIME 2500
-#define MARIO_POWER_UP_TIME 2000
-#define MARIO_TAIL_UP_TIME 1000
+#define MARIO_POWER_UP_TIME 1500
+#define MARIO_POWER_DOWN_TIME MARIO_POWER_UP_TIME
+#define MARIO_TAIL_UP_TIME 400
+#define MARIO_TAIL_DOWN_TIME MARIO_TAIL_UP_TIME
 #define MARIO_HOVER_TIME 500
 #define MARIO_BRAKE_TIME 500
 
@@ -188,6 +200,11 @@ class CMario : public CGameObject
 	ULONGLONG powerUpStart = -1;
 	int tailUp = 0;
 	ULONGLONG tailUpStart = -1;
+	int powerDown = 0;
+	ULONGLONG powerDownStart = -1;
+	int tailDown = 0;
+	ULONGLONG tailDownStart = -1;
+
 	int isHovering = 0;
 	ULONGLONG hoveringStart = -1;
 
@@ -215,8 +232,6 @@ class CMario : public CGameObject
 	int GetAniIdTail();
 
 	void HandleBraking(DWORD dt);
-	void HandlePowerUp(DWORD dt);
-	void HandleTailUp(DWORD dt);
 	void HandleUntouchable(DWORD dt);
 	void HandleHovering(DWORD dt);
 
@@ -243,9 +258,15 @@ public:
 
 	void StartPowerUp() { powerUp = 1; powerUpStart = GetTickCount64(); }
 	void StartTailUp() { tailUp = 1; tailUpStart = GetTickCount64(); }
+	void StartPowerDown() { powerDown = 1; powerDownStart = GetTickCount64(); }
+	void StartTailDown() { tailDown = 1; tailDownStart = GetTickCount64(); }
 	void StartBraking();
 	void StartHovering() { isHovering = 1; hoveringStart = GetTickCount64(); tailWagged = 0; }
 
 	int GetJumpCount() { return jumpCount; }
 	int GetLevel() { return level; }
+	int GetIsPowerUp() { return powerUp; }
+	int GetIsTailUp() { return tailUp; }
+	int GetIsPowerDown() { return powerDown; }
+	int GetIsTailDown() { return tailDown; }
 };

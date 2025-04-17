@@ -28,6 +28,7 @@ protected:
 	ULONGLONG bounceUpStart = -1;
 	ULONGLONG bounceDownStart = -1;
 	int type; // 0: static, 1: dynamic
+	int isVisible;
 public:
 	CCoin(float x, float y, int type);
 	void Render();
@@ -37,4 +38,5 @@ public:
 	void SetState(int state);
 	void StartBounceUp() { bounceUp = 1; bounceUpStart = GetTickCount64(); }
 	void StartBounceDown() { bounceDown = 1; bounceDownStart = GetTickCount64(); }
+	void SetVisible(int isVisible) { this->isVisible = isVisible; }
 };

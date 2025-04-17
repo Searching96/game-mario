@@ -469,8 +469,10 @@ void CPlayScene::Update(DWORD dt)
 
 	for (size_t i = 0; i < objects.size(); i++)
 	{
-		if (mario->GetState() == MARIO_STATE_POWER_UP)
-			continue;	// chrono stop the game  
+		if (!dynamic_cast<CMario*>(objects[i]))
+			if (mario->GetIsPowerUp() == 1 || mario->GetIsTailUp()
+				|| mario->GetIsPowerDown() == 1 || mario->GetIsTailDown() == 1)
+				continue;	// chrono stop the game  
 
 		objects[i]->Update(dt, &coObjects);
 	}

@@ -39,8 +39,46 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	static int lastJumpCount = 0;
 	int prevJumpCount = lastJumpCount;
 
-	HandlePowerUp(dt);
-	HandleTailUp(dt);
+	if (powerUp == 1)
+	{
+		if (GetTickCount64() - powerUpStart > MARIO_POWER_UP_TIME)
+		{
+			powerUp = 0;
+			SetLevel(MARIO_LEVEL_BIG);
+		}
+		return;
+	}
+	if (tailUp == 1)
+	{
+		if (GetTickCount64() - tailUpStart > MARIO_TAIL_UP_TIME)
+		{
+			tailUp = 0;
+			SetLevel(MARIO_LEVEL_TAIL);
+		}
+		return;
+	}
+	if (powerDown == 1)
+	{
+		if (GetTickCount64() - powerDownStart > MARIO_POWER_DOWN_TIME)
+		{
+			powerDown = 0;
+			y += 6; // RED ALERT
+			SetLevel(MARIO_LEVEL_SMALL);
+			StartUntouchable();
+		}
+		return;
+	}
+	if (tailDown == 1)
+	{
+		if (GetTickCount64() - tailDownStart > MARIO_TAIL_DOWN_TIME)
+		{
+			tailDown = 0;
+			SetLevel(MARIO_LEVEL_BIG);
+			StartUntouchable();
+		}
+		return;
+	}
+
 	HandleUntouchable(dt);
 	HandleHovering(dt);
 	
@@ -141,33 +179,6 @@ void CMario::HandleBraking(DWORD dt)
 	}
 }
 
-void CMario::HandlePowerUp(DWORD dt)
-{
-	if (powerUp == 1)
-	{
-		if (GetTickCount64() - powerUpStart > MARIO_POWER_UP_TIME)
-		{
-			powerUp = 0;
-			y -= 6; // RED ALERT
-			SetLevel(MARIO_LEVEL_BIG);
-		}
-		return;
-	}
-}
-
-void CMario::HandleTailUp(DWORD dt)
-{
-	if (tailUp == 1)
-	{
-		if (GetTickCount64() - tailUpStart > MARIO_TAIL_UP_TIME)
-		{
-			tailUp = 0;
-			SetLevel(MARIO_LEVEL_TAIL);
-		}
-		return;
-	}
-}
-
 void CMario::HandleUntouchable(DWORD dt)
 {
 	if (GetTickCount64() - untouchableStart > MARIO_UNTOUCHABLE_TIME)
@@ -251,10 +262,14 @@ void CMario::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
 		{
 			if (goomba->GetState() != GOOMBA_STATE_DIE)
 			{
-				if (level > MARIO_LEVEL_SMALL)
+				if (level == MARIO_LEVEL_BIG)
 				{
-					level = MARIO_LEVEL_SMALL;
-					StartUntouchable();
+					y += 6; // RED ALERT
+					SetState(MARIO_STATE_POWER_DOWN);
+				}
+				else if (level == MARIO_LEVEL_TAIL)
+				{
+					SetState(MARIO_STATE_TAIL_DOWN);
 				}
 				else
 				{
@@ -337,28 +352,11 @@ void CMario::OnCollisionWithMushroom(LPCOLLISIONEVENT e)
 
 	if (mushroom)
 	{
-		//if (level != MARIO_LEVEL_SMALL)
-		//{
-		//	mushroom->Delete();
-		//	return;
-		//}
-
-		//mushroom->SetVisible(1);
-
-		//if (e->ny > 0 && e->nx == 0 && mushroom->GetState() == MUSHROOM_STATE_NOT_HIT)
-		//{
-		//	mushroom->SetState(MUSHROOM_STATE_BOUNCE_UP);
-		//	float mX, mY;
-		//	mushroom->GetPosition(mX, mY);
-		//	if (x < mX)
-		//		mushroom->SetCollisionNx(1);
-		//	else
-		//		mushroom->SetCollisionNx(-1);
-		//}
 		if (mushroom->GetState() == MUSHROOM_STATE_MOVING)
 		{
 			mushroom->Delete();
-			this->SetState(MARIO_STATE_POWER_UP);
+			if (level == MARIO_LEVEL_SMALL)
+				this->SetState(MARIO_STATE_POWER_UP);
 		}
 	}
 }
@@ -457,7 +455,7 @@ int CMario::GetAniIdSmall()
 			aniId = ID_ANI_MARIO_SMALL_RUNNING_LEFT;
 	}
 
-	if (state == MARIO_STATE_POWER_UP)
+	if (powerUp)
 	{
 		if (nx > 0) aniId = ID_ANI_MARIO_SMALL_POWER_UP_RIGHT;
 		else aniId = ID_ANI_MARIO_SMALL_POWER_UP_LEFT;
@@ -525,6 +523,16 @@ int CMario::GetAniIdBig()
 			aniId = ID_ANI_MARIO_HALF_RUN_ACCEL_LEFT;
 		else if (fabs(vx) == MARIO_MAX_RUNNING_SPEED)
 			aniId = ID_ANI_MARIO_RUNNING_LEFT;
+	}
+
+	if (tailUp)
+	{
+		aniId = ID_ANI_MARIO_TAIL_UP;
+	}
+	if (powerDown)
+	{
+		if (nx > 0) aniId = ID_ANI_MARIO_POWER_DOWN_RIGHT;
+		else aniId = ID_ANI_MARIO_POWER_DOWN_LEFT;
 	}
 
 	if (aniId == -1) aniId = ID_ANI_MARIO_IDLE_RIGHT;
@@ -606,6 +614,11 @@ int CMario::GetAniIdTail()
 			aniId = ID_ANI_MARIO_TAIL_HOVERING_LEFT;
 		tailWagged = 1;
 	}
+
+	if (tailDown)
+	{
+		aniId = ID_ANI_MARIO_TAIL_DOWN;
+	}
 		
 	if (aniId == -1) aniId = ID_ANI_MARIO_TAIL_IDLE_RIGHT;
 
@@ -641,6 +654,12 @@ void CMario::SetState(int state)
 
 	if (this->state == MARIO_STATE_POWER_UP && (GetTickCount64() - powerUpStart <= MARIO_POWER_UP_TIME))
 		return;
+	if (this->state == MARIO_STATE_TAIL_UP && (GetTickCount64() - tailUpStart <= MARIO_TAIL_UP_TIME))
+		return;
+	if (this->state == MARIO_STATE_POWER_DOWN && (GetTickCount64() - powerUpStart <= MARIO_POWER_DOWN_TIME))
+		return;
+	if (this->state == MARIO_STATE_TAIL_DOWN && (GetTickCount64() - tailUpStart <= MARIO_TAIL_DOWN_TIME))
+		return;
 
 	int previousState = this->state;
 
@@ -666,7 +685,7 @@ void CMario::SetState(int state)
 			{
 				vx = MARIO_MAX_RUNNING_SPEED / SPEED_DIVISOR;
 				ax = 0.0f;  // Đặt ax thành 0 một cách rõ ràng
-				DebugOut(L"Air direction change - to right, ax set to 0\n");
+				//DebugOut(L"Air direction change - to right, ax set to 0\n");
 			}
 		}
 		else
@@ -762,7 +781,7 @@ void CMario::SetState(int state)
 			{
 				vx = -MARIO_MAX_WALKING_SPEED / SPEED_DIVISOR;
 				ax = 0.0f;  // Đặt ax thành 0 một cách rõ ràng
-				DebugOut(L"Air direction change - to left, ax set to 0\n");
+				//DebugOut(L"Air direction change - to left, ax set to 0\n");
 			}
 		}
 		else
@@ -856,6 +875,14 @@ void CMario::SetState(int state)
 		StartTailUp();
 		break;
 
+	case MARIO_STATE_POWER_DOWN:
+		StartPowerDown();
+		break;
+
+	case MARIO_STATE_TAIL_DOWN:
+		StartTailDown();
+		break;
+
 	case MARIO_STATE_BRAKE:
 		StartBraking();
 		// Modified braking behavior - don't force a specific velocity
@@ -881,6 +908,7 @@ void CMario::SetState(int state)
 		break;
 	}
 
+	DebugOut(L"SetState: %d\n", state);
 	CGameObject::SetState(state);
 }
 
