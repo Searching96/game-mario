@@ -627,6 +627,19 @@ int CMario::GetAniIdTail()
 
 void CMario::Render()
 {
+	if (untouchable)
+	{
+		ULONGLONG currentTime = GetTickCount64();
+		if (currentTime - lastRenderTime > MARIO_UNTOUCHABLE_RENDER_INTERVAL)
+		{
+			isRendering = !isRendering;
+			lastRenderTime = currentTime;
+		}
+
+		if (!isRendering)
+			return;
+	}
+
 	CAnimations* animations = CAnimations::GetInstance();
 	int aniId = -1;
 
