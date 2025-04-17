@@ -105,6 +105,12 @@
     <ClCompile Include="SkyPlatform.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="PiranhaPlant.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CoinQBlock.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Animation.h">
@@ -200,10 +206,16 @@
     <ClInclude Include="Trinket.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-	<ClInclude Include="SkyPlatform.h">
-		<Filter>Header Files</Filter>
-	</ClInclude>
+    <ClInclude Include="SkyPlatform.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="Mushroom.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PiranhaPlant.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CoinQBlock.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

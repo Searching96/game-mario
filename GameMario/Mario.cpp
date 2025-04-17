@@ -181,10 +181,11 @@ void CMario::HandleHovering(DWORD dt)
 	{
 		ay = MARIO_GRAVITY * 0.3f;
 		if (vy > 0) vy = MARIO_HOVER_SPEED_Y;
-		if (GetTickCount64() - hoveringStart > MARIO_HOVER_TIME)
+		if (GetTickCount64() - hoveringStart > MARIO_HOVER_TIME || isOnPlatform)
 		{
 			isHovering = 0;
 			ay = MARIO_GRAVITY;
+			vx = 0;
 		}
 	}
 }
