@@ -151,6 +151,7 @@
     <ClCompile Include="Box.cpp" />
     <ClCompile Include="Brick.cpp" />
     <ClCompile Include="Bush.cpp" />
+    <ClCompile Include="BuffQBlock.cpp" />
     <ClCompile Include="Cloud.cpp" />
     <ClCompile Include="Coin.cpp" />
     <ClCompile Include="CoinQBlock.cpp" />
@@ -186,6 +187,7 @@
     <ClInclude Include="Box.h" />
     <ClInclude Include="Brick.h" />
     <ClInclude Include="Bush.h" />
+    <ClInclude Include="BuffQBlock.h" />
     <ClInclude Include="Cloud.h" />
     <ClInclude Include="Coin.h" />
     <ClInclude Include="CoinQBlock.h" />

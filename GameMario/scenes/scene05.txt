@@ -33,24 +33,16 @@ assets\platform.txt
 4	160	80	0
 4	180	80	0
 
-#Mushroom
-7	200	80
-#SuperLeaf
-8	200	80
-#QuestionBlock
-6	200	80
+#Buff QBlock
+11	200	80
 
 #Coin
-4	216	80	1
+#4	216	80	1
 #Question Block
-6	216	80
+#6	216	80
 
-#Mushroom
-7	262	60
-#SuperLeaf
-8	262	60
-#Question Block
-6	262	60
+#Buff QBlock
+11	262	60
 
 #Coin
 4	287	80	1

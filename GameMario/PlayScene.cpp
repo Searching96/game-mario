@@ -14,6 +14,7 @@
 #include "SuperLeaf.h"
 #include "PiranhaPlant.h"
 #include "CoinQBlock.h"
+#include "BuffQBlock.h"
 
 #include "Box.h"
 #include "Tree.h"
@@ -210,6 +211,17 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		CCoin* coin = new CCoin(x, y, 1);
 		objects.push_back(coin);
 		obj = new CCoinQBlock(x, y, coin);
+		break;
+	}
+
+	case OBJECT_TYPE_BUFF_QBLOCK:
+	{
+		CMushroom* mushroom = new CMushroom(x, y);
+		CSuperLeaf* superleaf = new CSuperLeaf(x, y);
+		objects.push_back(mushroom);
+		objects.push_back(superleaf);
+		CBuffQBlock* bqb = new CBuffQBlock(x, y, mushroom, superleaf);
+		obj = bqb;
 		break;
 	}
 

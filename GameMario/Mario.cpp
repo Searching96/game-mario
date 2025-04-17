@@ -12,6 +12,7 @@
 #include "SuperLeaf.h"
 #include "PiranhaPlant.h"
 #include "CoinQBlock.h"
+#include "BuffQBlock.h"
 
 #include "Collision.h"
 
@@ -227,6 +228,8 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 		OnCollisionWithPiranhaPlant(e);
 	else if (dynamic_cast<CCoinQBlock*>(e->obj))
 		OnCollisionWithCoinQBlock(e);
+	else if (dynamic_cast<CBuffQBlock*>(e->obj))
+		OnCollisionWithBuffQBlock(e);
 }
 
 void CMario::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
@@ -302,30 +305,56 @@ void CMario::OnCollisionWithCoinQBlock(LPCOLLISIONEVENT e)
 			cqb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
 }
 
+void CMario::OnCollisionWithBuffQBlock(LPCOLLISIONEVENT e)
+{
+	CBuffQBlock* bqb = dynamic_cast<CBuffQBlock*>(e->obj);
+	if (bqb)
+		if (e->ny > 0 && e->nx == 0 && bqb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
+		{
+			if (level == MARIO_LEVEL_SMALL)
+			{
+				CMushroom* mushroom = bqb->GetMushroom();
+				if (mushroom)
+				{
+					float mX, mY;
+					mushroom->GetPosition(mX, mY);
+					if (x < mX)
+						mushroom->SetCollisionNx(1);
+					else
+						mushroom->SetCollisionNx(-1);
+				}
+				bqb->SetToSpawn(0);
+			}
+			else
+				bqb->SetToSpawn(1);
+			bqb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
+		}
+}
+
 void CMario::OnCollisionWithMushroom(LPCOLLISIONEVENT e)
 {
 	CMushroom* mushroom = dynamic_cast<CMushroom*>(e->obj);
 
 	if (mushroom)
 	{
-		if (level != MARIO_LEVEL_SMALL)
-		{
-			mushroom->Delete();
-			return;
-		}
+		//if (level != MARIO_LEVEL_SMALL)
+		//{
+		//	mushroom->Delete();
+		//	return;
+		//}
 
-		mushroom->SetVisible(1);
+		//mushroom->SetVisible(1);
 
-		if (e->ny > 0 && e->nx == 0 && mushroom->GetState() == MUSHROOM_STATE_NOT_HIT)
-		{
-			mushroom->SetState(MUSHROOM_STATE_BOUNCE_UP);
-			float mX, mY;
-			mushroom->GetPosition(mX, mY);
-			if (x < mX)
-				mushroom->SetCollisionNx(1);
-			else
-				mushroom->SetCollisionNx(-1);
-		}
+		//if (e->ny > 0 && e->nx == 0 && mushroom->GetState() == MUSHROOM_STATE_NOT_HIT)
+		//{
+		//	mushroom->SetState(MUSHROOM_STATE_BOUNCE_UP);
+		//	float mX, mY;
+		//	mushroom->GetPosition(mX, mY);
+		//	if (x < mX)
+		//		mushroom->SetCollisionNx(1);
+		//	else
+		//		mushroom->SetCollisionNx(-1);
+		//}
 		if (mushroom->GetState() == MUSHROOM_STATE_MOVING)
 		{
 			mushroom->Delete();
@@ -340,18 +369,6 @@ void CMario::OnCollisionWithSuperLeaf(LPCOLLISIONEVENT e)
 
 	if (superleaf)
 	{
-		if (level != MARIO_LEVEL_BIG && level != MARIO_LEVEL_TAIL)
-		{
-			superleaf->Delete();
-			return;
-		}
-
-		superleaf->SetVisible(1);
-
-		if (e->ny > 0 && superleaf->GetState() == SUPERLEAF_STATE_NOT_HIT)
-		{
-			superleaf->SetState(SUPERLEAF_STATE_BOUNCE_UP);
-		}
 		if (superleaf->GetState() == SUPERLEAF_STATE_FLOATING_RIGHT || superleaf->GetState() == SUPERLEAF_STATE_FLOATING_LEFT)
 		{
 			superleaf->Delete();
