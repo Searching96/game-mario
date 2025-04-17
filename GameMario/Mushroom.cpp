@@ -66,7 +66,7 @@ void CMushroom::OnNoCollision(DWORD dt)
 void CMushroom::OnCollisionWith(LPCOLLISIONEVENT e)
 {
     if (!e->obj->IsBlocking()) return;
-	if (dynamic_cast<CQuestionBnock*>(e->obj)) return;
+	if (dynamic_cast<CQuestionBlock*>(e->obj)) return;
 	if (!dynamic_cast<CMario*>(e->obj)) return; // koopa will be added here later on
 }
 

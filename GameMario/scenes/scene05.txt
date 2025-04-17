@@ -57,15 +57,11 @@ assets\platform.txt
 #Question Block
 6	288	80
 
-#Coin
-4	339	80	1
-#Question Block
-6	340	80
+#Coin QBlock
+10	340	80
 
-#Coin
-4	355	80	1
-#Question Block
-6	356	80
+#Coin QBlock
+10	356	80
 
 #Goomba
 2	262	164

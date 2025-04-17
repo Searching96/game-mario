@@ -13,6 +13,7 @@
 #include "Mushroom.h"
 #include "SuperLeaf.h"
 #include "PiranhaPlant.h"
+#include "CoinQBlock.h"
 
 #include "Box.h"
 #include "Tree.h"
@@ -200,9 +201,17 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		break;
 	}
 
-	case OBJECT_TYPE_QUESTION_BLOCK: obj = new CQuestionBnock(x, y); break;
+	case OBJECT_TYPE_QUESTION_BLOCK: obj = new CQuestionBlock(x, y); break;
 	case OBJECT_TYPE_MUSHROOM: obj = new CMushroom(x, y); break;
 	case OBJECT_TYPE_SUPERLEAF: obj = new CSuperLeaf(x, y); break;
+
+	case OBJECT_TYPE_COIN_QBLOCK:
+	{
+		CCoin* coin = new CCoin(x, y, 1);
+		objects.push_back(coin);
+		obj = new CCoinQBlock(x, y, coin);
+		break;
+	}
 
 	case OBJECT_TYPE_BOX:
 	{

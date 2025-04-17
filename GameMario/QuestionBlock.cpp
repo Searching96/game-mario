@@ -1,15 +1,14 @@
 #include "QuestionBlock.h"
-#include "QuestionBlock.h"
 #include "Game.h"
 
-CQuestionBnock::CQuestionBnock(float x, float y) : CGameObject(x, y)
+CQuestionBlock::CQuestionBlock(float x, float y) : CGameObject(x, y)
 {
 	this->x = x;
 	this->y = y;
 	SetState(QUESTIONBLOCK_STATE_NOT_HIT);
 }
 
-void CQuestionBnock::Render()
+void CQuestionBlock::Render()
 {
 	int aniId = ID_ANI_QUESTIONBLOCK;
 	if (isHit)
@@ -22,7 +21,7 @@ void CQuestionBnock::Render()
 	//RenderBoundingBox();
 }
 
-void CQuestionBnock::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
+void CQuestionBlock::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
 	if (bounceUp)
 	{
@@ -48,7 +47,7 @@ void CQuestionBnock::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	CCollision::GetInstance()->Process(this, dt, coObjects);
 }
 
-void CQuestionBnock::GetBoundingBox(float& l, float& t, float& r, float& b)
+void CQuestionBlock::GetBoundingBox(float& l, float& t, float& r, float& b)
 {
 	l = x - QUESTIONBLOCK_BBOX_WIDTH / 2;
 	t = y - QUESTIONBLOCK_BBOX_HEIGHT / 2;
@@ -56,7 +55,7 @@ void CQuestionBnock::GetBoundingBox(float& l, float& t, float& r, float& b)
 	b = t + QUESTIONBLOCK_BBOX_HEIGHT;
 }
 
-void CQuestionBnock::SetState(int state)
+void CQuestionBlock::SetState(int state)
 {
 	CGameObject::SetState(state);
 	switch (state)

@@ -11,6 +11,7 @@
 #include "Mushroom.h"
 #include "SuperLeaf.h"
 #include "PiranhaPlant.h"
+#include "CoinQBlock.h"
 
 #include "Collision.h"
 
@@ -212,11 +213,11 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 
 	if (dynamic_cast<CGoomba*>(e->obj))
 		OnCollisionWithGoomba(e);
-	else if (dynamic_cast<CCoin*>(e->obj))
-		OnCollisionWithCoin(e);
+	//else if (dynamic_cast<CCoin*>(e->obj))
+	//	OnCollisionWithCoin(e);
 	else if (dynamic_cast<CPortal*>(e->obj))
 		OnCollisionWithPortal(e);
-	else if (dynamic_cast<CQuestionBnock*>(e->obj))
+	else if (dynamic_cast<CQuestionBlock*>(e->obj))
 		OnCollisionWithQuestionBlock(e);
 	else if (dynamic_cast<CMushroom*>(e->obj))
 		OnCollisionWithMushroom(e);
@@ -224,6 +225,8 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 		OnCollisionWithSuperLeaf(e);
 	else if (dynamic_cast<CPiranhaPlant*>(e->obj))
 		OnCollisionWithPiranhaPlant(e);
+	else if (dynamic_cast<CCoinQBlock*>(e->obj))
+		OnCollisionWithCoinQBlock(e);
 }
 
 void CMario::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
@@ -283,11 +286,20 @@ void CMario::OnCollisionWithPortal(LPCOLLISIONEVENT e)
 
 void CMario::OnCollisionWithQuestionBlock(LPCOLLISIONEVENT e)
 {
-	CQuestionBnock* qb = dynamic_cast<CQuestionBnock*>(e->obj);
+	CQuestionBlock* qb = dynamic_cast<CQuestionBlock*>(e->obj);
 
 	if (qb)
 		if (e->ny > 0 && e->nx == 0 && qb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
 			qb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
+}
+
+
+void CMario::OnCollisionWithCoinQBlock(LPCOLLISIONEVENT e)
+{
+	CCoinQBlock* cqb = dynamic_cast<CCoinQBlock*>(e->obj);
+	if (cqb)
+		if (e->ny > 0 && e->nx == 0 && cqb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
+			cqb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
 }
 
 void CMario::OnCollisionWithMushroom(LPCOLLISIONEVENT e)
