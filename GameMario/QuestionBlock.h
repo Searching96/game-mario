@@ -19,7 +19,7 @@
 
 #define QUESTIONBLOCK_BOUNCE_SPEED -0.1f
 
-class CQuestionBlock : public CGameObject
+class CQuestionBnock : public CGameObject
 {
 protected:
 	bool isHit = false;
@@ -30,7 +30,7 @@ protected:
 	float y0 = -1;
 
 public:
-	CQuestionBlock(float x, float y);
+	CQuestionBnock(float x, float y);
 
 	void Render();
 	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);

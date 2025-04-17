@@ -216,7 +216,7 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 		OnCollisionWithCoin(e);
 	else if (dynamic_cast<CPortal*>(e->obj))
 		OnCollisionWithPortal(e);
-	else if (dynamic_cast<CQuestionBlock*>(e->obj))
+	else if (dynamic_cast<CQuestionBnock*>(e->obj))
 		OnCollisionWithQuestionBlock(e);
 	else if (dynamic_cast<CMushroom*>(e->obj))
 		OnCollisionWithMushroom(e);
@@ -283,7 +283,7 @@ void CMario::OnCollisionWithPortal(LPCOLLISIONEVENT e)
 
 void CMario::OnCollisionWithQuestionBlock(LPCOLLISIONEVENT e)
 {
-	CQuestionBlock* qb = dynamic_cast<CQuestionBlock*>(e->obj);
+	CQuestionBnock* qb = dynamic_cast<CQuestionBnock*>(e->obj);
 
 	if (qb)
 		if (e->ny > 0 && e->nx == 0 && qb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
@@ -789,6 +789,7 @@ void CMario::SetState(int state)
 		break;
 
 	case MARIO_STATE_SIT:
+		if (isMoving == 1) break; 
 		if (isOnPlatform && level != MARIO_LEVEL_SMALL)
 		{
 			state = MARIO_STATE_IDLE;
