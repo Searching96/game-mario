@@ -16,69 +16,116 @@ void CPiranhaPlant::Render()
 	int aniId = ID_ANI_PIRANHA_PLANT_LEFT_MOVE;
 	int direction = GetAiming();
 	if (moveUp || moveDown)
+	{
+		switch (direction)
 		{
-			switch (direction)
-			{
-			case 1:
-			case 2:
-
-				aniId = ID_ANI_PIRANHA_PLANT_LEFT_MOVE;
-				break;
-			case 0:
-			case 3:
-				aniId = ID_ANI_PIRANHA_PLANT_RIGHT_MOVE;
-				break;
-			}
+		case 0:
+		case 1:
+		case 2:
+		case 3:
+			aniId = ID_ANI_PIRANHA_PLANT_LEFT_MOVE;
+			break;
+		case 4:
+		case 5:
+		case 6:
+		case 7:
+			aniId = ID_ANI_PIRANHA_PLANT_RIGHT_MOVE;
+			break;
 		}
-		else
+	}
+	else
+	{
+		switch (direction)
 		{
-			switch (direction)
-			{
-			case 0:
-				aniId = ID_ANI_PIRANHA_PLANT_TOP_RIGHT_SHOOT;
-				break;
-			case 1:
-				aniId = ID_ANI_PIRANHA_PLANT_TOP_LEFT_SHOOT;
-				break;
-			case 2:
-				aniId = ID_ANI_PIRANHA_PLANT_BOTTOM_LEFT_SHOOT;
-				break;
-			case 3:
-				aniId = ID_ANI_PIRANHA_PLANT_BOTTOM_RIGHT_SHOOT;
-				break;
-			}
+		case 0:
+		case 1:
+			aniId = ID_ANI_PIRANHA_PLANT_BOTTOM_LEFT_SHOOT;
+			break;
+		case 2:
+		case 3:
+			aniId = ID_ANI_PIRANHA_PLANT_TOP_LEFT_SHOOT;
+			break;
+		case 4:
+		case 5:
+			aniId = ID_ANI_PIRANHA_PLANT_TOP_RIGHT_SHOOT;
+			break;
+		case 6:
+		case 7:
+			aniId = ID_ANI_PIRANHA_PLANT_BOTTOM_RIGHT_SHOOT;
+			break;
 		}
+	}
 
-		CAnimations::GetInstance()->Get(aniId)->Render(x, y);
+	CAnimations::GetInstance()->Get(aniId)->Render(x, y);
 
-		RenderBoundingBox();
+	RenderBoundingBox();
 }
 
+// 0 bottom left, 1 lower center left, 2 upper center left, 3 top left
+// 4 top right, 5 upper center right, 6 lower center right, 7 bottom right
 int CPiranhaPlant::GetAiming()
 {
 	CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
 	float mario_X, mario_Y;
 	player->GetPosition(mario_X, mario_Y);
-	if (mario_Y < this->y - PIRANHA_PLANT_BBOX_OFFSET)
+	float dx = mario_X - x;
+	float dy = mario_Y - y;
+
+	//if (std::fabs(dx) < 1e-6f && std::fabs(dy) < 1e-6f) {
+	//	return 4; // Mario is at the same position as the plant
+	//}
+
+	float abs_dx = std::fabs(dx);
+	float abs_dy = std::fabs(dy);
+
+	bool is_shallow = abs_dy < abs_dx;
+
+	if (dx >= 0)
 	{
-		if (mario_X > this->x)
+		//Right
+		if (dy >= 0) // Lower
 		{
-			return 0; // right up
+			// Right + Lower
+			if (is_shallow) {
+				return 6; // Lower Center Right
+			}
+			else {
+				return 7; // Bottom Right
+			}
 		}
-		else
+		else // Upper
 		{
-			return 1; // left up
+			// Right + Upper
+			if (is_shallow) {
+				return 5; // Upper Center Right
+			}
+			else {
+				return 4; // Top Right
+			}
 		}
 	}
 	else
 	{
-		if (mario_X < this->x)
+		//Left
+		if (dy >= 0) // Lower
 		{
-			return 2; // left down
+			// Left + Lower
+			if (is_shallow) {
+				return 1; // Lower Center Left
+			}
+			else {
+				return 0; // Bottom Left
+			}
 		}
-		else
+		else // Upper
 		{
-			return 3; // right down
+			// Left + Upper
+			if (is_shallow) {
+				return 2; // Upper Center Left
+			}
+			else {
+				return 3; // Top Left
+			}
 		}
 	}
 }
@@ -99,20 +146,36 @@ void CPiranhaPlant::Shoot(int direction)
 	switch (direction)
 	{
 	case 0:
-		fireball->SetState(FIREBALL_STATE_SHOOT_TOP_RIGHT);
-		DebugOut(L"[INFO] Shoot right up\n");
+		fireball->SetState(FIREBALL_STATE_SHOOT_BOTTOM_LEFT);
+		DebugOut(L"[INFO] Shoot left down sharp\n");
 		break;
 	case 1:
-		fireball->SetState(FIREBALL_STATE_SHOOT_TOP_LEFT);
-		DebugOut(L"[INFO] Shoot left up\n");
+		fireball->SetState(FIREBALL_STATE_SHOOT_LOWER_CENTER_LEFT);
+		DebugOut(L"[INFO] Shoot left down shallow\n");
 		break;
 	case 2:
-		fireball->SetState(FIREBALL_STATE_SHOOT_BOTTOM_LEFT);
-		DebugOut(L"[INFO] Shoot left down\n");
+		fireball->SetState(FIREBALL_STATE_SHOOT_UPPER_CENTER_LEFT);
+		DebugOut(L"[INFO] Shoot left up shallow\n");
 		break;
 	case 3:
+		fireball->SetState(FIREBALL_STATE_SHOOT_TOP_LEFT);
+		DebugOut(L"[INFO] Shoot left up sharp\n");
+		break;
+	case 4:
+		fireball->SetState(FIREBALL_STATE_SHOOT_TOP_RIGHT);
+		DebugOut(L"[INFO] Shoot right up sharp\n");
+		break;
+	case 5:
+		fireball->SetState(FIREBALL_STATE_SHOOT_UPPER_CENTER_RIGHT);
+		DebugOut(L"[INFO] Shoot right up shallow\n");
+		break;
+	case 6:
+		fireball->SetState(FIREBALL_STATE_SHOOT_LOWER_CENTER_RIGHT);
+		DebugOut(L"[INFO] Shoot right down shallow\n");
+		break;
+	case 7:
 		fireball->SetState(FIREBALL_STATE_SHOOT_BOTTOM_RIGHT);
-		DebugOut(L"[INFO] Shoot right down\n");
+		DebugOut(L"[INFO] Shoot right down sharp\n");
 		break;
 	default:
 		break;
@@ -160,6 +223,7 @@ void CPiranhaPlant::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			moveDown = 0;
 			moveDownStart = -1;
 			y = y0 + PIRANHA_PLANT_MOVE_OFFSET;
+			fireball->SetEnable(0);
 			SetState(PIRANHA_PLANT_STATE_HIDDEN);
 		}
 	}

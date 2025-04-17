@@ -7,14 +7,19 @@
 #define FIREBALL_RANGE_WIDTH 160
 #define FIREBALL_RANGE_HEIGHT 160
 
-#define FIREBALL_STATE_SHOOT_TOP_RIGHT 100
-#define FIREBALL_STATE_SHOOT_TOP_LEFT 200
-#define FIREBALL_STATE_SHOOT_BOTTOM_LEFT 300
-#define FIREBALL_STATE_SHOOT_BOTTOM_RIGHT 400
-#define FIREBALL_STATE_SHOOT_COMPLETE 500
-#define FIREBALL_STATE_ASCEND 600
-#define FIREBALL_STATE_DESCEND 700
 #define FIREBALL_STATE_STATIC 0
+#define FIREBALL_STATE_SHOOT_TOP_RIGHT 110
+#define FIREBALL_STATE_SHOOT_TOP_LEFT 120
+#define FIREBALL_STATE_SHOOT_UPPER_CENTER_LEFT 210
+#define FIREBALL_STATE_SHOOT_UPPER_CENTER_RIGHT 220
+#define FIREBALL_STATE_SHOOT_LOWER_CENTER_LEFT 310
+#define FIREBALL_STATE_SHOOT_LOWER_CENTER_RIGHT 320
+#define FIREBALL_STATE_SHOOT_BOTTOM_RIGHT 410
+#define FIREBALL_STATE_SHOOT_BOTTOM_LEFT 420
+
+
+#define SQUARE_ROOT_25_29 0.92847669089f
+#define SQUARE_ROOT_4_29 0.37139067635f
 
 #define FIREBALL_SPEED 0.1f
 
@@ -26,7 +31,7 @@ class CFireball :
 {
 protected:
 	int x0, y0;
-
+	int isEnabled = 0;
 public:
 	CFireball(float x, float y) :CGameObject(x, y)
 	{
@@ -40,11 +45,8 @@ public:
 	virtual void Render();
 
 	virtual void SetState(int state);
-	virtual int IsCollidable() { return 1; };
+	virtual int IsCollidable() { return isEnabled; };
 	virtual int IsBlocking() { return 0; }
-	//virtual void OnNoCollision(DWORD dt);
-
-
-	//virtual void OnCollisionWith(LPCOLLISIONEVENT e);
+	void SetEnable(int enable) { isEnabled = enable; }
 };
 

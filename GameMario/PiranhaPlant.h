@@ -7,7 +7,7 @@
 #define PIRANHA_PLANT_BBOX_HEIGHT 32
 #define PIRANHA_PLANT_BBOX_OFFSET 8
 
-#define PIRANHA_PLANT_MOVE_OFFSET 24
+#define PIRANHA_PLANT_MOVE_OFFSET 32
 
 #define PIRANHA_PLANT_DIE_TIMEOUT 500
 #define PIRANHA_PLANT_SHOOT_TIMEOUT 2500
@@ -45,7 +45,8 @@ protected:
 
 	CFireball* fireball = NULL;
 
-	//int aiming = 0; // 0: right up, 1: left up, 2: left down, 3: right down
+	// 0 bottom left, 1 lower center left, 2 upper center left, 3 top left
+	//4 top right, 5 upper center right, 6 lower center right, 7 bottom right
 
 	ULONGLONG die_start;
 
@@ -62,12 +63,10 @@ public:
 	void StartMoveUp() {
 		moveUp = 1;
 		moveUpStart = GetTickCount64();
-		fireball->SetState(FIREBALL_STATE_ASCEND);
 	}
 	void StartMoveDown() {
 		moveDown = 1;
 		moveDownStart = GetTickCount64();
-		fireball->SetState(FIREBALL_STATE_DESCEND);
 	}
 };
 

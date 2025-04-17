@@ -183,6 +183,8 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 		OnCollisionWithSuperLeaf(e);
 	else if (dynamic_cast<CPiranhaPlant*>(e->obj))
 		OnCollisionWithPiranhaPlant(e);
+	else if (dynamic_cast<CFireball*>(e->obj))
+		OnCollisionWithFireball(e);
 }
 
 void CMario::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
@@ -314,6 +316,27 @@ void CMario::OnCollisionWithPiranhaPlant(LPCOLLISIONEVENT e)
 	if (untouchable == 0)
 	{
 		if (plant->GetState() != PIRANHA_PLANT_STATE_HIDDEN)
+		{
+			if (level > MARIO_LEVEL_SMALL)
+			{
+				level = MARIO_LEVEL_SMALL;
+				StartUntouchable();
+			}
+			else
+			{
+				DebugOut(L">>> Mario DIE >>> \n");
+				SetState(MARIO_STATE_DIE);
+			}
+		}
+	}
+}
+
+void CMario::OnCollisionWithFireball(LPCOLLISIONEVENT e)
+{
+	CFireball* fireball = dynamic_cast<CFireball*>(e->obj);
+	if (untouchable == 0)
+	{
+		if (fireball->GetState() != FIREBALL_STATE_STATIC)
 		{
 			if (level > MARIO_LEVEL_SMALL)
 			{

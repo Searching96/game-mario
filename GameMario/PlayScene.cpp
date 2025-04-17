@@ -132,8 +132,7 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	case OBJECT_TYPE_GOOMBA: obj = new CGoomba(x, y); break;
 	case OBJECT_TYPE_PIRANHA_PLANT:
 	{
-		 
-		CGameObject* fireball = new CFireball(x, y);
+		CGameObject* fireball = new CFireball(x, y - PIRANHA_PLANT_BBOX_HEIGHT - PIRANHA_PLANT_BBOX_OFFSET);
 		obj = new CPiranhaPlant(x, y, (CFireball*)fireball);
 		objects.push_back(fireball);
 		break;

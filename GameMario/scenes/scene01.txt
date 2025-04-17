@@ -182,7 +182,7 @@ assets\fireball.txt
 102	2752	400	16	16	1	1081110	1081120	1064300	1064300
 
 #Piranha x, y
-9	360	368
+9	360	376
 
 #Pipe x, y, c_width, c_height, height, top_left, top_right, ...
 #Map border
