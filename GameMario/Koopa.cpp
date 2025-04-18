@@ -29,7 +29,15 @@ void CKoopa::GetBoundingBox(float& left, float& top, float& right, float& bottom
 
 void CKoopa::OnNoCollision(DWORD dt)
 {
-	if (ground != nullptr)
+	x += vx * dt;
+	y += vy * dt;
+}
+
+void CKoopa::OnCollisionWith(LPCOLLISIONEVENT e)
+{
+	if (!e->obj->IsBlocking()) return;
+	if (dynamic_cast<CKoopa*>(e->obj)) return;
+	if (e->obj == ground)
 	{
 		float ground_L, ground_T, ground_R, ground_B;
 		ground->GetBoundingBox(ground_L, ground_T, ground_R, ground_B);
@@ -41,21 +49,13 @@ void CKoopa::OnNoCollision(DWORD dt)
 		{
 			SetState(KOOPA_STATE_WALKING_RIGHT);
 		}
+		return;
 	}
-
-	x += vx * dt;
-	y += vy * dt;
-}
-
-void CKoopa::OnCollisionWith(LPCOLLISIONEVENT e)
-{
-	if (!e->obj->IsBlocking()) return;
-	if (dynamic_cast<CKoopa*>(e->obj)) return;
 
 	if (e->ny != 0)
 	{
 		vy = 0;
-		if (ground == nullptr) 
+		if (ground == nullptr)
 		{
 			ground = e->obj;
 		}
@@ -78,9 +78,9 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	vy += ay * dt;
 	vx += ax * dt;
 
-	if (state != KOOPA_STATE_WALKING_LEFT 
-	&& state != KOOPA_STATE_WALKING_RIGHT 
-	&& (GetTickCount64() - shell_start > KOOPA_SHELL_TIMEOUT))
+	if (state != KOOPA_STATE_WALKING_LEFT
+		&& state != KOOPA_STATE_WALKING_RIGHT
+		&& (GetTickCount64() - shell_start > KOOPA_SHELL_TIMEOUT))
 	{
 		SetState(KOOPA_STATE_WALKING_LEFT);
 		return;

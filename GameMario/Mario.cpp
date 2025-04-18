@@ -362,7 +362,8 @@ void CMario::OnCollisionWithKoopa(LPCOLLISIONEVENT e)
 	// jump on top >> Koopa hide in shell and deflect a bit 
 	if (e->ny < 0)
 	{
-		if (koopa->GetState() != KOOPA_STATE_SHELL_STATIC)
+		if (koopa->GetState() != KOOPA_STATE_SHELL_STATIC 
+		&& koopa->GetState() != KOOPA_STATE_SHELL_DYNAMIC)
 		{
 			koopa->SetState(KOOPA_STATE_SHELL_STATIC);
 			vy = -MARIO_JUMP_DEFLECT_SPEED;
