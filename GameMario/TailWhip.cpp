@@ -9,6 +9,8 @@ CTailWhip::CTailWhip(float x, float y) : CGameObject(x, y) {}
 
 void CTailWhip::Render()
 {
+	if (notWhipping == 1)
+		return;
 	CAnimations* animations = CAnimations::GetInstance();
 	animations->Get(ID_ANI_TAIL_WHIP)->Render(x, y);
 
@@ -17,6 +19,9 @@ void CTailWhip::Render()
 
 void CTailWhip::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
+	if (notWhipping == 1)
+		return;
+	
 	if (whipSpin == 2)
 	{
 		whipSpin = 0;
@@ -84,11 +89,13 @@ void CTailWhip::SetState(int state)
 	case TAIL_STATE_WHIPPING_LEFT:
 		whipSpin++;
 		whippingLeft = 1;
+		notWhipping = 0;
 		whipLeftStart = GetTickCount64();
 		break;
 	case TAIL_STATE_WHIPPING_RIGHT:
 		whipSpin++;
 		whippingRight = 1;
+		notWhipping = 0;
 		whipRightStart = GetTickCount64();
 		break;
 	case TAIL_STATE_NOT_WHIPPING:
