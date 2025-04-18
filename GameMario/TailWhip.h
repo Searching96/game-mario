@@ -3,7 +3,6 @@
 #include "GameObject.h"
 #include "Animation.h"
 #include "Animations.h"
-
 #include "AttackParticle.h"
 
 #define ID_ANI_TAIL_WHIP			20000
