@@ -15,6 +15,7 @@
 #include "PiranhaPlant.h"
 #include "CoinQBlock.h"
 #include "BuffQBlock.h"
+#include "TailWhip.h"
 
 #include "Box.h"
 #include "Tree.h"
@@ -120,16 +121,21 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	switch (object_type)
 	{
 	case OBJECT_TYPE_MARIO:
+	{
 		if (player != NULL)
 		{
 			DebugOut(L"[ERROR] MARIO object was created before!\n");
 			return;
 		}
-		obj = new CMario(x, y);
+		CTailWhip* tailWhip = new CTailWhip(x + 8, y);
+		objects.push_back(tailWhip);
+		obj = new CMario(x, y, tailWhip);
 		player = (CMario*)obj;
 
 		DebugOut(L"[INFO] Player object has been created!\n");
 		break;
+	}
+
 	case OBJECT_TYPE_GOOMBA: obj = new CGoomba(x, y); break;
 	case OBJECT_TYPE_PIRANHA_PLANT: obj = new CPiranhaPlant(x, y); break;
 	case OBJECT_TYPE_BRICK:

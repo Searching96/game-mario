@@ -16,8 +16,9 @@
 
 #include "Collision.h"
 
-CMario::CMario(float x, float y) : CGameObject(x, y)
+CMario::CMario(float x, float y, CTailWhip* tailWhip) : CGameObject(x, y)
 {
+	this->tailWhip = tailWhip;
 	isSitting = false;
 	maxVx = 0.0f;
 	ax = 0.0f;
@@ -35,6 +36,11 @@ CMario::CMario(float x, float y) : CGameObject(x, y)
 // In CMario::Update method, modify the hover handling
 void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
+	if (nx > 0)
+		tailWhip->SetPosition(x + 12, y + 6);
+	else
+		tailWhip->SetPosition(x - 12, y + 6);
+
 	// Track previous jump count to apply consistent jump impulse
 	static int lastJumpCount = 0;
 	int prevJumpCount = lastJumpCount;

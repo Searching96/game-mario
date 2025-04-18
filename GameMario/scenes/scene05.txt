@@ -9,6 +9,7 @@ assets\mushroom.txt
 assets\superleaf.txt
 assets\goomba.txt
 assets\platform.txt
+assets\tailwhip.txt
 #
 [OBJECTS]
 # type	x	y	extra_settings per object type

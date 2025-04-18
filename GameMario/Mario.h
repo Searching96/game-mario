@@ -4,6 +4,8 @@
 #include "Animation.h"
 #include "Animations.h"
 
+#include "TailWhip.h"
+
 #include "debug.h"
 
 #define MARIO_MAX_WALKING_SPEED		0.125f
@@ -184,6 +186,8 @@
 
 class CMario : public CGameObject
 {
+	CTailWhip* tailWhip;
+
 	BOOLEAN isSitting;
 	float maxVx;
 	float ax;				// acceleration on x 
@@ -240,7 +244,7 @@ class CMario : public CGameObject
 	void HandleHovering(DWORD dt);
 
 public:
-	CMario(float x, float y);
+	CMario(float x, float y, CTailWhip* tailWhip);
 	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 	void Render();
 	void SetState(int state);
