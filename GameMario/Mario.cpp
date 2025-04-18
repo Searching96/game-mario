@@ -404,9 +404,14 @@ void CMario::OnCollisionWithPiranhaPlant(LPCOLLISIONEVENT e)
 	{
 		if (plant->GetState() != PIRANHA_PLANT_STATE_HIDDEN)
 		{
-			if (level > MARIO_LEVEL_SMALL)
+			if (level == MARIO_LEVEL_TAIL)
 			{
-				level = MARIO_LEVEL_SMALL;
+				SetState(MARIO_STATE_TAIL_DOWN);
+				StartUntouchable();
+			}
+			else if (level > MARIO_LEVEL_SMALL)
+			{
+				SetState(MARIO_STATE_POWER_DOWN);
 				StartUntouchable();
 			}
 			else
@@ -425,9 +430,14 @@ void CMario::OnCollisionWithFireball(LPCOLLISIONEVENT e)
 	{
 		if (fireball->GetState() != FIREBALL_STATE_STATIC)
 		{
-			if (level > MARIO_LEVEL_SMALL)
+			if (level == MARIO_LEVEL_TAIL)
 			{
-				level = MARIO_LEVEL_SMALL;
+				SetState(MARIO_STATE_TAIL_DOWN);
+				StartUntouchable();
+			}
+			else if (level > MARIO_LEVEL_SMALL)
+			{
+				SetState(MARIO_STATE_POWER_DOWN);
 				StartUntouchable();
 			}
 			else
@@ -478,13 +488,20 @@ void CMario::OnCollisionWithKoopa(LPCOLLISIONEVENT e) {
 		koopa->GetState() == KOOPA_STATE_WALKING_RIGHT ||
 		koopa->GetState() == KOOPA_STATE_SHELL_DYNAMIC) {
 
-		if (level > MARIO_LEVEL_SMALL) {
-			SetState(MARIO_STATE_POWER_DOWN);
-			return;
+		if (level == MARIO_LEVEL_TAIL)
+		{
+			SetState(MARIO_STATE_TAIL_DOWN);
+			StartUntouchable();
 		}
-		else {
+		else if (level > MARIO_LEVEL_SMALL)
+		{
+			SetState(MARIO_STATE_POWER_DOWN);
+			StartUntouchable();
+		}
+		else
+		{
+			DebugOut(L">>> Mario DIE >>> \n");
 			SetState(MARIO_STATE_DIE);
-			return;
 		}
 	}
 }
