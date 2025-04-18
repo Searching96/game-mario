@@ -26,6 +26,10 @@ assets\trinket.txt
 assets\piranha.txt
 assets\fireball.txt
 assets\koopa.txt
+assets\tailwhip.txt
+assets\questionblock.txt
+assets\mushroom.txt
+assets\superleaf.txt
 #
 [OBJECTS]
 # type	x	y	extra_settings per object type
@@ -187,6 +191,11 @@ assets\koopa.txt
 
 #Koopa x, y
 12	576	340
+#Goomba
+2	640	384
+#bqb
+11	616	384
+11	864	384
 
 #Pipe x, y, c_width, c_height, height, top_left, top_right, ...
 #Map border

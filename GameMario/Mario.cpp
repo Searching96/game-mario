@@ -266,13 +266,15 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 void CMario::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
 {
 	CGoomba* goomba = dynamic_cast<CGoomba*>(e->obj);
+	if (goomba->GetState() == GOOMBA_STATE_DIE_ON_TAIL_WHIP)
+		return;
 
 	// jump on top >> kill Goomba and deflect a bit 
 	if (e->ny < 0)
 	{
-		if (goomba->GetState() != GOOMBA_STATE_DIE)
+		if (goomba->GetState() != GOOMBA_STATE_DIE_ON_STOMP)
 		{
-			goomba->SetState(GOOMBA_STATE_DIE);
+			goomba->SetState(GOOMBA_STATE_DIE_ON_STOMP);
 			vy = -MARIO_JUMP_DEFLECT_SPEED;
 		}
 	}
@@ -280,7 +282,7 @@ void CMario::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
 	{
 		if (untouchable == 0)
 		{
-			if (goomba->GetState() != GOOMBA_STATE_DIE)
+			if (goomba->GetState() != GOOMBA_STATE_DIE_ON_STOMP)
 			{
 				if (level == MARIO_LEVEL_BIG)
 				{
@@ -823,7 +825,7 @@ void CMario::SetState(int state)
 			{
 				vx = -MARIO_MAX_RUNNING_SPEED / SPEED_DIVISOR;
 				ax = 0.0f;  // Đặt ax thành 0 một cách rõ ràng
-				DebugOut(L"Air direction change - to left, ax set to 0\n");
+				//DebugOut(L"Air direction change - to left, ax set to 0\n");
 			}
 		}
 		else
@@ -855,7 +857,7 @@ void CMario::SetState(int state)
 			{
 				vx = MARIO_MAX_WALKING_SPEED / SPEED_DIVISOR;
 				ax = 0.0f;  // Đặt ax thành 0 một cách rõ ràng
-				DebugOut(L"Air direction change - to right, ax set to 0\n");
+				//DebugOut(L"Air direction change - to right, ax set to 0\n");
 			}
 		}
 		else
@@ -1014,7 +1016,7 @@ void CMario::SetState(int state)
 		break;
 	}
 
-	DebugOut(L"SetState: %d\n", state);
+	//DebugOut(L"SetState: %d\n", state);
 	CGameObject::SetState(state);
 }
 

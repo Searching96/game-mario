@@ -70,7 +70,7 @@ void CTailWhip::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
 	CGoomba* goomba = dynamic_cast<CGoomba*>(e->obj);
 	if (goomba)
 	{
-		goomba->SetState(GOOMBA_STATE_DIE);
+		goomba->SetState(GOOMBA_STATE_DIE_ON_TAIL_WHIP);
 	}
 }
 

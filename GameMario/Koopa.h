@@ -8,7 +8,7 @@
 
 
 #define KOOPA_BBOX_WIDTH 16
-#define KOOPA_BBOX_HEIGHT 26
+#define KOOPA_BBOX_HEIGHT 24
 #define KOOPA_BBOX_HEIGHT_SHELL 16
 
 #define KOOPA_SHELL_TIMEOUT 7000
@@ -46,7 +46,7 @@ protected:
 	virtual void Render();
 
 	virtual int IsCollidable() { return 1; };
-	virtual int IsBlocking() { return 0; }
+	virtual int IsBlocking() { return 1; }
 	virtual void OnNoCollision(DWORD dt);
 
 	virtual void OnCollisionWith(LPCOLLISIONEVENT e);

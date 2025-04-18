@@ -4,13 +4,13 @@ CGoomba::CGoomba(float x, float y):CGameObject(x, y)
 {
 	this->ax = 0;
 	this->ay = GOOMBA_GRAVITY;
-	shell_start = -1;
+	dieOnStompStart = -1;
 	SetState(GOOMBA_STATE_WALKING);
 }
 
 void CGoomba::GetBoundingBox(float &left, float &top, float &right, float &bottom)
 {
-	if (state == GOOMBA_STATE_DIE)
+	if (state == GOOMBA_STATE_DIE_ON_STOMP)
 	{
 		left = x - GOOMBA_BBOX_WIDTH/2;
 		top = y - GOOMBA_BBOX_HEIGHT_DIE/2;
@@ -52,7 +52,7 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	vy += ay * dt;
 	vx += ax * dt;
 
-	if ( (state==GOOMBA_STATE_DIE) && (GetTickCount64() - shell_start > GOOMBA_DIE_TIMEOUT) )
+	if ( (state==GOOMBA_STATE_DIE_ON_STOMP) && (GetTickCount64() - dieOnStompStart > GOOMBA_DIE_TIMEOUT) )
 	{
 		isDeleted = true;
 		return;
@@ -66,9 +66,13 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 void CGoomba::Render()
 {
 	int aniId = ID_ANI_GOOMBA_WALKING;
-	if (state == GOOMBA_STATE_DIE) 
+	if (state == GOOMBA_STATE_DIE_ON_STOMP) 
 	{
-		aniId = ID_ANI_GOOMBA_DIE;
+		aniId = ID_ANI_GOOMBA_DIE_ON_STOMP;
+	}
+	else if (state == GOOMBA_STATE_DIE_ON_TAIL_WHIP)
+	{
+		aniId = ID_ANI_GOOMBA_DIE_ON_TAIL_WHIP;
 	}
 
 	CAnimations::GetInstance()->Get(aniId)->Render(x,y);
@@ -80,15 +84,19 @@ void CGoomba::SetState(int state)
 	CGameObject::SetState(state);
 	switch (state)
 	{
-		case GOOMBA_STATE_DIE:
-			shell_start = GetTickCount64();
-			y += (GOOMBA_BBOX_HEIGHT - GOOMBA_BBOX_HEIGHT_DIE)/2;
-			vx = 0;
-			vy = 0;
-			ay = 0; 
-			break;
-		case GOOMBA_STATE_WALKING: 
-			vx = -GOOMBA_WALKING_SPEED;
-			break;
+	case GOOMBA_STATE_DIE_ON_STOMP:
+		dieOnStompStart = GetTickCount64();
+		y += (GOOMBA_BBOX_HEIGHT - GOOMBA_BBOX_HEIGHT_DIE)/2;
+		vx = 0;
+		vy = 0;
+		ay = 0; 
+		break;
+	case GOOMBA_STATE_DIE_ON_TAIL_WHIP:
+		vy = -0.5f;
+		ay = GOOMBA_GRAVITY;
+		break;
+	case GOOMBA_STATE_WALKING: 
+		vx = -GOOMBA_WALKING_SPEED;
+		break;
 	}
 }
