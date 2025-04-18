@@ -19,6 +19,7 @@
 #include "Fireball.h"
 #include "Koopa.h"
 #include "WingedGoomba.h"
+#include "LifeBrick.h"
 
 #include "Box.h"
 #include "Tree.h"
@@ -179,24 +180,10 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	case OBJECT_TYPE_PLATFORM:
 	{
 
-		float cell_width = (float)atof(tokens[3].c_str());
-		float cell_height = (float)atof(tokens[4].c_str());
-		int width = atoi(tokens[5].c_str());
-		int height = atoi(tokens[6].c_str());
-		int sprite_top_left = atoi(tokens[7].c_str());
-		int sprite_top_center = atoi(tokens[8].c_str());
-		int sprite_top_right = atoi(tokens[9].c_str());
-		int sprite_bottom_left = atoi(tokens[10].c_str());
-		int sprite_bottom_center = atoi(tokens[11].c_str());
-		int sprite_bottom_right = atoi(tokens[12].c_str());
+		float width = (float)atof(tokens[3].c_str());
+		float height = (float)atof(tokens[4].c_str());
 
-		obj = new CPlatform(
-			x, y,
-			cell_width, cell_height,
-			width, height,
-			sprite_top_left, sprite_top_center, sprite_top_right,
-			sprite_bottom_left, sprite_bottom_center, sprite_bottom_right
-		);
+		obj = new CPlatform(x, y, width, height);
 
 		break;
 	}
@@ -204,24 +191,10 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	case OBJECT_TYPE_SKYPLATFORM:
 	{
 
-		float cell_width = (float)atof(tokens[3].c_str());
-		float cell_height = (float)atof(tokens[4].c_str());
-		int width = atoi(tokens[5].c_str());
-		int height = atoi(tokens[6].c_str());
-		int sprite_top_left = atoi(tokens[7].c_str());
-		int sprite_top_center = atoi(tokens[8].c_str());
-		int sprite_top_right = atoi(tokens[9].c_str());
-		int sprite_bottom_left = atoi(tokens[10].c_str());
-		int sprite_bottom_center = atoi(tokens[11].c_str());
-		int sprite_bottom_right = atoi(tokens[12].c_str());
+		float width = (float)atof(tokens[3].c_str());
+		float height = (float)atof(tokens[4].c_str());
 
-		obj = new CSkyPlatform(
-			x, y,
-			cell_width, cell_height,
-			width, height,
-			sprite_top_left, sprite_top_center, sprite_top_right,
-			sprite_bottom_left, sprite_bottom_center, sprite_bottom_right
-		);
+		obj = new CSkyPlatform(x, y, width, height);
 
 		break;
 	}
@@ -249,34 +222,23 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		break;
 	}
 
+	case OBJECT_TYPE_LIFE_BRICK:
+	{
+		CLifeMushroom* mushroom = new CLifeMushroom(x, y);
+		objects.push_back(mushroom);
+		CLifeBrick* lb = new CLifeBrick(x, y, mushroom);
+		obj = lb;
+		break;
+	}
+
 	case OBJECT_TYPE_BOX:
 	{
 
-		float cell_width = (float)atof(tokens[3].c_str());
-		float cell_height = (float)atof(tokens[4].c_str());
-		int width = atoi(tokens[5].c_str());
-		int height = atoi(tokens[6].c_str());
-		int sprite_top_left = atoi(tokens[7].c_str());
-		int sprite_top_center = atoi(tokens[8].c_str());
-		int sprite_top_right = atoi(tokens[9].c_str());
-		int sprite_middle_left = atoi(tokens[10].c_str());
-		int sprite_middle_center = atoi(tokens[11].c_str());
-		int sprite_middle_right = atoi(tokens[12].c_str());
-		int sprite_bottom_left = atoi(tokens[13].c_str());
-		int sprite_bottom_center = atoi(tokens[14].c_str());
-		int sprite_bottom_right = atoi(tokens[15].c_str());
-		int sprite_top_shadow = atoi(tokens[16].c_str());
-		int sprite_bottom_shadow = atoi(tokens[17].c_str());
+		float width = (float)atof(tokens[3].c_str());
+		float height = (float)atof(tokens[4].c_str());
+		int type = atoi(tokens[5].c_str());
 
-		obj = new CBox(
-			x, y,
-			cell_width, cell_height,
-			width, height,
-			sprite_top_left, sprite_top_center, sprite_top_right,
-			sprite_middle_left, sprite_middle_center, sprite_middle_right,
-			sprite_bottom_left, sprite_bottom_center, sprite_bottom_right,
-			sprite_top_shadow, sprite_bottom_shadow
-		);
+		obj = new CBox(x, y, width, height, type);
 
 		break;
 	}
@@ -516,7 +478,7 @@ void CPlayScene::Update(DWORD dt)
 
 	float camX, camY;
 	game->GetCamPos(camX, camY);
-	camX = cx - game->GetBackBufferWidth()/2;
+	camX = cx - game->GetBackBufferWidth() / 2;
 	camY = cy - game->GetBackBufferHeight() / 2;
 
 	float mapWidth = 2815.0f;

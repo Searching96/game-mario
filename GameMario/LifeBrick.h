@@ -1,6 +1,7 @@
 #pragma once
 #include "QuestionBlock.h"
 #include "LifeMushroom.h"
+#include "Brick.h"
 
 #include <vector>
 #include <list>

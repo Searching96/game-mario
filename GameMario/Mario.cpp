@@ -8,6 +8,7 @@
 #include "Coin.h"
 #include "Portal.h"
 #include "QuestionBlock.h"
+#include "LifeMushroom.h"
 #include "Mushroom.h"
 #include "SuperLeaf.h"
 #include "PiranhaPlant.h"
@@ -57,6 +58,15 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			powerUp = 0;
 			y -= 6; // RED ALERT
 			SetLevel(MARIO_LEVEL_BIG);
+		}
+		return;
+	}
+	if (isKicking == 1)
+	{
+		if (GetTickCount64() - kickStart > MARIO_KICK_TIME)
+		{
+			isKicking = 0;
+			SetLevel(MARIO_LEVEL_TAIL);
 		}
 		return;
 	}
@@ -249,6 +259,8 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 		OnCollisionWithPortal(e);
 	else if (dynamic_cast<CQuestionBlock*>(e->obj))
 		OnCollisionWithQuestionBlock(e);
+	else if (dynamic_cast<CLifeMushroom*>(e->obj))
+		OnCollisionWithLifeMushroom(e);
 	else if (dynamic_cast<CMushroom*>(e->obj))
 		OnCollisionWithMushroom(e);
 	else if (dynamic_cast<CSuperLeaf*>(e->obj))
@@ -374,6 +386,20 @@ void CMario::OnCollisionWithBuffQBlock(LPCOLLISIONEVENT e)
 		}
 }
 
+void CMario::OnCollisionWithLifeMushroom(LPCOLLISIONEVENT e)
+{
+	CLifeMushroom* mushroom = dynamic_cast<CLifeMushroom*>(e->obj);
+
+	if (mushroom)
+	{
+		if (mushroom->GetState() == MUSHROOM_STATE_MOVING)
+		{
+			mushroom->Delete();
+			//Add 1 life
+		}
+	}
+}
+
 void CMario::OnCollisionWithMushroom(LPCOLLISIONEVENT e)
 {
 	CMushroom* mushroom = dynamic_cast<CMushroom*>(e->obj);
@@ -479,6 +505,7 @@ void CMario::OnCollisionWithKoopa(LPCOLLISIONEVENT e) {
 		// Kick the shell
 		if (isRunning == 0)
 		{
+			StartKick();
 			koopa->SetState(KOOPA_STATE_SHELL_DYNAMIC);
 			koopa->SetSpeed((nx > 0) ? KOOPA_SHELL_SPEED : -KOOPA_SHELL_SPEED, 0);
 			return;
@@ -583,6 +610,11 @@ int CMario::GetAniIdSmall()
 		else
 			aniId = ID_ANI_MARIO_SIT_LEFT;
 	}
+	else if (isKicking == 1)
+	{
+		if (nx > 0) aniId = ID_ANI_MARIO_SMALL_KICK_RIGHT;
+		else aniId = ID_ANI_MARIO_SMALL_KICK_LEFT;
+	}
 	else if (vx == 0)
 	{
 		if (nx > 0) aniId = ID_ANI_MARIO_SMALL_IDLE_RIGHT;
@@ -652,6 +684,11 @@ int CMario::GetAniIdBig()
 			aniId = ID_ANI_MARIO_SIT_RIGHT;
 		else
 			aniId = ID_ANI_MARIO_SIT_LEFT;
+	}
+	else if (isKicking == 1)
+	{
+		if (nx > 0) aniId = ID_ANI_MARIO_KICK_RIGHT;
+		else aniId = ID_ANI_MARIO_KICK_LEFT;
 	}
 	else if (vx == 0)
 	{
@@ -726,6 +763,11 @@ int CMario::GetAniIdTail()
 				aniId = ID_ANI_MARIO_TAIL_SIT_RIGHT;
 			else
 				aniId = ID_ANI_MARIO_TAIL_SIT_LEFT;
+		}
+		else if (isKicking == 1)
+		{
+			if (nx > 0) aniId = ID_ANI_MARIO_TAIL_KICK_RIGHT;
+			else aniId = ID_ANI_MARIO_TAIL_KICK_LEFT;
 		}
 		else
 			if (vx == 0)

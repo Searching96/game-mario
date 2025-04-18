@@ -24,8 +24,8 @@ void CPlatform::RenderBoundingBox()
 	float cx, cy;
 	CGame::GetInstance()->GetCamPos(cx, cy);
 
-	float xx = x - this->cellWidth / 2 + rect.right / 2;
-	float yy = y - this->cellHeight / 2 + rect.bottom / 2;
+	float xx = x - PLATFORM_CELL_WIDTH / 2 + rect.right / 2;
+	float yy = y - PLATFORM_CELL_HEIGHT / 2 + rect.bottom / 2;
 
 	CGame::GetInstance()->Draw(xx - cx, yy - cy, bbox, nullptr, BBOX_ALPHA, rect.right - 1, rect.bottom - 1);
 }
@@ -39,25 +39,25 @@ void CPlatform::Render()
 	{
 		for (int j = 0; j < this->width; j++)
 		{
-			float xx = x + j * this->cellWidth;
-			float yy = y + i * this->cellHeight;
+			float xx = x + j * PLATFORM_CELL_WIDTH;
+			float yy = y + i * PLATFORM_CELL_HEIGHT;
 			if (i == 0)
 			{
 				if (j == 0)
-					s->Get(this->spriteIdTopLeft)->Draw(xx, yy);
+					s->Get(ID_SPRITE_PLATFORM_TOP_LEFT)->Draw(xx, yy);
 				else if (j == this->width - 1)
-					s->Get(this->spriteIdTopRight)->Draw(xx, yy);
+					s->Get(ID_SPRITE_PLATFORM_TOP_RIGHT)->Draw(xx, yy);
 				else
-					s->Get(this->spriteIdTopCenter)->Draw(xx, yy);
+					s->Get(ID_SPRITE_PLATFORM_TOP_CENTER)->Draw(xx, yy);
 			}
 			else
 			{
 				if (j == 0)
-					s->Get(this->spriteIdBottomLeft)->Draw(xx, yy);
+					s->Get(ID_SPRITE_PLATFORM_BOTTOM_LEFT)->Draw(xx, yy);
 				else if (j == this->width - 1)
-					s->Get(this->spriteIdBottomRight)->Draw(xx, yy);
+					s->Get(ID_SPRITE_PLATFORM_BOTTOM_RIGHT)->Draw(xx, yy);
 				else
-					s->Get(this->spriteIdBottomCenter)->Draw(xx, yy);
+					s->Get(ID_SPRITE_PLATFORM_BOTTOM_CENTER)->Draw(xx, yy);
 			}
 
 		}
@@ -68,10 +68,10 @@ void CPlatform::Render()
 
 void CPlatform::GetBoundingBox(float& l, float& t, float& r, float& b)
 {
-	l = x - this->cellWidth / 2;
-	t = y - this->cellHeight / 2;
-	r = l + this->cellWidth * this->width;
-	b = t + this->cellHeight * this->height;
+	l = x - PLATFORM_CELL_WIDTH / 2;
+	t = y - PLATFORM_CELL_HEIGHT / 2;
+	r = l + PLATFORM_CELL_WIDTH * this->width;
+	b = t + PLATFORM_CELL_HEIGHT * this->height;
 }
 
 int CPlatform::IsDirectionColliable(float nx, float ny)

@@ -69,5 +69,6 @@ public:
 	void StartShell();
 	int GetBeingHeld() { return beingHeld; }
 	void SetBeingHeld(int beingHeld) { this->beingHeld = beingHeld; }
+	void SetReversed(bool isReversed) { this->isReversed = isReversed; }
 };
 

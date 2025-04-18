@@ -182,9 +182,9 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	}
 
 	//DebugOut(L"[INFO] Koopa: vx=%f, ax=%f, vy=%f, ay=%f\n", vx, ax, vy, ay);
-	float l, t, r, b;
-	GetBoundingBox(l, t, r, b);
-	DebugOut(L"[INFO] Bounding box: left=%f, top=%f, right=%f, bottom=%f\n", l, t, r, b);
+	//float l, t, r, b;
+	//GetBoundingBox(l, t, r, b);
+	//DebugOut(L"[INFO] Bounding box: left=%f, top=%f, right=%f, bottom=%f\n", l, t, r, b);
 	//DebugOut(L"[INFO] Koopa: x=%f, y=%f\n", x, y);
 
 	CGameObject::Update(dt, coObjects);
