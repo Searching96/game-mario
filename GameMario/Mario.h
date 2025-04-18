@@ -259,10 +259,7 @@ public:
 	void Render();
 	void SetState(int state);
 
-	int IsCollidable()
-	{ 
-		return (state != MARIO_STATE_DIE); 
-	}
+	int IsCollidable() { return (state != MARIO_STATE_DIE); }
 
 	int IsBlocking() { return (state != MARIO_STATE_DIE && untouchable==0); }
 

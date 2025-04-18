@@ -5,7 +5,10 @@
 
 #include "PlayScene.h"
 
-CTailWhip::CTailWhip(float x, float y) : CGameObject(x, y) {}
+CTailWhip::CTailWhip(float x, float y, CAttackParticle* attackParticle) : CGameObject(x, y) 
+{
+	this->attackParticle = attackParticle;
+}
 
 void CTailWhip::Render()
 {
@@ -70,6 +73,14 @@ void CTailWhip::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
 	CGoomba* goomba = dynamic_cast<CGoomba*>(e->obj);
 	if (goomba)
 	{
+		CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+		float mNx;
+		player->GetNx(mNx);
+		if (mNx > 0)
+			attackParticle->SetPosition(x + 8, y);
+		else
+			attackParticle->SetPosition(x - 8, y);
+		attackParticle->SetState(ATTACK_PARTICLE_STATE_EMERGING);
 		goomba->SetState(GOOMBA_STATE_DIE_ON_TAIL_WHIP);
 	}
 }

@@ -34,7 +34,7 @@ protected:
 
 	virtual int IsCollidable() 
 	{ 
-		return (state != GOOMBA_STATE_DIE_ON_TAIL_WHIP) ? 1 : 0;
+		return 1;
 	};
 	virtual int IsBlocking() { return 0; }
 	virtual void OnNoCollision(DWORD dt);

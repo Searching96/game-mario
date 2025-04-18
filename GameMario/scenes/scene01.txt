@@ -30,6 +30,8 @@ assets\tailwhip.txt
 assets\questionblock.txt
 assets\mushroom.txt
 assets\superleaf.txt
+assets\attackparticle.txt
+assets\wingedgoomba.txt
 #
 [OBJECTS]
 # type	x	y	extra_settings per object type
@@ -186,17 +188,6 @@ assets\superleaf.txt
 102	2768	368	16	16	3	1081110	1081120	1081210	1081220
 102	2752	400	16	16	1	1081110	1081120	1064300	1064300
 
-#Piranha x, y
-9	360	376
-
-#Koopa x, y
-12	576	340
-#Goomba
-2	640	384
-#bqb
-11	616	384
-11	864	384
-
 #Pipe x, y, c_width, c_height, height, top_left, top_right, ...
 #Map border
 103	-32	0	16	16	27	1064300	1064300	1064300	1064300
@@ -271,5 +262,18 @@ assets\superleaf.txt
 
 #Portal 
 50	300	400	316	140	2
+
+#Piranha x, y
+9	360	376
+
+#Koopa x, y
+12	576	340
+#Goomba
+2	640	384
+#WingedGoomba
+13	660	384
+#bqb
+11	616	384
+11	864	384
 
 

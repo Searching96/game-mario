@@ -18,6 +18,7 @@
 #include "TailWhip.h"
 #include "Fireball.h"
 #include "Koopa.h"
+#include "WingedGoomba.h"
 
 #include "Box.h"
 #include "Tree.h"
@@ -26,6 +27,7 @@
 #include "Cloud.h"
 #include "Trinket.h"
 #include "SkyPlatform.h"
+#include "AttackParticle.h"
 
 #include "SampleKeyEventHandler.h"
 
@@ -129,7 +131,9 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 			DebugOut(L"[ERROR] MARIO object was created before!\n");
 			return;
 		}
-		CTailWhip* tailWhip = new CTailWhip(x + 8, y);
+		CAttackParticle* attackParticle = new CAttackParticle(x, y);
+		CTailWhip* tailWhip = new CTailWhip(x + 8, y, attackParticle);
+		objects.push_back(attackParticle);
 		objects.push_back(tailWhip);
 		obj = new CMario(x, y, tailWhip);
 		player = (CMario*)obj;
@@ -149,6 +153,9 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		objects.push_back(fireball);
 		break;
 	}
+
+	case OBJECT_TYPE_WINGED_GOOMBA: obj = new CWingedGoomba(x, y); break;
+
 	case OBJECT_TYPE_BRICK:
 	{
 
