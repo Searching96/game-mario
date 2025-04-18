@@ -161,6 +161,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 	DebugOutTitle(L"vx=%f, ax=%f, vy=%f, ay=%f, jc=%d, fx=%f, iop=%d, imv=%d\n",
 		vx, ax, vy, ay, jumpCount, frictionX, isOnPlatform, isMoving);
+	//DebugOut(L"mario: x=%f, y=%f, nx=%d, state=%d\n", x, y, nx, state);
 
 	// Process collisions
 	CCollision::GetInstance()->Process(this, dt, coObjects);
@@ -438,38 +439,53 @@ void CMario::OnCollisionWithFireball(LPCOLLISIONEVENT e)
 	}
 }
 
-void CMario::OnCollisionWithKoopa(LPCOLLISIONEVENT e)
-{
+void CMario::OnCollisionWithKoopa(LPCOLLISIONEVENT e) {
+	if (untouchable) return; // Early exit if Mario is invulnerable
+
 	CKoopa* koopa = dynamic_cast<CKoopa*>(e->obj);
 
-	// jump on top >> Koopa hide in shell and deflect a bit 
-	if (e->ny < 0)
-	{
-		if (koopa->GetState() != KOOPA_STATE_SHELL_STATIC 
-		&& koopa->GetState() != KOOPA_STATE_SHELL_DYNAMIC)
-		{
+	// Jumped on top
+	if (e->ny < 0) {
+		if (koopa->GetState() == KOOPA_STATE_WALKING_LEFT ||
+			koopa->GetState() == KOOPA_STATE_WALKING_RIGHT) {
+			koopa->StartShell();
+			vy = -MARIO_JUMP_DEFLECT_SPEED;
+			return;
+		}
+		if (koopa->GetState() == KOOPA_STATE_SHELL_DYNAMIC) {
 			koopa->SetState(KOOPA_STATE_SHELL_STATIC);
 			vy = -MARIO_JUMP_DEFLECT_SPEED;
+			return;
 		}
 	}
-	else // hit by Koopa
-	{
-		if (untouchable == 0)
+	if (koopa->GetState() == KOOPA_STATE_SHELL_STATIC) {
+		// Kick the shell
+		if (isRunning == 0)
 		{
-			if (koopa->GetState() == KOOPA_STATE_WALKING_LEFT
-			|| koopa->GetState() == KOOPA_STATE_WALKING_RIGHT)
-			{
-				if (level > MARIO_LEVEL_SMALL)
-				{
-					level = MARIO_LEVEL_SMALL;
-					StartUntouchable();
-				}
-				else
-				{
-					DebugOut(L">>> Mario DIE >>> \n");
-					SetState(MARIO_STATE_DIE);
-				}
-			}
+			koopa->SetState(KOOPA_STATE_SHELL_DYNAMIC);
+			koopa->SetSpeed((nx > 0) ? KOOPA_SHELL_SPEED : -KOOPA_SHELL_SPEED, 0);
+			return;
+		}
+		//else
+		//{
+		//	koopa->SetState(KOOPA_STATE_SHELL_STATIC);
+		//	vy = -MARIO_JUMP_DEFLECT_SPEED;
+		//}
+		return;
+	}
+
+	// Side collision with walking or moving shell
+	if (koopa->GetState() == KOOPA_STATE_WALKING_LEFT ||
+		koopa->GetState() == KOOPA_STATE_WALKING_RIGHT ||
+		koopa->GetState() == KOOPA_STATE_SHELL_DYNAMIC) {
+
+		if (level > MARIO_LEVEL_SMALL) {
+			SetState(MARIO_STATE_POWER_DOWN);
+			return;
+		}
+		else {
+			SetState(MARIO_STATE_DIE);
+			return;
 		}
 	}
 }
@@ -801,6 +817,7 @@ void CMario::SetState(int state)
 		}
 		frictionX = 0;
 		isMoving = 1;
+		isRunning = 1;
 		nx = 1;
 		break;
 
@@ -834,6 +851,7 @@ void CMario::SetState(int state)
 		frictionX = 0;
 		nx = -1;
 		isMoving = 1;
+		isRunning = 1;
 		break;
 
 	case MARIO_STATE_WALKING_RIGHT:
@@ -1011,6 +1029,9 @@ void CMario::SetState(int state)
 	case MARIO_STATE_RELEASE_MOVE:
 		isMoving = 0;
 		frictionX = MARIO_FRICTION_X;
+		break;
+	case MARIO_STATE_RELEASE_RUN:
+		isRunning = 0;
 		break;
 	}
 

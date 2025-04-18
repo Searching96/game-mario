@@ -26,6 +26,7 @@ assets\trinket.txt
 assets\piranha.txt
 assets\fireball.txt
 assets\koopa.txt
+assets\tailwhip.txt
 #
 [OBJECTS]
 # type	x	y	extra_settings per object type

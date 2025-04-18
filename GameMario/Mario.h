@@ -57,6 +57,7 @@
 #define MARIO_STATE_BRAKE			1000
 
 #define MARIO_STATE_RELEASE_MOVE	1100
+#define MARIO_STATE_RELEASE_RUN		1101
 
 #define MARIO_STATE_TAIL_WHIP		1200
 
@@ -231,6 +232,7 @@ class CMario : public CGameObject
 	int jumpCount = 0;
 	int tailWagged = 1;
 	int isMoving = 0;
+	int isRunning = 0;
 	int isJumpButtonHeld = 0;
 
 	void OnCollisionWithGoomba(LPCOLLISIONEVENT e);
@@ -270,6 +272,7 @@ public:
 	void OnCollisionWith(LPCOLLISIONEVENT e);
 
 	void SetLevel(int l);
+	void SetIsRunning(int isRunning) { this->isRunning = isRunning; }
 	void StartUntouchable() { untouchable = 1; untouchableStart = GetTickCount64(); }
 
 	void GetBoundingBox(float& left, float& top, float& right, float& bottom);

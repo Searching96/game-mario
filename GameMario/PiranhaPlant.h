@@ -60,6 +60,8 @@ public:
 	int GetAiming();
 	void Shoot(int direction);
 	bool IsMarioInRange();
+	int IsBlocking() { return 0; }
+	int IsCollidable() { return 1; }
 	void StartMoveUp() {
 		moveUp = 1;
 		moveUpStart = GetTickCount64();

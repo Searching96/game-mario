@@ -5,6 +5,7 @@
 
 #define KOOPA_GRAVITY 0.002f
 #define KOOPA_WALKING_SPEED 0.02f
+#define KOOPA_SHELL_SPEED 0.15f
 
 
 #define KOOPA_BBOX_WIDTH 16
@@ -36,6 +37,7 @@ protected:
 	float ay;
 
 	bool isReversed = false;
+	bool isShell = false;
 
 	LPGAMEOBJECT ground;
 
@@ -44,6 +46,7 @@ protected:
 	virtual void GetBoundingBox(float& left, float& top, float& right, float& bottom);
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 	virtual void Render();
+	bool IsPlatformEdge(float checkDistance);
 
 	virtual int IsCollidable() { return 1; };
 	virtual int IsBlocking() { return 0; }
@@ -54,5 +57,6 @@ protected:
 public:
 	CKoopa(float x, float y);
 	virtual void SetState(int state);
+	void StartShell();
 };
 

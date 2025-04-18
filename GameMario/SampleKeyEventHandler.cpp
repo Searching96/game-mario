@@ -67,6 +67,9 @@ void CSampleKeyHandler::OnKeyUp(int KeyCode)
 	case DIK_RIGHT:
 		mario->SetState(MARIO_STATE_RELEASE_MOVE);
 		break;
+	case DIK_A:
+		mario->SetState(MARIO_STATE_RELEASE_RUN);
+		break;
 	}
 }
 

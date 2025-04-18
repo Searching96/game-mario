@@ -33,44 +33,44 @@ void CKoopa::OnNoCollision(DWORD dt)
 	y += vy * dt;
 }
 
-void CKoopa::OnCollisionWith(LPCOLLISIONEVENT e)
-{
-	if (!e->obj->IsBlocking()) return;
-	if (dynamic_cast<CKoopa*>(e->obj)) return;
-	if (e->obj == ground)
-	{
-		float ground_L, ground_T, ground_R, ground_B;
-		ground->GetBoundingBox(ground_L, ground_T, ground_R, ground_B);
-		if (x >= ground_R)
-		{
-			SetState(KOOPA_STATE_WALKING_LEFT);
-		}
-		else if (x <= ground_L)
-		{
-			SetState(KOOPA_STATE_WALKING_RIGHT);
-		}
-		return;
-	}
+void CKoopa::OnCollisionWith(LPCOLLISIONEVENT e) {
+	// Skip collision with non-blocking objects or self
+	if (!e->obj->IsBlocking() || e->obj == this) return;
 
-	if (e->ny != 0)
-	{
+	// Ground check and tracking
+	if (e->ny < 0) { // Collision from above (standing on something)
 		vy = 0;
-		if (ground == nullptr)
-		{
-			ground = e->obj;
+		if (ground == nullptr) ground = e->obj;
+	}// Remember what we're standing on
+
+	// Handle other collisions
+	if (e->nx != 0) {
+		// Wall collision while walking
+		if (state == KOOPA_STATE_WALKING_LEFT || state == KOOPA_STATE_WALKING_RIGHT) {
+			SetState(state == KOOPA_STATE_WALKING_LEFT ?
+				KOOPA_STATE_WALKING_RIGHT :
+				KOOPA_STATE_WALKING_LEFT);
+		}
+		// Shell bounce
+		else if (state == KOOPA_STATE_SHELL_DYNAMIC) {
+			vx = -vx; // Reverse direction
 		}
 	}
-	else if (e->nx != 0)
-	{
-		if (state == KOOPA_STATE_WALKING_LEFT)
-		{
-			SetState(KOOPA_STATE_WALKING_RIGHT);
-		}
-		else if (state == KOOPA_STATE_WALKING_RIGHT)
-		{
-			SetState(KOOPA_STATE_WALKING_LEFT);
-		}
-	}
+}
+
+bool CKoopa::IsPlatformEdge(float checkDistance)
+{
+	if (ground == nullptr) return false;
+
+	float groundL, groundT, groundR, groundB;
+	ground->GetBoundingBox(groundL, groundT, groundR, groundB);
+
+	// Check if there's ground ahead in walking direction
+	float checkX = (state == KOOPA_STATE_WALKING_LEFT)
+		? x - KOOPA_BBOX_WIDTH / 2 - checkDistance
+		: x + KOOPA_BBOX_WIDTH / 2 + checkDistance;
+
+	return (checkX < groundL || checkX > groundR);
 }
 
 void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
@@ -78,10 +78,20 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	vy += ay * dt;
 	vx += ax * dt;
 
-	if (state != KOOPA_STATE_WALKING_LEFT
-		&& state != KOOPA_STATE_WALKING_RIGHT
-		&& (GetTickCount64() - shell_start > KOOPA_SHELL_TIMEOUT))
+	if (state == KOOPA_STATE_WALKING_LEFT)
 	{
+		if (IsPlatformEdge(5.0f))
+			SetState(KOOPA_STATE_WALKING_RIGHT);
+	}
+	else if (state == KOOPA_STATE_WALKING_RIGHT)
+	{
+		if (IsPlatformEdge(5.0f))
+			SetState(KOOPA_STATE_WALKING_LEFT);
+	}
+
+	if (state == KOOPA_STATE_SHELL_STATIC && (GetTickCount64() - shell_start > KOOPA_SHELL_TIMEOUT))
+	{
+		y -= (KOOPA_BBOX_HEIGHT - KOOPA_BBOX_HEIGHT_SHELL) / 2;
 		SetState(KOOPA_STATE_WALKING_LEFT);
 		return;
 	}
@@ -91,6 +101,13 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 	CGameObject::Update(dt, coObjects);
 	CCollision::GetInstance()->Process(this, dt, coObjects);
+}
+
+void CKoopa::StartShell()
+{
+	shell_start = GetTickCount64();
+	isShell = true;
+	SetState(KOOPA_STATE_SHELL_STATIC);
 }
 
 
@@ -135,16 +152,24 @@ void CKoopa::SetState(int state)
 	switch (state)
 	{
 	case KOOPA_STATE_SHELL_STATIC:
-		shell_start = GetTickCount64();
-		y += (KOOPA_BBOX_HEIGHT - KOOPA_BBOX_HEIGHT_SHELL) / 2;
+		y = isShell ? y : y + (float)(KOOPA_BBOX_HEIGHT - KOOPA_BBOX_HEIGHT_SHELL) / 2;
 		vx = 0;
 		vy = 0;
+		ax = 0;
 		ay = 0;
+		isShell = true;
+		break;
+	case KOOPA_STATE_SHELL_DYNAMIC:
+		isShell = true;
+		vy = 0;
+		ay = KOOPA_GRAVITY;
 		break;
 	case KOOPA_STATE_WALKING_LEFT:
+		isShell = false;
 		vx = -KOOPA_WALKING_SPEED;
 		break;
 	case KOOPA_STATE_WALKING_RIGHT:
+		isShell = false;
 		vx = KOOPA_WALKING_SPEED;
 		break;
 	}
