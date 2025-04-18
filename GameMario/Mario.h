@@ -242,6 +242,8 @@ class CMario : public CGameObject
 	void OnCollisionWithPiranhaPlant(LPCOLLISIONEVENT e);
 	void OnCollisionWithCoinQBlock(LPCOLLISIONEVENT e);
 	void OnCollisionWithBuffQBlock(LPCOLLISIONEVENT e);
+	void OnCollisionWithFireball(LPCOLLISIONEVENT e);
+	void OnCollisionWithKoopa(LPCOLLISIONEVENT e);
 
 	int GetAniIdBig();
 	int GetAniIdSmall();
