@@ -49,6 +49,10 @@ protected:
 	//4 top right, 5 upper center right, 6 lower center right, 7 bottom right
 
 	ULONGLONG shell_start;
+	int GetAiming();
+	void Shoot(int direction);
+	bool IsMarioInRange();
+	bool IsMarioOnTop();
 
 public:
 	CPiranhaPlant(float x, float y, CFireball* fireball);
@@ -57,9 +61,7 @@ public:
 	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 	void GetBoundingBox(float& l, float& t, float& r, float& b);
 	void SetState(int state);
-	int GetAiming();
-	void Shoot(int direction);
-	bool IsMarioInRange();
+
 	int IsBlocking() { return 0; }
 	int IsCollidable() { return 1; }
 	void StartMoveUp() {

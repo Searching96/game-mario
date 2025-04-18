@@ -1,5 +1,4 @@
 #include "Koopa.h"
-#include "debug.h"
 
 CKoopa::CKoopa(float x, float y) :CGameObject(x, y)
 {
@@ -63,6 +62,37 @@ void CKoopa::OnCollisionWith(LPCOLLISIONEVENT e) {
 			vx = -vx; // Reverse direction
 		}
 	}
+
+	// Handle collision with Question Blocks
+	if (state == KOOPA_STATE_SHELL_DYNAMIC)
+	{
+		if (CCoinQBlock* cqb = dynamic_cast<CCoinQBlock*>(e->obj))
+			if (e->nx != 0 && cqb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
+				cqb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
+		if (CBuffQBlock* bqb = dynamic_cast<CBuffQBlock*>(e->obj))
+			if (e->nx != 0 && bqb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
+			{
+				CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+				if (player->GetLevel() == MARIO_LEVEL_SMALL)
+				{
+					CMushroom* mushroom = bqb->GetMushroom();
+					if (mushroom)
+					{
+						float mX, mY;
+						mushroom->GetPosition(mX, mY);
+						if (x < mX)
+							mushroom->SetCollisionNx(1);
+						else
+							mushroom->SetCollisionNx(-1);
+					}
+					bqb->SetToSpawn(0);
+				}
+				else
+					bqb->SetToSpawn(1);
+				bqb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
+			}
+	}
+
 }
 
 bool CKoopa::IsPlatformEdge(float checkDistance)
@@ -103,6 +133,9 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	}
 
 	//DebugOut(L"[INFO] Koopa: vx=%f, ax=%f, vy=%f, ay=%f\n", vx, ax, vy, ay);
+	float l, t, r, b;
+	GetBoundingBox(l, t, r, b);
+	DebugOut(L"[INFO] Bounding box: left=%f, top=%f, right=%f, bottom=%f\n", l, t, r, b);
 	//DebugOut(L"[INFO] Koopa: x=%f, y=%f\n", x, y);
 
 	CGameObject::Update(dt, coObjects);

@@ -35,8 +35,8 @@ public:
 	void Render();
 	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 	void GetBoundingBox(float& l, float& t, float& r, float& b);
-	void SetState(int state);
-	void StartBounceUp() { bounceUp = 1; bounceUpStart = GetTickCount64(); }
-	void StartBounceDown() { bounceDown = 1; bounceDownStart = GetTickCount64(); }
+	virtual void SetState(int state);
+	virtual void StartBounceUp() { bounceUp = 1; bounceUpStart = GetTickCount64(); }
+	virtual void StartBounceDown() { bounceDown = 1; bounceDownStart = GetTickCount64(); }
 };
 

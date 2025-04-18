@@ -182,6 +182,14 @@ void CPiranhaPlant::Shoot(int direction)
 	}
 }
 
+bool CPiranhaPlant::IsMarioOnTop()
+{
+	CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+	float mario_X, mario_Y;
+	player->GetPosition(mario_X, mario_Y);
+	return (fabs(mario_X - this->x) < PIRANHA_PLANT_BBOX_WIDTH && fabs(mario_Y - this->y) < PIRANHA_PLANT_BBOX_HEIGHT);
+}
+
 void CPiranhaPlant::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
 	if ((state == PIRANHA_PLANT_STATE_DIED) && (GetTickCount64() - shell_start > PIRANHA_PLANT_DIE_TIMEOUT))
@@ -229,7 +237,12 @@ void CPiranhaPlant::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	}
 	else if (GetTickCount64() - lastMove > PIRANHA_PLANT_HIDE_TIMEOUT)
 	{
-		SetState(PIRANHA_PLANT_STATE_ASCEND);
+		if (IsMarioOnTop())
+		{
+			lastMove = GetTickCount64();
+			return;
+		}
+			SetState(PIRANHA_PLANT_STATE_ASCEND);
 	}
 	x += vx * dt;
 	y += vy * dt;

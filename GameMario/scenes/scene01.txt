@@ -27,6 +27,9 @@ assets\piranha.txt
 assets\fireball.txt
 assets\koopa.txt
 assets\tailwhip.txt
+assets\questionblock.txt
+assets\superleaf.txt
+assets\mushroom.txt
 #
 [OBJECTS]
 # type	x	y	extra_settings per object type
@@ -261,7 +264,20 @@ assets\tailwhip.txt
 106	1920	144	16	16	1110003
 106	2112	112	16	16	1110003
 
+#Coin QBlock x,y
+10	176	352
+10	192	352
+10	224	304
+10	416	320
+
+
+#Buff QBlock x,y
+11	240	304
+11	656	384
+11	1472	368
+
+
 #Portal 
-50	300	400	316	140	2
+#50	300	400	316	140	2
 
 
