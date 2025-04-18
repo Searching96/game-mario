@@ -2,6 +2,16 @@
 
 #include "GameObject.h"
 
+#define ID_SPRITE_PLATFORM_TOP_LEFT 1070110
+#define ID_SPRITE_PLATFORM_TOP_CENTER 1070120
+#define ID_SPRITE_PLATFORM_TOP_RIGHT 1070130
+#define ID_SPRITE_PLATFORM_BOTTOM_LEFT 1070210
+#define ID_SPRITE_PLATFORM_BOTTOM_CENTER 1070220
+#define ID_SPRITE_PLATFORM_BOTTOM_RIGHT 1070230
+
+#define PLATFORM_CELL_WIDTH 16
+#define PLATFORM_CELL_HEIGHT 16
+
 // 
 // The most popular type of object in Mario! 
 // 
@@ -10,27 +20,12 @@ class CPlatform : public CGameObject
 protected:
 	int width;				// Unit: cell 
 	int height;				// Unit: cell
-	float cellWidth;
-	float cellHeight;
-	int spriteIdTopLeft, spriteIdTopCenter, spriteIdTopRight,
-		spriteIdBottomLeft, spriteIdBottomCenter, spriteIdBottomRight;
 
 public:
-	CPlatform(float x, float y,
-		float cell_width, float cell_height, int width, int height,
-		int sprite_id_top_left, int sprite_id_top_center, int sprite_id_top_right,
-		int sprite_id_bottom_left, int sprite_id_bottom_center, int sprite_id_bottom_right) : CGameObject(x, y)
+	CPlatform(float x, float y, int width, int height) : CGameObject(x, y)
 	{
 		this->height = height;
 		this->width = width;
-		this->cellWidth = cell_width;
-		this->cellHeight = cell_height;
-		this->spriteIdTopLeft = sprite_id_top_left;
-		this->spriteIdTopCenter = sprite_id_top_center;
-		this->spriteIdTopRight = sprite_id_top_right;
-		this->spriteIdBottomLeft = sprite_id_bottom_left;
-		this->spriteIdBottomCenter = sprite_id_bottom_center;
-		this->spriteIdBottomRight = sprite_id_bottom_right;
 	}
 
 	void Render();

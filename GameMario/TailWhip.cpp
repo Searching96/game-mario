@@ -1,6 +1,7 @@
 #include "TailWhip.h"
 #include "QuestionBlock.h"
 #include "Goomba.h"
+#include "Koopa.h"
 #include "Mario.h"
 
 #include "PlayScene.h"
@@ -63,6 +64,28 @@ void CTailWhip::OnCollisionWith(LPCOLLISIONEVENT e)
 {
 	if (dynamic_cast<CGoomba*>(e->obj))
 		OnCollisionWithGoomba(e);
+	else if (dynamic_cast<CWingedGoomba*>(e->obj))
+		OnCollisionWithWingedGoomba(e);
+	else if (dynamic_cast<CKoopa*>(e->obj))
+		OnCollisionWithKoopa(e);
+	else if (dynamic_cast<CBuffQBlock*>(e->obj))
+		OnCollisionWithBuffQBlock(e);
+	else if (dynamic_cast<CQuestionBlock*>(e->obj))
+		OnCollisionWithQuestionBlock(e);
+}
+
+void CTailWhip::OnCollisionWithQuestionBlock(LPCOLLISIONEVENT e)
+{
+	CQuestionBlock* qb = dynamic_cast<CQuestionBlock*>(e->obj);
+	if (e->nx != 0 && qb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
+		qb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
+}
+
+void CTailWhip::OnCollisionWithBuffQBlock(LPCOLLISIONEVENT e)
+{
+	CBuffQBlock* bqb = dynamic_cast<CBuffQBlock*>(e->obj);
+	if (e->nx != 0 && bqb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
+		bqb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
 }
 
 void CTailWhip::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
@@ -70,7 +93,50 @@ void CTailWhip::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
 	CGoomba* goomba = dynamic_cast<CGoomba*>(e->obj);
 	if (goomba)
 	{
-		goomba->SetState(GOOMBA_STATE_DIE);
+		CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+		float mNx;
+		player->GetNx(mNx);
+		if (mNx > 0)
+			attackParticle->SetPosition(x + 8, y);
+		else
+			attackParticle->SetPosition(x - 8, y);
+		attackParticle->SetState(ATTACK_PARTICLE_STATE_EMERGING);
+		goomba->SetState(GOOMBA_STATE_DIE_ON_TAIL_WHIP);
+	}
+}
+
+void CTailWhip::OnCollisionWithKoopa(LPCOLLISIONEVENT e)
+{
+	CKoopa* koopa = dynamic_cast<CKoopa*>(e->obj);
+	if (koopa)
+	{
+		CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+		float mNx;
+		player->GetNx(mNx);
+		if (mNx > 0)
+			attackParticle->SetPosition(x + 8, y);
+		else
+			attackParticle->SetPosition(x - 8, y);
+		attackParticle->SetState(ATTACK_PARTICLE_STATE_EMERGING);
+		koopa->StartShell();
+		koopa->SetReversed(true);
+	}
+}
+
+void CTailWhip::OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e)
+{
+	CWingedGoomba* wingedGoomba = dynamic_cast<CWingedGoomba*>(e->obj);
+	if (wingedGoomba)
+	{
+		CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+		float mNx;
+		player->GetNx(mNx);
+		if (mNx > 0)
+			attackParticle->SetPosition(x + 8, y);
+		else
+			attackParticle->SetPosition(x - 8, y);
+		attackParticle->SetState(ATTACK_PARTICLE_STATE_EMERGING);
+		wingedGoomba->SetState(WINGED_GOOMBA_STATE_DIE_ON_TAIL_WHIP);
 	}
 }
 

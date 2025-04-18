@@ -92,6 +92,9 @@
 #define ID_ANI_MARIO_POWER_DOWN_RIGHT 900
 #define ID_ANI_MARIO_POWER_DOWN_LEFT 910
 
+#define ID_ANI_MARIO_KICK_RIGHT 1000
+#define ID_ANI_MARIO_KICK_LEFT 1001
+
 #define ID_ANI_MARIO_DIE 4000
 
 // SMALL MARIO
@@ -118,6 +121,9 @@
 
 #define ID_ANI_MARIO_SMALL_HALF_RUN_ACCEL_RIGHT 2700
 #define ID_ANI_MARIO_SMALL_HALF_RUN_ACCEL_LEFT 2710
+
+#define ID_ANI_MARIO_SMALL_KICK_RIGHT 2800
+#define ID_ANI_MARIO_SMALL_KICK_LEFT 2801
 
 // TAIL MARIO
 #define ID_ANI_MARIO_TAIL_IDLE_RIGHT 6000
@@ -153,6 +159,9 @@
 #define ID_ANI_MARIO_TAIL_WHIP_RIGHT 7000
 #define ID_ANI_MARIO_TAIL_WHIP_LEFT 7010
 
+#define ID_ANI_MARIO_TAIL_KICK_RIGHT 7100
+#define ID_ANI_MARIO_TAIL_KICK_LEFT 7101
+
 #define ID_ANI_MARIO_TAIL_DOWN 7900
 
 
@@ -182,7 +191,8 @@
 #define MARIO_TAIL_UP_TIME							400
 #define MARIO_TAIL_DOWN_TIME						MARIO_TAIL_UP_TIME
 #define MARIO_HOVER_TIME							500
-#define MARIO_BRAKE_TIME							500
+#define MARIO_BRAKE_TIME							100
+#define MARIO_KICK_TIME							500
 #define MARIO_UNTOUCHABLE_RENDER_INTERVAL			75
 #define MARIO_TAIL_WHIP_TIME						400
 
@@ -229,11 +239,13 @@ class CMario : public CGameObject
 	int isTailWhipping = 0;
 	ULONGLONG tailWhipStart = -1;
 
+	int isKicking = 0;
+	ULONGLONG kickStart = -1;
+
 	int jumpCount = 0;
 	int tailWagged = 1;
 	int isMoving = 0;
 	int isRunning = 0;
-	int isKicking = 0;
 	int isJumpButtonHeld = 0;
 
 	void OnCollisionWithGoomba(LPCOLLISIONEVENT e);
@@ -247,6 +259,8 @@ class CMario : public CGameObject
 	void OnCollisionWithBuffQBlock(LPCOLLISIONEVENT e);
 	void OnCollisionWithFireball(LPCOLLISIONEVENT e);
 	void OnCollisionWithKoopa(LPCOLLISIONEVENT e);
+	void OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e);
+	void OnCollisionWithLifeMushroom(LPCOLLISIONEVENT e);
 
 	int GetAniIdBig();
 	int GetAniIdSmall();
@@ -282,6 +296,7 @@ public:
 	void StartTailUp() { tailUp = 1; tailUpStart = GetTickCount64(); }
 	void StartPowerDown() { powerDown = 1; powerDownStart = GetTickCount64(); }
 	void StartTailDown() { tailDown = 1; tailDownStart = GetTickCount64(); }
+	void StartKick() { isKicking = 1; kickStart = GetTickCount64(); }
 	void StartBraking();
 	void StartHovering() { isHovering = 1; hoveringStart = GetTickCount64(); tailWagged = 0; }
 	void StartTailWhip() { isTailWhipping = 1; tailWhipStart = GetTickCount64(); }

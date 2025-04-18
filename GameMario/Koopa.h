@@ -64,5 +64,6 @@ public:
 	CKoopa(float x, float y);
 	virtual void SetState(int state);
 	void StartShell();
+	void SetReversed(bool isReversed) { this->isReversed = isReversed; }
 };
 
