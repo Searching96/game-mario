@@ -25,6 +25,7 @@ assets\bush.txt
 assets\trinket.txt
 assets\piranha.txt
 assets\fireball.txt
+assets\koopa.txt
 #
 [OBJECTS]
 # type	x	y	extra_settings per object type
@@ -183,6 +184,9 @@ assets\fireball.txt
 
 #Piranha x, y
 9	360	376
+
+#Koopa x, y
+10	576	340
 
 #Pipe x, y, c_width, c_height, height, top_left, top_right, ...
 #Map border

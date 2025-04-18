@@ -4,7 +4,7 @@ CGoomba::CGoomba(float x, float y):CGameObject(x, y)
 {
 	this->ax = 0;
 	this->ay = GOOMBA_GRAVITY;
-	die_start = -1;
+	shell_start = -1;
 	SetState(GOOMBA_STATE_WALKING);
 }
 
@@ -52,7 +52,7 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	vy += ay * dt;
 	vx += ax * dt;
 
-	if ( (state==GOOMBA_STATE_DIE) && (GetTickCount64() - die_start > GOOMBA_DIE_TIMEOUT) )
+	if ( (state==GOOMBA_STATE_DIE) && (GetTickCount64() - shell_start > GOOMBA_DIE_TIMEOUT) )
 	{
 		isDeleted = true;
 		return;
@@ -81,7 +81,7 @@ void CGoomba::SetState(int state)
 	switch (state)
 	{
 		case GOOMBA_STATE_DIE:
-			die_start = GetTickCount64();
+			shell_start = GetTickCount64();
 			y += (GOOMBA_BBOX_HEIGHT - GOOMBA_BBOX_HEIGHT_DIE)/2;
 			vx = 0;
 			vy = 0;

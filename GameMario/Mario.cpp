@@ -11,6 +11,7 @@
 #include "Mushroom.h"
 #include "SuperLeaf.h"
 #include "PiranhaPlant.h"
+#include "Koopa.h"
 
 #include "Collision.h"
 
@@ -185,6 +186,8 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 		OnCollisionWithPiranhaPlant(e);
 	else if (dynamic_cast<CFireball*>(e->obj))
 		OnCollisionWithFireball(e);
+	else if (dynamic_cast<CKoopa*>(e->obj))
+		OnCollisionWithKoopa(e);
 }
 
 void CMario::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
@@ -347,6 +350,41 @@ void CMario::OnCollisionWithFireball(LPCOLLISIONEVENT e)
 			{
 				DebugOut(L">>> Mario DIE >>> \n");
 				SetState(MARIO_STATE_DIE);
+			}
+		}
+	}
+}
+
+void CMario::OnCollisionWithKoopa(LPCOLLISIONEVENT e)
+{
+	CKoopa* koopa = dynamic_cast<CKoopa*>(e->obj);
+
+	// jump on top >> Koopa hide in shell and deflect a bit 
+	if (e->ny < 0)
+	{
+		if (koopa->GetState() != KOOPA_STATE_SHELL_STATIC)
+		{
+			koopa->SetState(KOOPA_STATE_SHELL_STATIC);
+			vy = -MARIO_JUMP_DEFLECT_SPEED;
+		}
+	}
+	else // hit by Koopa
+	{
+		if (untouchable == 0)
+		{
+			if (koopa->GetState() == KOOPA_STATE_WALKING_LEFT
+			|| koopa->GetState() == KOOPA_STATE_WALKING_RIGHT)
+			{
+				if (level > MARIO_LEVEL_SMALL)
+				{
+					level = MARIO_LEVEL_SMALL;
+					StartUntouchable();
+				}
+				else
+				{
+					DebugOut(L">>> Mario DIE >>> \n");
+					SetState(MARIO_STATE_DIE);
+				}
 			}
 		}
 	}
