@@ -290,5 +290,6 @@ public:
 	int GetIsTailUp() { return tailUp; }
 	int GetIsPowerDown() { return powerDown; }
 	int GetIsTailDown() { return tailDown; }
+	int GetIsRunning() { return isRunning; }
 	void GetNx(float &nx) { nx = this->nx; }
 };

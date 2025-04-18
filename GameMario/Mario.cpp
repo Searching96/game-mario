@@ -483,11 +483,10 @@ void CMario::OnCollisionWithKoopa(LPCOLLISIONEVENT e) {
 			koopa->SetSpeed((nx > 0) ? KOOPA_SHELL_SPEED : -KOOPA_SHELL_SPEED, 0);
 			return;
 		}
-		//else
-		//{
-		//	koopa->SetState(KOOPA_STATE_SHELL_STATIC);
-		//	vy = -MARIO_JUMP_DEFLECT_SPEED;
-		//}
+		else
+		{
+			koopa->SetState(KOOPA_STATE_BEING_HELD);
+		}
 		return;
 	}
 	// Side collision with walking or moving shell

@@ -25,6 +25,7 @@
 #define KOOPA_STATE_WALKING_RIGHT 101
 #define KOOPA_STATE_SHELL_STATIC 200
 #define KOOPA_STATE_SHELL_DYNAMIC 300
+#define KOOPA_STATE_BEING_HELD 400
 
 #define ID_ANI_KOOPA_WALKING_LEFT 150010
 #define ID_ANI_KOOPA_WALKING_RIGHT 150020
@@ -49,6 +50,8 @@ protected:
 
 	ULONGLONG shell_start;
 
+	int beingHeld = 0;
+
 	virtual void GetBoundingBox(float& left, float& top, float& right, float& bottom);
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 	virtual void Render();
@@ -64,5 +67,7 @@ public:
 	CKoopa(float x, float y);
 	virtual void SetState(int state);
 	void StartShell();
+	int GetBeingHeld() { return beingHeld; }
+	void SetBeingHeld(int beingHeld) { this->beingHeld = beingHeld; }
 };
 

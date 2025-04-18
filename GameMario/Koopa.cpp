@@ -112,6 +112,61 @@ bool CKoopa::IsPlatformEdge(float checkDistance)
 
 void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
+	CMario* mario = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+
+	// thoat khoi mai
+	if ((state == KOOPA_STATE_SHELL_STATIC || state == KOOPA_STATE_BEING_HELD)
+		&& !isKicked && (GetTickCount64() - shell_start > KOOPA_SHELL_TIMEOUT))
+	{
+		if (mario->GetIsRunning() == 1 && beingHeld == 1)
+		{
+			if (mario->GetLevel() == MARIO_LEVEL_TAIL)
+				mario->SetState(MARIO_STATE_TAIL_DOWN);
+			else if (mario->GetLevel() == MARIO_LEVEL_BIG)
+				mario->SetState(MARIO_STATE_POWER_DOWN);
+			else if (mario->GetLevel() == MARIO_LEVEL_SMALL)
+				mario->SetState(MARIO_STATE_DIE);
+		}
+		beingHeld = 0;
+		SetState(KOOPA_STATE_WALKING_LEFT);
+		return;
+	}
+
+	if (beingHeld == 1)
+	{
+		if (mario->GetIsRunning() == 0)
+		{
+			float mNx;
+			mario->GetNx(mNx);
+			this->SetState(KOOPA_STATE_SHELL_DYNAMIC);
+			this->SetSpeed((mNx > 0) ? KOOPA_SHELL_SPEED : -KOOPA_SHELL_SPEED, 0);
+			beingHeld = 0;
+			return;
+		}
+
+		float mX, mY;
+		mario->GetPosition(mX, mY);
+		float mNx;
+		mario->GetNx(mNx);
+		if (mario->GetLevel() == MARIO_LEVEL_BIG || mario->GetLevel() == MARIO_LEVEL_TAIL)
+		{
+			if (mNx > 0)
+				x = mX + 8;
+			else
+				x = mX - 8;
+			y = mY;
+		}
+		else
+		{
+			if (mNx > 0)
+				x = mX + 6;
+			else
+				x = mX - 6;
+			y = mY - 2;
+		}
+		return;
+	}
+	
 	vy += ay * dt;
 	vx += ax * dt;
 
@@ -124,12 +179,6 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	{
 		if (IsPlatformEdge(5.0f))
 			SetState(KOOPA_STATE_WALKING_LEFT);
-	}
-
-	if (state == KOOPA_STATE_SHELL_STATIC && !isKicked && (GetTickCount64() - shell_start > KOOPA_SHELL_TIMEOUT))
-	{
-		SetState(KOOPA_STATE_WALKING_LEFT);
-		return;
 	}
 
 	//DebugOut(L"[INFO] Koopa: vx=%f, ax=%f, vy=%f, ay=%f\n", vx, ax, vy, ay);
@@ -153,7 +202,7 @@ void CKoopa::StartShell()
 void CKoopa::Render()
 {
 	int aniId;
-	if (state == KOOPA_STATE_SHELL_STATIC)
+	if (state == KOOPA_STATE_SHELL_STATIC || state == KOOPA_STATE_BEING_HELD)
 	{
 		if (!isKicked && GetTickCount64() - shell_start > KOOPA_SHELL_ALERT_TIMEOUT)
 		{
@@ -199,24 +248,29 @@ void CKoopa::SetState(int state)
 
 	switch (state)
 	{
-	case KOOPA_STATE_SHELL_STATIC:
-		vx = 0;
-		vy = 0;
-		ax = 0;
-		break;
-	case KOOPA_STATE_SHELL_DYNAMIC:
-		isKicked = true;
-		vy = 0;
-		ax = 0;
-		break;
-	case KOOPA_STATE_WALKING_LEFT:
-		isKicked = false;
-		vx = -KOOPA_WALKING_SPEED;
-		break;
-	case KOOPA_STATE_WALKING_RIGHT:
-		isKicked = false;
-		vx = KOOPA_WALKING_SPEED;
-		break;
+		case KOOPA_STATE_SHELL_STATIC:
+			vx = 0;
+			vy = 0;
+			ax = 0;
+			break;
+		case KOOPA_STATE_SHELL_DYNAMIC:
+			isKicked = true;
+			vy = 0;
+			ax = 0;
+			break;
+		case KOOPA_STATE_WALKING_LEFT:
+			isKicked = false;
+			vx = -KOOPA_WALKING_SPEED;
+			break;
+		case KOOPA_STATE_WALKING_RIGHT:
+			isKicked = false;
+			vx = KOOPA_WALKING_SPEED;
+			break;
+		case KOOPA_STATE_BEING_HELD:
+		{
+			beingHeld = 1;
+			break;
+		}
 	}
 	CGameObject::SetState(state);
 }
