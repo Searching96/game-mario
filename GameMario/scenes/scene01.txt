@@ -264,7 +264,7 @@ assets\wingedgoomba.txt
 106	2112	112	16	16	1110003
 
 #Coin QBlock x,y
-10	176	352
+10	176	352.69
 10	192	352
 10	224	304
 10	416	320
@@ -283,11 +283,8 @@ assets\wingedgoomba.txt
 #Koopa x, y
 12	576	340
 #Goomba
-2	640	384
+2	700	384
 #WingedGoomba
-13	660	384
-#bqb
-11	616	384
-11	864	384
+13	780	384
 
 

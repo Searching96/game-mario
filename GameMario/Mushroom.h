@@ -35,6 +35,7 @@ protected:
     ULONGLONG bounceUpStart = -1;
     ULONGLONG bounceDownStart = -1;
 
+    int isOnPlatform = 0;
     int rise = 0;
     float y0 = - 1;
     int collisionNx;

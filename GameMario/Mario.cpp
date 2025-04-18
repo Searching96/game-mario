@@ -120,7 +120,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	vy += ay * dt;
 
 	// Friction when not moving and not jumping
-	if (jumpCount < 1 && !isHovering && isMoving == 0)
+	if (jumpCount < 1 && isHovering == 0 && isMoving == 0 && isBraking == 0)
 	{
 		if (vx > 0)
 			vx = max(0.0f, vx - frictionX * dt);

@@ -10,6 +10,8 @@ CKoopa::CKoopa(float x, float y) :CGameObject(x, y)
 
 void CKoopa::GetBoundingBox(float& left, float& top, float& right, float& bottom)
 {
+	if (state == KOOPA_STATE_WALKING_LEFT || state == KOOPA_STATE_WALKING_RIGHT)
+	{
 		left = x - KOOPA_BBOX_WIDTH / 2;
 		right = left + KOOPA_BBOX_WIDTH;
 

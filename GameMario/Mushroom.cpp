@@ -1,6 +1,7 @@
 #include "Mushroom.h"
 #include "Mario.h"
 #include "QuestionBlock.h"
+#include "CoinQBlock.h"
 
 CMushroom::CMushroom(float x, float y) : CGameObject(x, y)
 {
@@ -50,7 +51,8 @@ void CMushroom::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		}
 	}
 
-    vy += ay * dt;
+	if (isOnPlatform != 1)
+		vy += ay * dt;
     vx += ax * dt;
 
     CGameObject::Update(dt, coObjects);
@@ -66,8 +68,15 @@ void CMushroom::OnNoCollision(DWORD dt)
 void CMushroom::OnCollisionWith(LPCOLLISIONEVENT e)
 {
     if (!e->obj->IsBlocking()) return;
-	if (dynamic_cast<CQuestionBlock*>(e->obj)) return;
-	if (!dynamic_cast<CMario*>(e->obj)) return; // koopa will be added here later on
+	if (e->ny != 0 && e->obj->IsBlocking())
+	{
+		vy = vy - vy / 50;
+		isOnPlatform == 1;
+	}
+	if (dynamic_cast<CCoinQBlock*>(e->obj)) return;
+	if (dynamic_cast<CCoin*>(e->obj)) return;
+	if (e->nx != 0)
+		vx = -vx;
 }
 
 void CMushroom::GetBoundingBox(float& l, float& t, float& r, float& b)

@@ -14,6 +14,9 @@ CTailWhip::CTailWhip(float x, float y, CAttackParticle* attackParticle) : CGameO
 
 void CTailWhip::Render()
 {
+	CMario* mario = dynamic_cast<CMario*>(dynamic_cast<CPlayScene*>(CGame::GetInstance()->GetCurrentScene())->GetPlayer());
+	if (mario->GetLevel() != MARIO_LEVEL_TAIL)
+		return;
 	if (notWhipping == 1)
 		return;
 	CAnimations* animations = CAnimations::GetInstance();
