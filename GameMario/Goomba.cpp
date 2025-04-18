@@ -52,7 +52,12 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	vy += ay * dt;
 	vx += ax * dt;
 
-	if ( (state==GOOMBA_STATE_DIE_ON_STOMP) && (GetTickCount64() - dieOnStompStart > GOOMBA_DIE_TIMEOUT) )
+	if ((state==GOOMBA_STATE_DIE_ON_STOMP) && (GetTickCount64() - dieOnStompStart > GOOMBA_DIE_TIMEOUT))
+	{
+		isDeleted = true;
+		return;
+	}
+	if ((state == GOOMBA_STATE_DIE_ON_TAIL_WHIP) && (GetTickCount64() - dieOnWhipStart > GOOMBA_DIE_TIMEOUT))
 	{
 		isDeleted = true;
 		return;
@@ -92,6 +97,7 @@ void CGoomba::SetState(int state)
 		ay = 0; 
 		break;
 	case GOOMBA_STATE_DIE_ON_TAIL_WHIP:
+		dieOnWhipStart = GetTickCount64();
 		vy = -0.5f;
 		ay = GOOMBA_GRAVITY;
 		break;

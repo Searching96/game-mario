@@ -30,6 +30,7 @@ protected:
 	int whipSpin = 0;
 
 	void OnCollisionWithGoomba(LPCOLLISIONEVENT e);
+	void OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e);
 public:
 	CTailWhip(float x, float y, CAttackParticle* attackParticle);
 	void Render();

@@ -38,8 +38,8 @@ void CFireball::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		return;
 	}
 
-	DebugOut(L"[FIREBALL] x: %f, y: %f, vx: %f, vy: %f, state: %i\n", x, y, vx, vy, state);
-	DebugOut(L"[FIREBALL] x0: %f, y0: %f\n", x0, y0);
+	//DebugOut(L"[FIREBALL] x: %f, y: %f, vx: %f, vy: %f, state: %i\n", x, y, vx, vy, state);
+	//DebugOut(L"[FIREBALL] x0: %f, y0: %f\n", x0, y0);
 }
 
 void CFireball::SetState(int state)

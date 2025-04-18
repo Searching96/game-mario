@@ -2,6 +2,8 @@
 #include "QuestionBlock.h"
 #include "Goomba.h"
 #include "Mario.h"
+#include "WingedGoomba.h"
+#include "BuffQBlock.h"
 
 #include "PlayScene.h"
 
@@ -66,6 +68,8 @@ void CTailWhip::OnCollisionWith(LPCOLLISIONEVENT e)
 {
 	if (dynamic_cast<CGoomba*>(e->obj))
 		OnCollisionWithGoomba(e);
+	else if (dynamic_cast<CWingedGoomba*>(e->obj))
+		OnCollisionWithWingedGoomba(e);
 }
 
 void CTailWhip::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
@@ -82,6 +86,23 @@ void CTailWhip::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
 			attackParticle->SetPosition(x - 8, y);
 		attackParticle->SetState(ATTACK_PARTICLE_STATE_EMERGING);
 		goomba->SetState(GOOMBA_STATE_DIE_ON_TAIL_WHIP);
+	}
+}
+
+void CTailWhip::OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e)
+{
+	CWingedGoomba* wingedGoomba = dynamic_cast<CWingedGoomba*>(e->obj);
+	if (wingedGoomba)
+	{
+		CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+		float mNx;
+		player->GetNx(mNx);
+		if (mNx > 0)
+			attackParticle->SetPosition(x + 8, y);
+		else
+			attackParticle->SetPosition(x - 8, y);
+		attackParticle->SetState(ATTACK_PARTICLE_STATE_EMERGING);
+		wingedGoomba->SetState(WINGED_GOOMBA_STATE_DIE_ON_TAIL_WHIP);
 	}
 }
 

@@ -78,6 +78,9 @@ assets\wingedgoomba.txt
 1	1680	384	16	16	1000002
 1	1696	400	16	16	1000002
 
+#Piranha x, y
+9	360	376
+
 #Big pile
 1	1952	400	16	16	1000001
 1	1968	400	16	16	1000001
@@ -262,9 +265,6 @@ assets\wingedgoomba.txt
 
 #Portal 
 50	300	400	316	140	2
-
-#Piranha x, y
-9	360	376
 
 #Koopa x, y
 12	576	340
