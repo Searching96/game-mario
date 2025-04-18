@@ -4,31 +4,39 @@
 #include "Animation.h"
 #include "Animations.h"
 
-#define ID_ANI_TAIL_WHIP 20000
+#define ID_ANI_TAIL_WHIP			20000
 
-#define TAIL_WHIP_BBOX_WIDTH 14
-#define TAIL_WHIP_BBOX_HEIGHT 8
+#define TAIL_WHIP_BBOX_WIDTH		9
+#define TAIL_WHIP_BBOX_HEIGHT		8
 
-#define COIN_STATE_DYNAMIC 100
+#define TAIL_STATE_WHIPPING_LEFT	100
+#define TAIL_STATE_WHIPPING_RIGHT	200
+#define TAIL_STATE_NOT_WHIPPING		300
 
-#define COIN_BOUNCE_UP_TIME 200
-#define COIN_BOUNCE_DOWN_TIME 200
+#define TAIL_WHIP_LEFT_TIME			200
+#define TAIL_WHIP_RIGHT_TIME		200
 
 class CTailWhip : public CGameObject 
 {
 protected:
-	int bounceUp = 0;
-	int bounceDown = 0;
-	ULONGLONG bounceUpStart = -1;
-	ULONGLONG bounceDownStart = -1;
-	int type; // 0: static, 1: dynamic
+	int whippingLeft = 0;
+	int whippingRight = 0;
+	int notWhipping = 0;
+	ULONGLONG whipLeftStart = -1;
+	ULONGLONG whipRightStart = -1;
+	int whipSpin = 0;
+
+	void OnCollisionWithGoomba(LPCOLLISIONEVENT e);
 public:
 	CTailWhip(float x, float y);
 	void Render();
 	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 	void GetBoundingBox(float& l, float& t, float& r, float& b);
+	int IsCollidable() { return 1; };
 	int IsBlocking() { return 0; }
 	void SetState(int state);
-	void StartBounceUp() { bounceUp = 1; bounceUpStart = GetTickCount64(); }
-	void StartBounceDown() { bounceDown = 1; bounceDownStart = GetTickCount64(); }
+	void StartWhippingLeft() { whippingLeft = 1; whipLeftStart = GetTickCount64(); }
+	void StartWhippingRight() { whippingRight = 1; whipRightStart = GetTickCount64(); }
+	void OnNoCollision(DWORD dt) {};
+	void OnCollisionWith(LPCOLLISIONEVENT e);
 };

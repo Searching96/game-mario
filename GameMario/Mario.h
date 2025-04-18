@@ -58,6 +58,7 @@
 
 #define MARIO_STATE_RELEASE_MOVE	1100
 
+#define MARIO_STATE_TAIL_WHIP		1200
 
 #pragma region ANIMATION_ID
 // BIG MARIO
@@ -148,7 +149,10 @@
 #define ID_ANI_MARIO_TAIL_HOVERING_RIGHT 6900
 #define ID_ANI_MARIO_TAIL_HOVERING_LEFT 6910
 
-#define ID_ANI_MARIO_TAIL_DOWN 7000
+#define ID_ANI_MARIO_TAIL_WHIP_RIGHT 7000
+#define ID_ANI_MARIO_TAIL_WHIP_LEFT 7010
+
+#define ID_ANI_MARIO_TAIL_DOWN 7900
 
 
 #pragma endregion
@@ -179,6 +183,7 @@
 #define MARIO_HOVER_TIME							500
 #define MARIO_BRAKE_TIME							500
 #define MARIO_UNTOUCHABLE_RENDER_INTERVAL			75
+#define MARIO_TAIL_WHIP_TIME						400
 
 #define MAX_JUMP_COUNT 10
 
@@ -219,6 +224,9 @@ class CMario : public CGameObject
 	int isBraking = 0;
 	float vxBeforeBraking = 0;
 	ULONGLONG brakingStart = -1;
+
+	int isTailWhipping = 0;
+	ULONGLONG tailWhipStart = -1;
 
 	int jumpCount = 0;
 	int tailWagged = 1;
@@ -270,6 +278,7 @@ public:
 	void StartTailDown() { tailDown = 1; tailDownStart = GetTickCount64(); }
 	void StartBraking();
 	void StartHovering() { isHovering = 1; hoveringStart = GetTickCount64(); tailWagged = 0; }
+	void StartTailWhip() { isTailWhipping = 1; tailWhipStart = GetTickCount64(); }
 
 	int GetJumpCount() { return jumpCount; }
 	int GetLevel() { return level; }
@@ -277,4 +286,5 @@ public:
 	int GetIsTailUp() { return tailUp; }
 	int GetIsPowerDown() { return powerDown; }
 	int GetIsTailDown() { return tailDown; }
+	void GetNx(float &nx) { nx = this->nx; }
 };

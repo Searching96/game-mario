@@ -36,14 +36,17 @@ CMario::CMario(float x, float y, CTailWhip* tailWhip) : CGameObject(x, y)
 // In CMario::Update method, modify the hover handling
 void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
-	if (nx > 0)
-		tailWhip->SetPosition(x + 12, y + 6);
-	else
-		tailWhip->SetPosition(x - 12, y + 6);
-
 	// Track previous jump count to apply consistent jump impulse
 	static int lastJumpCount = 0;
 	int prevJumpCount = lastJumpCount;
+
+	if (isTailWhipping == 1)
+	{
+		if (GetTickCount64() - tailWhipStart > MARIO_TAIL_WHIP_TIME)
+		{
+			isTailWhipping = 0;
+		}
+	}
 
 	if (powerUp == 1)
 	{
@@ -148,6 +151,11 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	// Cap vertical falling speed
 	if (vy > MARIO_MAX_FALLING_SPEED) vy = MARIO_MAX_FALLING_SPEED;
 	if (vy < MARIO_MAX_JUMP_SPEED) vy = MARIO_MAX_JUMP_SPEED;
+
+	//if (nx > 0)
+	//	tailWhip->SetPosition(x + 6, y + 6);
+	//else
+	//	tailWhip->SetPosition(x - 6, y + 6);
 
 	DebugOutTitle(L"vx=%f, ax=%f, vy=%f, ay=%f, jc=%d, fx=%f, iop=%d, imv=%d\n",
 		vx, ax, vy, ay, jumpCount, frictionX, isOnPlatform, isMoving);
@@ -625,6 +633,14 @@ int CMario::GetAniIdTail()
 	{
 		aniId = ID_ANI_MARIO_TAIL_DOWN;
 	}
+
+	if (isTailWhipping == 1)
+	{
+		if (nx > 0)
+			aniId = ID_ANI_MARIO_TAIL_WHIP_RIGHT;
+		else
+			aniId = ID_ANI_MARIO_TAIL_WHIP_LEFT;
+	}
 		
 	if (aniId == -1) aniId = ID_ANI_MARIO_TAIL_IDLE_RIGHT;
 
@@ -684,6 +700,14 @@ void CMario::SetState(int state)
 
 	switch (state)
 	{
+	case MARIO_STATE_TAIL_WHIP:
+		if (nx > 0)
+			tailWhip->SetState(TAIL_STATE_WHIPPING_RIGHT);
+		else
+			tailWhip->SetState(TAIL_STATE_WHIPPING_LEFT);
+		StartTailWhip();
+		break;
+
 	case MARIO_STATE_RUNNING_RIGHT:
 		if (isSitting) break;
 		if (isOnPlatform && vx < 0) // If Mario is moving left, set state to brake

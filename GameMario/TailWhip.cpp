@@ -1,5 +1,9 @@
 #include "TailWhip.h"
 #include "QuestionBlock.h"
+#include "Goomba.h"
+#include "Mario.h"
+
+#include "PlayScene.h"
 
 CTailWhip::CTailWhip(float x, float y) : CGameObject(x, y) {}
 
@@ -13,8 +17,56 @@ void CTailWhip::Render()
 
 void CTailWhip::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
-	x += vx * dt;
-	y += vy * dt;
+	if (whipSpin == 2)
+	{
+		whipSpin = 0;
+		SetState(TAIL_STATE_NOT_WHIPPING);
+	}
+	else if (whippingLeft == 1)
+	{
+		if (GetTickCount64() - whipLeftStart > TAIL_WHIP_LEFT_TIME)
+		{
+			whippingLeft = 0;
+			SetState(TAIL_STATE_WHIPPING_RIGHT);
+		}
+	}
+	else if (whippingRight == 1)
+	{
+		if (GetTickCount64() - whipRightStart > TAIL_WHIP_RIGHT_TIME)
+		{
+			whippingRight = 0;
+			SetState(TAIL_STATE_WHIPPING_LEFT);
+		}
+	}
+
+	CMario* mario = dynamic_cast<CMario*>(dynamic_cast<CPlayScene*>(CGame::GetInstance()->GetCurrentScene())->GetPlayer());
+
+	float mX, mY, mNx;
+	mario->GetPosition(mX, mY);
+	mario->GetNx(mNx);
+
+	if (whippingRight == 1)
+		x = mX + 6;
+	else if (whippingLeft == 1)
+		x = mX - 6;
+	y = mY + 6;
+
+	CCollision::GetInstance()->Process(this, dt, coObjects);
+}
+
+void CTailWhip::OnCollisionWith(LPCOLLISIONEVENT e)
+{
+	if (dynamic_cast<CGoomba*>(e->obj))
+		OnCollisionWithGoomba(e);
+}
+
+void CTailWhip::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
+{
+	CGoomba* goomba = dynamic_cast<CGoomba*>(e->obj);
+	if (goomba)
+	{
+		goomba->SetState(GOOMBA_STATE_DIE);
+	}
 }
 
 void CTailWhip::GetBoundingBox(float& l, float& t, float& r, float& b)
@@ -29,6 +81,21 @@ void CTailWhip::SetState(int state)
 {
 	switch (state)
 	{
+	case TAIL_STATE_WHIPPING_LEFT:
+		whipSpin++;
+		whippingLeft = 1;
+		whipLeftStart = GetTickCount64();
+		break;
+	case TAIL_STATE_WHIPPING_RIGHT:
+		whipSpin++;
+		whippingRight = 1;
+		whipRightStart = GetTickCount64();
+		break;
+	case TAIL_STATE_NOT_WHIPPING:
+		whippingLeft = 0;
+		whippingRight = 0;
+		notWhipping = 1;
+		break;
 	}
 	CGameObject::SetState(state);
 }
