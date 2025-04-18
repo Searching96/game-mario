@@ -2,10 +2,15 @@
 #include "QuestionBlock.h"
 #include "Goomba.h"
 #include "Mario.h"
+#include "WingedGoomba.h"
+#include "BuffQBlock.h"
 
 #include "PlayScene.h"
 
-CTailWhip::CTailWhip(float x, float y) : CGameObject(x, y) {}
+CTailWhip::CTailWhip(float x, float y, CAttackParticle* attackParticle) : CGameObject(x, y) 
+{
+	this->attackParticle = attackParticle;
+}
 
 void CTailWhip::Render()
 {
@@ -63,6 +68,8 @@ void CTailWhip::OnCollisionWith(LPCOLLISIONEVENT e)
 {
 	if (dynamic_cast<CGoomba*>(e->obj))
 		OnCollisionWithGoomba(e);
+	else if (dynamic_cast<CWingedGoomba*>(e->obj))
+		OnCollisionWithWingedGoomba(e);
 }
 
 void CTailWhip::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
@@ -70,7 +77,32 @@ void CTailWhip::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
 	CGoomba* goomba = dynamic_cast<CGoomba*>(e->obj);
 	if (goomba)
 	{
-		goomba->SetState(GOOMBA_STATE_DIE);
+		CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+		float mNx;
+		player->GetNx(mNx);
+		if (mNx > 0)
+			attackParticle->SetPosition(x + 8, y);
+		else
+			attackParticle->SetPosition(x - 8, y);
+		attackParticle->SetState(ATTACK_PARTICLE_STATE_EMERGING);
+		goomba->SetState(GOOMBA_STATE_DIE_ON_TAIL_WHIP);
+	}
+}
+
+void CTailWhip::OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e)
+{
+	CWingedGoomba* wingedGoomba = dynamic_cast<CWingedGoomba*>(e->obj);
+	if (wingedGoomba)
+	{
+		CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+		float mNx;
+		player->GetNx(mNx);
+		if (mNx > 0)
+			attackParticle->SetPosition(x + 8, y);
+		else
+			attackParticle->SetPosition(x - 8, y);
+		attackParticle->SetState(ATTACK_PARTICLE_STATE_EMERGING);
+		wingedGoomba->SetState(WINGED_GOOMBA_STATE_DIE_ON_TAIL_WHIP);
 	}
 }
 

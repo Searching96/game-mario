@@ -14,6 +14,7 @@
 #include "CoinQBlock.h"
 #include "BuffQBlock.h"
 #include "Koopa.h"
+#include "WingedGoomba.h"
 
 #include "Collision.h"
 
@@ -262,18 +263,24 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 		OnCollisionWithFireball(e);
 	else if (dynamic_cast<CKoopa*>(e->obj))
 		OnCollisionWithKoopa(e);
+	else if (dynamic_cast<CWingedGoomba*>(e->obj))
+		OnCollisionWithWingedGoomba(e);
 }
 
 void CMario::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
 {
 	CGoomba* goomba = dynamic_cast<CGoomba*>(e->obj);
+	if (goomba->GetState() == GOOMBA_STATE_DIE_ON_STOMP)
+		return;
+	if (goomba->GetState() == GOOMBA_STATE_DIE_ON_TAIL_WHIP)
+		return;
 
 	// jump on top >> kill Goomba and deflect a bit 
 	if (e->ny < 0)
 	{
-		if (goomba->GetState() != GOOMBA_STATE_DIE)
+		if (goomba->GetState() != GOOMBA_STATE_DIE_ON_STOMP)
 		{
-			goomba->SetState(GOOMBA_STATE_DIE);
+			goomba->SetState(GOOMBA_STATE_DIE_ON_STOMP);
 			vy = -MARIO_JUMP_DEFLECT_SPEED;
 		}
 	}
@@ -281,7 +288,7 @@ void CMario::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
 	{
 		if (untouchable == 0)
 		{
-			if (goomba->GetState() != GOOMBA_STATE_DIE)
+			if (goomba->GetState() != GOOMBA_STATE_DIE_ON_STOMP)
 			{
 				if (level == MARIO_LEVEL_BIG)
 				{
@@ -502,6 +509,47 @@ void CMario::OnCollisionWithKoopa(LPCOLLISIONEVENT e) {
 		{
 			DebugOut(L">>> Mario DIE >>> \n");
 			SetState(MARIO_STATE_DIE);
+		}
+	}
+}
+
+void CMario::OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e)
+{
+	CWingedGoomba* wingedGoomba = dynamic_cast<CWingedGoomba*>(e->obj);
+	if (wingedGoomba->GetState() == WINGED_GOOMBA_STATE_DIE_ON_STOMP)
+		return;
+	if (wingedGoomba->GetState() == WINGED_GOOMBA_STATE_DIE_ON_TAIL_WHIP)
+		return;
+	// jump on top >> kill Goomba and deflect a bit 
+	if (e->ny < 0)
+	{
+		if (wingedGoomba->GetState() != WINGED_GOOMBA_STATE_DIE_ON_STOMP)
+		{
+			wingedGoomba->SetState(WINGED_GOOMBA_STATE_DIE_ON_STOMP);
+			vy = -MARIO_JUMP_DEFLECT_SPEED;
+		}
+	}
+	else // hit by Goomba
+	{
+		if (untouchable == 0)
+		{
+			if (wingedGoomba->GetState() != WINGED_GOOMBA_STATE_DIE_ON_STOMP)
+			{
+				if (level == MARIO_LEVEL_BIG)
+				{
+					y += 6; // RED ALERT
+					SetState(MARIO_STATE_POWER_DOWN);
+				}
+				else if (level == MARIO_LEVEL_TAIL)
+				{
+					SetState(MARIO_STATE_TAIL_DOWN);
+				}
+				else
+				{
+					DebugOut(L">>> Mario DIE >>> \n");
+					SetState(MARIO_STATE_DIE);
+				}
+			}
 		}
 	}
 }
@@ -856,7 +904,7 @@ void CMario::SetState(int state)
 			{
 				vx = -MARIO_MAX_RUNNING_SPEED / SPEED_DIVISOR;
 				ax = 0.0f;  // Đặt ax thành 0 một cách rõ ràng
-				DebugOut(L"Air direction change - to left, ax set to 0\n");
+				//DebugOut(L"Air direction change - to left, ax set to 0\n");
 			}
 		}
 		else
@@ -889,7 +937,7 @@ void CMario::SetState(int state)
 			{
 				vx = MARIO_MAX_WALKING_SPEED / SPEED_DIVISOR;
 				ax = 0.0f;  // Đặt ax thành 0 một cách rõ ràng
-				DebugOut(L"Air direction change - to right, ax set to 0\n");
+				//DebugOut(L"Air direction change - to right, ax set to 0\n");
 			}
 		}
 		else
@@ -1051,7 +1099,7 @@ void CMario::SetState(int state)
 		break;
 	}
 
-	DebugOut(L"SetState: %d\n", state);
+	//DebugOut(L"SetState: %d\n", state);
 	CGameObject::SetState(state);
 }
 
@@ -1078,7 +1126,7 @@ void CMario::GetBoundingBox(float& left, float& top, float& right, float& bottom
 	{
 		left = x - MARIO_SMALL_BBOX_WIDTH / 2;
 		top = y - MARIO_SMALL_BBOX_HEIGHT / 2;
-		right = left + MARIO_SMALL_BBOX_WIDTH;
+		right = left + MARIO_SMALL_BBOX_WIDTH - 4;
 		bottom = top + MARIO_SMALL_BBOX_HEIGHT;
 	}
 }

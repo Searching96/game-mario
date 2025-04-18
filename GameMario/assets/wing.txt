@@ -1,0 +1,13 @@
+# id	left	top	right	bottom	texture_id
+[SPRITES]
+# LEFT OPEN
+160001	0	147	7	160	11
+# LEFT CLOSE
+160002	0	183	7	192	11
+# RIGHT OPEN
+160011	16	147	25	160	11
+# RIGHT CLOSE
+160012	16	183	25	192	11
+
+# ani_id	sprite1_id	time1	sprite2_id	time2	...
+[ANIMATIONS]

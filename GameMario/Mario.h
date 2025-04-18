@@ -29,7 +29,7 @@
 
 #define MARIO_GRAVITY				0.002f
 
-#define MARIO_JUMP_DEFLECT_SPEED	0.4f
+#define MARIO_JUMP_DEFLECT_SPEED	0.5f
 
 #define MARIO_HALF_RUN_ACCEL_SPEED	(MARIO_MAX_RUNNING_SPEED + MARIO_RUNNING_SPEED) / 2
 
@@ -247,6 +247,7 @@ class CMario : public CGameObject
 	void OnCollisionWithBuffQBlock(LPCOLLISIONEVENT e);
 	void OnCollisionWithFireball(LPCOLLISIONEVENT e);
 	void OnCollisionWithKoopa(LPCOLLISIONEVENT e);
+	void OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e);
 
 	int GetAniIdBig();
 	int GetAniIdSmall();
@@ -262,10 +263,7 @@ public:
 	void Render();
 	void SetState(int state);
 
-	int IsCollidable()
-	{ 
-		return (state != MARIO_STATE_DIE); 
-	}
+	int IsCollidable() { return (state != MARIO_STATE_DIE); }
 
 	int IsBlocking() { return (state != MARIO_STATE_DIE && untouchable==0); }
 

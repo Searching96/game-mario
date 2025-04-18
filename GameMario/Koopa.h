@@ -55,7 +55,7 @@ protected:
 	bool IsPlatformEdge(float checkDistance);
 
 	virtual int IsCollidable() { return 1; };
-	virtual int IsBlocking() { return 0; }
+	virtual int IsBlocking() { return 1; }
 	virtual void OnNoCollision(DWORD dt);
 
 	virtual void OnCollisionWith(LPCOLLISIONEVENT e);

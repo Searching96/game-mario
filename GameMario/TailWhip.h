@@ -4,9 +4,11 @@
 #include "Animation.h"
 #include "Animations.h"
 
+#include "AttackParticle.h"
+
 #define ID_ANI_TAIL_WHIP			20000
 
-#define TAIL_WHIP_BBOX_WIDTH		9
+#define TAIL_WHIP_BBOX_WIDTH		16
 #define TAIL_WHIP_BBOX_HEIGHT		8
 
 #define TAIL_STATE_WHIPPING_LEFT	100
@@ -19,6 +21,7 @@
 class CTailWhip : public CGameObject 
 {
 protected:
+	CAttackParticle* attackParticle;
 	int whippingLeft = 0;
 	int whippingRight = 0;
 	int notWhipping = 0;
@@ -27,8 +30,9 @@ protected:
 	int whipSpin = 0;
 
 	void OnCollisionWithGoomba(LPCOLLISIONEVENT e);
+	void OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e);
 public:
-	CTailWhip(float x, float y);
+	CTailWhip(float x, float y, CAttackParticle* attackParticle);
 	void Render();
 	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 	void GetBoundingBox(float& l, float& t, float& r, float& b);

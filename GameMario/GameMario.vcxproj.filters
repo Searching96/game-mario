@@ -123,6 +123,12 @@
     <ClCompile Include="Koopa.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="AttackParticle.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WingedGoomba.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="LifeBrick.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -252,6 +258,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="LifeMushroom.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AttackParticle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WingedGoomba.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
