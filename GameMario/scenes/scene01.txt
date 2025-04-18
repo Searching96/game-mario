@@ -269,6 +269,7 @@ assets\mushroom.txt
 10	192	352
 10	224	304
 10	416	320
+10	704	352
 
 
 #Buff QBlock x,y
