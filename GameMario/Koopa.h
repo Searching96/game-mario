@@ -37,7 +37,7 @@ protected:
 	float ay;
 
 	bool isReversed = false;
-	bool isShell = false;
+	bool isKicked = false;
 
 	LPGAMEOBJECT ground;
 

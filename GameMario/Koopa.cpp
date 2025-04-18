@@ -89,7 +89,7 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			SetState(KOOPA_STATE_WALKING_LEFT);
 	}
 
-	if (state == KOOPA_STATE_SHELL_STATIC && (GetTickCount64() - shell_start > KOOPA_SHELL_TIMEOUT))
+	if (state == KOOPA_STATE_SHELL_STATIC && !isKicked && (GetTickCount64() - shell_start > KOOPA_SHELL_TIMEOUT))
 	{
 		y -= (KOOPA_BBOX_HEIGHT - KOOPA_BBOX_HEIGHT_SHELL) / 2;
 		SetState(KOOPA_STATE_WALKING_LEFT);
@@ -106,7 +106,7 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 void CKoopa::StartShell()
 {
 	shell_start = GetTickCount64();
-	isShell = true;
+	isKicked = false;
 	SetState(KOOPA_STATE_SHELL_STATIC);
 }
 
@@ -148,29 +148,28 @@ void CKoopa::Render()
 
 void CKoopa::SetState(int state)
 {
-	CGameObject::SetState(state);
 	switch (state)
 	{
 	case KOOPA_STATE_SHELL_STATIC:
-		y = isShell ? y : y + (float)(KOOPA_BBOX_HEIGHT - KOOPA_BBOX_HEIGHT_SHELL) / 2;
+		y = state == KOOPA_STATE_SHELL_DYNAMIC ? y : y + (float)(KOOPA_BBOX_HEIGHT - KOOPA_BBOX_HEIGHT_SHELL) / 2;
 		vx = 0;
 		vy = 0;
 		ax = 0;
 		ay = 0;
-		isShell = true;
 		break;
 	case KOOPA_STATE_SHELL_DYNAMIC:
-		isShell = true;
+		isKicked = true;
 		vy = 0;
 		ay = KOOPA_GRAVITY;
 		break;
 	case KOOPA_STATE_WALKING_LEFT:
-		isShell = false;
+		isKicked = false;
 		vx = -KOOPA_WALKING_SPEED;
 		break;
 	case KOOPA_STATE_WALKING_RIGHT:
-		isShell = false;
+		isKicked = false;
 		vx = KOOPA_WALKING_SPEED;
 		break;
 	}
+	CGameObject::SetState(state);
 }
