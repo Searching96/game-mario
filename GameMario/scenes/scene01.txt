@@ -186,7 +186,7 @@ assets\koopa.txt
 9	360	376
 
 #Koopa x, y
-10	576	340
+12	576	340
 
 #Pipe x, y, c_width, c_height, height, top_left, top_right, ...
 #Map border
