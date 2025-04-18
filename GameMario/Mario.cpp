@@ -458,24 +458,20 @@ void CMario::OnCollisionWithKoopa(LPCOLLISIONEVENT e) {
 			return;
 		}
 	}
-	else
-	{
-		if (koopa->GetState() == KOOPA_STATE_SHELL_STATIC) {
-			// Kick the shell
-			if (isRunning == 0)
-			{
-				koopa->SetState(KOOPA_STATE_SHELL_DYNAMIC);
-				koopa->SetSpeed((nx > 0) ? KOOPA_SHELL_SPEED : -KOOPA_SHELL_SPEED, 0);
-				return;
-			}
-			//else
-			//{
-			//	koopa->SetState(KOOPA_STATE_SHELL_STATIC);
-			//	vy = -MARIO_JUMP_DEFLECT_SPEED;
-			//}
+	if (koopa->GetState() == KOOPA_STATE_SHELL_STATIC) {
+		// Kick the shell
+		if (isRunning == 0)
+		{
+			koopa->SetState(KOOPA_STATE_SHELL_DYNAMIC);
+			koopa->SetSpeed((nx > 0) ? KOOPA_SHELL_SPEED : -KOOPA_SHELL_SPEED, 0);
 			return;
 		}
-
+		//else
+		//{
+		//	koopa->SetState(KOOPA_STATE_SHELL_STATIC);
+		//	vy = -MARIO_JUMP_DEFLECT_SPEED;
+		//}
+		return;
 	}
 	// Side collision with walking or moving shell
 	if (koopa->GetState() == KOOPA_STATE_WALKING_LEFT ||

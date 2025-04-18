@@ -233,6 +233,7 @@ class CMario : public CGameObject
 	int tailWagged = 1;
 	int isMoving = 0;
 	int isRunning = 0;
+	int isKicking = 0;
 	int isJumpButtonHeld = 0;
 
 	void OnCollisionWithGoomba(LPCOLLISIONEVENT e);
