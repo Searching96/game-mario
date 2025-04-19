@@ -73,7 +73,6 @@ void CWingedGoomba::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		leftWing->SetKilled(1);
 		rightWing->SetKilled(1);
 		vy = 0;
-		ay = 1000;
 	}
 	
 	CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
@@ -157,6 +156,7 @@ void CWingedGoomba::SetState(int state)
 		break;
 	case WINGED_GOOMBA_STATE_TRACKING:
 	{
+		if (isWinged == 0) break;
 		CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
 		float mX, mY;
 		player->GetPosition(mX, mY);
@@ -171,6 +171,7 @@ void CWingedGoomba::SetState(int state)
 		break;
 	}
 	case WINGED_GOOMBA_STATE_BOUNCING:
+		if (isWinged == 0) break;
 		vx = (nx > 0) ? WINGED_GOOMBA_WALKING_SPEED : -WINGED_GOOMBA_WALKING_SPEED;
 		ay = WINGED_GOOMBA_GRAVITY;
 		vy = -WINGED_GOOMBA_BOUNCE_SPEED;
@@ -179,6 +180,7 @@ void CWingedGoomba::SetState(int state)
 		StartBouncing();
 		break;
 	case WINGED_GOOMBA_STATE_FLYING:
+		if (isWinged == 0) break;
 		vx = (nx > 0) ? WINGED_GOOMBA_WALKING_SPEED : -WINGED_GOOMBA_WALKING_SPEED;
 		vy = -0.35f;
 		ax = 0;
