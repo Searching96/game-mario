@@ -109,8 +109,8 @@ void CWingedGoomba::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		return;
 	}
 
-	leftWing->SetPosition(x - 6, y - 4);
-	rightWing->SetPosition(x + 6.5, y - 4);
+	leftWing->SetPosition(x - 6, y - 6);
+	rightWing->SetPosition(x + 6.5, y - 6);
 
 	CGameObject::Update(dt, coObjects);
 	CCollision::GetInstance()->Process(this, dt, coObjects);

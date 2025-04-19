@@ -131,6 +131,7 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		SetState(KOOPA_STATE_WALKING_LEFT);
 		return;
 	}
+	//if ()
 
 	if (beingHeld == 1)
 	{
