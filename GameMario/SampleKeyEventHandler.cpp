@@ -72,6 +72,7 @@ void CSampleKeyHandler::OnKeyUp(int KeyCode)
 		mario->SetState(MARIO_STATE_RELEASE_RUN);
 		break;
 	case DIK_R:
+		CGame::GetInstance()->GetCurrentScene()->Unload();
 		CGame::GetInstance()->GetCurrentScene()->Load();
 		break;
 	}
