@@ -184,6 +184,7 @@
     <ClCompile Include="Tree.cpp" />
     <ClCompile Include="Trinket.cpp" />
     <ClCompile Include="Utils.cpp" />
+    <ClCompile Include="Wing.cpp" />
     <ClCompile Include="WingedGoomba.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -229,6 +230,7 @@
     <ClInclude Include="Tree.h" />
     <ClInclude Include="Trinket.h" />
     <ClInclude Include="Utils.h" />
+    <ClInclude Include="Wing.h" />
     <ClInclude Include="WingedGoomba.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

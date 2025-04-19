@@ -155,7 +155,15 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		break;
 	}
 
-	case OBJECT_TYPE_WINGED_GOOMBA: obj = new CWingedGoomba(x, y); break;
+	case OBJECT_TYPE_WINGED_GOOMBA:
+	{
+		CWing* leftWing = new CWing(x - 6, y + 2, 0);
+		CWing* rightWing = new CWing(x + 4, y + 2, 1);
+		objects.push_back(leftWing);
+		objects.push_back(rightWing);
+		obj = new CWingedGoomba(x, y, leftWing, rightWing); 
+		break;
+	}
 
 	case OBJECT_TYPE_BRICK:
 	{

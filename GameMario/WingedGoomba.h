@@ -1,5 +1,6 @@
 #pragma once
 #include "GameObject.h"
+#include "Wing.h"
 
 #define WINGED_GOOMBA_GRAVITY					0.002f
 #define WINGED_GOOMBA_WALKING_SPEED				0.05f
@@ -34,7 +35,10 @@ protected:
 	float ax;
 	float ay;
 
-	int isWinged = 0;
+	int isWinged = 1;
+
+	CWing* leftWing;
+	CWing* rightWing;
 
 	ULONGLONG dieOnStompStart = -1;
 	ULONGLONG dieOnWhipStart = -1;
@@ -58,9 +62,11 @@ protected:
 	virtual void OnCollisionWith(LPCOLLISIONEVENT e);
 
 public:
-	CWingedGoomba(float x, float y);
+	CWingedGoomba(float x, float y, CWing* leftWing, CWing* rightWing);
 	virtual void SetState(int state);
 	void StartTracking() { isTracking = 1; trackingStart = GetTickCount64(); }
 	void StartBouncing() { isBouncing = 1; bounceCount++; }
 	void StartFlying() { isFlying = 1; flyingStart = GetTickCount64(); }
+	void SetWinged(int winged) { isWinged = winged; }
+	int GetWinged() { return isWinged; }
 };

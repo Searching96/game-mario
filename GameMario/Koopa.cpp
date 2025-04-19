@@ -231,7 +231,7 @@ void CKoopa::Render()
 	else aniId = ID_ANI_KOOPA_WALKING_RIGHT;
 
 	CAnimations::GetInstance()->Get(aniId)->Render(x, y);
-	RenderBoundingBox();
+	//RenderBoundingBox();
 }
 void CKoopa::SetState(int state)
 {

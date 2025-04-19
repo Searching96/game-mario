@@ -1,4 +1,6 @@
 #include "Goomba.h"
+#include "Mario.h"
+#include "PlayScene.h"
 
 CGoomba::CGoomba(float x, float y):CGameObject(x, y)
 {
@@ -49,6 +51,12 @@ void CGoomba::OnCollisionWith(LPCOLLISIONEVENT e)
 
 void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 {
+	CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+	float mX, mY;
+	player->GetPosition(mX, mY);
+	if (fabs(x - mX) >= 300)
+		return;
+
 	vy += ay * dt;
 	vx += ax * dt;
 
@@ -81,7 +89,7 @@ void CGoomba::Render()
 	}
 
 	CAnimations::GetInstance()->Get(aniId)->Render(x,y);
-	RenderBoundingBox();
+	//RenderBoundingBox();
 }
 
 void CGoomba::SetState(int state)

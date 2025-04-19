@@ -549,6 +549,13 @@ void CMario::OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e)
 	// jump on top >> kill Goomba and deflect a bit 
 	if (e->ny < 0)
 	{
+		if (wingedGoomba->GetWinged() == 1)
+		{
+			wingedGoomba->SetWinged(0);
+			wingedGoomba->SetState(WINGED_GOOMBA_STATE_WALKING);
+			vy = -MARIO_JUMP_DEFLECT_SPEED;
+			return;
+		}
 		if (wingedGoomba->GetState() != WINGED_GOOMBA_STATE_DIE_ON_STOMP)
 		{
 			wingedGoomba->SetState(WINGED_GOOMBA_STATE_DIE_ON_STOMP);

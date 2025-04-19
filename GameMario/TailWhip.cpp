@@ -23,11 +23,15 @@ void CTailWhip::Render()
 	CAnimations* animations = CAnimations::GetInstance();
 	animations->Get(ID_ANI_TAIL_WHIP)->Render(x, y);
 
-	RenderBoundingBox();
+	//RenderBoundingBox();
 }
 
 void CTailWhip::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
+	CMario* mario = dynamic_cast<CMario*>(dynamic_cast<CPlayScene*>(CGame::GetInstance()->GetCurrentScene())->GetPlayer());
+	if (mario->GetLevel() != MARIO_LEVEL_TAIL)
+		return;
+
 	if (notWhipping == 1)
 		return;
 	
@@ -52,8 +56,6 @@ void CTailWhip::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			SetState(TAIL_STATE_WHIPPING_LEFT);
 		}
 	}
-
-	CMario* mario = dynamic_cast<CMario*>(dynamic_cast<CPlayScene*>(CGame::GetInstance()->GetCurrentScene())->GetPlayer());
 
 	float mX, mY, mNx;
 	mario->GetPosition(mX, mY);

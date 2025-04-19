@@ -32,6 +32,7 @@ assets\mushroom.txt
 assets\superleaf.txt
 assets\attackparticle.txt
 assets\wingedgoomba.txt
+assets\wing.txt
 #
 [OBJECTS]
 # type	x	y	extra_settings per object type
@@ -308,13 +309,14 @@ assets\wingedgoomba.txt
 #50	300	400	316	140	2
 
 #Sky brick
-14	160	368
 14	1440	128
 #Koopa x, y
 12	576	340
 #Goomba
 2	700	384
+2	770	384
+2	300	384
 #WingedGoomba
-13	780	384
+13	840	384
 
 

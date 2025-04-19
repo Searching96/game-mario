@@ -4,10 +4,12 @@
 
 #include "debug.h"
 
-CWingedGoomba::CWingedGoomba(float x, float y) : CGameObject(x, y)
+CWingedGoomba::CWingedGoomba(float x, float y, CWing* left, CWing* right) : CGameObject(x, y)
 {
 	this->ax = 0;
 	this->ay = WINGED_GOOMBA_GRAVITY;
+	this->leftWing = left;
+	this->rightWing = right;
 	SetState(WINGED_GOOMBA_STATE_TRACKING);
 }
 
@@ -66,6 +68,19 @@ void CWingedGoomba::OnCollisionWith(LPCOLLISIONEVENT e)
 
 void CWingedGoomba::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
+	if (isWinged == 0)
+	{
+		leftWing->SetKilled(1);
+		rightWing->SetKilled(1);
+		vy = 0;
+		ay = 1000;
+	}
+	
+	CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+	float mX, mY;
+	player->GetPosition(mX, mY);
+	if (fabs(x - mX) >= 200)
+		return;
 
 	if (isTracking)
 	{
@@ -94,6 +109,9 @@ void CWingedGoomba::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		isDeleted = true;
 		return;
 	}
+
+	leftWing->SetPosition(x - 6, y - 4);
+	rightWing->SetPosition(x + 6.5, y - 4);
 
 	CGameObject::Update(dt, coObjects);
 	CCollision::GetInstance()->Process(this, dt, coObjects);
@@ -135,6 +153,7 @@ void CWingedGoomba::SetState(int state)
 		break;
 	case WINGED_GOOMBA_STATE_WALKING:
 		vx = -WINGED_GOOMBA_WALKING_SPEED;
+		vy = 0;
 		break;
 	case WINGED_GOOMBA_STATE_TRACKING:
 	{
@@ -146,6 +165,8 @@ void CWingedGoomba::SetState(int state)
 		vy = 0;
 		ax = 0;
 		ay = WINGED_GOOMBA_GRAVITY;
+		leftWing->SetState(WING_STATE_CLOSE);
+		rightWing->SetState(WING_STATE_CLOSE);
 		StartTracking();
 		break;
 	}
@@ -153,6 +174,8 @@ void CWingedGoomba::SetState(int state)
 		vx = (nx > 0) ? WINGED_GOOMBA_WALKING_SPEED : -WINGED_GOOMBA_WALKING_SPEED;
 		ay = WINGED_GOOMBA_GRAVITY;
 		vy = -WINGED_GOOMBA_BOUNCE_SPEED;
+		leftWing->SetState(WING_STATE_FLAP);
+		rightWing->SetState(WING_STATE_FLAP);
 		StartBouncing();
 		break;
 	case WINGED_GOOMBA_STATE_FLYING:
