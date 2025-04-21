@@ -5,6 +5,8 @@
 #include "Mario.h"
 #include "WingedGoomba.h"
 #include "BuffQBlock.h"
+#include "CoinQBlock.h"
+#include "PiranhaPlant.h"
 
 #include "PlayScene.h"
 
@@ -80,6 +82,22 @@ void CTailWhip::OnCollisionWith(LPCOLLISIONEVENT e)
 		OnCollisionWithKoopa(e);
 	else if (dynamic_cast<CBuffQBlock*>(e->obj))
 		OnCollisionWithBuffQBlock(e);
+	else if (dynamic_cast<CCoinQBlock*>(e->obj))
+		OnCollisionWithBuffQBlock(e);
+	else if (dynamic_cast<CCoin*>(e->obj))
+		OnCollisionWithBuffQBlock(e);
+	else if (dynamic_cast<CPiranhaPlant*>(e->obj))
+		OnCollisionWithPiranhaPlant(e);
+	//else if (dynamic_cast<CPortal*>(e->obj))
+	//	return;
+	//else if (dynamic_cast<CLifeMushroom*>(e->obj))
+	//	return;
+	else if (dynamic_cast<CMushroom*>(e->obj))
+		return;
+	else if (dynamic_cast<CSuperLeaf*>(e->obj))
+		return;
+	//else if (dynamic_cast<CFireball*>(e->obj))
+	//	return;
 	else if (dynamic_cast<CQuestionBlock*>(e->obj))
 		OnCollisionWithQuestionBlock(e);
 }
@@ -98,6 +116,13 @@ void CTailWhip::OnCollisionWithBuffQBlock(LPCOLLISIONEVENT e)
 		bqb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
 }
 
+void CTailWhip::OnCollisionWithCoinQBlock(LPCOLLISIONEVENT e)
+{
+	CCoinQBlock* cqb = dynamic_cast<CCoinQBlock*>(e->obj);
+	if (e->nx != 0 && cqb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
+		cqb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
+}
+
 void CTailWhip::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
 {
 	CGoomba* goomba = dynamic_cast<CGoomba*>(e->obj);
@@ -112,6 +137,23 @@ void CTailWhip::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
 			attackParticle->SetPosition(x - 8, y);
 		attackParticle->SetState(ATTACK_PARTICLE_STATE_EMERGING);
 		goomba->SetState(GOOMBA_STATE_DIE_ON_TAIL_WHIP);
+	}
+}
+
+void CTailWhip::OnCollisionWithPiranhaPlant(LPCOLLISIONEVENT e)
+{
+	CPiranhaPlant* plant = dynamic_cast<CPiranhaPlant*>(e->obj);
+	if (plant)
+	{
+		CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+		float mNx;
+		player->GetNx(mNx);
+		if (mNx > 0)
+			attackParticle->SetPosition(x + 8, y);
+		else
+			attackParticle->SetPosition(x - 8, y);
+		attackParticle->SetState(ATTACK_PARTICLE_STATE_EMERGING);
+		plant->SetState(PIRANHA_PLANT_STATE_DIED);
 	}
 }
 
