@@ -5,7 +5,7 @@
 #include <vector>
 #include <list>
 
-#define QUESTIONBLOCK_BBOX_WIDTH  14
+#define QUESTIONBLOCK_BBOX_WIDTH  16
 #define QUESTIONBLOCK_BBOX_HEIGHT 16
 
 #define ID_ANI_QUESTIONBLOCK 1030000
