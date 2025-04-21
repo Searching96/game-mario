@@ -32,6 +32,9 @@ protected:
 	void OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e);
 	void OnCollisionWithKoopa(LPCOLLISIONEVENT e);
 	void OnCollisionWithBuffQBlock(LPCOLLISIONEVENT e);
+	void OnCollisionWithCoinQBlock(LPCOLLISIONEVENT e);
+	void OnCollisionWithPiranhaPlant(LPCOLLISIONEVENT e);
+
 	void OnCollisionWithQuestionBlock(LPCOLLISIONEVENT e);
 public:
 	CTailWhip(float x, float y, CAttackParticle* attackParticle);

@@ -58,7 +58,7 @@ void CPiranhaPlant::Render()
 
 	CAnimations::GetInstance()->Get(aniId)->Render(x, y);
 
-	RenderBoundingBox();
+	//RenderBoundingBox();
 }
 
 // 0 bottom left, 1 lower center left, 2 upper center left, 3 top left

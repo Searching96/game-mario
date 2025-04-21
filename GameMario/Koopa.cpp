@@ -49,6 +49,20 @@ void CKoopa::OnCollisionWith(LPCOLLISIONEVENT e) {
 			ground = e->obj;
 	}// Remember what we're standing on
 
+	//if (e->ny == 0 && e->nx != 0 && state == KOOPA_STATE_WALKING_LEFT && dynamic_cast<CTail*>(e->src_obj))
+	//{
+	//	SetState(KOOPA_STATE_SHELL_STATIC);
+	//	// You may want to add velocity to make it move when hit, something like:
+	//	vx = e->nx * KOOPA_SHELL_DEFLECT_SPEED;
+	//	// Or if you want it to just be stationary:
+	//	// vx = 0;
+
+	//	// Reset any relevant timers or flags
+	//	isHeld = false;
+	//	start_moving = 0;
+	//	return;
+	//}
+
 	// Handle other collisions
 	if (e->nx != 0) {
 		// Wall collision while walking
@@ -131,6 +145,7 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		SetState(KOOPA_STATE_WALKING_LEFT);
 		return;
 	}
+	//if ()
 
 	if (beingHeld == 1)
 	{
