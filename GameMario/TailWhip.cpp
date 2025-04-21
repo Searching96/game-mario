@@ -74,6 +74,12 @@ void CTailWhip::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 void CTailWhip::OnCollisionWith(LPCOLLISIONEVENT e)
 {
+	if (dynamic_cast<CAttackParticle*>(e->obj))
+		return;
+	if (dynamic_cast<CTailWhip*>(e->obj))
+		return;
+	if (dynamic_cast<CMario*>(e->obj))
+		return;
 	if (dynamic_cast<CGoomba*>(e->obj))
 		OnCollisionWithGoomba(e);
 	else if (dynamic_cast<CWingedGoomba*>(e->obj))
@@ -83,21 +89,9 @@ void CTailWhip::OnCollisionWith(LPCOLLISIONEVENT e)
 	else if (dynamic_cast<CBuffQBlock*>(e->obj))
 		OnCollisionWithBuffQBlock(e);
 	else if (dynamic_cast<CCoinQBlock*>(e->obj))
-		OnCollisionWithBuffQBlock(e);
-	else if (dynamic_cast<CCoin*>(e->obj))
-		OnCollisionWithBuffQBlock(e);
+		OnCollisionWithCoinQBlock(e);
 	else if (dynamic_cast<CPiranhaPlant*>(e->obj))
 		OnCollisionWithPiranhaPlant(e);
-	//else if (dynamic_cast<CPortal*>(e->obj))
-	//	return;
-	//else if (dynamic_cast<CLifeMushroom*>(e->obj))
-	//	return;
-	else if (dynamic_cast<CMushroom*>(e->obj))
-		return;
-	else if (dynamic_cast<CSuperLeaf*>(e->obj))
-		return;
-	//else if (dynamic_cast<CFireball*>(e->obj))
-	//	return;
 	else if (dynamic_cast<CQuestionBlock*>(e->obj))
 		OnCollisionWithQuestionBlock(e);
 }
@@ -105,21 +99,41 @@ void CTailWhip::OnCollisionWith(LPCOLLISIONEVENT e)
 void CTailWhip::OnCollisionWithQuestionBlock(LPCOLLISIONEVENT e)
 {
 	CQuestionBlock* qb = dynamic_cast<CQuestionBlock*>(e->obj);
-	if (e->nx != 0 && qb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
+	if (qb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
 		qb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
 }
 
 void CTailWhip::OnCollisionWithBuffQBlock(LPCOLLISIONEVENT e)
 {
 	CBuffQBlock* bqb = dynamic_cast<CBuffQBlock*>(e->obj);
-	if (e->nx != 0 && bqb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
-		bqb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
+	CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+	if (bqb)
+		if (bqb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
+		{
+			if (player->GetLevel() == MARIO_LEVEL_SMALL)
+			{
+				CMushroom* mushroom = bqb->GetMushroom();
+				if (mushroom)
+				{
+					float mX, mY;
+					mushroom->GetPosition(mX, mY);
+					if (x < mX)
+						mushroom->SetCollisionNx(1);
+					else
+						mushroom->SetCollisionNx(-1);
+				}
+				bqb->SetToSpawn(0);
+			}
+			else
+				bqb->SetToSpawn(1);
+			bqb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
+		}
 }
 
 void CTailWhip::OnCollisionWithCoinQBlock(LPCOLLISIONEVENT e)
 {
 	CCoinQBlock* cqb = dynamic_cast<CCoinQBlock*>(e->obj);
-	if (e->nx != 0 && cqb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
+	if (cqb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
 		cqb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
 }
 
