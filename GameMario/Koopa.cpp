@@ -43,9 +43,11 @@ void CKoopa::OnCollisionWith(LPCOLLISIONEVENT e) {
 	// Ground check and tracking
 	if (e->ny < 0) { // Collision from above (standing on something)
 		vy = 0;
-		if (ground == nullptr
+		if (ground == nullptr 
 			|| dynamic_cast<CPlatform*>(e->obj)
-			|| dynamic_cast<CBox*>(e->obj))
+			|| dynamic_cast<CBox*>(e->obj)
+			|| dynamic_cast<CCoinQBlock*>(e->obj)
+			|| dynamic_cast<CBuffQBlock*>(e->obj))
 			ground = e->obj;
 	}// Remember what we're standing on
 
@@ -181,18 +183,18 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		}
 		return;
 	}
-	
+
 	vy += ay * dt;
 	vx += ax * dt;
 
 	if (state == KOOPA_STATE_WALKING_LEFT)
 	{
-		if (IsPlatformEdge(5.0f))
+		if (IsPlatformEdge(0.1f))
 			SetState(KOOPA_STATE_WALKING_RIGHT);
 	}
 	else if (state == KOOPA_STATE_WALKING_RIGHT)
 	{
-		if (IsPlatformEdge(5.0f))
+		if (IsPlatformEdge(0.1f))
 			SetState(KOOPA_STATE_WALKING_LEFT);
 	}
 
@@ -263,29 +265,29 @@ void CKoopa::SetState(int state)
 
 	switch (state)
 	{
-		case KOOPA_STATE_SHELL_STATIC:
-			vx = 0;
-			vy = 0;
-			ax = 0;
-			break;
-		case KOOPA_STATE_SHELL_DYNAMIC:
-			isKicked = true;
-			vy = 0;
-			ax = 0;
-			break;
-		case KOOPA_STATE_WALKING_LEFT:
-			isKicked = false;
-			vx = -KOOPA_WALKING_SPEED;
-			break;
-		case KOOPA_STATE_WALKING_RIGHT:
-			isKicked = false;
-			vx = KOOPA_WALKING_SPEED;
-			break;
-		case KOOPA_STATE_BEING_HELD:
-		{
-			beingHeld = 1;
-			break;
-		}
+	case KOOPA_STATE_SHELL_STATIC:
+		vx = 0;
+		vy = 0;
+		ax = 0;
+		break;
+	case KOOPA_STATE_SHELL_DYNAMIC:
+		isKicked = true;
+		vy = 0;
+		ax = 0;
+		break;
+	case KOOPA_STATE_WALKING_LEFT:
+		isKicked = false;
+		vx = -KOOPA_WALKING_SPEED;
+		break;
+	case KOOPA_STATE_WALKING_RIGHT:
+		isKicked = false;
+		vx = KOOPA_WALKING_SPEED;
+		break;
+	case KOOPA_STATE_BEING_HELD:
+	{
+		beingHeld = 1;
+		break;
+	}
 	}
 	CGameObject::SetState(state);
 }
