@@ -481,7 +481,7 @@ void CMario::OnCollisionWithFireball(LPCOLLISIONEVENT e)
 }
 
 void CMario::OnCollisionWithKoopa(LPCOLLISIONEVENT e) {
-	if (untouchable) return; // Early exit if Mario is invulnerable
+	 // Early exit if Mario is invulnerable
 
 	CKoopa* koopa = dynamic_cast<CKoopa*>(e->obj);
 
@@ -518,7 +518,7 @@ void CMario::OnCollisionWithKoopa(LPCOLLISIONEVENT e) {
 	if (koopa->GetState() == KOOPA_STATE_WALKING_LEFT ||
 		koopa->GetState() == KOOPA_STATE_WALKING_RIGHT ||
 		koopa->GetState() == KOOPA_STATE_SHELL_DYNAMIC) {
-
+		if (untouchable) return;
 		if (level == MARIO_LEVEL_TAIL)
 		{
 			SetState(MARIO_STATE_TAIL_DOWN);

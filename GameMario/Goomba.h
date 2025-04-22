@@ -19,14 +19,17 @@
 #define ID_ANI_GOOMBA_DIE_ON_STOMP		101000
 #define ID_ANI_GOOMBA_DIE_ON_TAIL_WHIP	101100
 
+
 class CGoomba : public CGameObject
 {
 protected:
 	float ax;				
 	float ay; 
 
+
 	ULONGLONG dieOnStompStart;
 	ULONGLONG dieOnWhipStart;
+
 
 	virtual void GetBoundingBox(float &left, float &top, float &right, float &bottom);
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects);

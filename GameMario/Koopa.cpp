@@ -293,6 +293,7 @@ void CKoopa::SetState(int state)
 	case KOOPA_STATE_BEING_HELD:
 	{
 		beingHeld = 1;
+		isFlying = false;
 		break;
 	}
 	}
