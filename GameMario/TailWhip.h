@@ -48,4 +48,5 @@ public:
 	void StartWhippingRight() { whippingRight = 1; whipRightStart = GetTickCount64(); }
 	void OnNoCollision(DWORD dt) {};
 	void OnCollisionWith(LPCOLLISIONEVENT e);
+	CAttackParticle* GetAttackParticle() { return attackParticle; }
 };

@@ -534,9 +534,11 @@ void CPlayScene::Update(DWORD dt)
 void CPlayScene::Render()
 {
 	// Render all objects except Mario
+	CAttackParticle* attackParticle = ((CMario*)player)->GetTailWhip()->GetAttackParticle();
+
 	for (int i = 0; i < objects.size(); i++)
 	{
-		if (objects[i] != player) // Skip Mario
+		if (objects[i] != player || objects[i] != attackParticle) // Skip Mario
 		{
 			objects[i]->Render();
 		}
@@ -546,6 +548,7 @@ void CPlayScene::Render()
 	if (player != NULL)
 	{
 		player->Render();
+		attackParticle->Render();
 	}
 }
 
