@@ -186,7 +186,7 @@ void CMario::HandleBraking(DWORD dt)
 		else
 			vx = min(0.0f, vx + brakeForce * dt);
 
-		if (GetTickCount64() - brakingStart > MARIO_BRAKE_TIME || fabs(vx) < 0.05f)
+		if (GetTickCount64() - brakingStart > MARIO_BRAKE_TIME || fabs(vx) < 0.075f)
 		{
 			isBraking = 0;
 			if (vxBeforeBraking > 0)

@@ -37,7 +37,7 @@ void CTailWhip::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	if (notWhipping == 1)
 		return;
 	
-	if (whipSpin == 2)
+	if (whipSpin >= 2)
 	{
 		whipSpin = 0;
 		SetState(TAIL_STATE_NOT_WHIPPING);
@@ -142,6 +142,10 @@ void CTailWhip::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
 	CGoomba* goomba = dynamic_cast<CGoomba*>(e->obj);
 	if (goomba)
 	{
+		if (goomba->GetState() == GOOMBA_STATE_DIE_ON_STOMP)
+			return;
+		if (goomba->GetState() == GOOMBA_STATE_DIE_ON_TAIL_WHIP)
+			return;
 		CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
 		float mNx;
 		player->GetNx(mNx);
@@ -195,6 +199,10 @@ void CTailWhip::OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e)
 	CWingedGoomba* wingedGoomba = dynamic_cast<CWingedGoomba*>(e->obj);
 	if (wingedGoomba)
 	{
+		if (wingedGoomba->GetState() == WINGED_GOOMBA_STATE_DIE_ON_STOMP)
+			return;
+		if (wingedGoomba->GetState() == WINGED_GOOMBA_STATE_DIE_ON_TAIL_WHIP)
+			return;
 		CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
 		float mNx;
 		player->GetNx(mNx);
