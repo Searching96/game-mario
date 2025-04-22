@@ -4,9 +4,9 @@
 #include "TailWhip.h"
 #include "BuffQBlock.h"
 #include "CoinQBlock.h"
+#include "WingedGoomba.h"
 #include "Goomba.h"
 #include "Koopa.h"
-
 #include "debug.h"
 
 #define BLOCK_PUSH_FACTOR 0.01f
@@ -437,14 +437,7 @@ void CCollision::Process(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* co
 			{
 				x += colX->t * dx + colX->nx * BLOCK_PUSH_FACTOR;
 				y += dy;
-				if (dynamic_cast<CGoomba*>(colX->obj)) {
-					DebugOut(L"Goomba collision with smth.");
-				}
-				else if (dynamic_cast <CKoopa*> (colX->obj)) {
-					DebugOut(L"Goomba collision with smth.");
-				}
 				objSrc->OnCollisionWith(colX);
-
 			}
 			else
 				if (colY != NULL)
@@ -459,7 +452,6 @@ void CCollision::Process(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* co
 					x += dx;
 					y += dy;
 				}
-
 		objSrc->SetPosition(x, y);
 	}
 
@@ -474,6 +466,12 @@ void CCollision::Process(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* co
 			&& dynamic_cast<CTailWhip*>(objSrc))
 		{
 			objSrc->OnCollisionWith(e); // tail whip can hit buffqblock
+			continue;
+		}
+		if ((dynamic_cast<CWingedGoomba*>(e->obj) || dynamic_cast<CGoomba*>(e->obj))
+			&& dynamic_cast<CKoopa*>(objSrc))
+		{
+			objSrc->OnCollisionWith(e); // Koopa can hit WingedGoomba and Goomba
 			continue;
 		}
 		//if (e->obj->IsBlocking() && !dynamic_cast<CBuffQBlock*>(e->obj)) continue;  // blocking collisions were handled already, skip them

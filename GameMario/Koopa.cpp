@@ -137,7 +137,6 @@ void CKoopa::OnCollisionWith(LPCOLLISIONEVENT e) {
 			}
 		}
 	}
-
 }
 
 bool CKoopa::IsPlatformEdge(float checkDistance)
