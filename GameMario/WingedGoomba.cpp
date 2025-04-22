@@ -141,7 +141,7 @@ void CWingedGoomba::SetState(int state)
 	{
 	case WINGED_GOOMBA_STATE_DIE_ON_STOMP:
 		dieOnStompStart = GetTickCount64();
-		y += (WINGED_GOOMBA_BBOX_HEIGHT - WINGED_GOOMBA_BBOX_HEIGHT_DIE) / 2;
+		y += (WINGED_GOOMBA_BBOX_HEIGHT - WINGED_GOOMBA_BBOX_HEIGHT_DIE) / 2 - 3;
 		vx = 0;
 		vy = 0;
 		ay = 0;

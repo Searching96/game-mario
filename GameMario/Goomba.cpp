@@ -99,7 +99,7 @@ void CGoomba::SetState(int state)
 	{
 	case GOOMBA_STATE_DIE_ON_STOMP:
 		dieOnStompStart = GetTickCount64();
-		y += (GOOMBA_BBOX_HEIGHT - GOOMBA_BBOX_HEIGHT_DIE)/2;
+		y += (GOOMBA_BBOX_HEIGHT - GOOMBA_BBOX_HEIGHT_DIE)/2 - 3;
 		vx = 0;
 		vy = 0;
 		ay = 0; 

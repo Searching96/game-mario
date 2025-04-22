@@ -3,6 +3,7 @@
 
 #include "TailWhip.h"
 #include "BuffQBlock.h"
+#include "CoinQBlock.h"
 
 #include "debug.h"
 
@@ -459,7 +460,14 @@ void CCollision::Process(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* co
 	{
 		LPCOLLISIONEVENT e = coEvents[i];
 		if (e->isDeleted) continue;
-		if (e->obj->IsBlocking() && !dynamic_cast<CBuffQBlock*>(e->obj)) continue;  // blocking collisions were handled already, skip them
+		if ((dynamic_cast<CCoinQBlock*>(e->obj) || dynamic_cast<CBuffQBlock*>(e->obj)) 
+			&& dynamic_cast<CTailWhip*>(objSrc))
+		{
+			objSrc->OnCollisionWith(e); // tail whip can hit buffqblock
+			continue;
+		}
+		//if (e->obj->IsBlocking() && !dynamic_cast<CBuffQBlock*>(e->obj)) continue;  // blocking collisions were handled already, skip them
+		if (e->obj->IsBlocking()) continue;  // blocking collisions were handled already, skip them
 
 		objSrc->OnCollisionWith(e);			
 	}

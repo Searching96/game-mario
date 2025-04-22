@@ -225,10 +225,11 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	{
 		CMushroom* mushroom = new CMushroom(x, y);
 		CSuperLeaf* superleaf = new CSuperLeaf(x, y);
-		objects.push_back(mushroom);
-		objects.push_back(superleaf);
 		CBuffQBlock* bqb = new CBuffQBlock(x, y, mushroom, superleaf);
-		obj = bqb;
+		objects.push_back(mushroom);
+		objects.push_back(bqb);
+		objects.push_back(superleaf);
+		return;
 		break;
 	}
 

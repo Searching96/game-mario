@@ -4,19 +4,15 @@
 CCoin::CCoin(float x, float y, int type) : CGameObject(x, y)
 {
 	this->type = type;
-	if (type == 0)
-		this->SetState(COIN_STATE_STATIC);
-	else
-		this->SetState(COIN_STATE_DYNAMIC);
+	if (type == 0) this->SetState(COIN_STATE_STATIC);
+	else this->SetState(COIN_STATE_DYNAMIC);
 }
 
 void CCoin::Render()
 {
 	if (isVisible == 0)
 		return;
-	//int aniId = ID_ANI_COIN_STATIC;
-	//if (state != COIN_STATE_STATIC)
-		//aniId = ID_ANI_COIN_DYNAMIC;
+
 	int aniId = ID_ANI_COIN_DYNAMIC;
 	CAnimations* animations = CAnimations::GetInstance();
 	animations->Get(aniId)->Render(x, y);
@@ -28,16 +24,18 @@ void CCoin::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
 	if (bounceUp == 1)
 	{
-		if (GetTickCount64() - bounceUpStart > COIN_BOUNCE_UP_TIME)
+		if (fabs(y - y0) >= COIN_BOUNCE_OFFSET)
 		{
+			y = y0 - COIN_BOUNCE_OFFSET;
 			bounceUp = 0;
 			SetState(COIN_STATE_BOUNCE_DOWN);
 		}
 	}
 	if (bounceDown == 1)
 	{
-		if (GetTickCount64() - bounceDownStart > COIN_BOUNCE_DOWN_TIME)
+		if (fabs(y - y0) >= COIN_BOUNCE_OFFSET)
 		{
+			y = y0 + COIN_BOUNCE_OFFSET;
 			bounceDown = 0;
 			SetState(COIN_STATE_BOUNCE_COMPLETE);
 		}
@@ -65,12 +63,14 @@ void CCoin::SetState(int state)
 		isVisible = 0;
 		break;
 	case COIN_STATE_BOUNCE_UP:
+		y0 = y;
 		vx = 0.0f;
 		vy = COIN_BOUNCE_SPEED;
 		isVisible = 1;
 		StartBounceUp();
 		break;
 	case COIN_STATE_BOUNCE_DOWN:
+		y0 = y;
 		vx = 0.0f;
 		vy = -COIN_BOUNCE_SPEED;
 		StartBounceDown();
