@@ -43,12 +43,10 @@ void CKoopa::OnCollisionWith(LPCOLLISIONEVENT e) {
 	// Ground check and tracking
 	if (e->ny < 0) { // Collision from above (standing on something)
 		vy = 0;
-		if (ground == nullptr
-			|| dynamic_cast<CPlatform*>(e->obj)
-			|| dynamic_cast<CBox*>(e->obj)
-			|| dynamic_cast<CCoinQBlock*>(e->obj)
-			|| dynamic_cast<CBuffQBlock*>(e->obj))
+		if (e->obj->IsBlocking())
+		{
 			ground = e->obj;
+		}
 		if (dynamic_cast<CMario*>(e->obj))
 		{
 			vy = -KOOPA_SHELL_DEFLECT_SPEED;

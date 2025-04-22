@@ -9,7 +9,7 @@
 
 #define PIRANHA_PLANT_MOVE_OFFSET 32
 
-#define PIRANHA_PLANT_DIE_TIMEOUT 500
+#define PIRANHA_PLANT_DIE_TIMEOUT 400
 #define PIRANHA_PLANT_SHOOT_TIMEOUT 2500
 #define PIRANHA_PLANT_HOVER_TIMEOUT 4000
 #define PIRANHA_PLANT_HIDE_TIMEOUT 3000
@@ -48,7 +48,7 @@ protected:
 	// 0 bottom left, 1 lower center left, 2 upper center left, 3 top left
 	//4 top right, 5 upper center right, 6 lower center right, 7 bottom right
 
-	ULONGLONG shell_start;
+	ULONGLONG death_start;
 	int GetAiming();
 	void Shoot(int direction);
 	bool IsMarioInRange();
@@ -64,6 +64,11 @@ public:
 
 	int IsBlocking() { return 0; }
 	int IsCollidable() { return 1; }
+	void StartDeath()
+	{
+		death_start = GetTickCount64();
+		SetState(PIRANHA_PLANT_STATE_DIED);
+	}
 	void StartMoveUp() {
 		moveUp = 1;
 		moveUpStart = GetTickCount64();

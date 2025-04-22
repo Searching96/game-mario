@@ -15,7 +15,11 @@ void CPiranhaPlant::Render()
 	if (state == PIRANHA_PLANT_STATE_HIDDEN) return;
 	int aniId = ID_ANI_PIRANHA_PLANT_LEFT_MOVE;
 	int direction = GetAiming();
-	if (moveUp || moveDown)
+	if (state == PIRANHA_PLANT_STATE_DIED)
+	{
+		aniId = ID_ANI_PIRANHA_PLANT_DIED;
+	}
+	else if (moveUp || moveDown)
 	{
 		switch (direction)
 		{
@@ -192,9 +196,12 @@ bool CPiranhaPlant::IsMarioOnTop()
 
 void CPiranhaPlant::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
-	if ((state == PIRANHA_PLANT_STATE_DIED) && (GetTickCount64() - shell_start > PIRANHA_PLANT_DIE_TIMEOUT))
+	if (state == PIRANHA_PLANT_STATE_DIED)
 	{
-		isDeleted = true;
+		if (GetTickCount64() - death_start > PIRANHA_PLANT_DIE_TIMEOUT)
+		{
+			isDeleted = true;
+		}
 		return;
 	}
 
@@ -242,7 +249,7 @@ void CPiranhaPlant::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			lastMove = GetTickCount64();
 			return;
 		}
-			SetState(PIRANHA_PLANT_STATE_ASCEND);
+		SetState(PIRANHA_PLANT_STATE_ASCEND);
 	}
 	x += vx * dt;
 	y += vy * dt;
@@ -283,7 +290,6 @@ void CPiranhaPlant::SetState(int state)
 		hoverStart = GetTickCount64();
 		break;
 	case PIRANHA_PLANT_STATE_DIED:
-		shell_start = GetTickCount64();
 		break;
 	}
 }

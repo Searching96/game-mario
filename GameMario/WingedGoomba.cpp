@@ -146,13 +146,13 @@ void CWingedGoomba::Render()
 	{
 		if (wingState == 0)
 		{
-			CAnimations::GetInstance()->Get(ID_ANI_WING_FLAP_LEFT)->Render(x - GOOMBA_BBOX_WIDTH / 2, y - GOOMBA_BBOX_HEIGHT / 2);
+			CAnimations::GetInstance()->Get(ID_ANI_WING_FLAP_LEFT)->Render(x - GOOMBA_BBOX_WIDTH / 2 + 1, y - GOOMBA_BBOX_HEIGHT / 2);
 			CAnimations::GetInstance()->Get(ID_ANI_WING_FLAP_RIGHT)->Render(x + GOOMBA_BBOX_WIDTH / 2, y - GOOMBA_BBOX_HEIGHT / 2);
 		}
 		else
 		{
-			CAnimations::GetInstance()->Get(ID_ANI_WING_CLOSE_LEFT)->Render(x - GOOMBA_BBOX_WIDTH / 2, y - GOOMBA_BBOX_HEIGHT / 2);
-			CAnimations::GetInstance()->Get(ID_ANI_WING_CLOSE_RIGHT)->Render(x + GOOMBA_BBOX_WIDTH / 2, y - GOOMBA_BBOX_HEIGHT / 2);
+			CAnimations::GetInstance()->Get(ID_ANI_WING_CLOSE_LEFT)->Render(x - GOOMBA_BBOX_WIDTH / 2 + 1, y - GOOMBA_BBOX_HEIGHT / 2 + 2);
+			CAnimations::GetInstance()->Get(ID_ANI_WING_CLOSE_RIGHT)->Render(x + GOOMBA_BBOX_WIDTH / 2, y - GOOMBA_BBOX_HEIGHT / 2 + 2);
 		}
 	}
 
