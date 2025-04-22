@@ -1,6 +1,5 @@
 #pragma once
 #include "GameObject.h"
-#include "Wing.h"
 
 #define WINGED_GOOMBA_GRAVITY					0.002f
 #define WINGED_GOOMBA_WALKING_SPEED				0.05f
@@ -23,6 +22,11 @@
 #define ID_ANI_WINGED_GOOMBA_DIE_ON_STOMP		171000
 #define ID_ANI_WINGED_GOOMBA_DIE_ON_TAIL_WHIP	171100
 
+#define ID_ANI_WING_FLAP_LEFT		160000
+#define ID_ANI_WING_CLOSE_LEFT		160100
+#define ID_ANI_WING_FLAP_RIGHT		160010
+#define ID_ANI_WING_CLOSE_RIGHT		160110
+
 #define WINGED_GOOMBA_TRACKING_TIME				1000
 #define WINGED_GOOMBA_BOUNCING_TIME				1000
 #define WINGED_GOOMBA_FLYING_TIME				1000
@@ -35,14 +39,13 @@ protected:
 	float ax;
 	float ay;
 
-	int isWinged = 1;
-
-	CWing* leftWing;
-	CWing* rightWing;
+	int wingState = 0; // 0: flap, 1: fold
 
 	ULONGLONG dieOnStompStart = -1;
 	ULONGLONG dieOnWhipStart = -1;
+	ULONGLONG flapStart = -1;
 
+	int isWinged = 1;
 	int isTracking = 0;
 	int isBouncing = 0;
 	int isFlying = 0;
@@ -62,7 +65,7 @@ protected:
 	virtual void OnCollisionWith(LPCOLLISIONEVENT e);
 
 public:
-	CWingedGoomba(float x, float y, CWing* leftWing, CWing* rightWing);
+	CWingedGoomba(float x, float y);
 	virtual void SetState(int state);
 	void StartTracking() { isTracking = 1; trackingStart = GetTickCount64(); }
 	void StartBouncing() { isBouncing = 1; bounceCount++; }

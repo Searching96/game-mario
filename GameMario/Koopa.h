@@ -5,13 +5,14 @@
 #include "BuffQBlock.h"
 #include "CoinQBlock.h"
 #include "Mario.h"
+#include "WingedGoomba.h"
 #include "PlayScene.h"
 #include "debug.h"
 
 #define KOOPA_GRAVITY 0.002f
 #define KOOPA_WALKING_SPEED 0.02f
 #define KOOPA_SHELL_SPEED 0.25f
-#define KOOPA_SHELL_DEFLECT_SPEED 0.1f
+#define KOOPA_SHELL_DEFLECT_SPEED 0.25f
 
 #define KOOPA_TEXTURE_WIDTH 16
 #define KOOPA_TEXTURE_HEIGHT 26

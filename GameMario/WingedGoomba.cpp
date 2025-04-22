@@ -1,15 +1,14 @@
 #include "WingedGoomba.h"
 #include "Mario.h"
+#include "Koopa.h"
 #include "PlayScene.h"
 
 #include "debug.h"
 
-CWingedGoomba::CWingedGoomba(float x, float y, CWing* left, CWing* right) : CGameObject(x, y)
+CWingedGoomba::CWingedGoomba(float x, float y) : CGameObject(x, y)
 {
 	this->ax = 0;
 	this->ay = WINGED_GOOMBA_GRAVITY;
-	this->leftWing = left;
-	this->rightWing = right;
 	SetState(WINGED_GOOMBA_STATE_TRACKING);
 }
 
@@ -42,6 +41,16 @@ void CWingedGoomba::OnCollisionWith(LPCOLLISIONEVENT e)
 	if (!e->obj->IsBlocking()) return;
 	if (dynamic_cast<CWingedGoomba*>(e->obj)) return;
 
+	if (CKoopa* koopa = dynamic_cast<CKoopa*>(e->obj))
+	{
+		DebugOut(L"Koopa hit Goomba from Goomba.cpp");
+		if (GetState() != GOOMBA_STATE_DIE_ON_TAIL_WHIP)
+		{
+			SetState(GOOMBA_STATE_DIE_ON_TAIL_WHIP);
+			koopa->SetState(GOOMBA_STATE_DIE_ON_TAIL_WHIP);
+		}
+	}
+
 	if (e->ny != 0)
 	{
 		if (isBouncing == 1)
@@ -68,13 +77,7 @@ void CWingedGoomba::OnCollisionWith(LPCOLLISIONEVENT e)
 
 void CWingedGoomba::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
-	if (isWinged == 0)
-	{
-		leftWing->SetKilled(1);
-		rightWing->SetKilled(1);
-		vy = 0;
-	}
-	
+
 	CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
 	float mX, mY;
 	player->GetPosition(mX, mY);
@@ -109,8 +112,16 @@ void CWingedGoomba::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		return;
 	}
 
-	leftWing->SetPosition(x - 6, y - 6);
-	rightWing->SetPosition(x + 6.5, y - 6);
+
+	if (GetTickCount64() - flapStart > 1000)
+	{
+		flapStart = GetTickCount64();
+		if (wingState == 0)
+			wingState = 1;
+		else
+			wingState = 0;
+	}
+
 
 	CGameObject::Update(dt, coObjects);
 	CCollision::GetInstance()->Process(this, dt, coObjects);
@@ -128,7 +139,23 @@ void CWingedGoomba::Render()
 		aniId = ID_ANI_WINGED_GOOMBA_DIE_ON_TAIL_WHIP;
 	}
 
+
+
 	CAnimations::GetInstance()->Get(aniId)->Render(x, y);
+	if (isWinged == 1)
+	{
+		if (wingState == 0)
+		{
+			CAnimations::GetInstance()->Get(ID_ANI_WING_FLAP_LEFT)->Render(x - GOOMBA_BBOX_WIDTH / 2 + 1, y - GOOMBA_BBOX_HEIGHT / 2);
+			CAnimations::GetInstance()->Get(ID_ANI_WING_FLAP_RIGHT)->Render(x + GOOMBA_BBOX_WIDTH / 2, y - GOOMBA_BBOX_HEIGHT / 2);
+		}
+		else
+		{
+			CAnimations::GetInstance()->Get(ID_ANI_WING_CLOSE_LEFT)->Render(x - GOOMBA_BBOX_WIDTH / 2 + 1, y - GOOMBA_BBOX_HEIGHT / 2 + 2);
+			CAnimations::GetInstance()->Get(ID_ANI_WING_CLOSE_RIGHT)->Render(x + GOOMBA_BBOX_WIDTH / 2, y - GOOMBA_BBOX_HEIGHT / 2 + 2);
+		}
+	}
+
 	//RenderBoundingBox();
 }
 
@@ -165,8 +192,7 @@ void CWingedGoomba::SetState(int state)
 		vy = 0;
 		ax = 0;
 		ay = WINGED_GOOMBA_GRAVITY;
-		leftWing->SetState(WING_STATE_CLOSE);
-		rightWing->SetState(WING_STATE_CLOSE);
+		wingState = 1;
 		StartTracking();
 		break;
 	}
@@ -175,8 +201,7 @@ void CWingedGoomba::SetState(int state)
 		vx = (nx > 0) ? WINGED_GOOMBA_WALKING_SPEED : -WINGED_GOOMBA_WALKING_SPEED;
 		ay = WINGED_GOOMBA_GRAVITY;
 		vy = -WINGED_GOOMBA_BOUNCE_SPEED;
-		leftWing->SetState(WING_STATE_FLAP);
-		rightWing->SetState(WING_STATE_FLAP);
+		wingState = 0;
 		StartBouncing();
 		break;
 	case WINGED_GOOMBA_STATE_FLYING:

@@ -43,12 +43,17 @@ void CKoopa::OnCollisionWith(LPCOLLISIONEVENT e) {
 	// Ground check and tracking
 	if (e->ny < 0) { // Collision from above (standing on something)
 		vy = 0;
-		if (ground == nullptr 
-			|| dynamic_cast<CPlatform*>(e->obj)
-			|| dynamic_cast<CBox*>(e->obj)
-			|| dynamic_cast<CCoinQBlock*>(e->obj)
-			|| dynamic_cast<CBuffQBlock*>(e->obj))
+		if (e->obj->IsBlocking())
+		{
 			ground = e->obj;
+		}
+		if (dynamic_cast<CMario*>(e->obj))
+		{
+			vy = -KOOPA_SHELL_DEFLECT_SPEED;
+			vx = e->nx > 0 ? -0.2f : 0.2f;
+			isFlying = true;
+			return;
+		}
 	}// Remember what we're standing on
 
 	//if (e->ny == 0 && e->nx != 0 && state == KOOPA_STATE_WALKING_LEFT && dynamic_cast<CTail*>(e->src_obj))
@@ -79,13 +84,16 @@ void CKoopa::OnCollisionWith(LPCOLLISIONEVENT e) {
 		}
 	}
 
-	// Handle collision with Question Blocks
+	// Handle collision with Question Blocks and Goomba
 	if (state == KOOPA_STATE_SHELL_DYNAMIC)
 	{
 		if (CCoinQBlock* cqb = dynamic_cast<CCoinQBlock*>(e->obj))
+		{
 			if (e->nx != 0 && cqb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
 				cqb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
-		if (CBuffQBlock* bqb = dynamic_cast<CBuffQBlock*>(e->obj))
+		}
+		else if (CBuffQBlock* bqb = dynamic_cast<CBuffQBlock*>(e->obj))
+		{
 			if (e->nx != 0 && bqb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
 			{
 				CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
@@ -107,8 +115,26 @@ void CKoopa::OnCollisionWith(LPCOLLISIONEVENT e) {
 					bqb->SetToSpawn(1);
 				bqb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
 			}
+		}
+		else if (CWingedGoomba* goomba = dynamic_cast<CWingedGoomba*>(e->obj))
+		{
+			DebugOut(L"Koopa hit Goomba from Koopa.cpp");
+			if (goomba->GetState() != GOOMBA_STATE_DIE_ON_TAIL_WHIP)
+			{
+				goomba->SetState(GOOMBA_STATE_DIE_ON_TAIL_WHIP);
+				vy = -MARIO_JUMP_DEFLECT_SPEED;
+			}
+		}
+		else if (CGoomba* goomba = dynamic_cast<CGoomba*>(e->obj))
+		{
+			DebugOut(L"Koopa hit Goomba from Koopa.cpp");
+			if (goomba->GetState() != GOOMBA_STATE_DIE_ON_TAIL_WHIP)
+			{
+				goomba->SetState(GOOMBA_STATE_DIE_ON_TAIL_WHIP);
+				vy = -MARIO_JUMP_DEFLECT_SPEED;
+			}
+		}
 	}
-
 }
 
 bool CKoopa::IsPlatformEdge(float checkDistance)
@@ -156,7 +182,7 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	}
 	//if ()
 
-	if (beingHeld == 1)
+	while (beingHeld == 1)
 	{
 		if (mario->GetIsRunning() == 0)
 		{
@@ -165,7 +191,7 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			this->SetState(KOOPA_STATE_SHELL_DYNAMIC);
 			this->SetSpeed((mNx > 0) ? KOOPA_SHELL_SPEED : -KOOPA_SHELL_SPEED, 0);
 			beingHeld = 0;
-			return;
+			break;
 		}
 
 		float mX, mY;
@@ -204,6 +230,7 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		if (IsPlatformEdge(0.1f))
 			SetState(KOOPA_STATE_WALKING_LEFT);
 	}
+	if (state == KOOPA_STATE_SHELL_DYNAMIC && vx < 0.000000001f && vy < 0.000000001f) SetState(KOOPA_STATE_SHELL_STATIC);
 
 	//DebugOut(L"[INFO] Koopa: vx=%f, ax=%f, vy=%f, ay=%f\n", vx, ax, vy, ay);
 	//float l, t, r, b;
@@ -293,6 +320,7 @@ void CKoopa::SetState(int state)
 	case KOOPA_STATE_BEING_HELD:
 	{
 		beingHeld = 1;
+		isFlying = false;
 		break;
 	}
 	}

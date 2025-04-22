@@ -163,6 +163,7 @@ void CTailWhip::OnCollisionWithPiranhaPlant(LPCOLLISIONEVENT e)
 	CPiranhaPlant* plant = dynamic_cast<CPiranhaPlant*>(e->obj);
 	if (plant)
 	{
+		if (plant->GetState() == PIRANHA_PLANT_STATE_HIDDEN) return;
 		CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
 		float mNx;
 		player->GetNx(mNx);
@@ -171,7 +172,7 @@ void CTailWhip::OnCollisionWithPiranhaPlant(LPCOLLISIONEVENT e)
 		else
 			attackParticle->SetPosition(x - 8, y);
 		attackParticle->SetState(ATTACK_PARTICLE_STATE_EMERGING);
-		plant->SetState(PIRANHA_PLANT_STATE_DIED);
+		plant->StartDeath();
 	}
 }
 
