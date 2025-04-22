@@ -25,7 +25,7 @@ void CTailWhip::Render()
 	CAnimations* animations = CAnimations::GetInstance();
 	animations->Get(ID_ANI_TAIL_WHIP)->Render(x, y);
 
-	//RenderBoundingBox();
+	RenderBoundingBox();
 }
 
 void CTailWhip::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)

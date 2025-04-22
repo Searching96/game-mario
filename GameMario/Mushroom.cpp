@@ -17,7 +17,7 @@ void CMushroom::Render()
     CAnimations* animations = CAnimations::GetInstance();
     animations->Get(ID_ANI_MUSHROOM)->Render(x, y);
 
-    RenderBoundingBox();
+    //RenderBoundingBox();
 }
 
 void CMushroom::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
@@ -73,8 +73,9 @@ void CMushroom::OnCollisionWith(LPCOLLISIONEVENT e)
 		vy = vy - vy / 50;
 		isOnPlatform == 1;
 	}
-	if (dynamic_cast<CCoinQBlock*>(e->obj)) return;
-	if (dynamic_cast<CCoin*>(e->obj)) return;
+	if (dynamic_cast<CCoinQBlock*>(e->obj))
+		x += 1;
+	//if (dynamic_cast<CCoin*>(e->obj)) return;
 	if (e->nx != 0)
 		vx = -vx;
 }
