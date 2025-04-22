@@ -46,6 +46,7 @@ protected:
 
 	bool isReversed = false;
 	bool isKicked = false;
+	bool isFlying = false;
 
 	LPGAMEOBJECT ground;
 
@@ -70,6 +71,7 @@ public:
 	void StartShell();
 	int GetBeingHeld() { return beingHeld; }
 	void SetBeingHeld(int beingHeld) { this->beingHeld = beingHeld; }
+	void SetFlying(bool isFlying) { this->isFlying = isFlying; }
 	void SetReversed(bool isReversed) { this->isReversed = isReversed; }
 };
 

@@ -130,6 +130,13 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
 	CMario* mario = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
 
+	if (isFlying && vy == 0)
+	{
+		vx = 0;
+		isFlying = false;
+		return;
+	}
+
 	// thoat khoi mai
 	if ((state == KOOPA_STATE_SHELL_STATIC || state == KOOPA_STATE_BEING_HELD)
 		&& !isKicked && (GetTickCount64() - shell_start > KOOPA_SHELL_TIMEOUT))
