@@ -86,7 +86,7 @@ void CKoopa::OnCollisionWith(LPCOLLISIONEVENT e) {
 		}
 	}
 
-	// Handle collision with Question Blocks and Goomba
+	// Handle collision with Question Blocks
 	if (state == KOOPA_STATE_SHELL_DYNAMIC)
 	{
 		if (CCoinQBlock* cqb = dynamic_cast<CCoinQBlock*>(e->obj))

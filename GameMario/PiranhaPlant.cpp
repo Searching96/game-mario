@@ -147,35 +147,35 @@ void CPiranhaPlant::Shoot(int direction)
 	{
 	case 0:
 		fireball->SetState(FIREBALL_STATE_SHOOT_BOTTOM_LEFT);
-		DebugOut(L"[INFO] Shoot left down sharp\n");
+		//DebugOut(L"[INFO] Shoot left down sharp\n");
 		break;
 	case 1:
 		fireball->SetState(FIREBALL_STATE_SHOOT_LOWER_CENTER_LEFT);
-		DebugOut(L"[INFO] Shoot left down shallow\n");
+		//DebugOut(L"[INFO] Shoot left down shallow\n");
 		break;
 	case 2:
 		fireball->SetState(FIREBALL_STATE_SHOOT_UPPER_CENTER_LEFT);
-		DebugOut(L"[INFO] Shoot left up shallow\n");
+		//DebugOut(L"[INFO] Shoot left up shallow\n");
 		break;
 	case 3:
 		fireball->SetState(FIREBALL_STATE_SHOOT_TOP_LEFT);
-		DebugOut(L"[INFO] Shoot left up sharp\n");
+		//DebugOut(L"[INFO] Shoot left up sharp\n");
 		break;
 	case 4:
 		fireball->SetState(FIREBALL_STATE_SHOOT_TOP_RIGHT);
-		DebugOut(L"[INFO] Shoot right up sharp\n");
+		//DebugOut(L"[INFO] Shoot right up sharp\n");
 		break;
 	case 5:
 		fireball->SetState(FIREBALL_STATE_SHOOT_UPPER_CENTER_RIGHT);
-		DebugOut(L"[INFO] Shoot right up shallow\n");
+		//DebugOut(L"[INFO] Shoot right up shallow\n");
 		break;
 	case 6:
 		fireball->SetState(FIREBALL_STATE_SHOOT_LOWER_CENTER_RIGHT);
-		DebugOut(L"[INFO] Shoot right down shallow\n");
+		//DebugOut(L"[INFO] Shoot right down shallow\n");
 		break;
 	case 7:
 		fireball->SetState(FIREBALL_STATE_SHOOT_BOTTOM_RIGHT);
-		DebugOut(L"[INFO] Shoot right down sharp\n");
+		//DebugOut(L"[INFO] Shoot right down sharp\n");
 		break;
 	default:
 		break;

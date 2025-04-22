@@ -1,5 +1,6 @@
 #include "Goomba.h"
 #include "Mario.h"
+#include "Koopa.h"
 #include "PlayScene.h"
 
 CGoomba::CGoomba(float x, float y):CGameObject(x, y)
@@ -38,6 +39,16 @@ void CGoomba::OnCollisionWith(LPCOLLISIONEVENT e)
 {
 	if (!e->obj->IsBlocking()) return; 
 	if (dynamic_cast<CGoomba*>(e->obj)) return; 
+
+	if (CKoopa* koopa = dynamic_cast<CKoopa*>(e->obj))
+	{
+		DebugOut(L"Koopa hit Goomba from Goomba.cpp");
+		if (GetState() != GOOMBA_STATE_DIE_ON_TAIL_WHIP)
+		{
+			SetState(GOOMBA_STATE_DIE_ON_TAIL_WHIP);
+			koopa->SetState(GOOMBA_STATE_DIE_ON_TAIL_WHIP);
+		}
+	}
 
 	if (e->ny != 0 )
 	{

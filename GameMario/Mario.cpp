@@ -101,7 +101,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 	HandleUntouchable(dt);
 	HandleHovering(dt);
-	
+
 	// Multi-jump gravity scaling and horizontal cap
 	if (jumpCount > 0)
 	{
@@ -481,7 +481,7 @@ void CMario::OnCollisionWithFireball(LPCOLLISIONEVENT e)
 }
 
 void CMario::OnCollisionWithKoopa(LPCOLLISIONEVENT e) {
-	 // Early exit if Mario is invulnerable
+	// Early exit if Mario is invulnerable
 
 	CKoopa* koopa = dynamic_cast<CKoopa*>(e->obj);
 
@@ -498,6 +498,10 @@ void CMario::OnCollisionWithKoopa(LPCOLLISIONEVENT e) {
 			vy = -MARIO_JUMP_DEFLECT_SPEED;
 			return;
 		}
+	}
+
+	if (e->ny > 0) { //Shell fell on mario
+		return; //Processed in Koopa.cpp
 	}
 	if (koopa->GetState() == KOOPA_STATE_SHELL_STATIC) {
 		// Kick the shell
@@ -819,7 +823,7 @@ int CMario::GetAniIdTail()
 		if (nx > 0) aniId = ID_ANI_MARIO_TAIL_WHIP_RIGHT;
 		else aniId = ID_ANI_MARIO_TAIL_WHIP_LEFT;
 	}
-		
+
 	if (isKicking == 1)
 	{
 		if (nx > 0) aniId = ID_ANI_MARIO_TAIL_KICK_RIGHT;
@@ -861,7 +865,7 @@ void CMario::Render()
 	animations->Get(aniId)->Render(x, y);
 
 	//RenderBoundingBox();
-	
+
 	//DebugOutTitle(L"Coins: %d", coin);
 }
 
@@ -1066,7 +1070,7 @@ void CMario::SetState(int state)
 		break;
 
 	case MARIO_STATE_SIT:
-		if (isMoving == 1) break; 
+		if (isMoving == 1) break;
 		if (isOnPlatform && level != MARIO_LEVEL_SMALL)
 		{
 			state = MARIO_STATE_IDLE;
