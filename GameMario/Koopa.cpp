@@ -230,7 +230,7 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		if (IsPlatformEdge(0.1f))
 			SetState(KOOPA_STATE_WALKING_LEFT);
 	}
-	if (state == KOOPA_STATE_SHELL_DYNAMIC && vx == 0 && vy == 0) SetState(KOOPA_STATE_SHELL_STATIC);
+	if (state == KOOPA_STATE_SHELL_DYNAMIC && vx < 0.1f && vy < 0.1f) SetState(KOOPA_STATE_SHELL_STATIC);
 
 	//DebugOut(L"[INFO] Koopa: vx=%f, ax=%f, vy=%f, ay=%f\n", vx, ax, vy, ay);
 	//float l, t, r, b;
