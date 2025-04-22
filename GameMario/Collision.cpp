@@ -128,7 +128,8 @@ void CCollision::SweptAABB(
 void CCollision::SweptAABB(float ml, float mt, float mr, float mb,
 	float dx, float dy,
 	float sl, float st, float sr, float sb,
-	float& t, float& nx, float& ny, LPGAMEOBJECT objSrc)
+	float& t, float& nx, float& ny, 
+	LPGAMEOBJECT objSrc, LPGAMEOBJECT objDest)
 {
 
 	float dx_entry, dx_exit, tx_entry, tx_exit;
@@ -142,6 +143,16 @@ void CCollision::SweptAABB(float ml, float mt, float mr, float mb,
 
 	if (dynamic_cast<CTailWhip*>(objSrc)) {
 		if (ml < sr && mr > sl && mt < sb && mb > st) {
+			t = 0.0f;      // collision at the start of the frame
+			nx = ny = 0.0f;
+			return;
+		}
+	}
+
+	if (dynamic_cast<CKoopa*>(objSrc) && objDest->IsBlocking())
+	{
+		if (ml < sr && mr > sl && mt < sb && mb > st)
+		{
 			t = 0.0f;      // collision at the start of the frame
 			nx = ny = 0.0f;
 			return;
@@ -263,7 +274,7 @@ LPCOLLISIONEVENT CCollision::SweptAABB(LPGAMEOBJECT objSrc, DWORD dt, LPGAMEOBJE
 		dx, dy,
 		sl, st, sr, sb,
 		t, nx, ny,
-		objSrc
+		objSrc, objDest
 	);
 
 	CCollisionEvent* e = new CCollisionEvent(t, nx, ny, dx, dy, objDest, objSrc);

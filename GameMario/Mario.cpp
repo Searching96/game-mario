@@ -168,8 +168,8 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	//else
 	//	tailWhip->SetPosition(x - 6, y + 6);
 
-	DebugOutTitle(L"vx=%f, ax=%f, vy=%f, ay=%f, jc=%d, fx=%f, iop=%d, imv=%d\n",
-		vx, ax, vy, ay, jumpCount, frictionX, isOnPlatform, isMoving);
+	//DebugOutTitle(L"vx=%f, ax=%f, vy=%f, ay=%f, jc=%d, fx=%f, iop=%d, imv=%d\n",
+		//vx, ax, vy, ay, jumpCount, frictionX, isOnPlatform, isMoving);
 	//DebugOut(L"mario: x=%f, y=%f, nx=%d, state=%d\n", x, y, nx, state);
 
 	// Process collisions

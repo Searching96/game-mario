@@ -23,7 +23,7 @@ protected:
 	CAttackParticle* attackParticle;
 	int whippingLeft = 0;
 	int whippingRight = 0;
-	int notWhipping = 0;
+	int notWhipping = 1;
 	ULONGLONG whipLeftStart = -1;
 	ULONGLONG whipRightStart = -1;
 	int whipSpin = 0;

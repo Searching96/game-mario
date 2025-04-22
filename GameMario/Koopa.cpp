@@ -1,4 +1,6 @@
-#include "Koopa.h"
+﻿#include "Koopa.h"
+
+#include "debug.h"
 
 CKoopa::CKoopa(float x, float y) :CGameObject(x, y)
 {
@@ -177,10 +179,29 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				mario->SetState(MARIO_STATE_DIE);
 		}
 		beingHeld = 0;
+		this->SetPosition(x, y - 2);
 		SetState(KOOPA_STATE_WALKING_LEFT);
+		
+		// Check for collision with blocking objects
+		vector<LPCOLLISIONEVENT> coEvents;
+		vector<LPCOLLISIONEVENT> coEventsResult;
+
+		coEvents.clear();
+		CCollision::GetInstance()->Scan(this, dt, coObjects, coEvents);
+
+		for (int i = 0; i < coEvents.size(); i++)
+		{
+			LPCOLLISIONEVENT e = coEvents[i];
+			if (e->obj->IsBlocking())
+			{
+				SetState(KOOPA_STATE_DIE);
+				break;
+			}
+		}
+
+		for (int i = 0; i < coEvents.size(); i++) delete coEvents[i];
 		return;
 	}
-	//if ()
 
 	while (beingHeld == 1)
 	{
@@ -191,7 +212,26 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			this->SetState(KOOPA_STATE_SHELL_DYNAMIC);
 			this->SetSpeed((mNx > 0) ? KOOPA_SHELL_SPEED : -KOOPA_SHELL_SPEED, 0);
 			beingHeld = 0;
-			break;
+
+			// Kiểm tra va chạm với các đối tượng có IsBlocking = 1
+			vector<LPCOLLISIONEVENT> coEvents;
+			vector<LPCOLLISIONEVENT> coEventsResult;
+
+			coEvents.clear();
+			CCollision::GetInstance()->Scan(this, dt, coObjects, coEvents);
+
+			for (size_t i = 0; i < coEvents.size(); i++)
+			{
+				LPCOLLISIONEVENT e = coEvents[i];
+				if (e->obj->IsBlocking())
+				{
+					SetState(KOOPA_STATE_DIE);
+					break;
+				}
+			}
+
+			for (size_t i = 0; i < coEvents.size(); i++) delete coEvents[i];
+			return;
 		}
 
 		float mX, mY;
@@ -204,7 +244,7 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				x = mX + 8;
 			else
 				x = mX - 8;
-			y = mY;
+			y = mY + 1;
 		}
 		else
 		{
@@ -212,7 +252,7 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				x = mX + 6;
 			else
 				x = mX - 6;
-			y = mY - 2;
+			y = mY - 1;
 		}
 		return;
 	}
@@ -286,6 +326,8 @@ void CKoopa::Render()
 }
 void CKoopa::SetState(int state)
 {
+	if (this->state == KOOPA_STATE_DIE) return;
+
 	// If transitioning from shell to walking state
 	if ((this->state == KOOPA_STATE_SHELL_STATIC || this->state == KOOPA_STATE_SHELL_DYNAMIC) &&
 		(state == KOOPA_STATE_WALKING_LEFT || state == KOOPA_STATE_WALKING_RIGHT))
@@ -299,6 +341,12 @@ void CKoopa::SetState(int state)
 
 	switch (state)
 	{
+	case KOOPA_STATE_DIE:
+		vx = 0;
+		vy = 0;
+		ax = 0;
+		isDeleted = true;
+		break;
 	case KOOPA_STATE_SHELL_STATIC:
 		vx = 0;
 		vy = 0;
@@ -318,11 +366,11 @@ void CKoopa::SetState(int state)
 		vx = KOOPA_WALKING_SPEED;
 		break;
 	case KOOPA_STATE_BEING_HELD:
-	{
 		beingHeld = 1;
 		isFlying = false;
 		break;
 	}
-	}
 	CGameObject::SetState(state);
+
+	//DebugOut(L"[INFO] Koopa: state=%d\n", state);
 }

@@ -214,6 +214,5 @@ void CWingedGoomba::SetState(int state)
 		break;
 	}
 
-	// debug out state
-	DebugOut(L"[WINGED_GOOMBA] SetState: %i\n", state);
+	//DebugOut(L"[WINGED_GOOMBA] SetState: %i\n", state);
 }

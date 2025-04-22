@@ -76,7 +76,8 @@ public:
 		float& t,
 		float& nx,
 		float& ny,
-		LPGAMEOBJECT objSrc);
+		LPGAMEOBJECT objSrc,
+		LPGAMEOBJECT objDest);
 
 	LPCOLLISIONEVENT SweptAABB(
 		LPGAMEOBJECT objSrc, 
