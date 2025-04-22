@@ -61,15 +61,6 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		}
 		return;
 	}
-	if (isKicking == 1)
-	{
-		if (GetTickCount64() - kickStart > MARIO_KICK_TIME)
-		{
-			isKicking = 0;
-			SetLevel(MARIO_LEVEL_TAIL);
-		}
-		return;
-	}
 	if (tailUp == 1)
 	{
 		if (GetTickCount64() - tailUpStart > MARIO_TAIL_UP_TIME)
@@ -99,6 +90,13 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			StartUntouchable();
 		}
 		return;
+	}
+	if (isKicking == 1)
+	{
+		if (GetTickCount64() - kickStart > MARIO_KICK_TIME)
+		{
+			isKicking = 0;
+		}
 	}
 
 	HandleUntouchable(dt);
@@ -188,7 +186,7 @@ void CMario::HandleBraking(DWORD dt)
 		else
 			vx = min(0.0f, vx + brakeForce * dt);
 
-		if (GetTickCount64() - brakingStart > MARIO_BRAKE_TIME || fabs(vx) < 0.1f)
+		if (GetTickCount64() - brakingStart > MARIO_BRAKE_TIME || fabs(vx) < 0.05f)
 		{
 			isBraking = 0;
 			if (vxBeforeBraking > 0)
