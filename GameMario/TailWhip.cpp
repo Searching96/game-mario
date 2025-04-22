@@ -188,8 +188,12 @@ void CTailWhip::OnCollisionWithKoopa(LPCOLLISIONEVENT e)
 		else
 			attackParticle->SetPosition(x - 8, y);
 		attackParticle->SetState(ATTACK_PARTICLE_STATE_EMERGING);
-		float vx = mNx > 0 ? -0.1f : 0.1f;
-		koopa->StartShell();
+		int state = koopa->GetState();
+		if (state == KOOPA_STATE_WALKING_LEFT || state == KOOPA_STATE_WALKING_RIGHT)
+			koopa->StartShell();
+		koopa->SetState(KOOPA_STATE_SHELL_STATIC);
+		float vx = mNx > 0 ? 0.1f : -0.1f;
+		koopa->SetFlying(true);
 		koopa->SetSpeed(vx, -0.5f);
 		koopa->SetReversed(true);
 	}
