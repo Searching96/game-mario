@@ -515,6 +515,7 @@ void CMario::OnCollisionWithKoopa(LPCOLLISIONEVENT e) {
 		else
 		{
 			koopa->SetState(KOOPA_STATE_BEING_HELD);
+			this->SetIsHoldingKoopa(1);
 		}
 		return;
 	}
@@ -581,8 +582,8 @@ void CMario::OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e)
 				}
 				else
 				{
-					DebugOut(L">>> Mario DIE >>> \n");
 					SetState(MARIO_STATE_DIE);
+					DebugOut(L">>> Mario DIE >>> \n");
 				}
 			}
 		}
@@ -656,6 +657,33 @@ int CMario::GetAniIdSmall()
 	{
 		if (nx > 0) aniId = ID_ANI_MARIO_SMALL_POWER_UP_RIGHT;
 		else aniId = ID_ANI_MARIO_SMALL_POWER_UP_LEFT;
+	}
+
+	if (holdingKoopa)
+	{
+		if (vx == 0)
+		{
+			if (nx > 0) aniId = ID_ANI_MARIO_SMALL_HOLD_KOOPA_IDLE_RIGHT;
+			else aniId = ID_ANI_MARIO_SMALL_HOLD_KOOPA_IDLE_LEFT;
+		}
+		else if (vx > 0)
+		{
+			if (fabs(vx) <= MARIO_HALF_RUN_ACCEL_SPEED)
+				aniId = ID_ANI_MARIO_SMALL_HOLD_KOOPA_WALKING_RIGHT;
+			else if (fabs(vx) > MARIO_HALF_RUN_ACCEL_SPEED && fabs(vx) < MARIO_MAX_RUNNING_SPEED)
+				aniId = ID_ANI_MARIO_SMALL_HOLD_KOOPA_HALF_RUNNING_RIGHT;
+			else if (fabs(vx) == MARIO_MAX_RUNNING_SPEED)
+				aniId = ID_ANI_MARIO_SMALL_HOLD_KOOPA_RUNNING_RIGHT;
+		}
+		else // vx < 0
+		{
+			if (fabs(vx) <= MARIO_HALF_RUN_ACCEL_SPEED)
+				aniId = ID_ANI_MARIO_SMALL_HOLD_KOOPA_WALKING_LEFT;
+			else if (fabs(vx) > MARIO_HALF_RUN_ACCEL_SPEED && fabs(vx) < MARIO_MAX_RUNNING_SPEED)
+				aniId = ID_ANI_MARIO_SMALL_HOLD_KOOPA_HALF_RUNNING_LEFT;
+			else if (fabs(vx) == MARIO_MAX_RUNNING_SPEED)
+				aniId = ID_ANI_MARIO_SMALL_HOLD_KOOPA_RUNNING_LEFT;
+		}
 	}
 
 	if (aniId == -1) aniId = ID_ANI_MARIO_SMALL_IDLE_RIGHT;

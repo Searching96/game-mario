@@ -171,30 +171,32 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				mario->SetState(MARIO_STATE_POWER_DOWN);
 			else if (mario->GetLevel() == MARIO_LEVEL_SMALL)
 				mario->SetState(MARIO_STATE_DIE);
+
+			beingHeld = 0;
+			mario->SetIsHoldingKoopa(0);
+
+			// Check for collision with blocking objects
+			vector<LPCOLLISIONEVENT> coEvents;
+			vector<LPCOLLISIONEVENT> coEventsResult;
+
+			coEvents.clear();
+			CCollision::GetInstance()->Scan(this, dt, coObjects, coEvents);
+
+			for (int i = 0; i < coEvents.size(); i++)
+			{
+				LPCOLLISIONEVENT e = coEvents[i];
+				if (e->obj->IsBlocking())
+				{
+					SetState(KOOPA_STATE_DIE);
+					break;
+				}
+			}
+
+			for (int i = 0; i < coEvents.size(); i++) delete coEvents[i];
+			return;
 		}
-		beingHeld = 0;
 		this->SetPosition(x, y - 2);
 		SetState(KOOPA_STATE_WALKING_LEFT);
-		
-		// Check for collision with blocking objects
-		vector<LPCOLLISIONEVENT> coEvents;
-		vector<LPCOLLISIONEVENT> coEventsResult;
-
-		coEvents.clear();
-		CCollision::GetInstance()->Scan(this, dt, coObjects, coEvents);
-
-		for (int i = 0; i < coEvents.size(); i++)
-		{
-			LPCOLLISIONEVENT e = coEvents[i];
-			if (e->obj->IsBlocking())
-			{
-				SetState(KOOPA_STATE_DIE);
-				break;
-			}
-		}
-
-		for (int i = 0; i < coEvents.size(); i++) delete coEvents[i];
-		return;
 	}
 
 	if (beingHeld == 1)
@@ -204,6 +206,7 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		coEvents.clear();
 		CCollision::GetInstance()->Scan(this, dt, coObjects, coEvents);
 
+		int isKilledOnCollideWithEnemy = 0;
 		for (size_t i = 0; i < coEvents.size(); i++)
 		{
 			LPCOLLISIONEVENT e = coEvents[i];
@@ -211,15 +214,22 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			{
 				this->SetState(KOOPA_STATE_DIE);
 				e->obj->SetState(GOOMBA_STATE_DIE_ON_TAIL_WHIP);
+				isKilledOnCollideWithEnemy = 1;
 			}
 			else if (dynamic_cast<CPiranhaPlant*>(e->obj))
 			{
 				this->SetState(KOOPA_STATE_DIE);
 				e->obj->SetState(PIRANHA_PLANT_STATE_DIED);
+				isKilledOnCollideWithEnemy = 1;
 			}
 		}
 
 		for (size_t i = 0; i < coEvents.size(); i++) delete coEvents[i];
+		if (isKilledOnCollideWithEnemy == 1)
+		{
+			mario->SetIsHoldingKoopa(0);
+			return;
+		}
 
 		if (mario->GetIsRunning() == 0)
 		{
@@ -228,6 +238,7 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			this->SetState(KOOPA_STATE_SHELL_DYNAMIC);
 			this->SetSpeed((mNx > 0) ? KOOPA_SHELL_SPEED : -KOOPA_SHELL_SPEED, 0);
 			beingHeld = 0;
+			mario->SetIsHoldingKoopa(0);
 
 			// Kiểm tra va chạm với các đối tượng có IsBlocking = 1
 			vector<LPCOLLISIONEVENT> coEvents;
