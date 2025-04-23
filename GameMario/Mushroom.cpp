@@ -71,7 +71,6 @@ void CMushroom::OnCollisionWith(LPCOLLISIONEVENT e)
 	if (e->ny != 0 && e->obj->IsBlocking())
 	{
 		vy = vy - vy / 50;
-		isOnPlatform == 1;
 	}
 	if (dynamic_cast<CCoinQBlock*>(e->obj))
 		x += 1;

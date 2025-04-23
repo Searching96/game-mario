@@ -515,6 +515,7 @@ void CMario::OnCollisionWithKoopa(LPCOLLISIONEVENT e) {
 		else
 		{
 			koopa->SetState(KOOPA_STATE_BEING_HELD);
+			koopa->SetSpeed(0, 0);
 			this->SetIsHoldingKoopa(1);
 		}
 		return;

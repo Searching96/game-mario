@@ -152,6 +152,14 @@ bool CKoopa::IsPlatformEdge(float checkDistance)
 
 void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
+	if (beingHeld == 1)
+	{
+		vx = 0;
+		vy = 0;
+	}
+
+	DebugOutTitle(L"Being held: %d, vx=%f, vy=%f\n", beingHeld, vx, vy);
+
 	if ((state == KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY) && (GetTickCount64() - dieStart > KOOPA_DIE_TIMEOUT))
 	{
 		isDeleted = true;
@@ -250,7 +258,7 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			float mNx;
 			mario->GetNx(mNx);
 			this->SetState(KOOPA_STATE_SHELL_DYNAMIC);
-			this->SetSpeed((mNx > 0) ? KOOPA_SHELL_SPEED : -KOOPA_SHELL_SPEED, 0);
+			this->SetSpeed((mNx > 0) ? KOOPA_SHELL_SPEED : - KOOPA_SHELL_SPEED, 0);
 			beingHeld = 0;
 			mario->SetIsHoldingKoopa(0);
 
@@ -427,9 +435,11 @@ void CKoopa::SetState(int state)
 		case KOOPA_STATE_BEING_HELD:
 			beingHeld = 1;
 			isFlying = false;
+			vx = 0;
+			vy = 0;
 			break;
 	}
 	CGameObject::SetState(state);
 
-	//DebugOut(L"[INFO] Koopa: state=%d\n", state);
+	DebugOut(L"[INFO] Koopa: state=%d\n", state);
 }
