@@ -470,59 +470,95 @@ void CPlayScene::Update(DWORD dt)
 		objects[i]->Update(dt, &coObjects);
 	}
 
-	// Skip the rest if the scene was already unloaded  
-	if (player == NULL) return;
+	// Skip camera update if the player doesn't exist or scene unloaded
+	if (mario == NULL) return;
 
-	// Update camera to follow Mario  
-	float cx, cy;
-	player->GetPosition(cx, cy);
 
+	// --- Camera Update Logic ---
 	CGame* game = CGame::GetInstance();
+	float screenWidth = (float)game->GetBackBufferWidth();
+	float screenHeight = (float)game->GetBackBufferHeight();
 
-	// Define margin boundaries    
-	float marginX = 136.0f; // Horizontal margin    
-	float marginY = 40.0f;  // Vertical margin    
+	// Get Mario's current position
+	float mario_cx, mario_cy; // Use cx/cy for center if your GetPosition provides center, otherwise adjust
+	mario->GetPosition(mario_cx, mario_cy);
 
-	float camX, camY;
-	game->GetCamPos(camX, camY);
-	camX = cx - game->GetBackBufferWidth() / 2;
-	camY = cy - game->GetBackBufferHeight() / 2;
+	// Get current camera position
+	float current_cam_x, current_cam_y;
+	game->GetCamPos(current_cam_x, current_cam_y);
 
-	float mapWidth = 2815.0f;
-	float mapHeight = 432.0f;
+	// --- Horizontal Tracking: Keep Mario within central 32px zone ---
+	float next_cam_x = current_cam_x; // Start with current camera position
+
+	// Calculate the screen coordinates of Mario relative to the current camera view
+	float mario_screen_x = mario_cx - current_cam_x;
+
+	// Define the boundaries of the central 32px zone (16px margin on each side of the center)
+	float screen_center_x = screenWidth / 2.0f;
+	float dead_zone_left_boundary = screen_center_x - 16.0f;
+	float dead_zone_right_boundary = screen_center_x + 16.0f;
+
+	// Check if Mario has moved outside the dead zone
+	if (mario_screen_x < dead_zone_left_boundary) {
+		// Mario moved left of the zone. Adjust camera so Mario is AT the left boundary.
+		// target_mario_screen_x = dead_zone_left_boundary
+		// target_mario_screen_x = mario_cx - next_cam_x
+		// dead_zone_left_boundary = mario_cx - next_cam_x
+		// next_cam_x = mario_cx - dead_zone_left_boundary
+		next_cam_x = mario_cx - dead_zone_left_boundary;
+	}
+	else if (mario_screen_x > dead_zone_right_boundary) {
+		// Mario moved right of the zone. Adjust camera so Mario is AT the right boundary.
+		// target_mario_screen_x = dead_zone_right_boundary
+		// target_mario_screen_x = mario_cx - next_cam_x
+		// dead_zone_right_boundary = mario_cx - next_cam_x
+		// next_cam_x = mario_cx - dead_zone_right_boundary
+		next_cam_x = mario_cx - dead_zone_right_boundary;
+	}
+	// If Mario is inside the 32px zone, next_cam_x remains unchanged.
 
 
-	//// Only move camera if Mario pushes outside the margin
-	//if (cx > camX + game->GetBackBufferWidth() - marginX)
-	//	camX = cx - (game->GetBackBufferWidth() - marginX);
-	//else if (cx < camX + marginX)
-	//	camX = cx - marginX;
+	// --- Vertical Tracking (Conditional) ---
+	float next_cam_y = current_cam_y; // Start with current position
 
-	//// Default camera to the ground
-	//camY = mapHeight - game->GetBackBufferHeight();
+	// Define map boundaries
+	float mapWidth = 2815.0f;  // Adjust as needed
+	float mapHeight = 432.0f; // Adjust as needed
+	float cam_y_bottom_limit = mapHeight - screenHeight - 8.0f; // Adjust padding
+	float cam_y_top_limit = 0.0f;
 
-	//// Only follow Mario vertically if his level is TAIL
-	//if (mario->GetLevel() == MARIO_LEVEL_TAIL) {
-	//	if (cy > camY + game->GetBackBufferHeight() - marginY)
-	//		camY = cy - (game->GetBackBufferHeight() - marginY);
-	//	else if (cy < camY + marginY)
-	//		camY = cy - marginY;
 
-	//	// Clamp camera position to map boundaries
-	//	if (camY < 0) camY = 0;
-	//	if (camY > mapHeight - game->GetBackBufferHeight() - 8)
-	//		camY = mapHeight - game->GetBackBufferHeight() - 8;
-	//}
+	// Default: Lock camera near the bottom
+	next_cam_y = cam_y_bottom_limit;
 
-	// Clamp camera position to map boundaries
-	if (camX < -8) camX = -8;
-	if (camX > mapWidth - game->GetBackBufferWidth() - 8) camX = mapWidth - game->GetBackBufferWidth() - 8;
-	if (camY < 0) camY = 0;
-	if (camY > mapHeight - game->GetBackBufferHeight() - 8) camY = mapHeight - game->GetBackBufferHeight() - 8;
+	// Check if Mario is Tail level
+	if (mario->GetLevel() == MARIO_LEVEL_TAIL)
+	{
+		// Calculate the camera position if it were centered vertically on Mario
+		float target_centered_cam_y = mario_cy - screenHeight / 2.0f;
 
-	game->SetCamPos(camX, camY);
+		// Only follow vertically if centering on Mario would place the camera
+		// higher up (lower Y value) than the default bottom lock position.
+		if (target_centered_cam_y < cam_y_bottom_limit)
+		{
+			next_cam_y = target_centered_cam_y;
+		}
+	}
 
-	// Purge deleted objects  
+
+	// --- Apply Map Boundary Clamping ---
+	// Clamp X
+	if (next_cam_x < -8.0f) next_cam_x = -8.0f;
+	if (next_cam_x > mapWidth - screenWidth - 8.0f) next_cam_x = mapWidth - screenWidth - 8.0f;
+
+	// Clamp Y
+	if (next_cam_y < cam_y_top_limit) next_cam_y = cam_y_top_limit;
+	if (next_cam_y > cam_y_bottom_limit) next_cam_y = cam_y_bottom_limit;
+
+
+	// Set the final calculated camera position
+	game->SetCamPos(next_cam_x, next_cam_y);
+
 	PurgeDeletedObjects();
 }
 
