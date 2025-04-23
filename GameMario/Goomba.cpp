@@ -35,28 +35,44 @@ void CGoomba::OnNoCollision(DWORD dt)
 	y += vy * dt;
 };
 
+// Corrected Goomba::OnCollisionWith
 void CGoomba::OnCollisionWith(LPCOLLISIONEVENT e)
 {
-	if (!e->obj->IsBlocking()) return; 
-	if (dynamic_cast<CGoomba*>(e->obj)) return; 
+	if (!e->obj->IsBlocking() && !dynamic_cast<CKoopa*>(e->obj))
+		return;
+	if (dynamic_cast<CGoomba*>(e->obj)) return;
 
 	if (CKoopa* koopa = dynamic_cast<CKoopa*>(e->obj))
 	{
-		DebugOut(L"Koopa hit Goomba from Goomba.cpp");
-		if (GetState() != GOOMBA_STATE_DIE_ON_TAIL_WHIP)
+		if (koopa->GetState() == KOOPA_STATE_SHELL_DYNAMIC)
 		{
-			SetState(GOOMBA_STATE_DIE_ON_TAIL_WHIP);
-			koopa->SetState(GOOMBA_STATE_DIE_ON_TAIL_WHIP);
+			if (this->state != GOOMBA_STATE_DIE_ON_STOMP && this->state != GOOMBA_STATE_DIE_ON_TAIL_WHIP)
+			{
+				DebugOut(L"Shell hit Goomba (Detected in Goomba.cpp)");
+				this->SetState(GOOMBA_STATE_DIE_ON_TAIL_WHIP);
+			}
+			return;
+		}
+		else
+		{
+			if (e->nx != 0)
+			{
+				vx = -vx;
+			}
+			return;
 		}
 	}
 
-	if (e->ny != 0 )
+	if (e->obj->IsBlocking())
 	{
-		vy = 0;
-	}
-	else if (e->nx != 0)
-	{
-		vx = -vx;
+		if (e->ny != 0)
+		{
+			vy = 0;
+		}
+		else if (e->nx != 0)
+		{
+			vx = -vx; // Turn around when hitting a wall
+		}
 	}
 }
 

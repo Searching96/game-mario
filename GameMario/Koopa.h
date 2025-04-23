@@ -66,13 +66,22 @@ protected:
 	virtual void GetBoundingBox(float& left, float& top, float& right, float& bottom);
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 	virtual void Render();
-	bool IsPlatformEdge(float checkDistance);
+	bool IsPlatformEdge(float checkDistance,vector<LPGAMEOBJECT>& possibleGrounds);
+	void UpdateMovement(DWORD dt,vector<LPGAMEOBJECT>* coObjects);
+	void HandleTimers(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
+	void HandleBeingHeld(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 
 	virtual int IsCollidable() { return (state != KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY && state != KOOPA_STATE_DIE_ON_COLLIDE_WITH_TERRAIN); };
 	virtual int IsBlocking() { return 0; }
 	virtual void OnNoCollision(DWORD dt);
 
 	virtual void OnCollisionWith(LPCOLLISIONEVENT e);
+	void OnCollisionWithMario(LPCOLLISIONEVENT e);
+	void OnCollisionWithBlock(LPCOLLISIONEVENT e);
+	void OnCollisionWithEnemy(LPCOLLISIONEVENT e);
+	void OnCollisionWithQuestionBlock(LPCOLLISIONEVENT e);
+	void OnCollisionWithBuffQBlock(LPCOLLISIONEVENT e);
+	void OnCollisionWithCoinQBlock(LPCOLLISIONEVENT e);
 
 public:
 	CKoopa(float x, float y);

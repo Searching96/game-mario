@@ -1,4 +1,4 @@
-﻿#include "Koopa.h"
+#include "Koopa.h"
 
 CKoopa::CKoopa(float x, float y) :CGameObject(x, y)
 {
@@ -17,8 +17,7 @@ void CKoopa::GetBoundingBox(float& left, float& top, float& right, float& bottom
 		bottom = y + KOOPA_TEXTURE_HEIGHT / 2;
 		top = bottom - KOOPA_BBOX_HEIGHT;
 	}
-	else // Shell states
-	{
+	else { // Shell states
 		left = x - KOOPA_BBOX_WIDTH / 2;
 		top = y - KOOPA_BBOX_HEIGHT / 2;
 		right = left + KOOPA_BBOX_WIDTH;
@@ -35,7 +34,6 @@ void CKoopa::OnNoCollision(DWORD dt)
 void CKoopa::OnCollisionWith(LPCOLLISIONEVENT e) {
 	if (state == KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY) return;
 
-	// Skip collision with non-blocking objects or self
 	if (!e->obj->IsBlocking() || e->obj == this) return;
 
 	// Ground check and tracking
@@ -52,54 +50,71 @@ void CKoopa::OnCollisionWith(LPCOLLISIONEVENT e) {
 			isFlying = true;
 			return;
 		}
-	}// Remember what we're standing on
-
-	//if (e->ny == 0 && e->nx != 0 && state == KOOPA_STATE_WALKING_LEFT && dynamic_cast<CTail*>(e->src_obj))
-	//{
-	//	SetState(KOOPA_STATE_SHELL_STATIC);
-	//	// You may want to add velocity to make it move when hit, something like:
-	//	vx = e->nx * KOOPA_SHELL_DEFLECT_SPEED;
-	//	// Or if you want it to just be stationary:
-	//	// vx = 0;
-
-	//	// Reset any relevant timers or flags
-	//	isHeld = false;
-	//	start_moving = 0;
-	//	return;
-	//}
-
-	// Handle other collisions
-	if (e->nx != 0) {
-		// Wall collision while walking
-		if (state == KOOPA_STATE_WALKING_LEFT || state == KOOPA_STATE_WALKING_RIGHT) {
-			SetState(state == KOOPA_STATE_WALKING_LEFT ?
-				KOOPA_STATE_WALKING_RIGHT :
-				KOOPA_STATE_WALKING_LEFT);
-		}
-		// Shell bounce
-		else if (state == KOOPA_STATE_SHELL_DYNAMIC) {
-			vx = -vx; // Reverse direction
-		}
 	}
 
-	// Handle collision with Question Blocks and Goomba
-	if (state == KOOPA_STATE_SHELL_DYNAMIC)
-	{
-		if (CCoinQBlock* cqb = dynamic_cast<CCoinQBlock*>(e->obj))
-		{
+	if (dynamic_cast<CMario*>(e->obj)) {
+		OnCollisionWithMario(e);
+	}
+	else if (e->obj->IsBlocking()) {
+		OnCollisionWithBlock(e);
+	}
+	else if (dynamic_cast<CCoinQBlock*>(e->obj) || dynamic_cast<CBuffQBlock*>(e->obj)) {
+		OnCollisionWithQuestionBlock(e);
+	}
+	else if (dynamic_cast<CWingedGoomba*>(e->obj) || dynamic_cast<CGoomba*>(e->obj)) {
+		OnCollisionWithEnemy(e);
+	}
+
+	// Handle other collisions
+	if (e->nx != 0 && e->obj->IsBlocking()) { // Added IsBlocking() check here for safety
+		if (state == KOOPA_STATE_WALKING_LEFT || state == KOOPA_STATE_WALKING_RIGHT) {
+			if (!dynamic_cast<CGoomba*>(e->obj) && !dynamic_cast<CWingedGoomba*>(e->obj)) {
+				SetState(state == KOOPA_STATE_WALKING_LEFT ?
+					KOOPA_STATE_WALKING_RIGHT :
+					KOOPA_STATE_WALKING_LEFT);
+			}
+		}
+		else if (state == KOOPA_STATE_SHELL_DYNAMIC) {
+			if (!dynamic_cast<CGoomba*>(e->obj) && !dynamic_cast<CWingedGoomba*>(e->obj) &&
+				!dynamic_cast<CCoinQBlock*>(e->obj) && !dynamic_cast<CBuffQBlock*>(e->obj))
+			{
+				vx = -vx;
+			}
+		}
+	}
+}
+
+void CKoopa::OnCollisionWithMario(LPCOLLISIONEVENT e) {
+	if (e->ny < 0) {
+		vy = -KOOPA_SHELL_DEFLECT_SPEED;
+		vx = e->nx > 0 ? -0.2f : 0.2f;
+		isFlying = true;
+	}
+}
+
+void CKoopa::OnCollisionWithBlock(LPCOLLISIONEVENT e) {
+	if (e->nx != 0) {
+		if (state == KOOPA_STATE_WALKING_LEFT || state == KOOPA_STATE_WALKING_RIGHT) {
+			SetState((state == KOOPA_STATE_WALKING_LEFT) ? KOOPA_STATE_WALKING_RIGHT : KOOPA_STATE_WALKING_LEFT);
+		}
+		else if (state == KOOPA_STATE_SHELL_DYNAMIC) {
+			vx = -vx;
+		}
+	}
+}
+
+void CKoopa::OnCollisionWithQuestionBlock(LPCOLLISIONEVENT e) {
+	if (state == KOOPA_STATE_SHELL_DYNAMIC) {
+		if (CCoinQBlock* cqb = dynamic_cast<CCoinQBlock*>(e->obj)) {
 			if (e->nx != 0 && cqb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
 				cqb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
 		}
-		else if (CBuffQBlock* bqb = dynamic_cast<CBuffQBlock*>(e->obj))
-		{
-			if (e->nx != 0 && bqb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
-			{
-				CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
-				if (player->GetLevel() == MARIO_LEVEL_SMALL)
-				{
+		else if (CBuffQBlock* bqb = dynamic_cast<CBuffQBlock*>(e->obj)) {
+			if (e->nx != 0 && bqb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT) {
+				CMario* player = (CMario*)(((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer());
+				if (player->GetLevel() == MARIO_LEVEL_SMALL) {
 					CMushroom* mushroom = bqb->GetMushroom();
-					if (mushroom)
-					{
+					if (mushroom) {
 						float mX, mY;
 						mushroom->GetPosition(mX, mY);
 						if (x < mX)
@@ -114,62 +129,116 @@ void CKoopa::OnCollisionWith(LPCOLLISIONEVENT e) {
 				bqb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
 			}
 		}
-		else if (CWingedGoomba* goomba = dynamic_cast<CWingedGoomba*>(e->obj))
-		{
-			DebugOut(L"Koopa hit Goomba from Koopa.cpp");
-			if (goomba->GetState() != GOOMBA_STATE_DIE_ON_TAIL_WHIP)
+	}
+}
+
+void CKoopa::OnCollisionWithEnemy(LPCOLLISIONEVENT e) {
+	if (state == KOOPA_STATE_SHELL_DYNAMIC) {
+		if (CWingedGoomba* goomba = dynamic_cast<CWingedGoomba*>(e->obj)) {
+			if (goomba->GetWinged() == 1)
 			{
-				goomba->SetState(GOOMBA_STATE_DIE_ON_TAIL_WHIP);
+				goomba->SetWinged(0);
+				goomba->SetState(WINGED_GOOMBA_STATE_WALKING);
+				//this->SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY);
+				//return;
+			}
+			else if (goomba->GetState() != WINGED_GOOMBA_STATE_DIE_ON_TAIL_WHIP && goomba->GetState() != WINGED_GOOMBA_STATE_DIE_ON_STOMP)
+			{
+				goomba->SetState(WINGED_GOOMBA_STATE_DIE_ON_TAIL_WHIP);
 				vy = -MARIO_JUMP_DEFLECT_SPEED;
 			}
+			//this->SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY);
+			//return;
 		}
-		else if (CGoomba* goomba = dynamic_cast<CGoomba*>(e->obj))
-		{
-			DebugOut(L"Koopa hit Goomba from Koopa.cpp");
-			if (goomba->GetState() != GOOMBA_STATE_DIE_ON_TAIL_WHIP)
-			{
+		else if (CGoomba* goomba = dynamic_cast<CGoomba*>(e->obj)) {
+			if (goomba->GetState() != GOOMBA_STATE_DIE_ON_TAIL_WHIP && goomba->GetState() != GOOMBA_STATE_DIE_ON_STOMP) {
 				goomba->SetState(GOOMBA_STATE_DIE_ON_TAIL_WHIP);
-				vy = -MARIO_JUMP_DEFLECT_SPEED;
+				//this->SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY);
 			}
+			//return;
 		}
 	}
 }
 
-bool CKoopa::IsPlatformEdge(float checkDistance)
-{
-	if (ground == nullptr) return false;
+bool CKoopa::IsPlatformEdge(float checkDistance, vector<LPGAMEOBJECT>& possibleGrounds) {
+	float verticalTolerance = 5.0f;
+	float koopaL, koopaT, koopaR, koopaB;
+	GetBoundingBox(koopaL, koopaT, koopaR, koopaB);
+	float koopaBottom = koopaB;
+	float koopaWidth = koopaR - koopaL;
 
-	float groundL, groundT, groundR, groundB;
-	ground->GetBoundingBox(groundL, groundT, groundR, groundB);
+	// Define two check points slightly offset from the corners
+	float edgeOffset = koopaWidth * 0.4f; // Check near the corners, adjust as needed
 
-	// Check if there's ground ahead in walking direction
-	float checkX = (state == KOOPA_STATE_WALKING_LEFT)
-		? x - KOOPA_BBOX_WIDTH / 2 - checkDistance
-		: x + KOOPA_BBOX_WIDTH / 2 + checkDistance;
+	float checkX_Outer, checkX_Inner;
+	if (state == KOOPA_STATE_WALKING_LEFT) {
+		checkX_Outer = koopaL - checkDistance;         // Point ahead of the outer edge
+		checkX_Inner = koopaL + edgeOffset - checkDistance; // Point ahead of an inner part
+	}
+	else { // Walking right
+		checkX_Outer = koopaR + checkDistance;         // Point ahead of the outer edge
+		checkX_Inner = koopaR - edgeOffset + checkDistance; // Point ahead of an inner part
+	}
 
-	return (checkX < groundL || checkX > groundR);
+	bool groundFoundOuter = false;
+	bool groundFoundInner = false;
+
+	for (const auto& ground : possibleGrounds) {
+		if (ground == nullptr || ground->IsDeleted()) continue;
+
+		float groundL, groundT, groundR, groundB;
+		ground->GetBoundingBox(groundL, groundT, groundR, groundB);
+
+		// Check outer point
+		if (!groundFoundOuter && checkX_Outer >= groundL && checkX_Outer <= groundR) {
+			if (abs(koopaBottom - groundT) <= verticalTolerance) {
+				groundFoundOuter = true;
+			}
+		}
+
+		// Check inner point
+		if (!groundFoundInner && checkX_Inner >= groundL && checkX_Inner <= groundR) {
+			if (abs(koopaBottom - groundT) <= verticalTolerance) {
+				groundFoundInner = true;
+			}
+		}
+
+		// If both points have found ground, no need to check further
+		if (groundFoundOuter && groundFoundInner) break;
+	}
+
+	// It's an edge if EITHER the inner OR outer check point fails to find ground
+	return !(groundFoundOuter && groundFoundInner);
 }
-
-void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
-{
-	if ((state == KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY) && (GetTickCount64() - dieStart > KOOPA_DIE_TIMEOUT))
-	{
+void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects) {
+	if (state == KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY && (GetTickCount64() - dieStart > KOOPA_DIE_TIMEOUT)) {
 		isDeleted = true;
 		return;
 	}
 
-	CMario* mario = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
-
-	if (isFlying && vy == 0)
-	{
+	if (isFlying && vy == 0) {
 		vx = 0;
 		isFlying = false;
 		return;
 	}
 
-	// thoat khoi mai
-	if ((state == KOOPA_STATE_SHELL_STATIC || state == KOOPA_STATE_BEING_HELD)
-		&& !isKicked && (GetTickCount64() - shellStart > KOOPA_SHELL_TIMEOUT))
+	CMario* mario = (CMario*)(((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer());
+
+	if (beingHeld == 1) {
+		HandleBeingHeld(dt, coObjects);
+		return; // Important: Skip normal movement if being held
+	}
+
+	HandleTimers(dt, coObjects); // Check shell timeout
+
+	UpdateMovement(dt, coObjects);
+	CGameObject::Update(dt, coObjects);
+	CCollision::GetInstance()->Process(this, dt, coObjects);
+}
+
+void CKoopa::HandleTimers(DWORD dt, vector<LPGAMEOBJECT>* coObjects) {
+	CMario* mario = (CMario*)(((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer());
+	if ((state == KOOPA_STATE_SHELL_STATIC || state == KOOPA_STATE_BEING_HELD) && !isKicked && (GetTickCount64() - shellStart > KOOPA_SHELL_TIMEOUT))
 	{
 		if (mario->GetIsRunning() == 1 && beingHeld == 1)
 		{
@@ -209,57 +278,83 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		this->SetPosition(x, y - 2);
 		SetState(KOOPA_STATE_WALKING_LEFT);
 	}
+}
 
-	if (beingHeld == 1)
+void CKoopa::UpdateMovement(DWORD dt, vector<LPGAMEOBJECT>* coObjects) {
+	vy += ay * dt;
+	vx += ax * dt;
+
+	// Collect potential ground objects
+	vector<LPGAMEOBJECT> potentialGrounds;
+	for (const auto& obj : *coObjects) {
+		if (obj != this && !obj->IsDeleted() && obj->IsBlocking()) { // Add blocking objects as potential ground
+			potentialGrounds.push_back(obj);
+		}
+	}
+
+	if (state == KOOPA_STATE_WALKING_LEFT) {
+		if (IsPlatformEdge(0.1f, potentialGrounds))
+			SetState(KOOPA_STATE_WALKING_RIGHT);
+	}
+	else if (state == KOOPA_STATE_WALKING_RIGHT) {
+		if (IsPlatformEdge(0.1f, potentialGrounds))
+			SetState(KOOPA_STATE_WALKING_LEFT);
+	}
+
+	if (state == KOOPA_STATE_SHELL_DYNAMIC)
 	{
-		// Kiểm tra overlap với Goomba
+		if (vx < 0.000000001f && vy < 0.000000001f)
+			SetState(KOOPA_STATE_SHELL_STATIC);
+		//else if ()
+	}
+}
+
+void CKoopa::HandleBeingHeld(DWORD dt, vector<LPGAMEOBJECT>* coObjects) {
+	CMario* mario = (CMario*)(((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer());
+
+	// Check for overlap with Goomba
+	vector<LPCOLLISIONEVENT> coEvents;
+	coEvents.clear();
+	CCollision::GetInstance()->Scan(this, dt, coObjects, coEvents);
+
+	int isKilledOnCollideWithEnemy = 0;
+	for (size_t i = 0; i < coEvents.size(); i++) {
+		LPCOLLISIONEVENT e = coEvents[i];
+		if (dynamic_cast<CGoomba*>(e->obj) || dynamic_cast<CWingedGoomba*>(e->obj)) {
+			this->SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY);
+			e->obj->SetState(GOOMBA_STATE_DIE_ON_TAIL_WHIP);
+			isKilledOnCollideWithEnemy = 1;
+		}
+		else if (dynamic_cast<CPiranhaPlant*>(e->obj)) {
+			this->SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY);
+			e->obj->SetState(PIRANHA_PLANT_STATE_DIED);
+			isKilledOnCollideWithEnemy = 1;
+		}
+	}
+
+	for (size_t i = 0; i < coEvents.size(); i++) delete coEvents[i];
+	if (isKilledOnCollideWithEnemy == 1) {
+		mario->SetIsHoldingKoopa(0);
+		beingHeld = 0;
+		vy += ay * dt;
+		y += vy * dt;
+		return;
+	}
+
+	if (mario->GetIsRunning() == 0) {
+		float mNx;
+		mario->GetNx(mNx);
+		this->SetState(KOOPA_STATE_SHELL_DYNAMIC);
+		this->SetSpeed((mNx > 0) ? KOOPA_SHELL_SPEED : -KOOPA_SHELL_SPEED, 0);
+		beingHeld = 0;
+		mario->SetIsHoldingKoopa(0);
+
+		// Check for collision with blocking objects
 		vector<LPCOLLISIONEVENT> coEvents;
+		vector<LPCOLLISIONEVENT> coEventsResult;
+
 		coEvents.clear();
 		CCollision::GetInstance()->Scan(this, dt, coObjects, coEvents);
-
-		int isKilledOnCollideWithEnemy = 0;
-		for (size_t i = 0; i < coEvents.size(); i++)
-		{
-			LPCOLLISIONEVENT e = coEvents[i];
-			if (dynamic_cast<CGoomba*>(e->obj) || dynamic_cast<CWingedGoomba*>(e->obj))
-			{
-				this->SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY);
-				e->obj->SetState(GOOMBA_STATE_DIE_ON_TAIL_WHIP);
-				isKilledOnCollideWithEnemy = 1;
-			}
-			else if (dynamic_cast<CPiranhaPlant*>(e->obj))
-			{
-				this->SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY);
-				e->obj->SetState(PIRANHA_PLANT_STATE_DIED);
-				isKilledOnCollideWithEnemy = 1;
-			}
-		}
-
-		for (size_t i = 0; i < coEvents.size(); i++) delete coEvents[i];
-		if (isKilledOnCollideWithEnemy == 1)
-		{
-			mario->SetIsHoldingKoopa(0);
-			beingHeld = 0;
-			vy += ay * dt;
-			y += vy * dt;
-			return;
-		}
-
-		if (mario->GetIsRunning() == 0)
-		{
-			float mNx;
-			mario->GetNx(mNx);
-			this->SetState(KOOPA_STATE_SHELL_DYNAMIC);
-			this->SetSpeed((mNx > 0) ? KOOPA_SHELL_SPEED : -KOOPA_SHELL_SPEED, 0);
-			beingHeld = 0;
-			mario->SetIsHoldingKoopa(0);
-
-			// Kiểm tra va chạm với các đối tượng có IsBlocking = 1
-			vector<LPCOLLISIONEVENT> coEvents;
-			vector<LPCOLLISIONEVENT> coEventsResult;
-
-			coEvents.clear();
-			CCollision::GetInstance()->Scan(this, dt, coObjects, coEvents);
 
 			for (size_t i = 0; i < coEvents.size(); i++)
 			{
@@ -274,53 +369,28 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				}
 			}
 
-			for (size_t i = 0; i < coEvents.size(); i++) delete coEvents[i];
-			return;
-		}
-
-		float mX, mY;
-		mario->GetPosition(mX, mY);
-		float mNx;
-		mario->GetNx(mNx);
-		if (mario->GetLevel() == MARIO_LEVEL_BIG || mario->GetLevel() == MARIO_LEVEL_TAIL)
-		{
-			if (mNx > 0)
-				x = mX + 8;
-			else
-				x = mX - 8;
-			y = mY + 1;
-		}
-		else
-		{
-			if (mNx > 0)
-				x = mX + 6;
-			else
-				x = mX - 6;
-			y = mY - 1;
-		}
+		for (size_t i = 0; i < coEvents.size(); i++) delete coEvents[i];
 		return;
 	}
 
-	vy += ay * dt;
-	vx += ax * dt;
-
-	if (state == KOOPA_STATE_WALKING_LEFT)
-		if (IsPlatformEdge(0.1f))
-			SetState(KOOPA_STATE_WALKING_RIGHT);
-	else if (state == KOOPA_STATE_WALKING_RIGHT)
-		if (IsPlatformEdge(0.1f))
-			SetState(KOOPA_STATE_WALKING_LEFT);
-
-	if (state == KOOPA_STATE_SHELL_DYNAMIC && vx < 0.000000001f && vy < 0.000000001f) SetState(KOOPA_STATE_SHELL_STATIC);
-
-	//DebugOut(L"[INFO] Koopa: vx=%f, ax=%f, vy=%f, ay=%f\n", vx, ax, vy, ay);
-	//float l, t, r, b;
-	//GetBoundingBox(l, t, r, b);
-	//DebugOut(L"[INFO] Bounding box: left=%f, top=%f, right=%f, bottom=%f\n", l, t, r, b);
-	//DebugOut(L"[INFO] Koopa: x=%f, y=%f\n", x, y);
-
-	CGameObject::Update(dt, coObjects);
-	CCollision::GetInstance()->Process(this, dt, coObjects);
+	float mX, mY;
+	mario->GetPosition(mX, mY);
+	float mNx;
+	mario->GetNx(mNx);
+	if (mario->GetLevel() == MARIO_LEVEL_BIG || mario->GetLevel() == MARIO_LEVEL_TAIL) {
+		if (mNx > 0)
+			x = mX + 8;
+		else
+			x = mX - 8;
+		y = mY + 1;
+	}
+	else {
+		if (mNx > 0)
+			x = mX + 6;
+		else
+			x = mX - 6;
+		y = mY - 1;
+	}
 }
 
 void CKoopa::StartShell()
@@ -330,46 +400,45 @@ void CKoopa::StartShell()
 	SetState(KOOPA_STATE_SHELL_STATIC);
 }
 
-
-void CKoopa::Render()
-{
+void CKoopa::Render() {
 	int aniId;
-	if (state == KOOPA_STATE_SHELL_STATIC || state == KOOPA_STATE_BEING_HELD)
-	{
-		if (!isKicked && GetTickCount64() - shellStart > KOOPA_SHELL_ALERT_TIMEOUT)
-		{
-			if (isReversed)
-				aniId = ID_ANI_KOOPA_SHELL_STATIC_REVERSE_2;
-			else
-				aniId = ID_ANI_KOOPA_SHELL_STATIC_2;
+
+	switch (state) {
+	case KOOPA_STATE_SHELL_STATIC:
+	case KOOPA_STATE_BEING_HELD: {
+		if (!isKicked && GetTickCount64() - shellStart > KOOPA_SHELL_ALERT_TIMEOUT) {
+			aniId = (isReversed) ? ID_ANI_KOOPA_SHELL_STATIC_REVERSE_2 : ID_ANI_KOOPA_SHELL_STATIC_2;
 		}
-		else
-		{
-			if (isReversed)
-				aniId = ID_ANI_KOOPA_SHELL_STATIC_REVERSE_1;
-			else
-				aniId = ID_ANI_KOOPA_SHELL_STATIC_1;
+		else {
+			aniId = (isReversed) ? ID_ANI_KOOPA_SHELL_STATIC_REVERSE_1 : ID_ANI_KOOPA_SHELL_STATIC_1;
 		}
+		break;
 	}
-	else if (state == KOOPA_STATE_SHELL_DYNAMIC)
-	{
-		if (isReversed)
-			aniId = ID_ANI_KOOPA_SHELL_DYNAMIC_REVERSE;
-		else
-			aniId = ID_ANI_KOOPA_SHELL_DYNAMIC;
-	}
-	else if (state == KOOPA_STATE_WALKING_LEFT)
+	case KOOPA_STATE_SHELL_DYNAMIC:
+		aniId = (isReversed) ? ID_ANI_KOOPA_SHELL_DYNAMIC_REVERSE : ID_ANI_KOOPA_SHELL_DYNAMIC;
+		break;
+	case KOOPA_STATE_WALKING_LEFT:
 		aniId = ID_ANI_KOOPA_WALKING_LEFT;
-	else aniId = ID_ANI_KOOPA_WALKING_RIGHT;
-
-	if (state == KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY || state == KOOPA_STATE_DIE_ON_COLLIDE_WITH_TERRAIN)
-	{
+		break;
+	case KOOPA_STATE_WALKING_RIGHT:
+		aniId = ID_ANI_KOOPA_WALKING_RIGHT;
+		break;
+	case KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY:
+	case KOOPA_STATE_DIE_ON_COLLIDE_WITH_TERRAIN:
 		aniId = ID_ANI_KOOPA_SHELL_STATIC_REVERSE_1;
+		break;
+	default:
+		DebugOut(L"[ERROR] Invalid KoopaState for rendering\n");
+		aniId = -1; // Or some default animation
+		break;
 	}
 
-	CAnimations::GetInstance()->Get(aniId)->Render(x, y);
-	//RenderBoundingBox();
+	if (aniId != -1) {
+		CAnimations::GetInstance()->Get(aniId)->Render(x, y);
+	}
+	// RenderBoundingBox(); //Good for debug
 }
+
 void CKoopa::SetState(int state)
 {
 	if (this->state == KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY) return;
@@ -387,47 +456,66 @@ void CKoopa::SetState(int state)
 
 	switch (state)
 	{
-		case KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY:
-		{
-			dieStart = GetTickCount64();
-			CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
-			float mNx;
-			player->GetNx(mNx);
-			vx = (mNx > 0) ? 0.2f : -0.2f;
-			vy = -0.4f;
-			ax = 0;
-			ay = KOOPA_GRAVITY;
-			break;
+	case KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY:
+	{
+		dieStart = GetTickCount64();
+		CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+		float mNx;
+		player->GetNx(mNx);
+		vx = (mNx > 0) ? 0.2f : -0.2f;
+		vy = -0.4f;
+		ax = 0;
+		ay = KOOPA_GRAVITY;
+		break;
+	}
+	case KOOPA_STATE_DIE_ON_COLLIDE_WITH_TERRAIN:
+	{
+		dieStart = GetTickCount64();
+		vx = 0;
+		vy = -0.4f;
+		ax = 0;
+		ay = KOOPA_GRAVITY;
+		break;
+	}
+	case KOOPA_STATE_SHELL_STATIC:
+	{
+		vx = 0;
+		vy = 0;
+		ax = 0;
+		isKicked = false;
+		// Ensure shellStart timer is running if it wasn't already
+		if (shellStart == -1) { // Or maybe always reset it here? Depends on desired logic
+			shellStart = GetTickCount64();
 		}
-		case KOOPA_STATE_DIE_ON_COLLIDE_WITH_TERRAIN:
-			dieStart = GetTickCount64();
-			vx = 0;
-			vy = -0.4f;
-			ax = 0;
-			ay = KOOPA_GRAVITY;
-			break;
-		case KOOPA_STATE_SHELL_STATIC:
-			vx = 0;
-			vy = 0;
-			ax = 0;
-			break;
-		case KOOPA_STATE_SHELL_DYNAMIC:
-			isKicked = true;
-			vy = 0;
-			ax = 0;
-			break;
-		case KOOPA_STATE_WALKING_LEFT:
-			isKicked = false;
-			vx = -KOOPA_WALKING_SPEED;
-			break;
-		case KOOPA_STATE_WALKING_RIGHT:
-			isKicked = false;
-			vx = KOOPA_WALKING_SPEED;
-			break;
-		case KOOPA_STATE_BEING_HELD:
-			beingHeld = 1;
-			isFlying = false;
-			break;
+		break;
+	}
+	case KOOPA_STATE_SHELL_DYNAMIC:
+	{
+		isKicked = true;
+		vy = 0;
+		ax = 0;
+		break;
+	}
+	case KOOPA_STATE_WALKING_LEFT:
+	{
+		isKicked = false;
+		shellStart = -1;
+		vx = -KOOPA_WALKING_SPEED;
+		break;
+	}
+	case KOOPA_STATE_WALKING_RIGHT:
+	{
+		isKicked = false;
+		shellStart = -1;
+		vx = KOOPA_WALKING_SPEED;
+		break;
+	}
+	case KOOPA_STATE_BEING_HELD:
+	{
+		beingHeld = 1;
+		isFlying = false;
+		break;
+	}
 	}
 	CGameObject::SetState(state);
 

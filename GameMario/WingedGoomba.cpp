@@ -38,40 +38,87 @@ void CWingedGoomba::OnNoCollision(DWORD dt)
 
 void CWingedGoomba::OnCollisionWith(LPCOLLISIONEVENT e)
 {
-	if (!e->obj->IsBlocking()) return;
+	if (!e->obj->IsBlocking() && !dynamic_cast<CKoopa*>(e->obj)) return;
 	if (dynamic_cast<CWingedGoomba*>(e->obj)) return;
 
+	// --- Collision with Koopa ---
 	if (CKoopa* koopa = dynamic_cast<CKoopa*>(e->obj))
 	{
-		DebugOut(L"Koopa hit Goomba from Goomba.cpp");
-		if (GetState() != GOOMBA_STATE_DIE_ON_TAIL_WHIP)
+		if (koopa->GetState() == KOOPA_STATE_SHELL_DYNAMIC)
 		{
-			SetState(GOOMBA_STATE_DIE_ON_TAIL_WHIP);
-			koopa->SetState(GOOMBA_STATE_DIE_ON_TAIL_WHIP);
-		}
-	}
-
-	if (e->ny != 0)
-	{
-		if (isBouncing == 1)
-		{
-			vy = -WINGED_GOOMBA_BOUNCE_SPEED;
-			bounceCount++;
-		}
-		else if (isFlying == 1)
-		{
-
-			vy = 0;
-			isFlying = 0;
-			SetState(WINGED_GOOMBA_STATE_TRACKING);
+			if (this->state == WINGED_GOOMBA_STATE_DIE_ON_STOMP || this->state == WINGED_GOOMBA_STATE_DIE_ON_TAIL_WHIP)
+			{
+				return;
+			}
+			if (this->isWinged == 1)
+			{
+				DebugOut(L"Shell hit Winged Goomba (Wings Removed) - Detected in WingedGoomba.cpp\n");
+				this->SetWinged(0);
+				this->SetState(WINGED_GOOMBA_STATE_WALKING);
+			}
+			else
+			{
+				DebugOut(L"Shell hit Winged Goomba (No Wings - Killed) - Detected in WingedGoomba.cpp\n");
+				this->SetState(WINGED_GOOMBA_STATE_DIE_ON_TAIL_WHIP);
+			}
+			return;
 		}
 		else
-			vy = 0;
+		{
+			if (e->nx != 0)
+			{
+				vx = -vx;
+				nx = -nx;
+			}
+			return;
+		}
 	}
-	else if (e->nx != 0)
+
+
+	if (e->obj->IsBlocking())
 	{
-		vx = -vx;
-		nx = -nx;
+		if (e->ny != 0) // Vertical collision with blocking object
+		{
+			// Handle landing/bouncing logic based on current state
+			if (isBouncing == 1)
+			{
+				if (e->ny < 0)
+				{
+					vy = -WINGED_GOOMBA_BOUNCE_SPEED;
+					bounceCount++;
+				}
+				else {
+					vy = 0;
+				}
+			}
+			else if (isFlying == 1)
+			{
+				if (e->ny < 0) // Landed while flying
+				{
+					vy = 0;
+					isFlying = 0;
+					SetState(WINGED_GOOMBA_STATE_TRACKING); // Or WINGED_GOOMBA_STATE_WALKING?
+				}
+				else {
+					vy = 0;
+				}
+			}
+			else
+			{
+				if (e->ny < 0)
+				{
+					vy = 0;
+				}
+				else {
+					vy = 0;
+				}
+			}
+		}
+		else if (e->nx != 0)
+		{
+			vx = -vx;
+			nx = -nx;
+		}
 	}
 }
 

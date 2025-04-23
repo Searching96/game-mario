@@ -243,11 +243,11 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 		vy = 0;
 		if (e->ny < 0) isOnPlatform = true;
 	}
-	else
-		if (e->nx != 0 && e->obj->IsBlocking())
-		{
-			vx = 0;
-		}
+	//else
+	//	if (e->nx != 0 && e->obj->IsBlocking())
+	//	{
+	//		vx = 0;
+	//	}
 
 	if (dynamic_cast<CGoomba*>(e->obj))
 		OnCollisionWithGoomba(e);
@@ -504,18 +504,17 @@ void CMario::OnCollisionWithKoopa(LPCOLLISIONEVENT e) {
 		return; //Processed in Koopa.cpp
 	}
 	if (koopa->GetState() == KOOPA_STATE_SHELL_STATIC) {
-		// Kick the shell
-		if (isRunning == 0)
-		{
+		if (isRunning) {
+			// Pick up the shell
+			koopa->SetState(KOOPA_STATE_BEING_HELD);
+			koopa->SetBeingHeld(1);
+			this->SetIsHoldingKoopa(1);
+		}
+		else {
+			// Kick the shell
 			StartKick();
 			koopa->SetState(KOOPA_STATE_SHELL_DYNAMIC);
 			koopa->SetSpeed((nx > 0) ? KOOPA_SHELL_SPEED : -KOOPA_SHELL_SPEED, 0);
-			return;
-		}
-		else
-		{
-			koopa->SetState(KOOPA_STATE_BEING_HELD);
-			this->SetIsHoldingKoopa(1);
 		}
 		return;
 	}
@@ -693,7 +692,7 @@ int CMario::GetAniIdSmall()
 
 
 //
-// Get animdation ID for big Mario
+// Get animation ID for big Mario
 //
 int CMario::GetAniIdBig()
 {
