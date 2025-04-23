@@ -16,11 +16,7 @@ void CKoopa::GetBoundingBox(float& left, float& top, float& right, float& bottom
 	{
 		left = x - KOOPA_BBOX_WIDTH / 2;
 		right = left + KOOPA_BBOX_WIDTH;
-
-		// Set bottom at the sprite's bottom
 		bottom = y + KOOPA_TEXTURE_HEIGHT / 2;
-
-		// Set top 16 pixels up from bottom
 		top = bottom - KOOPA_BBOX_HEIGHT;
 	}
 	else // Shell states
@@ -203,8 +199,29 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		return;
 	}
 
-	while (beingHeld == 1)
+	if (beingHeld == 1)
 	{
+		// Kiểm tra overlap với Goomba
+		vector<LPCOLLISIONEVENT> coEvents;
+		coEvents.clear();
+		CCollision::GetInstance()->Scan(this, dt, coObjects, coEvents);
+
+		for (size_t i = 0; i < coEvents.size(); i++)
+		{
+			LPCOLLISIONEVENT e = coEvents[i];
+			if (dynamic_cast<CGoomba*>(e->obj) || dynamic_cast<CWingedGoomba*>(e->obj))
+			{
+				CGoomba* goomba = dynamic_cast<CGoomba*>(e->obj);
+				if (goomba->GetState() != GOOMBA_STATE_DIE_ON_TAIL_WHIP)
+				{
+					this->SetState(KOOPA_STATE_DIE);
+					goomba->SetState(GOOMBA_STATE_DIE_ON_TAIL_WHIP);
+				}
+			}
+		}
+
+		for (size_t i = 0; i < coEvents.size(); i++) delete coEvents[i];
+
 		if (mario->GetIsRunning() == 0)
 		{
 			float mNx;
@@ -261,15 +278,12 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	vx += ax * dt;
 
 	if (state == KOOPA_STATE_WALKING_LEFT)
-	{
 		if (IsPlatformEdge(0.1f))
 			SetState(KOOPA_STATE_WALKING_RIGHT);
-	}
 	else if (state == KOOPA_STATE_WALKING_RIGHT)
-	{
 		if (IsPlatformEdge(0.1f))
 			SetState(KOOPA_STATE_WALKING_LEFT);
-	}
+
 	if (state == KOOPA_STATE_SHELL_DYNAMIC && vx < 0.000000001f && vy < 0.000000001f) SetState(KOOPA_STATE_SHELL_STATIC);
 
 	//DebugOut(L"[INFO] Koopa: vx=%f, ax=%f, vy=%f, ay=%f\n", vx, ax, vy, ay);

@@ -7,6 +7,8 @@
 #include "WingedGoomba.h"
 #include "Goomba.h"
 #include "Koopa.h"
+#include "PiranhaPlant.h"
+
 #include "debug.h"
 
 #define BLOCK_PUSH_FACTOR 0.01f
@@ -149,13 +151,27 @@ void CCollision::SweptAABB(float ml, float mt, float mr, float mb,
 		}
 	}
 
-	if (dynamic_cast<CKoopa*>(objSrc) && objDest->IsBlocking())
+	if (dynamic_cast<CKoopa*>(objSrc) && objDest->IsBlocking() == 1)
 	{
 		if (ml < sr && mr > sl && mt < sb && mb > st)
 		{
 			t = 0.0f;      // collision at the start of the frame
 			nx = ny = 0.0f;
 			return;
+		}
+	}
+
+	if (dynamic_cast<CKoopa*>(objSrc) && (dynamic_cast<CGoomba*>(objDest)
+		|| dynamic_cast<CWingedGoomba*>(objDest) || dynamic_cast<CPiranhaPlant*>(objDest)))
+	{
+		if (dynamic_cast<CKoopa*>(objSrc)->GetBeingHeld() == 1)
+		{
+			if (ml < sr && mr > sl && mt < sb && mb > st)
+			{
+				t = 0.0f;      // collision at the start of the frame
+				nx = ny = 0.0f;
+				return;
+			}
 		}
 	}
 

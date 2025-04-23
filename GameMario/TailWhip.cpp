@@ -17,8 +17,8 @@ CTailWhip::CTailWhip(float x, float y, CAttackParticle* attackParticle) : CGameO
 
 void CTailWhip::Render()
 {
-	CMario* mario = dynamic_cast<CMario*>(dynamic_cast<CPlayScene*>(CGame::GetInstance()->GetCurrentScene())->GetPlayer());
-	if (mario->GetLevel() != MARIO_LEVEL_TAIL)
+	CMario* player = dynamic_cast<CMario*>(dynamic_cast<CPlayScene*>(CGame::GetInstance()->GetCurrentScene())->GetPlayer());
+	if (player->GetLevel() != MARIO_LEVEL_TAIL)
 		return;
 	if (notWhipping == 1)
 		return;
@@ -30,8 +30,8 @@ void CTailWhip::Render()
 
 void CTailWhip::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
-	CMario* mario = dynamic_cast<CMario*>(dynamic_cast<CPlayScene*>(CGame::GetInstance()->GetCurrentScene())->GetPlayer());
-	if (mario->GetLevel() != MARIO_LEVEL_TAIL)
+	CMario* player = dynamic_cast<CMario*>(dynamic_cast<CPlayScene*>(CGame::GetInstance()->GetCurrentScene())->GetPlayer());
+	if (player->GetLevel() != MARIO_LEVEL_TAIL)
 		return;
 
 	if (notWhipping == 1)
@@ -60,8 +60,8 @@ void CTailWhip::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	}
 
 	float mX, mY, mNx;
-	mario->GetPosition(mX, mY);
-	mario->GetNx(mNx);
+	player->GetPosition(mX, mY);
+	player->GetNx(mNx);
 
 	if (whippingRight == 1)
 		x = mX + 6;
@@ -108,6 +108,7 @@ void CTailWhip::OnCollisionWithBuffQBlock(LPCOLLISIONEVENT e)
 	CBuffQBlock* bqb = dynamic_cast<CBuffQBlock*>(e->obj);
 	CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
 	if (bqb)
+	{
 		if (bqb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
 		{
 			if (player->GetLevel() == MARIO_LEVEL_SMALL)
@@ -128,6 +129,7 @@ void CTailWhip::OnCollisionWithBuffQBlock(LPCOLLISIONEVENT e)
 				bqb->SetToSpawn(1);
 			bqb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
 		}
+	}
 }
 
 void CTailWhip::OnCollisionWithCoinQBlock(LPCOLLISIONEVENT e)
