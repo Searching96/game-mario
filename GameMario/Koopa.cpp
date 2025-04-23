@@ -197,6 +197,8 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				{
 					this->SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_TERRAIN);
 					beingHeld = 0;
+					mario->SetIsHoldingKoopa(0);
+					mario->StartKick();
 					break;
 				}
 			}
@@ -266,6 +268,8 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				{
 					SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_TERRAIN);
 					beingHeld = 0;
+					mario->SetIsHoldingKoopa(0);
+					mario->StartKick();
 					break;
 				}
 			}

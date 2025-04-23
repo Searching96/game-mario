@@ -659,7 +659,7 @@ int CMario::GetAniIdSmall()
 		else aniId = ID_ANI_MARIO_SMALL_POWER_UP_LEFT;
 	}
 
-	if (holdingKoopa)
+	if (isHoldingKoopa)
 	{
 		if (vx == 0)
 		{
@@ -765,7 +765,7 @@ int CMario::GetAniIdBig()
 		else aniId = ID_ANI_MARIO_POWER_DOWN_LEFT;
 	}
 
-	if (holdingKoopa)
+	if (isHoldingKoopa)
 	{
 		if (vx == 0)
 		{
@@ -885,7 +885,7 @@ int CMario::GetAniIdTail()
 		else aniId = ID_ANI_MARIO_TAIL_KICK_LEFT;
 	}
 
-	if (holdingKoopa)
+	if (isHoldingKoopa)
 	{
 		if (vx == 0)
 		{
