@@ -88,12 +88,6 @@ void CBuffQBlock::SetState(int state)
 			mushroom->SetVisible(1);
 			mushroom->SetState(MUSHROOM_STATE_RISE);
 		}
-		else // Spawn SuperLeaf
-		{
-			// superleaf->SetVisible(1); // Visibility was set in BOUNCE_UP
-			superleaf->SetState(SUPERLEAF_STATE_FLOATING_RIGHT); // Or LEFT, depending on desired initial motion
-			// break; // Remove the break here
-		}
 		break; // Keep the break for the overall switch case
 	}
 }

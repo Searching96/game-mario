@@ -889,7 +889,7 @@ int CMario::GetAniIdTail()
 		else aniId = ID_ANI_MARIO_TAIL_KICK_LEFT;
 	}
 
-	if (holdingKoopa)
+	if (isHoldingKoopa)
 	{
 		if (vx == 0)
 		{
