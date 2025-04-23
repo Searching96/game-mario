@@ -454,19 +454,29 @@ void CPlayScene::Update(DWORD dt)
 		}
 	}
 
+	if (mario == NULL) return; // Added null check for safety
+
 	vector<LPGAMEOBJECT> coObjects;
-	for (size_t i = 1; i < objects.size(); i++)
+	for (size_t i = 1; i < objects.size(); i++) // Assuming player is objects[0]
 	{
-		coObjects.push_back(objects[i]);
+		// Ensure we don't add the player to its own collision list if player isn't objects[0]
+		if (objects[i] != player)
+			coObjects.push_back(objects[i]);
 	}
+
+	// Check Mario's state once before the loop
+	bool isMarioTransforming = mario->GetIsPowerUp() || mario->GetIsTailUp() ||
+		mario->GetIsPowerDown() || mario->GetIsTailDown();
 
 	for (size_t i = 0; i < objects.size(); i++)
 	{
-		if (!dynamic_cast<CMario*>(objects[i]))
-			if (mario->GetIsPowerUp() == 1 || mario->GetIsTailUp()
-				|| mario->GetIsPowerDown() == 1 || mario->GetIsTailDown() == 1)
-				continue;	// chrono stop the game  
+		// Apply chrono stop logic using the pre-checked flag
+		if (!dynamic_cast<CMario*>(objects[i]) && isMarioTransforming)
+		{
+			continue; // chrono stop the game for non-Mario objects
+		}
 
+		// Update the object (Mario or others if not transforming)
 		objects[i]->Update(dt, &coObjects);
 	}
 
@@ -565,23 +575,34 @@ void CPlayScene::Update(DWORD dt)
 
 void CPlayScene::Render()
 {
-	// Render all objects except Mario
-	CAttackParticle* attackParticle = ((CMario*)player)->GetTailWhip()->GetAttackParticle();
+    // Ensure player and attackParticle pointers are valid if player exists
+    CAttackParticle* attackParticle = nullptr;
+    if (player != nullptr) {
+         // Need to cast player to CMario to access GetTailWhip
+         CMario* marioPlayer = dynamic_cast<CMario*>(player);
+         if (marioPlayer && marioPlayer->GetTailWhip()) {
+            attackParticle = marioPlayer->GetTailWhip()->GetAttackParticle();
+         }
+    }
 
-	for (int i = 0; i < objects.size(); i++)
-	{
-		if (objects[i] != player || objects[i] != attackParticle) // Skip Mario
-		{
-			objects[i]->Render();
-		}
-	}
 
-	// Render Mario on top of everything else
-	if (player != NULL)
-	{
-		player->Render();
-		attackParticle->Render();
-	}
+    // Render all objects except Mario and his particle
+    for (int i = 0; i < objects.size(); i++)
+    {
+        if (objects[i] != player && objects[i] != attackParticle)
+        {
+            objects[i]->Render();
+        }
+    }
+
+    // Render Mario and his particle last (on top)
+    if (player != NULL)
+    {
+        player->Render();
+        if (attackParticle != nullptr) {
+            attackParticle->Render();
+        }
+    }
 }
 
 /*

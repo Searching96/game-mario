@@ -34,9 +34,9 @@ void CKoopa::OnNoCollision(DWORD dt)
 void CKoopa::OnCollisionWith(LPCOLLISIONEVENT e) {
 	if (state == KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY) return;
 
+	// Skip collision with non-blocking objects or self
 	if (!e->obj->IsBlocking() || e->obj == this) return;
 
-	// Ground check and tracking
 	if (e->ny < 0) { // Collision from above (standing on something)
 		vy = 0;
 		if (e->obj->IsBlocking())
