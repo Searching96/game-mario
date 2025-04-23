@@ -75,7 +75,6 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		if (GetTickCount64() - powerDownStart > MARIO_POWER_DOWN_TIME)
 		{
 			powerDown = 0;
-			y += 6; // RED ALERT
 			SetLevel(MARIO_LEVEL_SMALL);
 			StartUntouchable();
 		}
@@ -302,7 +301,6 @@ void CMario::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
 			{
 				if (level == MARIO_LEVEL_BIG)
 				{
-					y += 6; // RED ALERT
 					SetState(MARIO_STATE_POWER_DOWN);
 				}
 				else if (level == MARIO_LEVEL_TAIL)
@@ -466,7 +464,7 @@ void CMario::OnCollisionWithFireball(LPCOLLISIONEVENT e)
 				SetState(MARIO_STATE_TAIL_DOWN);
 				StartUntouchable();
 			}
-			else if (level > MARIO_LEVEL_SMALL)
+			else if (level == MARIO_LEVEL_BIG)
 			{
 				SetState(MARIO_STATE_POWER_DOWN);
 				StartUntouchable();
@@ -584,7 +582,6 @@ void CMario::OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e)
 			{
 				if (level == MARIO_LEVEL_BIG)
 				{
-					y += 6; // RED ALERT
 					SetState(MARIO_STATE_POWER_DOWN);
 				}
 				else if (level == MARIO_LEVEL_TAIL)
@@ -991,7 +988,7 @@ void CMario::SetState(int state)
 
 	case MARIO_STATE_RUNNING_RIGHT:
 		if (isSitting) break;
-		if (isOnPlatform && vx < 0) // If Mario is moving left, set state to brake
+		if (isOnPlatform && vx < 0 && isHoldingKoopa == 0) // If Mario is moving left, set state to brake
 		{
 			if (isOnPlatform)
 			{
@@ -1025,7 +1022,7 @@ void CMario::SetState(int state)
 
 	case MARIO_STATE_RUNNING_LEFT:
 		if (isSitting) break;
-		if (isOnPlatform && vx > 0) // If Mario is moving right, set state to brake
+		if (isOnPlatform && vx > 0 && isHoldingKoopa == 0) // If Mario is moving right, set state to brake
 		{
 			if (isOnPlatform)
 			{
@@ -1058,7 +1055,7 @@ void CMario::SetState(int state)
 
 	case MARIO_STATE_WALKING_RIGHT:
 		if (isSitting) break;
-		if (isOnPlatform && vx < 0) // If Mario is moving left, set state to brake
+		if (isOnPlatform && vx < 0 && isHoldingKoopa == 0) // If Mario is moving left, set state to brake
 		{
 			if (isOnPlatform)
 			{
@@ -1090,7 +1087,7 @@ void CMario::SetState(int state)
 
 	case MARIO_STATE_WALKING_LEFT:
 		if (isSitting) break;
-		if (isOnPlatform && vx > 0) // If Mario is moving right, set state to brake
+		if (isOnPlatform && vx > 0 && isHoldingKoopa == 0) // If Mario is moving right, set state to brake
 		{
 			if (isOnPlatform)
 			{
@@ -1202,6 +1199,7 @@ void CMario::SetState(int state)
 		break;
 
 	case MARIO_STATE_POWER_DOWN:
+		y += 6; // RED ALERT
 		StartPowerDown();
 		break;
 

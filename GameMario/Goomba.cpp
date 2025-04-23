@@ -39,7 +39,6 @@ void CGoomba::OnCollisionWith(LPCOLLISIONEVENT e)
 {
 	if (!e->obj->IsBlocking() && !dynamic_cast<CKoopa*>(e->obj))
 		return;
-	if (dynamic_cast<CGoomba*>(e->obj)) return;
 
 	if (CKoopa* koopa = dynamic_cast<CKoopa*>(e->obj))
 	{

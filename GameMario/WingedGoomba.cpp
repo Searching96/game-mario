@@ -38,27 +38,15 @@ void CWingedGoomba::OnNoCollision(DWORD dt)
 
 void CWingedGoomba::OnCollisionWith(LPCOLLISIONEVENT e)
 {
-	if (!e->obj->IsBlocking() && !dynamic_cast<CKoopa*>(e->obj)) return;
-	if (dynamic_cast<CWingedGoomba*>(e->obj)) return;
+	if (!e->obj->IsBlocking() && !dynamic_cast<CKoopa*>(e->obj))
+		return;
 
-	// --- Collision with Koopa ---
 	if (CKoopa* koopa = dynamic_cast<CKoopa*>(e->obj))
 	{
 		if (koopa->GetState() == KOOPA_STATE_SHELL_DYNAMIC)
 		{
-			if (this->state == WINGED_GOOMBA_STATE_DIE_ON_STOMP || this->state == WINGED_GOOMBA_STATE_DIE_ON_TAIL_WHIP)
+			if (this->state != WINGED_GOOMBA_STATE_DIE_ON_STOMP && this->state != WINGED_GOOMBA_STATE_DIE_ON_TAIL_WHIP)
 			{
-				return;
-			}
-			if (this->isWinged == 1)
-			{
-				DebugOut(L"Shell hit Winged Goomba (Wings Removed) - Detected in WingedGoomba.cpp\n");
-				this->SetWinged(0);
-				this->SetState(WINGED_GOOMBA_STATE_WALKING);
-			}
-			else
-			{
-				DebugOut(L"Shell hit Winged Goomba (No Wings - Killed) - Detected in WingedGoomba.cpp\n");
 				this->SetState(WINGED_GOOMBA_STATE_DIE_ON_TAIL_WHIP);
 			}
 			return;
@@ -68,12 +56,10 @@ void CWingedGoomba::OnCollisionWith(LPCOLLISIONEVENT e)
 			if (e->nx != 0)
 			{
 				vx = -vx;
-				nx = -nx;
 			}
 			return;
 		}
 	}
-
 
 	if (e->obj->IsBlocking())
 	{

@@ -1,6 +1,7 @@
 #include "PiranhaPlant.h"
 #include "Game.h"
 #include "PlayScene.h"
+#include "Koopa.h"
 
 CPiranhaPlant::CPiranhaPlant(float x, float y, CFireball* fireball) : CGameObject(x, y)
 {
@@ -192,6 +193,28 @@ bool CPiranhaPlant::IsMarioOnTop()
 	float mario_X, mario_Y;
 	player->GetPosition(mario_X, mario_Y);
 	return (fabs(mario_X - this->x) < PIRANHA_PLANT_BBOX_WIDTH && fabs(mario_Y - this->y) < PIRANHA_PLANT_BBOX_HEIGHT);
+}
+
+void CPiranhaPlant::OnNoCollision(DWORD dt)
+{
+}
+
+void CPiranhaPlant::OnCollisionWith(LPCOLLISIONEVENT e)
+{
+	if (!e->obj->IsBlocking() && !dynamic_cast<CKoopa*>(e->obj))
+		return;
+
+	if (CKoopa* koopa = dynamic_cast<CKoopa*>(e->obj))
+	{
+		if (koopa->GetState() == KOOPA_STATE_SHELL_DYNAMIC)
+		{
+			if (this->state != PIRANHA_PLANT_STATE_DIED)
+			{
+				this->SetState(PIRANHA_PLANT_STATE_DIED);
+			}
+			return;
+		}
+	}
 }
 
 void CPiranhaPlant::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)

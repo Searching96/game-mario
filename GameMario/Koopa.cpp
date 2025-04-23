@@ -48,13 +48,10 @@ void CKoopa::OnCollisionWith(LPCOLLISIONEVENT e) {
 	if (dynamic_cast<CMario*>(e->obj)) {
 		OnCollisionWithMario(e);
 	}
-	//else if (e->obj->IsBlocking()) {
-	//	OnCollisionWithBlock(e);
-	//}
 	else if (dynamic_cast<CCoinQBlock*>(e->obj) || dynamic_cast<CBuffQBlock*>(e->obj)) {
 		OnCollisionWithQuestionBlock(e);
 	}
-	else if (dynamic_cast<CWingedGoomba*>(e->obj) || dynamic_cast<CGoomba*>(e->obj)) {
+	else if (dynamic_cast<CWingedGoomba*>(e->obj) || dynamic_cast<CGoomba*>(e->obj) || dynamic_cast<CPiranhaPlant*>(e->obj)) {
 		OnCollisionWithEnemy(e);
 	}
 
@@ -81,17 +78,6 @@ void CKoopa::OnCollisionWithMario(LPCOLLISIONEVENT e) {
 		vy = -KOOPA_SHELL_DEFLECT_SPEED;
 		vx = e->nx > 0 ? -0.2f : 0.2f;
 		isFlying = true;
-	}
-}
-
-void CKoopa::OnCollisionWithBlock(LPCOLLISIONEVENT e) {
-	if (e->nx != 0) {
-		if (state == KOOPA_STATE_WALKING_LEFT || state == KOOPA_STATE_WALKING_RIGHT) {
-			SetState((state == KOOPA_STATE_WALKING_LEFT) ? KOOPA_STATE_WALKING_RIGHT : KOOPA_STATE_WALKING_LEFT);
-		}
-		else if (state == KOOPA_STATE_SHELL_DYNAMIC) {
-			vx = -vx;
-		}
 	}
 }
 
@@ -127,22 +113,19 @@ void CKoopa::OnCollisionWithQuestionBlock(LPCOLLISIONEVENT e) {
 void CKoopa::OnCollisionWithEnemy(LPCOLLISIONEVENT e) {
 	if (state == KOOPA_STATE_SHELL_DYNAMIC) {
 		if (CWingedGoomba* goomba = dynamic_cast<CWingedGoomba*>(e->obj)) {
-			if (goomba->GetWinged() == 1)
-			{
-				goomba->SetWinged(0);
-				goomba->SetState(WINGED_GOOMBA_STATE_WALKING);
-				//this->SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY);
-				//return;
-			}
-			else if (goomba->GetState() != WINGED_GOOMBA_STATE_DIE_ON_TAIL_WHIP && goomba->GetState() != WINGED_GOOMBA_STATE_DIE_ON_STOMP)
+			if (goomba->GetState() != WINGED_GOOMBA_STATE_DIE_ON_TAIL_WHIP && goomba->GetState() != WINGED_GOOMBA_STATE_DIE_ON_STOMP)
 			{
 				goomba->SetState(WINGED_GOOMBA_STATE_DIE_ON_TAIL_WHIP);
-				vy = -MARIO_JUMP_DEFLECT_SPEED;
 			}
 		}
 		else if (CGoomba* goomba = dynamic_cast<CGoomba*>(e->obj)) {
 			if (goomba->GetState() != GOOMBA_STATE_DIE_ON_TAIL_WHIP && goomba->GetState() != GOOMBA_STATE_DIE_ON_STOMP) {
 				goomba->SetState(GOOMBA_STATE_DIE_ON_TAIL_WHIP);
+			}
+		}
+		else if (CPiranhaPlant* piranha = dynamic_cast<CPiranhaPlant*>(e->obj)) {
+			if (piranha->GetState() != PIRANHA_PLANT_STATE_DIED) {
+				piranha->SetState(PIRANHA_PLANT_STATE_DIED);
 			}
 		}
 	}
@@ -366,45 +349,24 @@ void CKoopa::HandleBeingHeld(DWORD dt, vector<LPGAMEOBJECT>* coObjects) {
 	player->GetPosition(mX, mY);
 	float mNx;
 	player->GetNx(mNx);
-	if (player->GetLevel() == MARIO_LEVEL_BIG || player->GetLevel() == MARIO_LEVEL_TAIL) {
-		{
-			if (mNx > 0)
-				x = mX + 8;
-			else
-				x = mX - 8;
-			y = mY + 1;
-		}
-		else
-		{
-			if (mNx > 0)
-				x = mX + 6;
-			else
-				x = mX - 6;
-			y = mY - 1;
-		}
-=========
->>>>>>>>> Temporary merge branch 2
-		return;
-	}
-
-	float mX, mY;
-	mario->GetPosition(mX, mY);
-	float mNx;
-	mario->GetNx(mNx);
-	if (mario->GetLevel() == MARIO_LEVEL_BIG || mario->GetLevel() == MARIO_LEVEL_TAIL) {
+	if (player->GetLevel() == MARIO_LEVEL_BIG || player->GetLevel() == MARIO_LEVEL_TAIL)
+	{
 		if (mNx > 0)
 			x = mX + 8;
 		else
 			x = mX - 8;
 		y = mY + 1;
 	}
-	else {
+	else
+	{
 		if (mNx > 0)
 			x = mX + 6;
 		else
 			x = mX - 6;
 		y = mY - 1;
 	}
+
+	return;
 }
 
 void CKoopa::StartShell()

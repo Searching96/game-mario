@@ -164,6 +164,20 @@ void CCollision::SweptAABB(float ml, float mt, float mr, float mb,
 	if (dynamic_cast<CKoopa*>(objSrc) && (dynamic_cast<CGoomba*>(objDest)
 		|| dynamic_cast<CWingedGoomba*>(objDest) || dynamic_cast<CPiranhaPlant*>(objDest)))
 	{
+		if (dynamic_cast<CKoopa*>(objSrc)->GetState() == KOOPA_STATE_SHELL_DYNAMIC)
+		{
+			if (ml < sr && mr > sl && mt < sb && mb > st)
+			{
+				t = 0.0f;      // collision at the start of the frame
+				nx = ny = 0.0f;
+				return;
+			}
+		}
+	}
+
+	if (dynamic_cast<CKoopa*>(objSrc) && (dynamic_cast<CGoomba*>(objDest)
+		|| dynamic_cast<CWingedGoomba*>(objDest) || dynamic_cast<CPiranhaPlant*>(objDest)))
+	{
 		if (dynamic_cast<CKoopa*>(objSrc)->GetBeingHeld() == 1)
 		{
 			if (ml < sr && mr > sl && mt < sb && mb > st)

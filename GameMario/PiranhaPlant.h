@@ -54,6 +54,9 @@ protected:
 	bool IsMarioInRange();
 	bool IsMarioOnTop();
 
+	void OnNoCollision(DWORD dt);
+	void OnCollisionWith(LPCOLLISIONEVENT e);
+
 public:
 	CPiranhaPlant(float x, float y, CFireball* fireball);
 
