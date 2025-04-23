@@ -6,6 +6,8 @@
 #include "Brick.h"
 #include "Mario.h"
 #include "Goomba.h"
+#include "Chunk.h"
+#include <set>
 //#include "Koopas.h"
 
 
@@ -13,15 +15,19 @@ class CPlayScene: public CScene
 {
 protected: 
 	// A play scene has to have player, right? 
-	LPGAMEOBJECT player;					
+	LPGAMEOBJECT player;	
+	set<int> currentChunk;
 
 	vector<LPGAMEOBJECT> objects;
+	vector<LPCHUNK> chunks;
+
+	LPCHUNK currentParsingChunk = nullptr;
 
 	void _ParseSection_SPRITES(string line);
 	void _ParseSection_ANIMATIONS(string line);
 
 	void _ParseSection_ASSETS(string line);
-	void _ParseSection_OBJECTS(string line);
+	void _ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk);
 
 	void LoadAssets(LPCWSTR assetFile);
 	
@@ -34,6 +40,7 @@ public:
 	virtual void Unload();
 
 	LPGAMEOBJECT GetPlayer() { return player; }
+	LPCHUNK GetChunk(int id) { return chunks[id]; }
 
 	void Clear();
 	void PurgeDeletedObjects();
