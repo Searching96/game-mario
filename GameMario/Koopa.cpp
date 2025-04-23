@@ -37,19 +37,11 @@ void CKoopa::OnCollisionWith(LPCOLLISIONEVENT e) {
 
 	if (!e->obj->IsBlocking() || e->obj == this) return;
 
-	// Ground check and tracking
 	if (e->ny < 0) { // Collision from above (standing on something)
 		vy = 0;
 		if (e->obj->IsBlocking())
 		{
 			ground = e->obj;
-		}
-		if (dynamic_cast<CMario*>(e->obj))
-		{
-			vy = -KOOPA_SHELL_DEFLECT_SPEED;
-			vx = e->nx > 0 ? -0.2f : 0.2f;
-			isFlying = true;
-			return;
 		}
 	}
 
@@ -375,6 +367,31 @@ void CKoopa::HandleBeingHeld(DWORD dt, vector<LPGAMEOBJECT>* coObjects) {
 	float mNx;
 	player->GetNx(mNx);
 	if (player->GetLevel() == MARIO_LEVEL_BIG || player->GetLevel() == MARIO_LEVEL_TAIL) {
+		{
+			if (mNx > 0)
+				x = mX + 8;
+			else
+				x = mX - 8;
+			y = mY + 1;
+		}
+		else
+		{
+			if (mNx > 0)
+				x = mX + 6;
+			else
+				x = mX - 6;
+			y = mY - 1;
+		}
+=========
+>>>>>>>>> Temporary merge branch 2
+		return;
+	}
+
+	float mX, mY;
+	mario->GetPosition(mX, mY);
+	float mNx;
+	mario->GetNx(mNx);
+	if (mario->GetLevel() == MARIO_LEVEL_BIG || mario->GetLevel() == MARIO_LEVEL_TAIL) {
 		if (mNx > 0)
 			x = mX + 8;
 		else

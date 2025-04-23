@@ -88,8 +88,7 @@ void CBuffQBlock::SetState(int state)
 			mushroom->SetVisible(1);
 			mushroom->SetState(MUSHROOM_STATE_RISE);
 		}
-		else
-		break;
+		break; // Keep the break for the overall switch case
 	}
 }
 
