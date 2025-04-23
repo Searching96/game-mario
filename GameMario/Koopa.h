@@ -26,13 +26,15 @@
 
 #define KOOPA_SHELL_TIMEOUT 7000
 #define KOOPA_SHELL_ALERT_TIMEOUT 5000
+#define KOOPA_DIE_TIMEOUT 500
 
 #define KOOPA_STATE_WALKING_LEFT 100
-#define KOOPA_STATE_WALKING_RIGHT 101
+#define KOOPA_STATE_WALKING_RIGHT 110
 #define KOOPA_STATE_SHELL_STATIC 200
 #define KOOPA_STATE_SHELL_DYNAMIC 300
 #define KOOPA_STATE_BEING_HELD 400
-#define KOOPA_STATE_DIE 500
+#define KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY 500
+#define KOOPA_STATE_DIE_ON_COLLIDE_WITH_TERRAIN 510
 
 #define ID_ANI_KOOPA_WALKING_LEFT 150010
 #define ID_ANI_KOOPA_WALKING_RIGHT 150020
@@ -56,7 +58,8 @@ protected:
 
 	LPGAMEOBJECT ground;
 
-	ULONGLONG shell_start;
+	ULONGLONG shellStart;
+	ULONGLONG dieStart;
 
 	int beingHeld = 0;
 
@@ -65,7 +68,7 @@ protected:
 	virtual void Render();
 	bool IsPlatformEdge(float checkDistance);
 
-	virtual int IsCollidable() { return 1; };
+	virtual int IsCollidable() { return (state != KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY && state != KOOPA_STATE_DIE_ON_COLLIDE_WITH_TERRAIN); };
 	virtual int IsBlocking() { return 0; }
 	virtual void OnNoCollision(DWORD dt);
 
