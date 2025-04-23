@@ -174,7 +174,7 @@ void CTailWhip::OnCollisionWithPiranhaPlant(LPCOLLISIONEVENT e)
 		else
 			attackParticle->SetPosition(x - 8, y);
 		attackParticle->SetState(ATTACK_PARTICLE_STATE_EMERGING);
-		plant->StartDeath();
+		plant->SetState(PIRANHA_PLANT_STATE_DIED);
 	}
 }
 

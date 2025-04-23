@@ -198,7 +198,7 @@ void CPiranhaPlant::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
 	if (state == PIRANHA_PLANT_STATE_DIED)
 	{
-		if (GetTickCount64() - death_start > PIRANHA_PLANT_DIE_TIMEOUT)
+		if (GetTickCount64() - deathStart > PIRANHA_PLANT_DIE_TIMEOUT)
 		{
 			isDeleted = true;
 		}
@@ -290,6 +290,7 @@ void CPiranhaPlant::SetState(int state)
 		hoverStart = GetTickCount64();
 		break;
 	case PIRANHA_PLANT_STATE_DIED:
+		StartDeath();
 		break;
 	}
 }

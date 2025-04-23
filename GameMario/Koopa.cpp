@@ -1,7 +1,5 @@
 ﻿#include "Koopa.h"
 
-#include "debug.h"
-
 CKoopa::CKoopa(float x, float y) :CGameObject(x, y)
 {
 	this->ax = 0;
@@ -211,12 +209,13 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			LPCOLLISIONEVENT e = coEvents[i];
 			if (dynamic_cast<CGoomba*>(e->obj) || dynamic_cast<CWingedGoomba*>(e->obj))
 			{
-				CGoomba* goomba = dynamic_cast<CGoomba*>(e->obj);
-				if (goomba->GetState() != GOOMBA_STATE_DIE_ON_TAIL_WHIP)
-				{
-					this->SetState(KOOPA_STATE_DIE);
-					goomba->SetState(GOOMBA_STATE_DIE_ON_TAIL_WHIP);
-				}
+				this->SetState(KOOPA_STATE_DIE);
+				e->obj->SetState(GOOMBA_STATE_DIE_ON_TAIL_WHIP);
+			}
+			else if (dynamic_cast<CPiranhaPlant*>(e->obj))
+			{
+				this->SetState(KOOPA_STATE_DIE);
+				e->obj->SetState(PIRANHA_PLANT_STATE_DIED);
 			}
 		}
 

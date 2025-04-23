@@ -48,7 +48,7 @@ protected:
 	// 0 bottom left, 1 lower center left, 2 upper center left, 3 top left
 	//4 top right, 5 upper center right, 6 lower center right, 7 bottom right
 
-	ULONGLONG death_start;
+	ULONGLONG deathStart;
 	int GetAiming();
 	void Shoot(int direction);
 	bool IsMarioInRange();
@@ -66,8 +66,7 @@ public:
 	int IsCollidable() { return 1; }
 	void StartDeath()
 	{
-		death_start = GetTickCount64();
-		SetState(PIRANHA_PLANT_STATE_DIED);
+		deathStart = GetTickCount64();
 	}
 	void StartMoveUp() {
 		moveUp = 1;

@@ -1,5 +1,6 @@
 #pragma once
 #include "GameObject.h"
+
 #include "Platform.h"
 #include "Box.h"
 #include "BuffQBlock.h"
@@ -7,7 +8,10 @@
 #include "Mario.h"
 #include "WingedGoomba.h"
 #include "PlayScene.h"
+#include "PiranhaPlant.h"
+
 #include "debug.h"
+
 
 #define KOOPA_GRAVITY 0.002f
 #define KOOPA_WALKING_SPEED 0.02f
@@ -20,8 +24,8 @@
 #define KOOPA_BBOX_WIDTH 14
 #define KOOPA_BBOX_HEIGHT 14
 
-#define KOOPA_SHELL_TIMEOUT 4000
-#define KOOPA_SHELL_ALERT_TIMEOUT 2000
+#define KOOPA_SHELL_TIMEOUT 7000
+#define KOOPA_SHELL_ALERT_TIMEOUT 5000
 
 #define KOOPA_STATE_WALKING_LEFT 100
 #define KOOPA_STATE_WALKING_RIGHT 101
