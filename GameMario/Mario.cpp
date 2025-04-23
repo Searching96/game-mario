@@ -885,6 +885,33 @@ int CMario::GetAniIdTail()
 		else aniId = ID_ANI_MARIO_TAIL_KICK_LEFT;
 	}
 
+	if (holdingKoopa)
+	{
+		if (vx == 0)
+		{
+			if (nx > 0) aniId = ID_ANI_MARIO_TAIL_HOLDING_KOOPA_IDLE_RIGHT;
+			else aniId = ID_ANI_MARIO_TAIL_HOLDING_KOOPA_IDLE_LEFT;
+		}
+		else if (vx > 0)
+		{
+			if (fabs(vx) <= MARIO_HALF_RUN_ACCEL_SPEED)
+				aniId = ID_ANI_MARIO_TAIL_HOLDING_KOOPA_WALKING_RIGHT;
+			else if (fabs(vx) > MARIO_HALF_RUN_ACCEL_SPEED && fabs(vx) < MARIO_MAX_RUNNING_SPEED)
+				aniId = ID_ANI_MARIO_TAIL_HOLDING_KOOPA_HALF_RUNNING_RIGHT;
+			else if (fabs(vx) == MARIO_MAX_RUNNING_SPEED)
+				aniId = ID_ANI_MARIO_TAIL_HOLDING_KOOPA_RUNNING_RIGHT;
+		}
+		else // vx < 0
+		{
+			if (fabs(vx) <= MARIO_HALF_RUN_ACCEL_SPEED)
+				aniId = ID_ANI_MARIO_TAIL_HOLDING_KOOPA_WALKING_LEFT;
+			else if (fabs(vx) > MARIO_HALF_RUN_ACCEL_SPEED && fabs(vx) < MARIO_MAX_RUNNING_SPEED)
+				aniId = ID_ANI_MARIO_TAIL_HOLDING_KOOPA_HALF_RUNNING_LEFT;
+			else if (fabs(vx) == MARIO_MAX_RUNNING_SPEED)
+				aniId = ID_ANI_MARIO_TAIL_HOLDING_KOOPA_RUNNING_LEFT;
+		}
+	}
+
 	if (aniId == -1) aniId = ID_ANI_MARIO_TAIL_IDLE_RIGHT;
 
 	return aniId;
