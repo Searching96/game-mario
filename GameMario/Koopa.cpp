@@ -33,6 +33,7 @@ void CKoopa::OnNoCollision(DWORD dt)
 
 void CKoopa::OnCollisionWith(LPCOLLISIONEVENT e) {
 	if (state == KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY) return;
+	if (state == KOOPA_STATE_DIE_ON_COLLIDE_WITH_TERRAIN) return;
 
 	if (!e->obj->IsBlocking() || e->obj == this) return;
 
