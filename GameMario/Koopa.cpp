@@ -75,8 +75,7 @@ void CKoopa::OnCollisionWith(LPCOLLISIONEVENT e) {
 			}
 		}
 		else if (state == KOOPA_STATE_SHELL_DYNAMIC) {
-			if (!dynamic_cast<CGoomba*>(e->obj) && !dynamic_cast<CWingedGoomba*>(e->obj) &&
-				!dynamic_cast<CCoinQBlock*>(e->obj) && !dynamic_cast<CBuffQBlock*>(e->obj))
+			if (!dynamic_cast<CGoomba*>(e->obj) && !dynamic_cast<CWingedGoomba*>(e->obj))
 			{
 				vx = -vx;
 			}
@@ -310,7 +309,7 @@ void CKoopa::UpdateMovement(DWORD dt, vector<LPGAMEOBJECT>* coObjects) {
 }
 
 void CKoopa::HandleBeingHeld(DWORD dt, vector<LPGAMEOBJECT>* coObjects) {
-	CMario* mario = (CMario*)(((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer());
+	CMario* player = (CMario*)(((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer());
 
 	// Check for overlap with Goomba
 	vector<LPCOLLISIONEVENT> coEvents;
@@ -334,20 +333,21 @@ void CKoopa::HandleBeingHeld(DWORD dt, vector<LPGAMEOBJECT>* coObjects) {
 
 	for (size_t i = 0; i < coEvents.size(); i++) delete coEvents[i];
 	if (isKilledOnCollideWithEnemy == 1) {
-		mario->SetIsHoldingKoopa(0);
+		player->SetIsHoldingKoopa(0);
 		beingHeld = 0;
 		vy += ay * dt;
 		y += vy * dt;
 		return;
 	}
 
-	if (mario->GetIsRunning() == 0) {
+	if (player->GetIsRunning() == 0) {
 		float mNx;
-		mario->GetNx(mNx);
+		player->GetNx(mNx);
 		this->SetState(KOOPA_STATE_SHELL_DYNAMIC);
 		this->SetSpeed((mNx > 0) ? KOOPA_SHELL_SPEED : -KOOPA_SHELL_SPEED, 0);
 		beingHeld = 0;
-		mario->SetIsHoldingKoopa(0);
+		player->SetIsHoldingKoopa(0);
+		player->StartKick();
 
 		// Check for collision with blocking objects
 		vector<LPCOLLISIONEVENT> coEvents;
@@ -363,8 +363,8 @@ void CKoopa::HandleBeingHeld(DWORD dt, vector<LPGAMEOBJECT>* coObjects) {
 				{
 					SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_TERRAIN);
 					beingHeld = 0;
-					mario->SetIsHoldingKoopa(0);
-					mario->StartKick();
+					player->SetIsHoldingKoopa(0);
+					player->StartKick();
 					break;
 				}
 			}
@@ -374,10 +374,10 @@ void CKoopa::HandleBeingHeld(DWORD dt, vector<LPGAMEOBJECT>* coObjects) {
 	}
 
 	float mX, mY;
-	mario->GetPosition(mX, mY);
+	player->GetPosition(mX, mY);
 	float mNx;
-	mario->GetNx(mNx);
-	if (mario->GetLevel() == MARIO_LEVEL_BIG || mario->GetLevel() == MARIO_LEVEL_TAIL) {
+	player->GetNx(mNx);
+	if (player->GetLevel() == MARIO_LEVEL_BIG || player->GetLevel() == MARIO_LEVEL_TAIL) {
 		if (mNx > 0)
 			x = mX + 8;
 		else

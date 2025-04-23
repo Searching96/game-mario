@@ -27,8 +27,8 @@ protected:
 	float ay; 
 
 
-	ULONGLONG dieOnStompStart;
-	ULONGLONG dieOnWhipStart;
+	ULONGLONG dieOnStompStart = -1;
+	ULONGLONG dieOnWhipStart = -1;
 
 
 	virtual void GetBoundingBox(float &left, float &top, float &right, float &bottom);
