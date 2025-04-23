@@ -277,7 +277,7 @@ class CMario : public CGameObject
 	int isKicking = 0;
 	ULONGLONG kickStart = -1;
 
-	int holdingKoopa = 0;
+	int isHoldingKoopa = 0;
 	int jumpCount = 0;
 	int tailWagged = 1;
 	int isMoving = 0;
@@ -343,5 +343,5 @@ public:
 
 	void SetLevel(int l);
 	void SetIsRunning(int isRunning) { this->isRunning = isRunning; }
-	void SetIsHoldingKoopa(int isHoldingKoopa) { this->holdingKoopa = isHoldingKoopa; }
+	void SetIsHoldingKoopa(int isHoldingKoopa) { this->isHoldingKoopa = isHoldingKoopa; }
 };

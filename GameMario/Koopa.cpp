@@ -257,6 +257,8 @@ void CKoopa::HandleTimers(DWORD dt, vector<LPGAMEOBJECT>* coObjects) {
 				{
 					this->SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_TERRAIN);
 					beingHeld = 0;
+					mario->SetIsHoldingKoopa(0);
+					mario->StartKick();
 					break;
 				}
 			}
@@ -345,14 +347,18 @@ void CKoopa::HandleBeingHeld(DWORD dt, vector<LPGAMEOBJECT>* coObjects) {
 		coEvents.clear();
 		CCollision::GetInstance()->Scan(this, dt, coObjects, coEvents);
 
-		for (size_t i = 0; i < coEvents.size(); i++) {
-			LPCOLLISIONEVENT e = coEvents[i];
-			if (e->obj->IsBlocking()) {
-				SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_TERRAIN);
-				beingHeld = 0;
-				break;
+			for (size_t i = 0; i < coEvents.size(); i++)
+			{
+				LPCOLLISIONEVENT e = coEvents[i];
+				if (e->obj->IsBlocking())
+				{
+					SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_TERRAIN);
+					beingHeld = 0;
+					mario->SetIsHoldingKoopa(0);
+					mario->StartKick();
+					break;
+				}
 			}
-		}
 
 		for (size_t i = 0; i < coEvents.size(); i++) delete coEvents[i];
 		return;

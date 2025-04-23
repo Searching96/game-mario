@@ -607,126 +607,96 @@ void CMario::OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e)
 int CMario::GetAniIdSmall()
 {
 	int aniId = -1;
-
-	// Priority 1: Transitioning (Power Up)
-	if (powerUp)
-	{
-		if (nx > 0) aniId = ID_ANI_MARIO_SMALL_POWER_UP_RIGHT;
-		else aniId = ID_ANI_MARIO_SMALL_POWER_UP_LEFT;
-		return aniId;
-	}
-
-	// Priority 2: Kicking (Cannot kick while holding)
-	if (isKicking == 1 && !holdingKoopa)
-	{
-		if (nx > 0) aniId = ID_ANI_MARIO_SMALL_KICK_RIGHT;
-		else aniId = ID_ANI_MARIO_SMALL_KICK_LEFT;
-		return aniId;
-	}
-
-	// Priority 3: Holding Koopa (Overrides standard actions/movement)
-	if (holdingKoopa)
-	{
-		if (isBraking) // << NEW: Braking while holding
-		{
-			// Use nx set during StartBraking (opposite of movement before brake)
-			//RED ALERT
-			//if (nx > 0) aniId = ID_ANI_MARIO_SMALL_HOLDING_KOOPA_BRACE_RIGHT;
-			//else aniId = ID_ANI_MARIO_SMALL_HOLDING_KOOPA_BRACE_LEFT;
-		}
-		else if (!isOnPlatform) // Jumping while holding (use standard jump holding ani if needed, or just walk/run?)
-		{
-			// Using walk/run jump looks okay usually even when holding
-			if (fabs(vx) >= MARIO_RUNNING_SPEED) // Use a threshold slightly less than max if needed
-			{
-				if (nx >= 0) aniId = ID_ANI_MARIO_SMALL_JUMP_RUN_RIGHT; // Or a specific Holding Jump Run?
-				else aniId = ID_ANI_MARIO_SMALL_JUMP_RUN_LEFT;
-			}
-			else
-			{
-				if (nx >= 0) aniId = ID_ANI_MARIO_SMALL_JUMP_WALK_RIGHT; // Or a specific Holding Jump Walk?
-				else aniId = ID_ANI_MARIO_SMALL_JUMP_WALK_LEFT;
-			}
-		}
-		else if (vx == 0) // Idle while holding
-		{
-			if (nx > 0) aniId = ID_ANI_MARIO_SMALL_HOLDING_KOOPA_IDLE_RIGHT;
-			else aniId = ID_ANI_MARIO_SMALL_HOLDING_KOOPA_IDLE_LEFT;
-		}
-		else if (vx > 0) // Moving right while holding
-		{
-			if (fabs(vx) <= MARIO_HALF_RUN_ACCEL_SPEED)
-				aniId = ID_ANI_MARIO_SMALL_HOLDING_KOOPA_WALKING_RIGHT;
-			else if (fabs(vx) < MARIO_MAX_RUNNING_SPEED) // Use < max, not == max
-				aniId = ID_ANI_MARIO_SMALL_HOLDING_KOOPA_HALF_RUNNING_RIGHT;
-			else // At max speed
-				aniId = ID_ANI_MARIO_SMALL_HOLDING_KOOPA_RUNNING_RIGHT;
-		}
-		else // Moving left while holding (vx < 0)
-		{
-			if (fabs(vx) <= MARIO_HALF_RUN_ACCEL_SPEED)
-				aniId = ID_ANI_MARIO_SMALL_HOLDING_KOOPA_WALKING_LEFT;
-			else if (fabs(vx) < MARIO_MAX_RUNNING_SPEED)
-				aniId = ID_ANI_MARIO_SMALL_HOLDING_KOOPA_HALF_RUNNING_LEFT;
-			else // At max speed
-				aniId = ID_ANI_MARIO_SMALL_HOLDING_KOOPA_RUNNING_LEFT;
-		}
-		return aniId; // Return holding animation
-	}
-
-	// Priority 4: Jumping / Falling (Not holding)
 	if (!isOnPlatform)
 	{
-		if (fabs(vx) >= MARIO_RUNNING_SPEED) // Use threshold slightly less than max?
+		if (fabs(vx) == MARIO_MAX_RUNNING_SPEED)
 		{
-			if (nx >= 0) aniId = ID_ANI_MARIO_SMALL_JUMP_RUN_RIGHT;
-			else aniId = ID_ANI_MARIO_SMALL_JUMP_RUN_LEFT;
+			if (nx >= 0)
+				aniId = ID_ANI_MARIO_SMALL_JUMP_RUN_RIGHT;
+			else
+				aniId = ID_ANI_MARIO_SMALL_JUMP_RUN_LEFT;
 		}
 		else
 		{
-			if (nx >= 0) aniId = ID_ANI_MARIO_SMALL_JUMP_WALK_RIGHT;
-			else aniId = ID_ANI_MARIO_SMALL_JUMP_WALK_LEFT;
+			if (nx >= 0)
+				aniId = ID_ANI_MARIO_SMALL_JUMP_WALK_RIGHT;
+			else
+				aniId = ID_ANI_MARIO_SMALL_JUMP_WALK_LEFT;
 		}
-		return aniId;
 	}
-
-	// Priority 5: Sitting (Small Mario doesn't sit)
-
-	// Priority 6: Braking (Not holding)
-	if (isBraking)
+	else if (isSitting)
 	{
-		// Use nx set during StartBraking
-		if (nx > 0) aniId = ID_ANI_MARIO_SMALL_BRACE_RIGHT;
-		else aniId = ID_ANI_MARIO_SMALL_BRACE_LEFT;
-		return aniId;
+		if (nx > 0)
+			aniId = ID_ANI_MARIO_SIT_RIGHT;
+		else
+			aniId = ID_ANI_MARIO_SIT_LEFT;
 	}
-
-	// Priority 7: Ground Movement / Idle (Not holding)
-	if (vx == 0)
+	else if (isKicking == 1)
+	{
+		if (nx > 0) aniId = ID_ANI_MARIO_SMALL_KICK_RIGHT;
+		else aniId = ID_ANI_MARIO_SMALL_KICK_LEFT;
+	}
+	else if (vx == 0)
 	{
 		if (nx > 0) aniId = ID_ANI_MARIO_SMALL_IDLE_RIGHT;
 		else aniId = ID_ANI_MARIO_SMALL_IDLE_LEFT;
 	}
 	else if (vx > 0)
 	{
-		if (fabs(vx) <= MARIO_HALF_RUN_ACCEL_SPEED)
+		if (isBraking)
+			aniId = ID_ANI_MARIO_SMALL_BRACE_RIGHT;
+		else if (fabs(vx) <= MARIO_HALF_RUN_ACCEL_SPEED)
 			aniId = ID_ANI_MARIO_SMALL_WALKING_RIGHT;
-		else if (fabs(vx) < MARIO_MAX_RUNNING_SPEED)
+		else if (fabs(vx) > MARIO_HALF_RUN_ACCEL_SPEED && fabs(vx) < MARIO_MAX_RUNNING_SPEED)
 			aniId = ID_ANI_MARIO_SMALL_HALF_RUN_ACCEL_RIGHT;
-		else // At max speed
+		else if (fabs(vx) == MARIO_MAX_RUNNING_SPEED)
 			aniId = ID_ANI_MARIO_SMALL_RUNNING_RIGHT;
 	}
 	else // vx < 0
 	{
-		if (fabs(vx) <= MARIO_HALF_RUN_ACCEL_SPEED)
+		if (isBraking)
+			aniId = ID_ANI_MARIO_SMALL_BRACE_LEFT;
+		else if (fabs(vx) <= MARIO_HALF_RUN_ACCEL_SPEED)
 			aniId = ID_ANI_MARIO_SMALL_WALKING_LEFT;
-		else if (fabs(vx) < MARIO_MAX_RUNNING_SPEED)
+		else if (fabs(vx) > MARIO_HALF_RUN_ACCEL_SPEED && fabs(vx) < MARIO_MAX_RUNNING_SPEED)
 			aniId = ID_ANI_MARIO_SMALL_HALF_RUN_ACCEL_LEFT;
-		else // At max speed
+		else if (fabs(vx) == MARIO_MAX_RUNNING_SPEED)
 			aniId = ID_ANI_MARIO_SMALL_RUNNING_LEFT;
 	}
 
-	// Default fallback
+	if (powerUp)
+	{
+		if (nx > 0) aniId = ID_ANI_MARIO_SMALL_POWER_UP_RIGHT;
+		else aniId = ID_ANI_MARIO_SMALL_POWER_UP_LEFT;
+	}
+
+	if (isHoldingKoopa)
+	{
+		if (vx == 0)
+		{
+			if (nx > 0) aniId = ID_ANI_MARIO_SMALL_HOLDING_KOOPA_IDLE_RIGHT;
+			else aniId = ID_ANI_MARIO_SMALL_HOLDING_KOOPA_IDLE_LEFT;
+		}
+		else if (vx > 0)
+		{
+			if (fabs(vx) <= MARIO_HALF_RUN_ACCEL_SPEED)
+				aniId = ID_ANI_MARIO_SMALL_HOLDING_KOOPA_WALKING_RIGHT;
+			else if (fabs(vx) > MARIO_HALF_RUN_ACCEL_SPEED && fabs(vx) < MARIO_MAX_RUNNING_SPEED)
+				aniId = ID_ANI_MARIO_SMALL_HOLDING_KOOPA_HALF_RUNNING_RIGHT;
+			else if (fabs(vx) == MARIO_MAX_RUNNING_SPEED)
+				aniId = ID_ANI_MARIO_SMALL_HOLDING_KOOPA_RUNNING_RIGHT;
+		}
+		else // vx < 0
+		{
+			if (fabs(vx) <= MARIO_HALF_RUN_ACCEL_SPEED)
+				aniId = ID_ANI_MARIO_SMALL_HOLDING_KOOPA_WALKING_LEFT;
+			else if (fabs(vx) > MARIO_HALF_RUN_ACCEL_SPEED && fabs(vx) < MARIO_MAX_RUNNING_SPEED)
+				aniId = ID_ANI_MARIO_SMALL_HOLDING_KOOPA_HALF_RUNNING_LEFT;
+			else if (fabs(vx) == MARIO_MAX_RUNNING_SPEED)
+				aniId = ID_ANI_MARIO_SMALL_HOLDING_KOOPA_RUNNING_LEFT;
+		}
+	}
+
 	if (aniId == -1) aniId = ID_ANI_MARIO_SMALL_IDLE_RIGHT;
 
 	return aniId;
@@ -734,141 +704,98 @@ int CMario::GetAniIdSmall()
 
 
 //
-// Get animation ID for big Mario
+// Get animdation ID for big Mario
 //
 int CMario::GetAniIdBig()
 {
 	int aniId = -1;
-
-	// Priority 1: Transitioning (Power Down / Tail Up)
-	if (powerDown)
-	{
-		if (nx > 0) aniId = ID_ANI_MARIO_POWER_DOWN_RIGHT;
-		else aniId = ID_ANI_MARIO_POWER_DOWN_LEFT;
-		return aniId;
-	}
-	if (tailUp) // Tail up animation for Big Mario becoming Tail Mario
-	{
-		aniId = ID_ANI_MARIO_TAIL_UP;
-		return aniId;
-	}
-
-	// Priority 2: Kicking (Cannot kick while holding)
-	if (isKicking == 1 && !holdingKoopa)
-	{
-		if (nx > 0) aniId = ID_ANI_MARIO_KICK_RIGHT;
-		else aniId = ID_ANI_MARIO_KICK_LEFT;
-		return aniId;
-	}
-
-	// Priority 3: Holding Koopa (Overrides standard actions/movement)
-	if (holdingKoopa)
-	{
-		if (isBraking) // << NEW: Braking while holding
-		{
-			// Use nx set during StartBraking
-			//RED ALERT
-			//if (nx > 0) aniId = ID_ANI_MARIO_HOLDING_KOOPA_BRACE_RIGHT;
-			//else aniId = ID_ANI_MARIO_HOLDING_KOOPA_BRACE_LEFT;
-		}
-		else if (!isOnPlatform) // Jumping while holding
-		{
-			if (fabs(vx) >= MARIO_RUNNING_SPEED)
-			{
-				if (nx >= 0) aniId = ID_ANI_MARIO_JUMP_RUN_RIGHT; // Or specific Holding Jump Run?
-				else aniId = ID_ANI_MARIO_JUMP_RUN_LEFT;
-			}
-			else
-			{
-				if (nx >= 0) aniId = ID_ANI_MARIO_JUMP_WALK_RIGHT; // Or specific Holding Jump Walk?
-				else aniId = ID_ANI_MARIO_JUMP_WALK_LEFT;
-			}
-		}
-		else if (vx == 0) // Idle while holding
-		{
-			if (nx > 0) aniId = ID_ANI_MARIO_HOLDING_KOOPA_IDLE_RIGHT;
-			else aniId = ID_ANI_MARIO_HOLDING_KOOPA_IDLE_LEFT;
-		}
-		else if (vx > 0) // Moving right while holding
-		{
-			if (fabs(vx) <= MARIO_HALF_RUN_ACCEL_SPEED)
-				aniId = ID_ANI_MARIO_HOLDING_KOOPA_WALKING_RIGHT;
-			else if (fabs(vx) < MARIO_MAX_RUNNING_SPEED)
-				aniId = ID_ANI_MARIO_HOLDING_KOOPA_HALF_RUNNING_RIGHT;
-			else // At max speed
-				aniId = ID_ANI_MARIO_HOLDING_KOOPA_RUNNING_RIGHT;
-		}
-		else // Moving left while holding (vx < 0)
-		{
-			if (fabs(vx) <= MARIO_HALF_RUN_ACCEL_SPEED)
-				aniId = ID_ANI_MARIO_HOLDING_KOOPA_WALKING_LEFT;
-			else if (fabs(vx) < MARIO_MAX_RUNNING_SPEED)
-				aniId = ID_ANI_MARIO_HOLDING_KOOPA_HALF_RUNNING_LEFT;
-			else // At max speed
-				aniId = ID_ANI_MARIO_HOLDING_KOOPA_RUNNING_LEFT;
-		}
-		return aniId; // Return holding animation
-	}
-
-	// Priority 4: Jumping / Falling (Not holding)
 	if (!isOnPlatform)
 	{
-		if (fabs(vx) >= MARIO_RUNNING_SPEED)
+		if (fabs(vx) == MARIO_MAX_RUNNING_SPEED)
 		{
-			if (nx >= 0) aniId = ID_ANI_MARIO_JUMP_RUN_RIGHT;
-			else aniId = ID_ANI_MARIO_JUMP_RUN_LEFT;
+			if (nx >= 0)
+				aniId = ID_ANI_MARIO_JUMP_RUN_RIGHT;
+			else
+				aniId = ID_ANI_MARIO_JUMP_RUN_LEFT;
 		}
 		else
 		{
-			if (nx >= 0) aniId = ID_ANI_MARIO_JUMP_WALK_RIGHT;
-			else aniId = ID_ANI_MARIO_JUMP_WALK_LEFT;
+			if (nx >= 0)
+				aniId = ID_ANI_MARIO_JUMP_WALK_RIGHT;
+			else
+				aniId = ID_ANI_MARIO_JUMP_WALK_LEFT;
 		}
-		return aniId;
 	}
-
-	// Priority 5: Sitting (Not holding)
-	if (isSitting)
+	else if (isSitting)
 	{
-		if (nx > 0) aniId = ID_ANI_MARIO_SIT_RIGHT;
-		else aniId = ID_ANI_MARIO_SIT_LEFT;
-		return aniId;
+		if (nx > 0) aniId = ID_ANI_MARIO_KICK_RIGHT;
+		else aniId = ID_ANI_MARIO_KICK_LEFT;
 	}
-
-	// Priority 6: Braking (Not holding)
-	if (isBraking)
-	{
-		// Use nx set during StartBraking
-		if (nx > 0) aniId = ID_ANI_MARIO_BRACE_RIGHT;
-		else aniId = ID_ANI_MARIO_BRACE_LEFT;
-		return aniId;
-	}
-
-	// Priority 7: Ground Movement / Idle (Not holding)
-	if (vx == 0)
+	else if (vx == 0)
 	{
 		if (nx > 0) aniId = ID_ANI_MARIO_IDLE_RIGHT;
 		else aniId = ID_ANI_MARIO_IDLE_LEFT;
 	}
 	else if (vx > 0)
 	{
-		if (fabs(vx) <= MARIO_HALF_RUN_ACCEL_SPEED)
+		if (isBraking)
+			aniId = ID_ANI_MARIO_BRACE_RIGHT;
+		else if (fabs(vx) <= MARIO_HALF_RUN_ACCEL_SPEED)
 			aniId = ID_ANI_MARIO_WALKING_RIGHT;
-		else if (fabs(vx) < MARIO_MAX_RUNNING_SPEED)
+		else if (fabs(vx) > MARIO_HALF_RUN_ACCEL_SPEED && fabs(vx) < MARIO_MAX_RUNNING_SPEED)
 			aniId = ID_ANI_MARIO_HALF_RUN_ACCEL_RIGHT;
-		else // At max speed
+		else if (fabs(vx) == MARIO_MAX_RUNNING_SPEED)
 			aniId = ID_ANI_MARIO_RUNNING_RIGHT;
 	}
 	else // vx < 0
 	{
-		if (fabs(vx) <= MARIO_HALF_RUN_ACCEL_SPEED)
+		if (isBraking)
+			aniId = ID_ANI_MARIO_BRACE_LEFT;
+		else if (fabs(vx) <= MARIO_HALF_RUN_ACCEL_SPEED)
 			aniId = ID_ANI_MARIO_WALKING_LEFT;
-		else if (fabs(vx) < MARIO_MAX_RUNNING_SPEED)
+		else if (fabs(vx) > MARIO_HALF_RUN_ACCEL_SPEED && fabs(vx) < MARIO_MAX_RUNNING_SPEED)
 			aniId = ID_ANI_MARIO_HALF_RUN_ACCEL_LEFT;
-		else // At max speed
+		else if (fabs(vx) == MARIO_MAX_RUNNING_SPEED)
 			aniId = ID_ANI_MARIO_RUNNING_LEFT;
 	}
 
-	// Default fallback
+	if (tailUp)
+	{
+		aniId = ID_ANI_MARIO_TAIL_UP;
+	}
+	if (powerDown)
+	{
+		if (nx > 0) aniId = ID_ANI_MARIO_POWER_DOWN_RIGHT;
+		else aniId = ID_ANI_MARIO_POWER_DOWN_LEFT;
+	}
+
+	if (isHoldingKoopa)
+	{
+		if (vx == 0)
+		{
+			if (nx > 0) aniId = ID_ANI_MARIO_HOLDING_KOOPA_IDLE_RIGHT;
+			else aniId = ID_ANI_MARIO_HOLDING_KOOPA_IDLE_LEFT;
+		}
+		else if (vx > 0)
+		{
+			if (fabs(vx) <= MARIO_HALF_RUN_ACCEL_SPEED)
+				aniId = ID_ANI_MARIO_HOLDING_KOOPA_WALKING_RIGHT;
+			else if (fabs(vx) > MARIO_HALF_RUN_ACCEL_SPEED && fabs(vx) < MARIO_MAX_RUNNING_SPEED)
+				aniId = ID_ANI_MARIO_HOLDING_KOOPA_HALF_RUNNING_RIGHT;
+			else if (fabs(vx) == MARIO_MAX_RUNNING_SPEED)
+				aniId = ID_ANI_MARIO_HOLDING_KOOPA_RUNNING_RIGHT;
+		}
+		else // vx < 0
+		{
+			if (fabs(vx) <= MARIO_HALF_RUN_ACCEL_SPEED)
+				aniId = ID_ANI_MARIO_HOLDING_KOOPA_WALKING_LEFT;
+			else if (fabs(vx) > MARIO_HALF_RUN_ACCEL_SPEED && fabs(vx) < MARIO_MAX_RUNNING_SPEED)
+				aniId = ID_ANI_MARIO_HOLDING_KOOPA_HALF_RUNNING_LEFT;
+			else if (fabs(vx) == MARIO_MAX_RUNNING_SPEED)
+				aniId = ID_ANI_MARIO_HOLDING_KOOPA_RUNNING_LEFT;
+		}
+	}
+
 	if (aniId == -1) aniId = ID_ANI_MARIO_IDLE_RIGHT;
 
 	return aniId;
@@ -880,151 +807,115 @@ int CMario::GetAniIdBig()
 int CMario::GetAniIdTail()
 {
 	int aniId = -1;
+	if (!isOnPlatform)
+	{
+		if (fabs(vx) == MARIO_MAX_RUNNING_SPEED)
+		{
+			if (nx >= 0)
+				aniId = ID_ANI_MARIO_TAIL_JUMP_RUN_RIGHT;
+			else
+				aniId = ID_ANI_MARIO_TAIL_JUMP_RUN_LEFT;
+		}
+		else
+		{
+			if (nx >= 0)
+				aniId = ID_ANI_MARIO_TAIL_JUMP_WALK_RIGHT;
+			else
+				aniId = ID_ANI_MARIO_TAIL_JUMP_WALK_LEFT;
+		}
+	}
+	else
+		if (isSitting)
+		{
+			if (nx > 0)
+				aniId = ID_ANI_MARIO_TAIL_SIT_RIGHT;
+			else
+				aniId = ID_ANI_MARIO_TAIL_SIT_LEFT;
+		}
+		else
+			if (vx == 0)
+			{
+				if (nx > 0) aniId = ID_ANI_MARIO_TAIL_IDLE_RIGHT;
+				else aniId = ID_ANI_MARIO_TAIL_IDLE_LEFT;
+			}
+			else if (vx > 0)
+			{
+				if (isBraking)
+					aniId = ID_ANI_MARIO_TAIL_BRACE_RIGHT;
+				else if (fabs(vx) <= MARIO_HALF_RUN_ACCEL_SPEED)
+					aniId = ID_ANI_MARIO_TAIL_WALKING_RIGHT;
+				else if (fabs(vx) > MARIO_HALF_RUN_ACCEL_SPEED && fabs(vx) < MARIO_MAX_RUNNING_SPEED)
+					aniId = ID_ANI_MARIO_TAIL_HALF_RUN_ACCEL_RIGHT;
+				else if (fabs(vx) == MARIO_MAX_RUNNING_SPEED)
+					aniId = ID_ANI_MARIO_TAIL_RUNNING_RIGHT;
+			}
+			else // vx < 0
+			{
+				if (isBraking)
+					aniId = ID_ANI_MARIO_TAIL_BRACE_LEFT;
+				else if (fabs(vx) <= MARIO_HALF_RUN_ACCEL_SPEED)
+					aniId = ID_ANI_MARIO_TAIL_WALKING_LEFT;
+				else if (fabs(vx) > MARIO_HALF_RUN_ACCEL_SPEED && fabs(vx) < MARIO_MAX_RUNNING_SPEED)
+					aniId = ID_ANI_MARIO_TAIL_HALF_RUN_ACCEL_LEFT;
+				else if (fabs(vx) == MARIO_MAX_RUNNING_SPEED)
+					aniId = ID_ANI_MARIO_TAIL_RUNNING_LEFT;
+			}
 
-	// Priority 1: Transitioning (Tail Down)
+	if (jumpCount > 0)
+		if (nx > 0) aniId = ID_ANI_MARIO_TAIL_MULTIJUMP_RIGHT;
+		else aniId = ID_ANI_MARIO_TAIL_MULTIJUMP_LEFT;
+
+	if (isHovering)
+	{
+		if (nx > 0) aniId = ID_ANI_MARIO_TAIL_HOVERING_RIGHT;
+		else aniId = ID_ANI_MARIO_TAIL_HOVERING_LEFT;
+		tailWagged = 1;
+	}
+
 	if (tailDown)
 	{
 		aniId = ID_ANI_MARIO_TAIL_DOWN;
-		return aniId;
 	}
 
-	// Priority 2: Special Actions (Whip / Kick)
-	if (isTailWhipping == 1 && !holdingKoopa) // Cannot whip while holding
+	if (isTailWhipping == 1)
 	{
 		if (nx > 0) aniId = ID_ANI_MARIO_TAIL_WHIP_RIGHT;
 		else aniId = ID_ANI_MARIO_TAIL_WHIP_LEFT;
-		return aniId;
 	}
-	if (isKicking == 1 && !holdingKoopa) // Cannot kick while holding
+
+	if (isKicking == 1)
 	{
 		if (nx > 0) aniId = ID_ANI_MARIO_TAIL_KICK_RIGHT;
 		else aniId = ID_ANI_MARIO_TAIL_KICK_LEFT;
-		return aniId;
 	}
 
-
-	// Priority 3: Holding Koopa (Overrides standard actions/movement)
 	if (holdingKoopa)
 	{
-		if (isBraking) // << NEW: Braking while holding
-		{
-			// Use nx set during StartBraking
-			//RED ALERT
-			//if (nx > 0) aniId = ID_ANI_MARIO_TAIL_HOLDING_KOOPA_BRACE_RIGHT;
-			//else aniId = ID_ANI_MARIO_TAIL_HOLDING_KOOPA_BRACE_LEFT;
-		}
-		else if (!isOnPlatform) // Jumping while holding
-		{
-			if (fabs(vx) >= MARIO_RUNNING_SPEED)
-			{
-				if (nx >= 0) aniId = ID_ANI_MARIO_TAIL_JUMP_RUN_RIGHT; // Or specific Holding Jump Run?
-				else aniId = ID_ANI_MARIO_TAIL_JUMP_RUN_LEFT;
-			}
-			else
-			{
-				if (nx >= 0) aniId = ID_ANI_MARIO_TAIL_JUMP_WALK_RIGHT; // Or specific Holding Jump Walk?
-				else aniId = ID_ANI_MARIO_TAIL_JUMP_WALK_LEFT;
-			}
-		}
-		else if (vx == 0) // Idle while holding
+		if (vx == 0)
 		{
 			if (nx > 0) aniId = ID_ANI_MARIO_TAIL_HOLDING_KOOPA_IDLE_RIGHT;
 			else aniId = ID_ANI_MARIO_TAIL_HOLDING_KOOPA_IDLE_LEFT;
 		}
-		else if (vx > 0) // Moving right while holding
+		else if (vx > 0)
 		{
 			if (fabs(vx) <= MARIO_HALF_RUN_ACCEL_SPEED)
 				aniId = ID_ANI_MARIO_TAIL_HOLDING_KOOPA_WALKING_RIGHT;
-			else if (fabs(vx) < MARIO_MAX_RUNNING_SPEED)
+			else if (fabs(vx) > MARIO_HALF_RUN_ACCEL_SPEED && fabs(vx) < MARIO_MAX_RUNNING_SPEED)
 				aniId = ID_ANI_MARIO_TAIL_HOLDING_KOOPA_HALF_RUNNING_RIGHT;
-			else // At max speed
+			else if (fabs(vx) == MARIO_MAX_RUNNING_SPEED)
 				aniId = ID_ANI_MARIO_TAIL_HOLDING_KOOPA_RUNNING_RIGHT;
 		}
-		else // Moving left while holding (vx < 0)
+		else // vx < 0
 		{
 			if (fabs(vx) <= MARIO_HALF_RUN_ACCEL_SPEED)
 				aniId = ID_ANI_MARIO_TAIL_HOLDING_KOOPA_WALKING_LEFT;
-			else if (fabs(vx) < MARIO_MAX_RUNNING_SPEED)
+			else if (fabs(vx) > MARIO_HALF_RUN_ACCEL_SPEED && fabs(vx) < MARIO_MAX_RUNNING_SPEED)
 				aniId = ID_ANI_MARIO_TAIL_HOLDING_KOOPA_HALF_RUNNING_LEFT;
-			else // At max speed
+			else if (fabs(vx) == MARIO_MAX_RUNNING_SPEED)
 				aniId = ID_ANI_MARIO_TAIL_HOLDING_KOOPA_RUNNING_LEFT;
 		}
-		return aniId; // Return holding animation
 	}
 
-	// Priority 4: Jumping / Falling / Hovering (Not holding)
-	if (!isOnPlatform)
-	{
-		if (isHovering) // Hovering overrides regular falling
-		{
-			if (nx > 0) aniId = ID_ANI_MARIO_TAIL_HOVERING_RIGHT;
-			else aniId = ID_ANI_MARIO_TAIL_HOVERING_LEFT;
-			tailWagged = 1; // Reset wagged flag? Or handle in Hovering logic
-		}
-		else if (jumpCount > 0) // Multi-jump flap overrides standard fall
-		{
-			if (nx > 0) aniId = ID_ANI_MARIO_TAIL_MULTIJUMP_RIGHT;
-			else aniId = ID_ANI_MARIO_TAIL_MULTIJUMP_LEFT;
-		}
-		else // Standard fall
-		{
-			if (fabs(vx) >= MARIO_RUNNING_SPEED)
-			{
-				if (nx >= 0) aniId = ID_ANI_MARIO_TAIL_JUMP_RUN_RIGHT;
-				else aniId = ID_ANI_MARIO_TAIL_JUMP_RUN_LEFT;
-			}
-			else
-			{
-				if (nx >= 0) aniId = ID_ANI_MARIO_TAIL_JUMP_WALK_RIGHT;
-				else aniId = ID_ANI_MARIO_TAIL_JUMP_WALK_LEFT;
-			}
-		}
-		return aniId;
-	}
-
-	// Priority 5: Sitting (Not holding)
-	if (isSitting)
-	{
-		if (nx > 0) aniId = ID_ANI_MARIO_TAIL_SIT_RIGHT;
-		else aniId = ID_ANI_MARIO_TAIL_SIT_LEFT;
-		return aniId;
-	}
-
-	// Priority 6: Braking (Not holding)
-	if (isBraking)
-	{
-		// Use nx set during StartBraking
-		if (nx > 0) aniId = ID_ANI_MARIO_TAIL_BRACE_RIGHT;
-		else aniId = ID_ANI_MARIO_TAIL_BRACE_LEFT;
-		return aniId;
-	}
-
-	// Priority 7: Ground Movement / Idle (Not holding)
-	if (vx == 0)
-	{
-		if (nx > 0) aniId = ID_ANI_MARIO_TAIL_IDLE_RIGHT;
-		else aniId = ID_ANI_MARIO_TAIL_IDLE_LEFT;
-	}
-	else if (vx > 0)
-	{
-		if (fabs(vx) <= MARIO_HALF_RUN_ACCEL_SPEED)
-			aniId = ID_ANI_MARIO_TAIL_WALKING_RIGHT;
-		else if (fabs(vx) < MARIO_MAX_RUNNING_SPEED)
-			aniId = ID_ANI_MARIO_TAIL_HALF_RUN_ACCEL_RIGHT;
-		else // At max speed
-			aniId = ID_ANI_MARIO_TAIL_RUNNING_RIGHT;
-	}
-	else // vx < 0
-	{
-		if (fabs(vx) <= MARIO_HALF_RUN_ACCEL_SPEED)
-			aniId = ID_ANI_MARIO_TAIL_WALKING_LEFT;
-		else if (fabs(vx) < MARIO_MAX_RUNNING_SPEED)
-			aniId = ID_ANI_MARIO_TAIL_HALF_RUN_ACCEL_LEFT;
-		else // At max speed
-			aniId = ID_ANI_MARIO_TAIL_RUNNING_LEFT;
-	}
-
-	// Default fallback
 	if (aniId == -1) aniId = ID_ANI_MARIO_TAIL_IDLE_RIGHT;
 
 	return aniId;
