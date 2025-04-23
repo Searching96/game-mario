@@ -107,7 +107,7 @@ assets\wing.txt
 1	2272	304	16	16	1
 
 #Box x, y, c_width, c_height, width, height, top_left, top_center, top_right, ...
-// 0: orange, 1: blue, 2: green, 3: white, 4: black
+# 0: orange, 1: blue, 2: green, 3: white, 4: black
 
 #First Cluster
 101	272	336	3	5	1

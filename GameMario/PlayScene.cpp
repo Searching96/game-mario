@@ -627,7 +627,6 @@ void CPlayScene::Render()
 		vector<LPGAMEOBJECT> chunkObjects = chunk->GetObjects();
 		for (LPGAMEOBJECT obj : chunkObjects)
 		{
-			if (obj->IsDeleted()) continue;
 			if (obj != player && obj != attackParticle)
 				obj->Render();
 		}
@@ -689,36 +688,6 @@ void CPlayScene::PurgeDeletedObjects()
 	// Purge deleted objects from chunks
 	for (LPCHUNK chunk : chunks)
 	{
-		if (currentChunk.find(chunk->GetID()) != currentChunk.end())
-			continue;
-		vector<LPGAMEOBJECT> chunkObjects = chunk->GetObjects();
-		for (auto it = chunkObjects.begin(); it != chunkObjects.end(); )
-		{
-			LPGAMEOBJECT o = *it;
-			if (o && o->IsDeleted())
-			{
-				delete o;
-				*it = NULL;
-			}
-			++it;
-		}
-		chunkObjects.erase(
-			std::remove_if(chunkObjects.begin(), chunkObjects.end(), CPlayScene::IsGameObjectDeleted),
-			chunkObjects.end());
+		chunk->PurgeDeletedObjects();
 	}
-
-	// Purge deleted objects from global objects
-	for (auto it = objects.begin(); it != objects.end(); )
-	{
-		LPGAMEOBJECT o = *it;
-		if (o && o->IsDeleted())
-		{
-			delete o;
-			*it = NULL;
-		}
-		++it;
-	}
-	objects.erase(
-		std::remove_if(objects.begin(), objects.end(), CPlayScene::IsGameObjectDeleted),
-		objects.end());
 }
