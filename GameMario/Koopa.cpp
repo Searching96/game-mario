@@ -33,8 +33,6 @@ void CKoopa::OnNoCollision(DWORD dt)
 
 void CKoopa::OnCollisionWith(LPCOLLISIONEVENT e) {
 	if (state == KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY) return;
-
-	// Skip collision with non-blocking objects or self
 	if (!e->obj->IsBlocking() || e->obj == this) return;
 
 	if (e->ny < 0) { // Collision from above (standing on something)
@@ -42,13 +40,6 @@ void CKoopa::OnCollisionWith(LPCOLLISIONEVENT e) {
 		if (e->obj->IsBlocking())
 		{
 			ground = e->obj;
-		}
-		if (dynamic_cast<CMario*>(e->obj))
-		{
-			vy = -KOOPA_SHELL_DEFLECT_SPEED;
-			vx = e->nx > 0 ? -0.2f : 0.2f;
-			isFlying = true;
-			return;
 		}
 	}
 

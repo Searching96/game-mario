@@ -575,34 +575,34 @@ void CPlayScene::Update(DWORD dt)
 
 void CPlayScene::Render()
 {
-    // Ensure player and attackParticle pointers are valid if player exists
-    CAttackParticle* attackParticle = nullptr;
-    if (player != nullptr) {
-         // Need to cast player to CMario to access GetTailWhip
-         CMario* marioPlayer = dynamic_cast<CMario*>(player);
-         if (marioPlayer && marioPlayer->GetTailWhip()) {
-            attackParticle = marioPlayer->GetTailWhip()->GetAttackParticle();
-         }
-    }
+	// Ensure player and attackParticle pointers are valid if player exists
+	CAttackParticle* attackParticle = nullptr;
+	if (player != nullptr) {
+		// Need to cast player to CMario to access GetTailWhip
+		CMario* marioPlayer = dynamic_cast<CMario*>(player);
+		if (marioPlayer && marioPlayer->GetTailWhip()) {
+			attackParticle = marioPlayer->GetTailWhip()->GetAttackParticle();
+		}
+	}
 
 
-    // Render all objects except Mario and his particle
-    for (int i = 0; i < objects.size(); i++)
-    {
-        if (objects[i] != player && objects[i] != attackParticle)
-        {
-            objects[i]->Render();
-        }
-    }
+	// Render all objects except Mario and his particle
+	for (int i = 0; i < objects.size(); i++)
+	{
+		if (objects[i] != player && objects[i] != attackParticle)
+		{
+			objects[i]->Render();
+		}
+	}
 
-    // Render Mario and his particle last (on top)
-    if (player != NULL)
-    {
-        player->Render();
-        if (attackParticle != nullptr) {
-            attackParticle->Render();
-        }
-    }
+	// Render Mario and his particle last (on top)
+	if (player != NULL)
+	{
+		player->Render();
+		if (attackParticle != nullptr) {
+			attackParticle->Render();
+		}
+	}
 }
 
 /*

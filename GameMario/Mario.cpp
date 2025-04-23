@@ -500,43 +500,55 @@ void CMario::OnCollisionWithKoopa(LPCOLLISIONEVENT e) {
 		}
 	}
 
-	if (e->ny > 0) { //Shell fell on mario
-		return; //Processed in Koopa.cpp
+	else if (e->ny > 0)
+	{
+		if (koopa->GetState() == KOOPA_STATE_SHELL_DYNAMIC)
+		{
+			// Take damage if hitting a moving shell from below
+			if (untouchable == 0)
+			{
+				if (level == MARIO_LEVEL_TAIL) SetState(MARIO_STATE_TAIL_DOWN);
+				else if (level > MARIO_LEVEL_SMALL) SetState(MARIO_STATE_POWER_DOWN);
+				else SetState(MARIO_STATE_DIE);
+				StartUntouchable(); // Start untouchable regardless of level change
+			}
+		}
+		else if (koopa->GetState() == KOOPA_STATE_SHELL_STATIC)
+		{
+			// Optional: Treat static shell like a block? Kick it upwards?
+			// For simplicity, let's just make it bounce slightly and maybe kick it
+			koopa->SetSpeed(vx * 0.2f, -KOOPA_SHELL_DEFLECT_SPEED * 0.5f); // Small upward kick
+			koopa->SetState(KOOPA_STATE_SHELL_DYNAMIC); // Make it dynamic after hit
+		}
+		// If it's a walking Koopa, hitting from below doesn't usually do anything specific
 	}
-	if (koopa->GetState() == KOOPA_STATE_SHELL_STATIC) {
-		if (isRunning) {
-			// Pick up the shell
-			koopa->SetState(KOOPA_STATE_BEING_HELD);
-			koopa->SetBeingHeld(1);
-			this->SetIsHoldingKoopa(1);
+	// Side collision logic (ensure this comes after ny checks or uses nx explicitly)
+	else if (e->nx != 0) // Added explicit check for horizontal collision
+	{
+		if (koopa->GetState() == KOOPA_STATE_SHELL_STATIC) {
+			// Kick the shell or hold it (existing logic is likely fine here)
+			if (isRunning == 0)
+			{
+				StartKick();
+				koopa->SetState(KOOPA_STATE_SHELL_DYNAMIC);
+				koopa->SetSpeed((nx > 0) ? KOOPA_SHELL_SPEED : -KOOPA_SHELL_SPEED, 0);
+			}
+			else
+			{
+				koopa->SetState(KOOPA_STATE_BEING_HELD);
+				this->SetIsHoldingKoopa(1);
+			}
+			return; // Return after kicking/holding
 		}
-		else {
-			// Kick the shell
-			StartKick();
-			koopa->SetState(KOOPA_STATE_SHELL_DYNAMIC);
-			koopa->SetSpeed((nx > 0) ? KOOPA_SHELL_SPEED : -KOOPA_SHELL_SPEED, 0);
-		}
-		return;
-	}
-	// Side collision with walking or moving shell
-	if (koopa->GetState() == KOOPA_STATE_WALKING_LEFT ||
-		koopa->GetState() == KOOPA_STATE_WALKING_RIGHT ||
-		koopa->GetState() == KOOPA_STATE_SHELL_DYNAMIC) {
-		if (untouchable) return;
-		if (level == MARIO_LEVEL_TAIL)
-		{
-			SetState(MARIO_STATE_TAIL_DOWN);
-			StartUntouchable();
-		}
-		else if (level > MARIO_LEVEL_SMALL)
-		{
-			SetState(MARIO_STATE_POWER_DOWN);
-			StartUntouchable();
-		}
-		else
-		{
-			DebugOut(L">>> Mario DIE >>> \n");
-			SetState(MARIO_STATE_DIE);
+		// Side collision with walking or moving shell (existing damage logic)
+		else if (koopa->GetState() == KOOPA_STATE_WALKING_LEFT ||
+			koopa->GetState() == KOOPA_STATE_WALKING_RIGHT ||
+			koopa->GetState() == KOOPA_STATE_SHELL_DYNAMIC) {
+			if (untouchable) return;
+			if (level == MARIO_LEVEL_TAIL) SetState(MARIO_STATE_TAIL_DOWN);
+			else if (level > MARIO_LEVEL_SMALL) SetState(MARIO_STATE_POWER_DOWN);
+			else SetState(MARIO_STATE_DIE);
+			StartUntouchable(); // Start untouchable here too
 		}
 	}
 }
