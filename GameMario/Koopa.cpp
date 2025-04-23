@@ -55,9 +55,9 @@ void CKoopa::OnCollisionWith(LPCOLLISIONEVENT e) {
 	if (dynamic_cast<CMario*>(e->obj)) {
 		OnCollisionWithMario(e);
 	}
-	else if (e->obj->IsBlocking()) {
-		OnCollisionWithBlock(e);
-	}
+	//else if (e->obj->IsBlocking()) {
+	//	OnCollisionWithBlock(e);
+	//}
 	else if (dynamic_cast<CCoinQBlock*>(e->obj) || dynamic_cast<CBuffQBlock*>(e->obj)) {
 		OnCollisionWithQuestionBlock(e);
 	}
@@ -146,15 +146,11 @@ void CKoopa::OnCollisionWithEnemy(LPCOLLISIONEVENT e) {
 				goomba->SetState(WINGED_GOOMBA_STATE_DIE_ON_TAIL_WHIP);
 				vy = -MARIO_JUMP_DEFLECT_SPEED;
 			}
-			//this->SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY);
-			//return;
 		}
 		else if (CGoomba* goomba = dynamic_cast<CGoomba*>(e->obj)) {
 			if (goomba->GetState() != GOOMBA_STATE_DIE_ON_TAIL_WHIP && goomba->GetState() != GOOMBA_STATE_DIE_ON_STOMP) {
 				goomba->SetState(GOOMBA_STATE_DIE_ON_TAIL_WHIP);
-				//this->SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY);
 			}
-			//return;
 		}
 	}
 }
