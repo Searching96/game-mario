@@ -2,6 +2,11 @@
 #include "GameObject.h"
 #include "Mario.h"
 #include "Fireball.h"
+#include "Koopa.h"
+
+#include "Game.h"
+#include "PlayScene.h"
+
 
 #define PIRANHA_PLANT_BBOX_WIDTH 16
 #define PIRANHA_PLANT_BBOX_HEIGHT 32
@@ -53,6 +58,9 @@ protected:
 	void Shoot(int direction);
 	bool IsMarioInRange();
 	bool IsMarioOnTop();
+
+	void OnNoCollision(DWORD dt);
+	void OnCollisionWith(LPCOLLISIONEVENT e);
 
 public:
 	CPiranhaPlant(float x, float y, CFireball* fireball);

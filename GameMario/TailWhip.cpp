@@ -196,8 +196,6 @@ void CTailWhip::OnCollisionWithKoopa(LPCOLLISIONEVENT e)
 		float vx = mNx > 0 ? 0.1f : -0.1f;
 		koopa->SetFlying(true);
 		koopa->SetReversed(true);
-		if (koopa->GetState() == KOOPA_STATE_BEING_HELD)
-			return;
 		koopa->SetSpeed(vx, -0.5f);
 	}
 }

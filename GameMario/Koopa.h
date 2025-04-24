@@ -72,8 +72,6 @@ protected:
 
 	virtual void OnCollisionWith(LPCOLLISIONEVENT e);
 	void OnCollisionWithMario(LPCOLLISIONEVENT e);
-	void OnCollisionWithBlock(LPCOLLISIONEVENT e);
-	void OnCollisionWithEnemy(LPCOLLISIONEVENT e);
 	void OnCollisionWithQuestionBlock(LPCOLLISIONEVENT e);
 
 public:

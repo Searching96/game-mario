@@ -1,6 +1,4 @@
 #include "PiranhaPlant.h"
-#include "Game.h"
-#include "PlayScene.h"
 
 CPiranhaPlant::CPiranhaPlant(float x, float y, CFireball* fireball) : CGameObject(x, y)
 {
@@ -292,5 +290,27 @@ void CPiranhaPlant::SetState(int state)
 	case PIRANHA_PLANT_STATE_DIED:
 		StartDeath();
 		break;
+	}
+}
+
+void CPiranhaPlant::OnNoCollision(DWORD dt)
+{
+}
+
+void CPiranhaPlant::OnCollisionWith(LPCOLLISIONEVENT e)
+{
+	if (!e->obj->IsBlocking() && !dynamic_cast<CKoopa*>(e->obj))
+		return;
+
+	if (CKoopa* koopa = dynamic_cast<CKoopa*>(e->obj))
+	{
+		if (koopa->GetState() == KOOPA_STATE_SHELL_DYNAMIC)
+		{
+			if (this->state != PIRANHA_PLANT_STATE_DIED)
+			{
+				this->SetState(PIRANHA_PLANT_STATE_DIED);
+			}
+			return;
+		}
 	}
 }
