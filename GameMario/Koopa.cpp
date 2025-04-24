@@ -36,8 +36,13 @@ void CKoopa::OnCollisionWith(LPCOLLISIONEVENT e) {
 	if (state == KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY) return;
 	if (!e->obj->IsBlocking() || e->obj == this) return;
 
-	if (e->ny < 0) { // Collision from above (standing on something)
+	if (e->ny < 0) {
 		vy = 0;
+	}
+	if (e->nx != 0 && e->obj->IsBlocking()) {
+		if (state == KOOPA_STATE_SHELL_DYNAMIC) {
+			vx = -vx;
+		}
 	}
 
 	if (dynamic_cast<CMario*>(e->obj)) {

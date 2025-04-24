@@ -29,6 +29,7 @@
 #include "Trinket.h"
 #include "SkyPlatform.h"
 #include "AttackParticle.h"
+#include "FallPitch.h"
 
 #include "SampleKeyEventHandler.h"
 
@@ -406,6 +407,18 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 		float b = (float)atof(tokens[4].c_str());
 		int scene_id = atoi(tokens[5].c_str());
 		obj = new CPortal(x, y, r, b, scene_id);
+		break;
+	}
+
+	case OBJECT_TYPE_FALL_PITCH:
+	{
+		if (tokens.size() < 5) {
+			DebugOut(L"[WARN] Skipping FALL_PITCH - Insufficient params in chunk %d: %hs\n", targetChunk->GetID(), line.c_str());
+			return;
+		}
+		float r = (float)atof(tokens[3].c_str());
+		float b = (float)atof(tokens[4].c_str());
+		obj = new CFallPitch(x, y, r, b);
 		break;
 	}
 

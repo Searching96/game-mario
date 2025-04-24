@@ -16,6 +16,7 @@
 #include "BuffQBlock.h"
 #include "Koopa.h"
 #include "WingedGoomba.h"
+#include "FallPitch.h"
 
 #include "Collision.h"
 
@@ -275,6 +276,8 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 		OnCollisionWithKoopa(e);
 	else if (dynamic_cast<CWingedGoomba*>(e->obj))
 		OnCollisionWithWingedGoomba(e);
+	else if (dynamic_cast<CFallPitch*>(e->obj))
+		OnCollisionWithFallPitch(e);
 }
 
 void CMario::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
@@ -398,6 +401,11 @@ void CMario::OnCollisionWithLifeMushroom(LPCOLLISIONEVENT e)
 	}
 }
 
+void CMario::OnCollisionWithFallPitch(LPCOLLISIONEVENT e)
+{
+	this->SetState(MARIO_STATE_DIE);
+}
+
 void CMario::OnCollisionWithMushroom(LPCOLLISIONEVENT e)
 {
 	CMushroom* mushroom = dynamic_cast<CMushroom*>(e->obj);
@@ -495,6 +503,7 @@ void CMario::OnCollisionWithKoopa(LPCOLLISIONEVENT e) {
 		}
 		if (koopa->GetState() == KOOPA_STATE_SHELL_DYNAMIC) {
 			koopa->SetState(KOOPA_STATE_SHELL_STATIC);
+			koopa->StartShell();
 			vy = -MARIO_JUMP_DEFLECT_SPEED;
 			return;
 		}
@@ -962,9 +971,9 @@ void CMario::SetState(int state)
 		return;
 	if (this->state == MARIO_STATE_TAIL_UP && (GetTickCount64() - tailUpStart <= MARIO_TAIL_UP_TIME))
 		return;
-	if (this->state == MARIO_STATE_POWER_DOWN && (GetTickCount64() - powerUpStart <= MARIO_POWER_DOWN_TIME))
+	if (this->state == MARIO_STATE_POWER_DOWN && (GetTickCount64() - powerDownStart <= MARIO_POWER_DOWN_TIME))
 		return;
-	if (this->state == MARIO_STATE_TAIL_DOWN && (GetTickCount64() - tailUpStart <= MARIO_TAIL_DOWN_TIME))
+	if (this->state == MARIO_STATE_TAIL_DOWN && (GetTickCount64() - tailDownStart <= MARIO_TAIL_DOWN_TIME))
 		return;
 
 	int previousState = this->state;
