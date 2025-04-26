@@ -509,13 +509,14 @@ void CMario::OnCollisionWithKoopa(LPCOLLISIONEVENT e) {
 		}
 	}
 
-	if (e->ny > 0) { //Shell fell on mario
-		return; //Processed in Koopa.cpp
-	}
+	//if (e->ny > 0) { //Shell fell on mario
+	//	return; //Processed in Koopa.cpp
+	//}
 	if (koopa->GetState() == KOOPA_STATE_SHELL_STATIC) {
 		// Kick the shell
 		if (isRunning == 0)
 		{
+			koopa->SetSpeed(0, 0);
 			StartKick();
 			koopa->SetState(KOOPA_STATE_SHELL_DYNAMIC);
 			koopa->SetSpeed((nx > 0) ? KOOPA_SHELL_SPEED : -KOOPA_SHELL_SPEED, 0);

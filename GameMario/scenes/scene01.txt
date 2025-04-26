@@ -201,7 +201,7 @@ assets\wing.txt
 104	1728	400	16	16	3	1100000
 
 #FallPitch
-107	320	376	400	400
+107	1000	376	1100	400
 #50	320	376	400	400	1
 
 #Cloud x, y, c_width, c_height, width, top_left, top_center, top_right, ...

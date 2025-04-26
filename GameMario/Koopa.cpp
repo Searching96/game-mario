@@ -42,24 +42,26 @@ void CKoopa::OnCollisionWith(LPCOLLISIONEVENT e) {
 	if (e->nx != 0 && e->obj->IsBlocking()) {
 		if (state == KOOPA_STATE_SHELL_DYNAMIC) {
 			vx = -vx;
+			nx = -nx;
 		}
 	}
 
-	if (dynamic_cast<CMario*>(e->obj)) {
-		OnCollisionWithMario(e);
-	}
-	else if (dynamic_cast<CCoinQBlock*>(e->obj) || dynamic_cast<CBuffQBlock*>(e->obj)) {
+	//if (dynamic_cast<CMario*>(e->obj)) {
+	//	OnCollisionWithMario(e);
+	//}
+	//else 
+	if (dynamic_cast<CCoinQBlock*>(e->obj) || dynamic_cast<CBuffQBlock*>(e->obj)) {
 		OnCollisionWithQuestionBlock(e);
 	}
 }
 
-void CKoopa::OnCollisionWithMario(LPCOLLISIONEVENT e) {
-	if (e->ny < 0) {
-		vy = -KOOPA_SHELL_DEFLECT_SPEED;
-		vx = e->nx > 0 ? -0.2f : 0.2f;
-		isFlying = true;
-	}
-}
+//void CKoopa::OnCollisionWithMario(LPCOLLISIONEVENT e) {
+//	if (e->ny < 0) {
+//		vy = -KOOPA_SHELL_DEFLECT_SPEED;
+//		vx = e->nx > 0 ? -0.2f : 0.2f;
+//		isFlying = true;
+//	}
+//}
 
 void CKoopa::OnCollisionWithQuestionBlock(LPCOLLISIONEVENT e) {
 	if (state == KOOPA_STATE_SHELL_DYNAMIC) {
@@ -148,6 +150,11 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	{
 		vx = 0;
 		vy = 0;
+	}
+	
+	if (state == KOOPA_STATE_SHELL_DYNAMIC)
+	{
+		vx = (nx > 0) ? KOOPA_SHELL_SPEED : -KOOPA_SHELL_SPEED;
 	}
 
 	// Add blocking objects as potential ground
@@ -425,8 +432,8 @@ void CKoopa::SetState(int state)
 			break;
 		case KOOPA_STATE_SHELL_DYNAMIC:
 			isKicked = true;
-			vy = 0;
-			ax = 0;
+			//vy = 0;
+			//ax = 0;
 			break;
 		case KOOPA_STATE_WALKING_LEFT:
 			isKicked = false;
