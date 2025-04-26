@@ -256,8 +256,6 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 	//	OnCollisionWithCoin(e);
 	else if (dynamic_cast<CPortal*>(e->obj))
 		OnCollisionWithPortal(e);
-	else if (dynamic_cast<CQuestionBlock*>(e->obj))
-		OnCollisionWithQuestionBlock(e);
 	else if (dynamic_cast<CLifeMushroom*>(e->obj))
 		OnCollisionWithLifeMushroom(e);
 	else if (dynamic_cast<CMushroom*>(e->obj))
@@ -283,10 +281,7 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 void CMario::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
 {
 	CGoomba* goomba = dynamic_cast<CGoomba*>(e->obj);
-	if (goomba->GetState() == GOOMBA_STATE_DIE_ON_STOMP)
-		return;
-	if (goomba->GetState() == GOOMBA_STATE_DIE_ON_TAIL_WHIP)
-		return;
+	if (goomba->GetIsDead() == 1) return;
 
 	// jump on top >> kill Goomba and deflect a bit 
 	if (e->ny < 0)
@@ -343,16 +338,6 @@ void CMario::OnCollisionWithPortal(LPCOLLISIONEVENT e)
 	CGame::GetInstance()->InitiateSwitchScene(p->GetSceneId());
 }
 
-void CMario::OnCollisionWithQuestionBlock(LPCOLLISIONEVENT e)
-{
-	CQuestionBlock* qb = dynamic_cast<CQuestionBlock*>(e->obj);
-
-	if (qb)
-		if (e->ny > 0 && e->nx == 0 && qb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
-			qb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
-}
-
-
 void CMario::OnCollisionWithCoinQBlock(LPCOLLISIONEVENT e)
 {
 	CCoinQBlock* cqb = dynamic_cast<CCoinQBlock*>(e->obj);
@@ -369,15 +354,15 @@ void CMario::OnCollisionWithBuffQBlock(LPCOLLISIONEVENT e)
 		{
 			if (level == MARIO_LEVEL_SMALL)
 			{
-				CMushroom* mushroom = bqb->GetMushroom();
-				if (mushroom)
+				CMushroom* mr = bqb->GetMushroom();
+				if (mr)
 				{
 					float mX, mY;
-					mushroom->GetPosition(mX, mY);
+					mr->GetPosition(mX, mY);
 					if (x < mX)
-						mushroom->SetCollisionNx(1);
+						mr->SetCollisionNx(1);
 					else
-						mushroom->SetCollisionNx(-1);
+						mr->SetCollisionNx(-1);
 				}
 				bqb->SetToSpawn(0);
 			}
@@ -389,13 +374,13 @@ void CMario::OnCollisionWithBuffQBlock(LPCOLLISIONEVENT e)
 
 void CMario::OnCollisionWithLifeMushroom(LPCOLLISIONEVENT e)
 {
-	CLifeMushroom* mushroom = dynamic_cast<CLifeMushroom*>(e->obj);
+	CLifeMushroom* lmr = dynamic_cast<CLifeMushroom*>(e->obj);
 
-	if (mushroom)
+	if (lmr)
 	{
-		if (mushroom->GetState() == MUSHROOM_STATE_MOVING)
+		if (lmr->GetState() == MUSHROOM_STATE_MOVING)
 		{
-			mushroom->Delete();
+			lmr->Delete();
 			//Add 1 life
 		}
 	}
@@ -423,13 +408,13 @@ void CMario::OnCollisionWithMushroom(LPCOLLISIONEVENT e)
 
 void CMario::OnCollisionWithSuperLeaf(LPCOLLISIONEVENT e)
 {
-	CSuperLeaf* superleaf = dynamic_cast<CSuperLeaf*>(e->obj);
+	CSuperLeaf* sl = dynamic_cast<CSuperLeaf*>(e->obj);
 
-	if (superleaf)
+	if (sl)
 	{
-		if (superleaf->GetState() == SUPERLEAF_STATE_FLOATING_RIGHT || superleaf->GetState() == SUPERLEAF_STATE_FLOATING_LEFT)
+		if (sl->GetState() == SUPERLEAF_STATE_FLOATING_RIGHT || sl->GetState() == SUPERLEAF_STATE_FLOATING_LEFT)
 		{
-			superleaf->Delete();
+			sl->Delete();
 			if (level == MARIO_LEVEL_BIG)
 				this->SetState(MARIO_STATE_TAIL_UP);
 		}
@@ -520,6 +505,7 @@ void CMario::OnCollisionWithKoopa(LPCOLLISIONEVENT e) {
 			StartKick();
 			koopa->SetState(KOOPA_STATE_SHELL_DYNAMIC);
 			koopa->SetSpeed((nx > 0) ? KOOPA_SHELL_SPEED : -KOOPA_SHELL_SPEED, 0);
+			koopa->SetNx(nx);
 			return;
 		}
 		else
@@ -560,6 +546,9 @@ void CMario::OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e)
 		return;
 	if (wingedGoomba->GetState() == WINGED_GOOMBA_STATE_DIE_ON_TAIL_WHIP)
 		return;
+	if (wingedGoomba->GetState() == WINGED_GOOMBA_STATE_DIE_ON_HELD_KOOPA)
+		return;
+	
 	// jump on top >> kill Goomba and deflect a bit 
 	if (e->ny < 0)
 	{
@@ -876,7 +865,6 @@ int CMario::GetAniIdTail()
 	{
 		if (nx > 0) aniId = ID_ANI_MARIO_TAIL_HOVERING_RIGHT;
 		else aniId = ID_ANI_MARIO_TAIL_HOVERING_LEFT;
-		tailWagged = 1;
 	}
 
 	if (tailDown)
@@ -1237,7 +1225,7 @@ void CMario::SetState(int state)
 		break;
 	}
 
-	//DebugOut(L"SetState: %d\n", state);
+	DebugOutTitle(L"nx=: %d\n", nx);
 	CGameObject::SetState(state);
 }
 

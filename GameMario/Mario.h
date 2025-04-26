@@ -279,7 +279,6 @@ class CMario : public CGameObject
 
 	int isHoldingKoopa = 0;
 	int jumpCount = 0;
-	int tailWagged = 1;
 	int isMoving = 0;
 	int isRunning = 0;
 	int isJumpButtonHeld = 0;
@@ -329,7 +328,7 @@ public:
 	void StartTailDown() { tailDown = 1; tailDownStart = GetTickCount64(); }
 	void StartKick() { isKicking = 1; kickStart = GetTickCount64(); }
 	void StartBraking();
-	void StartHovering() { isHovering = 1; hoveringStart = GetTickCount64(); tailWagged = 0; }
+	void StartHovering() { isHovering = 1; hoveringStart = GetTickCount64(); }
 	void StartTailWhip() { isTailWhipping = 1; tailWhipStart = GetTickCount64(); }
 
 	int GetJumpCount() { return jumpCount; }

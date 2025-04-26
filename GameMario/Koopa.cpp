@@ -46,22 +46,10 @@ void CKoopa::OnCollisionWith(LPCOLLISIONEVENT e) {
 		}
 	}
 
-	//if (dynamic_cast<CMario*>(e->obj)) {
-	//	OnCollisionWithMario(e);
-	//}
-	//else 
 	if (dynamic_cast<CCoinQBlock*>(e->obj) || dynamic_cast<CBuffQBlock*>(e->obj)) {
 		OnCollisionWithQuestionBlock(e);
 	}
 }
-
-//void CKoopa::OnCollisionWithMario(LPCOLLISIONEVENT e) {
-//	if (e->ny < 0) {
-//		vy = -KOOPA_SHELL_DEFLECT_SPEED;
-//		vx = e->nx > 0 ? -0.2f : 0.2f;
-//		isFlying = true;
-//	}
-//}
 
 void CKoopa::OnCollisionWithQuestionBlock(LPCOLLISIONEVENT e) {
 	if (state == KOOPA_STATE_SHELL_DYNAMIC) {
@@ -165,7 +153,7 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		}
 	}
 
-	DebugOutTitle(L"Being held: %d, vx=%f, vy=%f\n", beingHeld, vx, vy);
+	//DebugOutTitle(L"Being held: %d, vx=%f, vy=%f\n", beingHeld, vx, vy);
 
 	if ((state == KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY) && (GetTickCount64() - dieStart > KOOPA_DIE_TIMEOUT))
 	{
@@ -239,7 +227,7 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			if (dynamic_cast<CGoomba*>(e->obj) || dynamic_cast<CWingedGoomba*>(e->obj))
 			{
 				this->SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY);
-				e->obj->SetState(GOOMBA_STATE_DIE_ON_TAIL_WHIP);
+				e->obj->SetState(WINGED_GOOMBA_STATE_DIE_ON_HELD_KOOPA);
 				isKilledOnCollideWithEnemy = 1;
 			}
 			else if (dynamic_cast<CPiranhaPlant*>(e->obj))
@@ -265,9 +253,11 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			float mNx;
 			mario->GetNx(mNx);
 			this->SetState(KOOPA_STATE_SHELL_DYNAMIC);
-			this->SetSpeed((mNx > 0) ? KOOPA_SHELL_SPEED : - KOOPA_SHELL_SPEED, 0);
+			this->SetNx(mNx);
+			this->SetSpeed((nx > 0) ? KOOPA_SHELL_SPEED : - KOOPA_SHELL_SPEED, 0);
 			beingHeld = 0;
 			mario->SetIsHoldingKoopa(0);
+			mario->StartKick();
 
 			// Kiểm tra va chạm với các đối tượng có IsBlocking = 1
 			vector<LPCOLLISIONEVENT> coEvents;
@@ -413,7 +403,7 @@ void CKoopa::SetState(int state)
 			float mNx;
 			player->GetNx(mNx);
 			vx = (mNx > 0) ? 0.2f : -0.2f;
-			vy = -0.4f;
+			vy = -0.35f;
 			ax = 0;
 			ay = KOOPA_GRAVITY;
 			break;

@@ -144,7 +144,11 @@ void CWingedGoomba::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		isDeleted = true;
 		return;
 	}
-
+	if ((state == WINGED_GOOMBA_STATE_DIE_ON_TAIL_WHIP) && (GetTickCount64() - dieOnWhipStart > GOOMBA_DIE_TIMEOUT))
+	{
+		isDeleted = true;
+		return;
+	}
 
 	if (GetTickCount64() - flapStart > 1000)
 	{
@@ -194,7 +198,9 @@ void CWingedGoomba::Render()
 
 void CWingedGoomba::SetState(int state)
 {
-	if (this->state == WINGED_GOOMBA_STATE_DIE_ON_STOMP || this->state == WINGED_GOOMBA_STATE_DIE_ON_TAIL_WHIP)
+	if (this->state == WINGED_GOOMBA_STATE_DIE_ON_STOMP 
+		|| this->state == WINGED_GOOMBA_STATE_DIE_ON_TAIL_WHIP
+		|| this->state == WINGED_GOOMBA_STATE_DIE_ON_HELD_KOOPA)
 		return;
 	CGameObject::SetState(state);
 	switch (state)
@@ -207,7 +213,12 @@ void CWingedGoomba::SetState(int state)
 		ay = 0;
 		break;
 	case WINGED_GOOMBA_STATE_DIE_ON_TAIL_WHIP:
+		dieOnWhipStart = GetTickCount64();
 		vy = -0.5f;
+		ay = WINGED_GOOMBA_GRAVITY;
+		break;
+	case WINGED_GOOMBA_STATE_DIE_ON_HELD_KOOPA:
+		vy = -0.35f;
 		ay = WINGED_GOOMBA_GRAVITY;
 		break;
 	case WINGED_GOOMBA_STATE_WALKING:

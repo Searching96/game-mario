@@ -81,5 +81,6 @@ public:
 	void SetBeingHeld(int beingHeld) { this->beingHeld = beingHeld; }
 	void SetFlying(bool isFlying) { this->isFlying = isFlying; }
 	void SetReversed(bool isReversed) { this->isReversed = isReversed; }
+	void SetNx(int nx) { this->nx = nx; }
 };
 

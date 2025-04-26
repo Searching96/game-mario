@@ -144,10 +144,8 @@ void CTailWhip::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
 	CGoomba* goomba = dynamic_cast<CGoomba*>(e->obj);
 	if (goomba)
 	{
-		if (goomba->GetState() == GOOMBA_STATE_DIE_ON_STOMP)
-			return;
-		if (goomba->GetState() == GOOMBA_STATE_DIE_ON_TAIL_WHIP)
-			return;
+		if (goomba->GetIsDead() == 1) return;
+
 		CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
 		float mNx;
 		player->GetNx(mNx);

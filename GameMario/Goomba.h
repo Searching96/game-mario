@@ -14,6 +14,7 @@
 #define GOOMBA_STATE_WALKING			100
 #define GOOMBA_STATE_DIE_ON_STOMP		200
 #define GOOMBA_STATE_DIE_ON_TAIL_WHIP	300
+#define GOOMBA_STATE_DIE_ON_HELD_KOOPA	400
 
 #define ID_ANI_GOOMBA_WALKING			100000
 #define ID_ANI_GOOMBA_DIE_ON_STOMP		101000
@@ -26,16 +27,15 @@ protected:
 	float ax;				
 	float ay; 
 
+	ULONGLONG dieStart = -1;
 
-	ULONGLONG dieOnStompStart;
-	ULONGLONG dieOnWhipStart;
-
+	int isDead = 0;
 
 	virtual void GetBoundingBox(float &left, float &top, float &right, float &bottom);
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects);
 	virtual void Render();
 
-	virtual int IsCollidable() { return (state != GOOMBA_STATE_DIE_ON_TAIL_WHIP) ? 1 : 0; };
+	virtual int IsCollidable() { return (isDead == 0); }
 	virtual int IsBlocking() { return 0; }
 	virtual void OnNoCollision(DWORD dt);
 
@@ -44,4 +44,5 @@ protected:
 public: 	
 	CGoomba(float x, float y);
 	virtual void SetState(int state);
+	int GetIsDead() { return isDead; }
 };
