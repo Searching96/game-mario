@@ -638,9 +638,9 @@ void CPlayScene::Load()
 	// if (playerFoundInFile && startCamX == /* some magic value like -1 */) { ... center on player ... }
 
 	// Clamp initial camera position using loaded map dimensions
-	if (mapWidth > 0 && initial_cam_x > mapWidth - cam_width) initial_cam_x = mapWidth - cam_width;
+	if (mapWidth > 0 && initial_cam_x > mapWidth - cam_width - 8) initial_cam_x = mapWidth - cam_width - 8;
 	if (initial_cam_x < 0) initial_cam_x = 0; // Or your desired minimum X boundary
-	if (mapHeight > 0 && initial_cam_y > mapHeight - cam_height) initial_cam_y = mapHeight - cam_height;
+	if (mapHeight > 0 && initial_cam_y > mapHeight - cam_height - 8) initial_cam_y = mapHeight - cam_height - 8;
 	if (initial_cam_y < 0) initial_cam_y = 0; // Or your desired minimum Y boundary
 
 	game->SetCamPos(initial_cam_x, initial_cam_y);
@@ -744,12 +744,12 @@ void CPlayScene::UpdateCamera(CMario* mario, float player_cx, float player_cy, f
 
 	// --- Clamp Camera Position using loaded map boundaries ---
 	// Clamp X
-	if (target_cam_x < 0) target_cam_x = 0; // Clamp left (use 0 or a specific boundary value)
+	if (target_cam_x < -8) target_cam_x = -8; // Clamp left (use 0 or a specific boundary value)
 	if (mapWidth > 0 && target_cam_x > mapWidth - cam_width) target_cam_x = mapWidth - cam_width; // Clamp right
 
 	// Clamp Y
 	if (target_cam_y < 0) target_cam_y = 0; // Clamp top
-	if (mapHeight > 0 && target_cam_y > mapHeight - cam_height) target_cam_y = mapHeight - cam_height; // Clamp bottom
+	if (mapHeight > 0 && target_cam_y > mapHeight - cam_height - 8) target_cam_y = mapHeight - cam_height - 8; // Clamp bottom
 
 	// Set the final camera position
 	game->SetCamPos(target_cam_x, target_cam_y);
@@ -768,12 +768,6 @@ void CPlayScene::Update(DWORD dt)
 
 	float cx, cy;
 	mario->GetPosition(cx, cy);
-
-	// REMOVE these hardcoded values:
-	// float mapWidth = 2815.0f;
-	// float mapHeight = 432.0f;
-	// float marginX = 136.0f;
-	// float marginY = 40.0f;
 
 	vector<LPGAMEOBJECT> coObjects;
 	UpdateChunks(cam_x, cam_width); // Load/unload chunks based on current camera

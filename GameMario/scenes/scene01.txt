@@ -38,7 +38,7 @@ assets\wing.txt
 # Initial X position of the camera
 start_cam_x	0
 # Initial Y position of the camera (Top edge of the view)
-start_cam_y	416
+start_cam_y	400
 # Total width of the playable map area
 map_width	2816
 # Total height of the playable map area (Usually height of background/level)
@@ -96,7 +96,7 @@ margin_y	40
 9	360	376
 
 # Pipe
-103	-32	0	16	16	27	1064300	1064300	1064300	1064300
+103	-16	0	16	16	27	1064300	1064300	1064300	1064300
 103	352	368	16	16	3	1090110	1090120	1090210	1090220
 
 # MARIO
