@@ -45,6 +45,7 @@ CPlayScene::CPlayScene(int id, LPCWSTR filePath) :
 #define SCENE_SECTION_UNKNOWN -1
 #define SCENE_SECTION_ASSETS	1
 #define SCENE_SECTION_CHUNK_OBJECT 2
+#define SCENE_SECTION_SETTINGS 3
 
 #define ASSETS_SECTION_UNKNOWN -1
 #define ASSETS_SECTION_SPRITES 1
@@ -105,6 +106,36 @@ void CPlayScene::_ParseSection_ANIMATIONS(string line)
 	}
 
 	CAnimations::GetInstance()->Add(ani_id, ani);
+}
+
+void CPlayScene::_ParseSection_SETTINGS(string line)
+{
+	vector<string> tokens = split(line);
+	if (tokens.size() < 2) return;
+	string key = tokens[0];
+	try {
+		float value = stof(tokens[1]);
+
+		if (key == "start_cam_x") {
+			startCamX = value;
+		}
+		else if (key == "start_cam_y") {
+			startCamY = value;
+		}
+		else if (key == "map_width") {
+			mapWidth = value;
+		}
+		else if (key == "map_height") {
+			mapHeight = value;
+		}
+		else if (key == "margin_x") marginX = value;
+		else if (key == "margin_y") marginY = value;
+		else {
+		}
+	}
+	catch (...) {
+		DebugOut(L"[ERROR] Failed to parse setting line: %hs\n", line.c_str());
+	}
 }
 
 /*
@@ -434,21 +465,26 @@ void CPlayScene::LoadChunkObjects(int chunk_id, LPCHUNK targetChunk)
 	f.open(scene_file_path);
 	string line;
 	bool in_target_section = false;
-	string target_section = "[CHUNK " + to_string(chunk_id) + " ";
+
+	string target_section = "[CHUNK\t" + to_string(chunk_id) + "\t";
 
 	while (getline(f, line))
 	{
 		if (line.empty() || line[0] == '#') continue;
+
 		if (line[0] == '[')
 		{
+			// Check if this is our target chunk section
 			in_target_section = (line.find(target_section) == 0);
 			continue;
 		}
+
 		if (in_target_section)
 		{
 			_ParseSection_CHUNK_OBJECTS(line, targetChunk);
 		}
 	}
+
 	f.close();
 	targetChunk->SetLoaded(true);
 	DebugOut(L"[INFO] Loaded objects for chunk %d\n", chunk_id);
@@ -506,6 +542,8 @@ void CPlayScene::UnloadChunksOutOfRange(float cam_x, float cam_width)
 	}
 }
 
+// In CPlayScene::Load()
+
 void CPlayScene::Load()
 {
 	DebugOut(L"[INFO] Start loading scene from : %s \n", sceneFilePath);
@@ -514,56 +552,112 @@ void CPlayScene::Load()
 	int section = SCENE_SECTION_UNKNOWN;
 	char str[MAX_SCENE_LINE];
 
+	// Reset settings to defaults before parsing, in case the file is missing some
+	startCamX = 0.0f;
+	startCamY = 0.0f;
+	mapWidth = 0.0f; // Or perhaps screen width as default?
+	mapHeight = 0.0f; // Or screen height?
+	marginX = 0.0f;
+	marginY = 0.0f;
+	currentParsingChunk = nullptr; // Reset parsing state
+
 	while (f.getline(str, MAX_SCENE_LINE))
 	{
 		string line(str);
 		if (line.empty() || line[0] == '#') continue;
 
-		if (line.substr(0, 7) == "[CHUNK ")
-		{
-			vector<string> tokens = split(line.substr(7, line.length() - 8), " ");
-			if (tokens.size() >= 3)
-			{
-				int chunkId = atoi(tokens[0].c_str());
-				float chunk_Start_X = atof(tokens[1].c_str());
-				float chunk_End_X = atof(tokens[2].c_str());
-
-				// Create empty chunk
-				LPCHUNK chunk = new CChunk(chunkId, chunk_Start_X, chunk_End_X);
-				chunks.push_back(chunk);
-				DebugOut(L"[INFO] Registered chunk %d (%f, %f)\n", chunkId, chunk_Start_X, chunk_End_X);
-			}
-			else
-			{
-				DebugOut(L"[ERROR] Malformed chunk header: %hs\n", line.c_str());
-			}
-			section = SCENE_SECTION_CHUNK_OBJECT;
-			continue;
-		}
-
+		// Section checks
+		if (line == "[SCENE_SETTINGS]") { section = SCENE_SECTION_SETTINGS; continue; } // Add this check
 		if (line == "[ASSETS]") { section = SCENE_SECTION_ASSETS; continue; }
-		if (line[0] == '[') { section = SCENE_SECTION_UNKNOWN; continue; }
+		if (line.substr(0, 6) == "[CHUNK")
+		{
+			// Extract the content inside brackets
+			size_t closeBracketPos = line.find(']');
+			if (closeBracketPos != string::npos) {
+				string chunkHeader = line.substr(1, closeBracketPos - 1); // Remove [ and ]
+				vector<string> tokens = split(chunkHeader);
 
+				if (tokens.size() >= 4) { // "CHUNK", ID, start_X, end_X
+					int chunkId = atoi(tokens[1].c_str());
+					float chunk_Start_X = atof(tokens[2].c_str());
+					float chunk_End_X = atof(tokens[3].c_str());
+
+					if (GetChunk(chunkId) == nullptr) { // Avoid recreating chunks on reload
+						LPCHUNK chunk = new CChunk(chunkId, chunk_Start_X, chunk_End_X);
+						chunks.push_back(chunk);
+						DebugOut(L"[INFO] Registered chunk %d (%f, %f)\n", chunkId, chunk_Start_X, chunk_End_X);
+						currentParsingChunk = chunk; // Keep track for potential object parsing immediately after
+					}
+					else {
+						currentParsingChunk = GetChunk(chunkId); // Point to existing chunk
+						DebugOut(L"[INFO] Chunk %d already exists, reusing.\n", chunkId);
+					}
+				}
+				else {
+					DebugOut(L"[ERROR] Malformed chunk header: %hs\n", line.c_str());
+					currentParsingChunk = nullptr;
+				}
+				section = SCENE_SECTION_CHUNK_OBJECT; // Set section type
+				continue; // Process next line
+				// --- End chunk header parsing ---
+			}
+		}
+		if (line[0] == '[') { section = SCENE_SECTION_UNKNOWN; continue; } // Generic section skip
+
+		// Line processing based on section
 		switch (section)
 		{
 		case SCENE_SECTION_ASSETS:
 			_ParseSection_ASSETS(line);
 			break;
+		case SCENE_SECTION_SETTINGS:    // Add this case
+			_ParseSection_SETTINGS(line);
+			break;
 		case SCENE_SECTION_CHUNK_OBJECT:
-			// Skip object lines during initial load
+			// If using Solution 2 (find player during load), you might parse here.
+			// Otherwise, skip object lines during initial load.
+			// Example for Solution 2:
+			// if (currentParsingChunk != nullptr && !playerFoundInFile) {
+			//     // Check if line is Mario definition and store info
+			// }
 			break;
 		}
 	}
-
 	f.close();
-	scene_file_path = sceneFilePath; // Store for later parsing
 
-	// Load initial chunks based on camera
+	scene_file_path = sceneFilePath; // Store for later chunk object loading
+
+	// --- Set Initial Camera using loaded settings ---
 	CGame* game = CGame::GetInstance();
-	float cam_x, cam_y;
-	game->GetCamPos(cam_x, cam_y);
+	float initial_cam_x = startCamX;
+	float initial_cam_y = startCamY;
 	float cam_width = (float)game->GetBackBufferWidth();
-	LoadChunksInRange(cam_x, cam_width);
+	float cam_height = (float)game->GetBackBufferHeight();
+
+	// Optional: If using Solution 2, you might center on player AFTER finding them
+	// if (playerFoundInFile && startCamX == /* some magic value like -1 */) { ... center on player ... }
+
+	// Clamp initial camera position using loaded map dimensions
+	if (mapWidth > 0 && initial_cam_x > mapWidth - cam_width) initial_cam_x = mapWidth - cam_width;
+	if (initial_cam_x < 0) initial_cam_x = 0; // Or your desired minimum X boundary
+	if (mapHeight > 0 && initial_cam_y > mapHeight - cam_height) initial_cam_y = mapHeight - cam_height;
+	if (initial_cam_y < 0) initial_cam_y = 0; // Or your desired minimum Y boundary
+
+	game->SetCamPos(initial_cam_x, initial_cam_y);
+	DebugOut(L"[INFO] Initial camera set to (%f, %f) from settings.\n", initial_cam_x, initial_cam_y);
+
+	// --- Load initial chunks based on the camera position we just set ---
+	LoadChunksInRange(initial_cam_x, cam_width);
+
+	// --- If using Solution 2, ensure player's chunk is loaded if not already ---
+	// if (playerFoundInFile) {
+	//    LPCHUNK playerChunk = GetChunk(playerStartChunkId);
+	//    if (playerChunk && !playerChunk->IsLoaded()) {
+	//        LoadChunkObjects(playerStartChunkId, playerChunk);
+	//    }
+	//    // Error checking if player object wasn't created
+	// }
+
 
 	DebugOut(L"[INFO] Done loading scene %s\n", sceneFilePath);
 }
@@ -601,40 +695,64 @@ void CPlayScene::UpdateObjects(DWORD dt, CMario* mario, vector<LPGAMEOBJECT>& co
 	}
 }
 
-void CPlayScene::UpdateCamera(CMario* mario, float cx, float cy, float cam_width, float cam_height, float mapWidth, float mapHeight, float marginX, float marginY)
+void CPlayScene::UpdateCamera(CMario* mario, float player_cx, float player_cy, float cam_width, float cam_height)
 {
 	CGame* game = CGame::GetInstance();
 	float cam_x, cam_y;
-	game->GetCamPos(cam_x, cam_y);
-	float mario_X, mario_Y;
+	game->GetCamPos(cam_x, cam_y); // Get current camera position
+
+	// --- Calculate Target Camera X ---
+	// Start with current camera position
+	float target_cam_x = cam_x;
+
+	// Apply margin logic
+	if (player_cx > cam_x + cam_width - marginX) // Player past right margin
+		target_cam_x = player_cx - (cam_width - marginX);
+	else if (player_cx < cam_x + marginX) // Player past left margin
+		target_cam_x = player_cx - marginX;
+
+	// --- Calculate Target Camera Y ---
+	// Default: Camera bottom aligns with map bottom (or slightly above)
+	float target_cam_y = 0; // Default Y target (top edge of viewport)
+	if (mapHeight > 0) { // Prevent issues if mapHeight isn't loaded
+		target_cam_y = mapHeight - cam_height; // Bottom align (adjust if 0,0 is top-left)
+	}
+
+
+	// Vertical Follow Logic (Example - adjust as needed)
+	float mario_X, mario_Y; // Renamed to avoid conflict
 	mario->GetPosition(mario_X, mario_Y);
 
-	cam_x = cx - cam_width / 2;
-	if (cx > cam_x + cam_width - marginX)
-		cam_x = cx - (cam_width - marginX);
-	else if (cx < cam_x + marginX)
-		cam_x = cx - marginX;
-
-	cam_y = mapHeight - cam_height;
-	if (mario->IsOnPlatform() && mario_Y > mapHeight - game->GetBackBufferHeight())
+	// Reset lock condition
+	if (mario->IsOnPlatform() && mario_Y > mapHeight - cam_height) // On ground near bottom
 	{
 		is_camera_vertically_locked = false;
 	}
-	else if (mario->GetLevel() == MARIO_LEVEL_TAIL && mario->GetJumpCount() > 1 && cy < cam_y)
+	// Lock condition (e.g., flying high)
+	else if (mario->GetLevel() == MARIO_LEVEL_TAIL && mario->GetJumpCount() > 1 && player_cy < cam_y + marginY) // Flying upwards near top margin
 	{
 		is_camera_vertically_locked = true;
 	}
+
+	// If locked, center vertically (adjust margin as needed)
 	if (is_camera_vertically_locked)
 	{
-		cam_y = cy - cam_height / 2;
+		target_cam_y = player_cy - cam_height / 2; // Center around player Y
+		// Optional: Add vertical margins (marginY) here if desired for flying lock
 	}
 
-	if (cam_x < -8) cam_x = -8;
-	if (cam_x > mapWidth - cam_width - 8) cam_x = mapWidth - cam_width - 8;
-	if (cam_y < 0) cam_y = 0;
-	if (cam_y > mapHeight - cam_height - 8) cam_y = mapHeight - cam_height - 8;
 
-	game->SetCamPos(cam_x, cam_y);
+	// --- Clamp Camera Position using loaded map boundaries ---
+	// Clamp X
+	if (target_cam_x < 0) target_cam_x = 0; // Clamp left (use 0 or a specific boundary value)
+	if (mapWidth > 0 && target_cam_x > mapWidth - cam_width) target_cam_x = mapWidth - cam_width; // Clamp right
+
+	// Clamp Y
+	if (target_cam_y < 0) target_cam_y = 0; // Clamp top
+	if (mapHeight > 0 && target_cam_y > mapHeight - cam_height) target_cam_y = mapHeight - cam_height; // Clamp bottom
+
+	// Set the final camera position
+	game->SetCamPos(target_cam_x, target_cam_y);
 }
 
 void CPlayScene::Update(DWORD dt)
@@ -650,16 +768,21 @@ void CPlayScene::Update(DWORD dt)
 
 	float cx, cy;
 	mario->GetPosition(cx, cy);
-	float mapWidth = 2815.0f;
-	float mapHeight = 432.0f;
-	float marginX = 136.0f;
-	float marginY = 40.0f;
+
+	// REMOVE these hardcoded values:
+	// float mapWidth = 2815.0f;
+	// float mapHeight = 432.0f;
+	// float marginX = 136.0f;
+	// float marginY = 40.0f;
 
 	vector<LPGAMEOBJECT> coObjects;
-	UpdateChunks(cam_x, cam_width);
-	UpdateObjects(dt, mario, coObjects);
-	UpdateCamera(mario, cx, cy, cam_width, cam_height, mapWidth, mapHeight, marginX, marginY);
-	PurgeDeletedObjects();
+	UpdateChunks(cam_x, cam_width); // Load/unload chunks based on current camera
+	UpdateObjects(dt, mario, coObjects); // Update all loaded objects
+
+	// Update camera using player pos and loaded scene settings
+	UpdateCamera(mario, cx, cy, cam_width, cam_height);
+
+	PurgeDeletedObjects(); // Clean up deleted objects
 }
 
 void CPlayScene::Render()

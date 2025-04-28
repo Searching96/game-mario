@@ -20,9 +20,17 @@ protected:
     wstring scene_file_path;
     bool is_camera_vertically_locked = false;
 
+    float startCamX = 0.0f;
+    float startCamY = 0.0f;
+    float mapWidth = 0.0f; // Initialize to 0 or a default
+    float mapHeight = 0.0f; // Initialize to 0 or a default
+    float marginX = 0.0f; // Initialize to 0 or a default
+    float marginY = 0.0f; // Initialize to 0 or a default
+
     void _ParseSection_SPRITES(string line);
     void _ParseSection_ANIMATIONS(string line);
     void _ParseSection_ASSETS(string line);
+    void _ParseSection_SETTINGS(string line); // New parsing function
     void _ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk);
 
     void LoadAssets(LPCWSTR assetFile);
@@ -32,7 +40,7 @@ protected:
 
     void UpdateChunks(float cam_x, float cam_width);
     void UpdateObjects(DWORD dt, CMario* mario, vector<LPGAMEOBJECT>& coObjects);
-    void UpdateCamera(CMario* mario, float cx, float cy, float cam_width, float cam_height, float mapWidth, float mapHeight, float marginX, float marginY);
+    void UpdateCamera(CMario* mario, float cx, float cy, float cam_width, float cam_height);
 
 public:
     CPlayScene(int id, LPCWSTR filePath);

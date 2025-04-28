@@ -74,6 +74,7 @@ void CSampleKeyHandler::OnKeyUp(int KeyCode)
 	case DIK_R:
 		CGame::GetInstance()->GetCurrentScene()->Unload();
 		CGame::GetInstance()->GetCurrentScene()->Load();
+		DebugOut(L"[INFO] Reloading scene...\n");
 		break;
 	}
 }
