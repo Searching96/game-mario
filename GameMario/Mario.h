@@ -341,6 +341,8 @@ public:
 	void GetNx(float &nx) { nx = this->nx; }
 	CTailWhip* GetTailWhip() { return tailWhip; }
 
+	BOOLEAN IsOnPlatform() { return isOnPlatform; }
+
 	void SetLevel(int l);
 	void SetIsRunning(int isRunning) { this->isRunning = isRunning; }
 	void SetIsHoldingKoopa(int isHoldingKoopa) { this->isHoldingKoopa = isHoldingKoopa; }

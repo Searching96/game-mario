@@ -76,15 +76,19 @@ protected:
 	int width;				// Unit: cell 
 	int height;				// Unit: cell
 	int color; // 0: orange, 1: blue, 2: green, 3: white, 4: black, 5: ending
+	int bottomShadow;
 public:
-	CBox(float x, float y, int width, int height, int color)  : CGameObject(x, y)
+	CBox(float x, float y, int width, int height, int color, int bottomShadow)  : CGameObject(x, y)
 	{
 		this->height = height;
 		this->width = width;
 		this->color = color;
+		this->bottomShadow = bottomShadow;
 	}
 
 	void Render();
+	void RenderBox(CSprites* s);
+	void RenderShadow(CSprites* s);
 	void Update(DWORD dt) {}
 	void GetBoundingBox(float& l, float& t, float& r, float& b);
 	void RenderBoundingBox();

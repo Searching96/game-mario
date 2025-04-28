@@ -1,29 +1,30 @@
 #pragma once
 #include "GameObject.h"
+
+#define TRINKET_WIDTH 16
+#define TRINKET_HEIGHT 16
+
+#define ID_TEX_FLOWER 1110001
+#define ID_TEX_STAR 1110002
+#define ID_TEX_MUSHROOM 1110003
 class CTrinket :
     public CGameObject
 {
 protected:
-	//int width; default = 1				// Unit: cell 
-	//int height; default = 1				// Unit: cell
-	float cellWidth;
-	float cellHeight;
-	int spriteId;
+	int type;
 
 public:
-	CTrinket(float x, float y,
-		float cell_width, float cell_height,
-		int sprite_id) : CGameObject(x, y)
+	CTrinket(float x, float y, int type) : CGameObject(x, y)
 	{
-		this->cellWidth = cell_width;
-		this->cellHeight = cell_height;
-		this->spriteId = sprite_id;
+		this->type = type;
 	}
 
 	void Render();
 	void Update(DWORD dt) {}
 	void GetBoundingBox(float& l, float& t, float& r, float& b);
 	void RenderBoundingBox();
+
+	int IsCollidable() { return 0; }
 
 	int IsDirectionColliable(float nx, float ny);
 };

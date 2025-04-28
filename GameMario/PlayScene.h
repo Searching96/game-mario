@@ -11,42 +11,49 @@
 //#include "Koopas.h"
 
 
-class CPlayScene: public CScene
+class CPlayScene : public CScene
 {
-protected: 
-	// A play scene has to have player, right? 
-	LPGAMEOBJECT player;	
-	set<int> currentChunk;
+protected:
+    LPGAMEOBJECT player;
+    vector<LPCHUNK> chunks;
+    LPCHUNK currentParsingChunk = nullptr;
+    wstring scene_file_path;
+    bool is_camera_vertically_locked = false;
 
-	vector<LPGAMEOBJECT> objects;
-	vector<LPCHUNK> chunks;
+    void _ParseSection_SPRITES(string line);
+    void _ParseSection_ANIMATIONS(string line);
+    void _ParseSection_ASSETS(string line);
+    void _ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk);
 
-	LPCHUNK currentParsingChunk = nullptr;
+    void LoadAssets(LPCWSTR assetFile);
+    void LoadChunkObjects(int chunk_id, LPCHUNK targetChunk); // New
+    void LoadChunksInRange(float cam_x, float cam_width); // New
+    void UnloadChunksOutOfRange(float cam_x, float cam_width); // New
 
-	void _ParseSection_SPRITES(string line);
-	void _ParseSection_ANIMATIONS(string line);
+    void UpdateChunks(float cam_x, float cam_width);
+    void UpdateObjects(DWORD dt, CMario* mario, vector<LPGAMEOBJECT>& coObjects);
+    void UpdateCamera(CMario* mario, float cx, float cy, float cam_width, float cam_height, float mapWidth, float mapHeight, float marginX, float marginY);
 
-	void _ParseSection_ASSETS(string line);
-	void _ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk);
+public:
+    CPlayScene(int id, LPCWSTR filePath);
 
-	void LoadAssets(LPCWSTR assetFile);
-	
-public: 
-	CPlayScene(int id, LPCWSTR filePath);
+    virtual void Load();
+    virtual void Update(DWORD dt);
+    virtual void Render();
+    virtual void Unload();
 
-	virtual void Load();
-	virtual void Update(DWORD dt);
-	virtual void Render();
-	virtual void Unload();
+    LPGAMEOBJECT GetPlayer() { return player; }
+    LPCHUNK GetChunk(int id) {
+        for (LPCHUNK chunk : chunks) {
+            if (chunk->GetID() == id) return chunk;
+        }
+        return nullptr;
+    }
 
-	LPGAMEOBJECT GetPlayer() { return player; }
-	LPCHUNK GetChunk(int id) { return chunks[id]; }
+    void Clear();
+    void PurgeDeletedObjects();
 
-	void Clear();
-	void PurgeDeletedObjects();
-
-	static bool IsGameObjectDeleted(const LPGAMEOBJECT& o);
+    static bool IsGameObjectDeleted(const LPGAMEOBJECT& o);
 };
 
 typedef CPlayScene* LPPLAYSCENE;
-

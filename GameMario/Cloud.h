@@ -1,37 +1,33 @@
 #pragma once
 #include "GameObject.h"
+#define CLOUD_WIDTH 16
+#define CLOUD_HEIGHT 16
+
+#define ID_TEX_CLOUD_TOP_LEFT 1020110
+#define ID_TEX_CLOUD_TOP_CENTER 1020120
+#define ID_TEX_CLOUD_TOP_RIGHT 1020130
+#define ID_TEX_CLOUD_BOTTOM_LEFT 1020210
+#define ID_TEX_CLOUD_BOTTOM_CENTER 1020220
+#define ID_TEX_CLOUD_BOTTOM_RIGHT 1020230
+
 class CCloud :
 	public CGameObject
 {
 protected:
 	int width;				// Unit: cell 
 	//int height; default = 2				// Unit: cell
-	float cellWidth;
-	float cellHeight;
-	int spriteIdTopLeft, spriteIdTopCenter, spriteIdTopRight,
-		spriteIdBottomLeft, spriteIdBottomCenter, spriteIdBottomRight;
 
 public:
-	CCloud(float x, float y,
-		float cell_width, float cell_height, int width,
-		int sprite_id_top_left, int sprite_id_top_center, int sprite_id_top_right,
-		int sprite_id_bottom_left, int sprite_id_bottom_center, int sprite_id_bottom_right) : CGameObject(x, y)
+	CCloud(float x, float y, int width) : CGameObject(x, y)
 	{
 		this->width = width;
-		this->cellWidth = cell_width;
-		this->cellHeight = cell_height;
-		this->spriteIdTopLeft = sprite_id_top_left;
-		this->spriteIdTopCenter = sprite_id_top_center;
-		this->spriteIdTopRight = sprite_id_top_right;
-		this->spriteIdBottomLeft = sprite_id_bottom_left;
-		this->spriteIdBottomCenter = sprite_id_bottom_center;
-		this->spriteIdBottomRight = sprite_id_bottom_right;
 	}
 
 	void Render();
 	void Update(DWORD dt) {}
 	void GetBoundingBox(float& l, float& t, float& r, float& b);
 	void RenderBoundingBox();
+	int IsCollidable() { return 0; }
 
 	int IsDirectionColliable(float nx, float ny);
 };

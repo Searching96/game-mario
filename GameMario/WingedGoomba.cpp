@@ -50,17 +50,8 @@ void CWingedGoomba::OnCollisionWith(LPCOLLISIONEVENT e)
 			{
 				return;
 			}
-			if (this->isWinged == 1)
-			{
-				DebugOut(L"Shell hit Winged Goomba (Wings Removed) - Detected in WingedGoomba.cpp\n");
-				this->SetWinged(0);
-				this->SetState(WINGED_GOOMBA_STATE_WALKING);
-			}
-			else
-			{
-				DebugOut(L"Shell hit Winged Goomba (No Wings - Killed) - Detected in WingedGoomba.cpp\n");
-				this->SetState(WINGED_GOOMBA_STATE_DIE_ON_TAIL_WHIP);
-			}
+			DebugOut(L"Shell hit Winged Goomba - Detected in WingedGoomba.cpp\n");
+			this->SetState(WINGED_GOOMBA_STATE_DIE_ON_TAIL_WHIP);
 			return;
 		}
 		else

@@ -6,6 +6,8 @@ class CChunk
 protected:
 	int id;
 	float start_x, end_x;
+	bool isLoaded = false;
+
 	vector<LPGAMEOBJECT> objects;
 	map<LPGAMEOBJECT, bool> isDefeated;
 public:
@@ -36,7 +38,11 @@ public:
 	void Render();
 	void PurgeDeletedObjects();
 
-	int GetID() { return id; }
+	int GetID() const { return id; }
+	float GetStartX() const { return start_x; }
+	float GetEndX() const { return end_x; }
+	bool IsLoaded() const { return isLoaded; }
+	void SetLoaded(bool loaded) { isLoaded = loaded; }
 };
 
 typedef CChunk* LPCHUNK;

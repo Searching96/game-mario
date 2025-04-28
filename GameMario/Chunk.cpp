@@ -18,6 +18,7 @@ void CChunk::Clear()
 	}
 	objects.clear();
 	isDefeated.clear();
+	isLoaded = false;
 }
 
 void CChunk::Render()

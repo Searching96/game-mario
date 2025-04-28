@@ -485,5 +485,5 @@ void CKoopa::SetState(int state)
 	}
 	CGameObject::SetState(state);
 
-	DebugOut(L"[INFO] Koopa: state=%d\n", state);
+	//DebugOut(L"[INFO] Koopa: state=%d\n", state);
 }
