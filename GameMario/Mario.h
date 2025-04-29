@@ -337,6 +337,7 @@ public:
 	int GetIsTailUp() { return tailUp; }
 	int GetIsPowerDown() { return powerDown; }
 	int GetIsTailDown() { return tailDown; }
+	int GetIsHovering() { return isHovering; }
 	int GetIsRunning() { return isRunning; }
 	void GetNx(float &nx) { nx = this->nx; }
 	CTailWhip* GetTailWhip() { return tailWhip; }

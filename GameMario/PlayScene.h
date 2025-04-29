@@ -26,6 +26,7 @@ protected:
     float mapHeight = 0.0f; // Initialize to 0 or a default
     float marginX = 0.0f; // Initialize to 0 or a default
     float marginY = 0.0f; // Initialize to 0 or a default
+    float current_cam_base_y = 0.0f;
 
     void _ParseSection_SPRITES(string line);
     void _ParseSection_ANIMATIONS(string line);

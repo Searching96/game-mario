@@ -559,6 +559,7 @@ void CPlayScene::Load()
 	mapHeight = 0.0f; // Or screen height?
 	marginX = 0.0f;
 	marginY = 0.0f;
+	current_cam_base_y = 0.0f;
 	currentParsingChunk = nullptr; // Reset parsing state
 
 	while (f.getline(str, MAX_SCENE_LINE))
@@ -627,24 +628,35 @@ void CPlayScene::Load()
 
 	scene_file_path = sceneFilePath; // Store for later chunk object loading
 
-	// --- Set Initial Camera using loaded settings ---
+	// --- Set Initial Camera and Base Y ---
 	CGame* game = CGame::GetInstance();
 	float initial_cam_x = startCamX;
-	float initial_cam_y = startCamY;
+	// We'll set initial_cam_y based on the calculated base_y later
 	float cam_width = (float)game->GetBackBufferWidth();
 	float cam_height = (float)game->GetBackBufferHeight();
 
-	// Optional: If using Solution 2, you might center on player AFTER finding them
-	// if (playerFoundInFile && startCamX == /* some magic value like -1 */) { ... center on player ... }
+	// Initialize camera base Y based on mapHeight (most reliable starting point)
+	if (mapHeight > 0) {
+		current_cam_base_y = mapHeight - cam_height - 8; // Default base = ground view (-8 offset)
+		if (current_cam_base_y < 0) current_cam_base_y = 0; // Clamp to top
+	}
+	else {
+		current_cam_base_y = 0; // Default if no mapHeight specified
+	}
+	// You could override with startCamY here if needed: current_cam_base_y = startCamY;
 
-	// Clamp initial camera position using loaded map dimensions
+	float initial_cam_y = current_cam_base_y; // Start the camera at the calculated base
+
+	// Clamp initial camera position (using the determined initial_cam_y)
 	if (mapWidth > 0 && initial_cam_x > mapWidth - cam_width - 8) initial_cam_x = mapWidth - cam_width - 8;
-	if (initial_cam_x < 0) initial_cam_x = 0; // Or your desired minimum X boundary
+	if (initial_cam_x < -8) initial_cam_x = -8;
+	// Clamp Y based on mapHeight, ensuring it respects the base we just set
 	if (mapHeight > 0 && initial_cam_y > mapHeight - cam_height - 8) initial_cam_y = mapHeight - cam_height - 8;
-	if (initial_cam_y < 0) initial_cam_y = 0; // Or your desired minimum Y boundary
+	if (initial_cam_y < 0) initial_cam_y = 0;
 
 	game->SetCamPos(initial_cam_x, initial_cam_y);
-	DebugOut(L"[INFO] Initial camera set to (%f, %f) from settings.\n", initial_cam_x, initial_cam_y);
+	DebugOut(L"[INFO] Initial camera set to (%f, %f).\n", initial_cam_x, initial_cam_y);
+	DebugOut(L"[INFO] Initial camera base Y set to %f.\n", current_cam_base_y);
 
 	// --- Load initial chunks based on the camera position we just set ---
 	LoadChunksInRange(initial_cam_x, cam_width);
@@ -695,66 +707,116 @@ void CPlayScene::UpdateObjects(DWORD dt, CMario* mario, vector<LPGAMEOBJECT>& co
 	}
 }
 
-void CPlayScene::UpdateCamera(CMario* mario, float player_cx, float player_cy, float cam_width, float cam_height)
-{
+void CPlayScene::UpdateCamera(CMario* mario, float player_cx, float player_cy, float cam_width, float cam_height) {
 	CGame* game = CGame::GetInstance();
 	float cam_x, cam_y;
-	game->GetCamPos(cam_x, cam_y); // Get current camera position
+	game->GetCamPos(cam_x, cam_y);
 
-	// --- Calculate Target Camera X ---
-	// Start with current camera position
-	float target_cam_x = cam_x;
+	float mario_vx, mario_vy;
+	mario->GetSpeed(mario_vx, mario_vy);
+	float mario_l, mario_t, mario_r, mario_b;
+	mario->GetBoundingBox(mario_l, mario_t, mario_r, mario_b);
+	float mario_center_y = mario_t + (mario_b - mario_t) / 2.0f;
 
-	// Apply margin logic
-	if (player_cx > cam_x + cam_width - marginX) // Player past right margin
-		target_cam_x = player_cx - (cam_width - marginX);
-	else if (player_cx < cam_x + marginX) // Player past left margin
-		target_cam_x = player_cx - marginX;
+	// --- Smooth Mario's Center Y to Reduce Jitter ---
+	static float smoothed_center_y = mario_center_y;
+	smoothed_center_y += (mario_center_y - smoothed_center_y) * 0.5f;
 
-	// --- Calculate Target Camera Y ---
-	// Default: Camera bottom aligns with map bottom (or slightly above)
-	float target_cam_y = 0; // Default Y target (top edge of viewport)
-	if (mapHeight > 0) { // Prevent issues if mapHeight isn't loaded
-		target_cam_y = mapHeight - cam_height; // Bottom align (adjust if 0,0 is top-left)
+	// --- Horizontal Following with Dead Zone ---
+	static float last_mario_x = player_cx;
+	static bool moving_right = mario_vx >= 0;
+	bool direction_changed = (mario_vx >= 0) != moving_right;
+	moving_right = mario_vx >= 0;
+
+	float dead_zone = 16.0f;
+	float target_cam_x = player_cx - cam_width / 2.0f;
+	if (direction_changed && abs(player_cx - last_mario_x) < dead_zone) {
+		target_cam_x = cam_x;
+	}
+	last_mario_x = player_cx;
+
+	// --- Absolute Ground Level ---
+	float absolute_ground_cam_y = 0;
+	if (mapHeight > 0) {
+		absolute_ground_cam_y = mapHeight - cam_height - 8;
+		if (absolute_ground_cam_y < 0) absolute_ground_cam_y = 0;
 	}
 
+	// --- Mario States ---
+	bool is_flying_state = (mario->GetLevel() == MARIO_LEVEL_TAIL && (mario->GetJumpCount() > 0 || mario->GetIsHovering()));
+	bool is_on_platform = mario->IsOnPlatform();
+	bool is_in_water = false;
+	bool is_on_vine = false;
+	bool is_vertical_level = true;
 
-	// Vertical Follow Logic (Example - adjust as needed)
-	float mario_X, mario_Y; // Renamed to avoid conflict
-	mario->GetPosition(mario_X, mario_Y);
+	// --- Identify Sky Platform ---
+	float platform_height_threshold = 200.0f;
+	bool is_on_sky_platform = is_on_platform && is_vertical_level && (mario_b < mapHeight - platform_height_threshold);
 
-	// Reset lock condition
-	if (mario->IsOnPlatform() && mario_Y > mapHeight - cam_height) // On ground near bottom
-	{
-		is_camera_vertically_locked = false;
+	// --- Update Vertical Lock State ---
+	is_camera_vertically_locked = is_flying_state || is_in_water || is_on_vine;
+
+	// --- Falling State with Hysteresis ---
+	static bool is_falling = false;
+	static float last_platform_base_y = current_cam_base_y; // Track last platform's base
+	float fall_threshold = last_platform_base_y + cam_height * 0.75f;
+	float hysteresis_margin = 50.0f;
+	if (mario_vy > 0 && smoothed_center_y > fall_threshold + hysteresis_margin) {
+		is_falling = true;
 	}
-	// Lock condition (e.g., flying high)
-	else if (mario->GetLevel() == MARIO_LEVEL_TAIL && mario->GetJumpCount() > 1 && player_cy < cam_y + marginY) // Flying upwards near top margin
-	{
-		is_camera_vertically_locked = true;
+	else if (is_on_platform || smoothed_center_y < fall_threshold - hysteresis_margin) {
+		is_falling = false;
+		last_platform_base_y = current_cam_base_y; // Update on landing or above platform
 	}
 
-	// If locked, center vertically (adjust margin as needed)
-	if (is_camera_vertically_locked)
-	{
-		target_cam_y = player_cy - cam_height / 2; // Center around player Y
-		// Optional: Add vertical margins (marginY) here if desired for flying lock
+	// --- Determine Target Camera Y ---
+	float target_cam_y;
+	float smooth_factor = 0.3f;
+	if (is_in_water || is_on_vine) {
+		target_cam_x = player_cx - cam_width / 2.0f;
+		target_cam_y = smoothed_center_y - cam_height / 2.0f;
+		current_cam_base_y = target_cam_y;
+	}
+	else if (is_flying_state) {
+		target_cam_y = smoothed_center_y - cam_height / 2.0f;
+		current_cam_base_y = target_cam_y;
+	}
+	else if (is_on_sky_platform) {
+		target_cam_y = mario_b - cam_height * 0.75f;
+		current_cam_base_y = target_cam_y;
+		smooth_factor = 0.5f;
+	}
+	else if (is_on_platform || !is_vertical_level) {
+		target_cam_y = absolute_ground_cam_y;
+		current_cam_base_y = absolute_ground_cam_y;
+		smooth_factor = 0.5f;
+	}
+	else {
+		// Jumping or falling
+		if (is_falling) {
+			target_cam_y = smoothed_center_y - cam_height / 2.0f; // Track Mario
+		}
+		else {
+			target_cam_y = current_cam_base_y; // Lock to last platform
+		}
 	}
 
+	// --- Clamp Camera ---
+	if (target_cam_x < -8) target_cam_x = -8;
+	if (mapWidth > 0 && target_cam_x > mapWidth - cam_width - 8) target_cam_x = mapWidth - cam_width - 8;
+	if (target_cam_y < 0) target_cam_y = 0;
+	if (mapHeight > 0 && target_cam_y > mapHeight - cam_height - 8) target_cam_y = mapHeight - cam_height - 8;
 
-	// --- Clamp Camera Position using loaded map boundaries ---
-	// Clamp X
-	if (target_cam_x < -8) target_cam_x = -8; // Clamp left (use 0 or a specific boundary value)
-	if (mapWidth > 0 && target_cam_x > mapWidth - cam_width) target_cam_x = mapWidth - cam_width; // Clamp right
+	// --- Apply Camera Position with Smoothing ---
+	cam_x += (target_cam_x - cam_x) * smooth_factor;
+	cam_y += (target_cam_y - cam_y) * smooth_factor;
 
-	// Clamp Y
-	if (target_cam_y < 0) target_cam_y = 0; // Clamp top
-	if (mapHeight > 0 && target_cam_y > mapHeight - cam_height - 8) target_cam_y = mapHeight - cam_height - 8; // Clamp bottom
+	game->SetCamPos(cam_x, cam_y);
 
-	// Set the final camera position
-	game->SetCamPos(target_cam_x, target_cam_y);
+	// --- Debug Output ---
+	DebugOut(L"CamX:%.1f TgtX:%.1f CamY:%.1f TgtY:%.1f BaseY:%.1f SkyP:%d OnP:%d Vx:%.2f Vy:%.2f FeetY:%.1f CenterY:%.1f SmoothedY:%.1f MapH:%.1f CamH:%.1f AbsGndY:%.1f VertLev:%d Smooth:%.2f Falling:%d FallThresh:%.1f\n",
+		cam_x, target_cam_x, cam_y, target_cam_y, current_cam_base_y, is_on_sky_platform, is_on_platform, mario_vx, mario_vy, mario_b, mario_center_y, smoothed_center_y, mapHeight, cam_height, absolute_ground_cam_y, is_vertical_level, smooth_factor, is_falling, fall_threshold);
 }
-
 void CPlayScene::Update(DWORD dt)
 {
 	if (player == NULL) return;
