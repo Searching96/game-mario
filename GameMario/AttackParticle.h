@@ -21,8 +21,9 @@ protected:
 	ULONGLONG emergingStart = -1;
 public:
 	CAttackParticle(float x, float y);
+	virtual ~CAttackParticle() {}
 	void Render();
-	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
+	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects = nullptr);
 	void GetBoundingBox(float& l, float& t, float& r, float& b);
 	int IsCollidable() { return 0; };
 	int IsBlocking() { return 0; }

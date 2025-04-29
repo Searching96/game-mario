@@ -1,27 +1,29 @@
 #include "AttackParticle.h"
-#include "Mario.h"
+#include "Game.h"
 
 #include "PlayScene.h"
 
-CAttackParticle::CAttackParticle(float x, float y) : CGameObject(x, y) {}
+CAttackParticle::CAttackParticle(float x, float y) : CGameObject(x, y) {
+	isEmerging = 0;
+	emergingStart = -1;
+}
 
 void CAttackParticle::Render()
 {
-	if (isEmerging == 0)
-		return;
-	CAnimations* animations = CAnimations::GetInstance();
-	animations->Get(ID_ANI_ATTACK_PARTICLE)->Render(x, y);
+	if (isEmerging == 0) return;
 
-	RenderBoundingBox();
+	CAnimations* animations = CAnimations::GetInstance();
+	LPANIMATION ani = animations->Get(ID_ANI_ATTACK_PARTICLE);
+	if (ani)
+		ani->Render(x, y);
+
+	 //RenderBoundingBox(); // Debug only
 }
 
-void CAttackParticle::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
+void CAttackParticle::Update(DWORD dt, vector<LPGAMEOBJECT>* /*coObjects*/) // Ignore coObjects
 {
-	if (isEmerging == 1)
-	{
-		if (GetTickCount64() - emergingStart > ATTACK_PARTICLE_EMERGE_TIME)
-		{
-			isEmerging = 0;
+	if (isEmerging == 1) {
+		if (GetTickCount64() - emergingStart > ATTACK_PARTICLE_EMERGE_TIME) {
 			SetState(ATTACK_PARTICLE_STATE_NOT_EMERGING);
 		}
 	}
@@ -37,15 +39,18 @@ void CAttackParticle::GetBoundingBox(float& l, float& t, float& r, float& b)
 
 void CAttackParticle::SetState(int state)
 {
+	CGameObject::SetState(state);
 	switch (state)
 	{
 	case ATTACK_PARTICLE_STATE_NOT_EMERGING:
 		isEmerging = 0;
+		emergingStart = -1;
 		break;
 	case ATTACK_PARTICLE_STATE_EMERGING:
-		isEmerging = 1;
-		emergingStart = GetTickCount64();
+		if (isEmerging == 0) {
+			isEmerging = 1;
+			emergingStart = GetTickCount64();
+		}
 		break;
 	}
-	CGameObject::SetState(state);
 }

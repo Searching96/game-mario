@@ -1,7 +1,12 @@
 #include <iostream>
 #include <fstream>
-#include "AssetIDs.h"
+#include <vector>     // Make sure vector is included if not implicitly
+#include <string>     // Make sure string is included if not implicitly
+#include <cmath>
+#include <algorithm>
+#include <stdexcept>  // For invalid_argument, out_of_range
 
+#include "AssetIDs.h"
 #include "PlayScene.h"
 #include "Utils.h"
 #include "Textures.h"
@@ -20,7 +25,6 @@
 #include "Koopa.h"
 #include "WingedGoomba.h"
 #include "LifeBrick.h"
-
 #include "Box.h"
 #include "Tree.h"
 #include "Pipe.h"
@@ -34,14 +38,7 @@
 
 using namespace std;
 
-CPlayScene::CPlayScene(int id, LPCWSTR filePath) :
-	CScene(id, filePath)
-{
-	player = NULL;
-	key_handler = new CSampleKeyHandler(this);
-}
-
-
+// --- Constants ---
 #define SCENE_SECTION_UNKNOWN -1
 #define SCENE_SECTION_ASSETS	1
 #define SCENE_SECTION_CHUNK_OBJECT 2
@@ -53,59 +50,88 @@ CPlayScene::CPlayScene(int id, LPCWSTR filePath) :
 
 #define MAX_SCENE_LINE 1024
 
+// Camera specific constants
+#define VERTICAL_GROUND_LOCK_BUFFER 48.0f
+#define HORIZONTAL_DEAD_ZONE_THRESHOLD 12.0f // Was 16.0f, user changed to 12.0f
+#define CAMERA_BOUNDARY_MARGIN -8.0f
+#define DEFAULT_HORIZONTAL_SMOOTH 0.3f
+#define DEFAULT_VERTICAL_SMOOTH 0.3f
+
+CPlayScene::CPlayScene(int id, LPCWSTR filePath) :
+	CScene(id, filePath)
+{
+	player = NULL;
+	key_handler = new CSampleKeyHandler(this); // 'this' is the CPlayScene instance
+}
+
+// --- Parsing Functions ---
+
 void CPlayScene::_ParseSection_SPRITES(string line)
 {
 	vector<string> tokens = split(line);
+	if (tokens.size() < 6) return;
 
-	if (tokens.size() < 6) return; // skip invalid lines
+	try {
+		int ID = stoi(tokens[0]);
+		int l = stoi(tokens[1]);
+		int t = stoi(tokens[2]);
+		int r = stoi(tokens[3]);
+		int b = stoi(tokens[4]);
+		int texID = stoi(tokens[5]);
 
-	int ID = atoi(tokens[0].c_str());
-	int l = atoi(tokens[1].c_str());
-	int t = atoi(tokens[2].c_str());
-	int r = atoi(tokens[3].c_str());
-	int b = atoi(tokens[4].c_str());
-	int texID = atoi(tokens[5].c_str());
-
-	LPTEXTURE tex = CTextures::GetInstance()->Get(texID);
-	if (tex == NULL)
-	{
-		DebugOut(L"[ERROR] Texture ID %d not found!\n", texID);
-		return;
+		LPTEXTURE tex = CTextures::GetInstance()->Get(texID);
+		if (tex == NULL) {
+			DebugOut(L"[ERROR] Texture ID %d not found for sprite %d!\n", texID, ID);
+			return;
+		}
+		CSprites::GetInstance()->Add(ID, l, t, r, b, tex);
 	}
-
-	CSprites::GetInstance()->Add(ID, l, t, r, b, tex);
+	catch (const invalid_argument& ia) {
+		DebugOut(L"[ERROR] Invalid argument parsing SPRITE line: %hs. Exception: %hs\n", line.c_str(), ia.what());
+	}
+	catch (const out_of_range& oor) {
+		DebugOut(L"[ERROR] Out of range parsing SPRITE line: %hs. Exception: %hs\n", line.c_str(), oor.what());
+	}
 }
 
 void CPlayScene::_ParseSection_ASSETS(string line)
 {
 	vector<string> tokens = split(line);
-
 	if (tokens.size() < 1) return;
-
 	wstring path = ToWSTR(tokens[0]);
-
 	LoadAssets(path.c_str());
 }
 
 void CPlayScene::_ParseSection_ANIMATIONS(string line)
 {
 	vector<string> tokens = split(line);
-
-	if (tokens.size() < 3) return; // skip invalid lines - an animation must at least has 1 frame and 1 frame time
-
-	//DebugOut(L"--> %s\n",ToWSTR(line).c_str());
-
-	LPANIMATION ani = new CAnimation();
-
-	int ani_id = atoi(tokens[0].c_str());
-	for (int i = 1; i < tokens.size(); i += 2)	// why i+=2 ?  sprite_id | frame_time  
-	{
-		int sprite_id = atoi(tokens[i].c_str());
-		int frame_time = atoi(tokens[i + 1].c_str());
-		ani->Add(sprite_id, frame_time);
+	if (tokens.size() < 3 || tokens.size() % 2 == 0) { // Need ID + pairs of sprite/time
+		DebugOut(L"[WARN] Invalid animation line format: %hs\n", line.c_str());
+		return;
 	}
 
-	CAnimations::GetInstance()->Add(ani_id, ani);
+	try {
+		LPANIMATION ani = new CAnimation();
+		int ani_id = stoi(tokens[0]);
+		for (size_t i = 1; i < tokens.size(); i += 2) {
+			int sprite_id = stoi(tokens[i]);
+			int frame_time = stoi(tokens[i + 1]);
+			// Basic validation
+			if (frame_time <= 0) {
+				DebugOut(L"[WARN] Invalid frame time %d for animation %d, sprite %d. Setting to 100ms.\n", frame_time, ani_id, sprite_id);
+				frame_time = 100; // Default to a sensible value
+			}
+			// Optional: Check if sprite_id exists? Might be slow.
+			ani->Add(sprite_id, frame_time);
+		}
+		CAnimations::GetInstance()->Add(ani_id, ani);
+	}
+	catch (const invalid_argument& ia) {
+		DebugOut(L"[ERROR] Invalid argument parsing ANIMATION line: %hs. Exception: %hs\n", line.c_str(), ia.what());
+	}
+	catch (const out_of_range& oor) {
+		DebugOut(L"[ERROR] Out of range parsing ANIMATION line: %hs. Exception: %hs\n", line.c_str(), oor.what());
+	}
 }
 
 void CPlayScene::_ParseSection_SETTINGS(string line)
@@ -114,595 +140,522 @@ void CPlayScene::_ParseSection_SETTINGS(string line)
 	if (tokens.size() < 2) return;
 	string key = tokens[0];
 	try {
-		float value = stof(tokens[1]);
+		float value = stof(tokens[1]); // Use stof for consistency
 
-		if (key == "start_cam_x") {
-			startCamX = value;
-		}
-		else if (key == "start_cam_y") {
-			startCamY = value;
-		}
-		else if (key == "map_width") {
-			mapWidth = value;
-		}
-		else if (key == "map_height") {
-			mapHeight = value;
-		}
-		else if (key == "margin_x") marginX = value;
-		else if (key == "margin_y") marginY = value;
-		else {
-		}
+		if (key == "start_cam_x") startCamX = value;
+		else if (key == "start_cam_y") startCamY = value;
+		else if (key == "map_width") mapWidth = value;
+		else if (key == "map_height") mapHeight = value;
+		else if (key == "margin_x") marginX = value; // Keep if might be used later
+		else if (key == "margin_y") marginY = value; // Keep if might be used later
+		else DebugOut(L"[WARN] Unknown setting key: %hs\n", key.c_str());
+
 	}
-	catch (...) {
-		DebugOut(L"[ERROR] Failed to parse setting line: %hs\n", line.c_str());
+	catch (const invalid_argument& ia) {
+		DebugOut(L"[ERROR] Invalid argument parsing SETTING line: %hs. Exception: %hs\n", line.c_str(), ia.what());
+	}
+	catch (const out_of_range& oor) {
+		DebugOut(L"[ERROR] Out of range parsing SETTING line: %hs. Exception: %hs\n", line.c_str(), oor.what());
 	}
 }
 
-/*
-	Parse a line in section [OBJECTS]
-*/
 void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 {
-	// Safety check
 	if (targetChunk == nullptr) {
 		DebugOut(L"[FATAL ERROR] _ParseSection_CHUNK_OBJECT called with null targetChunk!\n");
 		return;
 	}
-
 	vector<string> tokens = split(line);
-
-	// Minimum tokens: object_type, x, y
-	if (tokens.size() < 3) {
-		DebugOut(L"[WARN] Skipping invalid object line in chunk %d (too few tokens): %hs\n", targetChunk->GetID(), line.c_str());
+	if (tokens.size() < 3) { // Min: type, x, y
+		DebugOut(L"[WARN] Skipping invalid object line (too few tokens): %hs in chunk %d\n", line.c_str(), targetChunk->GetID());
 		return;
 	}
 
-	int object_type = atoi(tokens[0].c_str());
-	float x = (float)atof(tokens[1].c_str());
-	float y = (float)atof(tokens[2].c_str());
-
-	CGameObject* obj = NULL; // The primary object created
-
-	switch (object_type)
-	{
-	case OBJECT_TYPE_MARIO:
-	{
-		if (player != NULL) {
-			DebugOut(L"[ERROR] MARIO object was created before (in chunk %d)!\n", targetChunk->GetID());
-			return;
-		}
-		// Create associated objects
-		CAttackParticle* attackParticle = new CAttackParticle(x, y);
-		CTailWhip* tailWhip = new CTailWhip(x + 8, y, attackParticle);
-		obj = new CMario(x, y, tailWhip);
-		player = (CMario*)obj;
-
-		// Add all associated objects to the chunk
-		targetChunk->AddObject(attackParticle);
-		targetChunk->AddObject(tailWhip);
-		targetChunk->AddObject(obj);
-
-		DebugOut(L"[INFO] Player object created in chunk %d!\n", targetChunk->GetID());
+	// Use stoi/stof with try-catch for robustness
+	int object_type;
+	float x, y;
+	try {
+		object_type = stoi(tokens[0]);
+		x = stof(tokens[1]);
+		y = stof(tokens[2]);
+	}
+	catch (const exception& e) {
+		DebugOut(L"[ERROR] Failed to parse basic object data (type,x,y) for line: %hs in chunk %d. Exception: %hs\n", line.c_str(), targetChunk->GetID(), e.what());
 		return;
 	}
 
-	case OBJECT_TYPE_GOOMBA:
-		obj = new CGoomba(x, y);
-		break;
+	CGameObject* obj = NULL;
 
-	case OBJECT_TYPE_KOOPA:
-		obj = new CKoopa(x, y);
-		break;
+	try { // Wrap specific object parsing logic
+		switch (object_type)
+		{
+		case OBJECT_TYPE_MARIO: // **** MODIFIED CASE ****
+		{
+			if (player != NULL) {
+				DebugOut(L"[ERROR] MARIO object defined multiple times! Ignoring in chunk %d.\n", targetChunk->GetID());
+				return;
+			}
+			// Mario constructor handles internal whip/particle creation
+			obj = new CMario(x, y);
+			if (obj == nullptr) {
+				DebugOut(L"[ERROR] Failed to allocate CMario object!\n");
+				return;
+			}
+			player = (CMario*)obj; // Assign independent player pointer
 
-	case OBJECT_TYPE_PIRANHA_PLANT:
-	{
-		CFireball* fireball = new CFireball(x, y - PIRANHA_PLANT_BBOX_HEIGHT - PIRANHA_PLANT_BBOX_OFFSET);
-		obj = new CPiranhaPlant(x, y, fireball);
-		targetChunk->AddObject(fireball);
-		targetChunk->AddObject(obj);
-		return;
-	}
-
-	case OBJECT_TYPE_WINGED_GOOMBA:
-	{
-		obj = new CWingedGoomba(x, y);
-		targetChunk->AddObject(obj);
-		return;
-	}
-
-	case OBJECT_TYPE_BRICK:
-	{
-		if (tokens.size() < 6) {
-			DebugOut(L"[WARN] Skipping BRICK - Insufficient params in chunk %d: %hs\n", targetChunk->GetID(), line.c_str());
-			return;
+			// DO NOT ADD PLAYER TO CHUNK
+			DebugOut(L"[INFO] Player object created independently at (%f, %f) from chunk %d definition.\n", x, y, targetChunk->GetID());
+			return; // Player handled
 		}
-		float cell_width = (float)atof(tokens[3].c_str());
-		float cell_height = (float)atof(tokens[4].c_str());
-		int sprite_id = atoi(tokens[5].c_str());
-		obj = new CBrick(x, y, cell_width, cell_height, sprite_id);
-		break;
-	}
-
-	case OBJECT_TYPE_COIN:
-	{
-		if (tokens.size() < 4) {
-			DebugOut(L"[WARN] Skipping COIN - Insufficient params in chunk %d: %hs\n", targetChunk->GetID(), line.c_str());
-			return;
+		case OBJECT_TYPE_GOOMBA: obj = new CGoomba(x, y); break;
+		case OBJECT_TYPE_KOOPA: obj = new CKoopa(x, y); break;
+		case OBJECT_TYPE_PIRANHA_PLANT:
+		{
+			// Create owned object first
+			CFireball* fireball = new CFireball(x, y - PIRANHA_PLANT_BBOX_HEIGHT - PIRANHA_PLANT_BBOX_OFFSET); // Relative position
+			obj = new CPiranhaPlant(x, y, fireball);
+			targetChunk->AddObject(fireball); // Add owned first
+			targetChunk->AddObject(obj);
+			return; // Handled
 		}
-		int type = atoi(tokens[3].c_str());
-		obj = new CCoin(x, y, type);
-		break;
-	}
-
-	case OBJECT_TYPE_PLATFORM:
-	{
-		if (tokens.size() < 5) {
-			DebugOut(L"[WARN] Skipping PLATFORM - Insufficient params in chunk %d: %hs\n", targetChunk->GetID(), line.c_str());
-			return;
+		case OBJECT_TYPE_WINGED_GOOMBA:	obj = new CWingedGoomba(x, y); break; // Simplified AddObject later
+		case OBJECT_TYPE_BRICK:
+		{
+			if (tokens.size() < 6) throw runtime_error("Insufficient params for BRICK");
+			float cell_width = stof(tokens[3]);
+			float cell_height = stof(tokens[4]);
+			int sprite_id = stoi(tokens[5]);
+			obj = new CBrick(x, y, cell_width, cell_height, sprite_id);
+			break;
 		}
-		float width = (float)atof(tokens[3].c_str());
-		float height = (float)atof(tokens[4].c_str());
-		obj = new CPlatform(x, y, width, height);
-		break;
-	}
-
-	case OBJECT_TYPE_SKYPLATFORM:
-	{
-		if (tokens.size() < 5) {
-			DebugOut(L"[WARN] Skipping SKYPLATFORM - Insufficient params in chunk %d: %hs\n", targetChunk->GetID(), line.c_str());
-			return;
+		case OBJECT_TYPE_COIN:
+		{
+			if (tokens.size() < 4) throw runtime_error("Insufficient params for COIN");
+			int type = stoi(tokens[3]);
+			obj = new CCoin(x, y, type);
+			break;
 		}
-		float width = (float)atof(tokens[3].c_str());
-		float height = (float)atof(tokens[4].c_str());
-		obj = new CSkyPlatform(x, y, width, height);
-		break;
-	}
-
-	case OBJECT_TYPE_QUESTION_BLOCK:
-	{
-		obj = new CQuestionBlock(x, y);
-		break;
-	}
-
-	case OBJECT_TYPE_MUSHROOM:
-	{
-		obj = new CMushroom(x, y);
-		break;
-	}
-
-	case OBJECT_TYPE_SUPERLEAF:
-	{
-		obj = new CSuperLeaf(x, y);
-		break;
-	}
-
-	case OBJECT_TYPE_COIN_QBLOCK:
-	{
-		if (tokens.size() < 3) {
-			DebugOut(L"[WARN] Skipping COIN_QBLOCK - Insufficient params in chunk %d: %hs\n", targetChunk->GetID(), line.c_str());
-			return;
+		case OBJECT_TYPE_PLATFORM:
+		{
+			if (tokens.size() < 5) throw runtime_error("Insufficient params for PLATFORM");
+			float width = stof(tokens[3]);
+			float height = stof(tokens[4]);
+			obj = new CPlatform(x, y, width, height);
+			break;
 		}
-		CCoin* coin = new CCoin(x, y, 1);
-		obj = new CCoinQBlock(x, y, coin);
-		targetChunk->AddObject(coin);
-		targetChunk->AddObject(obj);
-		return;
-	}
-
-	case OBJECT_TYPE_BUFF_QBLOCK:
-	{
-		CMushroom* mushroom = new CMushroom(x, y);
-		CSuperLeaf* superleaf = new CSuperLeaf(x, y);
-		obj = new CBuffQBlock(x, y, mushroom, superleaf);
-		targetChunk->AddObject(mushroom);
-		targetChunk->AddObject(superleaf);
-		targetChunk->AddObject(obj);
-		return;
-	}
-
-	case OBJECT_TYPE_LIFE_BRICK:
-	{
-		if (tokens.size() < 3) {
-			DebugOut(L"[WARN] Skipping LIFE_BRICK - Insufficient params in chunk %d: %hs\n", targetChunk->GetID(), line.c_str());
-			return;
+		case OBJECT_TYPE_SKYPLATFORM:
+		{
+			if (tokens.size() < 5) throw runtime_error("Insufficient params for SKYPLATFORM");
+			float width = stof(tokens[3]);
+			float height = stof(tokens[4]);
+			obj = new CSkyPlatform(x, y, width, height);
+			break;
 		}
-		CLifeMushroom* mushroom = new CLifeMushroom(x, y);
-		obj = new CLifeBrick(x, y, mushroom);
-		targetChunk->AddObject(mushroom);
-		targetChunk->AddObject(obj);
-		return;
-	}
+		// Removed redundant QUESTION_BLOCK/MUSHROOM/SUPERLEAF cases as they are handled by specific QBlocks below
 
-	case OBJECT_TYPE_BOX:
-	{
-		if (tokens.size() < 6) {
-			DebugOut(L"[WARN] Skipping BOX - Insufficient params in chunk %d: %hs\n", targetChunk->GetID(), line.c_str());
-			return;
+		case OBJECT_TYPE_COIN_QBLOCK:
+		{
+			// Create owned object first
+			CCoin* coin = new CCoin(x, y, 1); // Coin type 1 for QBlock?
+			obj = new CCoinQBlock(x, y, coin);
+			targetChunk->AddObject(coin);
+			targetChunk->AddObject(obj);
+			return; // Handled
 		}
-		float width = (float)atof(tokens[3].c_str());
-		float height = (float)atof(tokens[4].c_str());
-		int color = atoi(tokens[5].c_str());
-		int bottomShadow = (tokens.size() >= 7) ? atoi(tokens[6].c_str()) : 0;
-		obj = new CBox(x, y, width, height, color, bottomShadow);
-		break;
-	}
-
-	case OBJECT_TYPE_TREE:
-	{
-		if (tokens.size() < 10) {
-			DebugOut(L"[WARN] Skipping TREE - Insufficient params in chunk %d: %hs\n", targetChunk->GetID(), line.c_str());
-			return;
+		case OBJECT_TYPE_BUFF_QBLOCK:
+		{
+			// Create owned objects first
+			CMushroom* mushroom = new CMushroom(x, y);
+			CSuperLeaf* superleaf = new CSuperLeaf(x, y);
+			obj = new CBuffQBlock(x, y, mushroom, superleaf);
+			targetChunk->AddObject(mushroom);
+			targetChunk->AddObject(superleaf);
+			targetChunk->AddObject(obj);
+			return; // Handled
 		}
-		float cell_width = (float)atof(tokens[3].c_str());
-		float cell_height = (float)atof(tokens[4].c_str());
-		int height = atoi(tokens[5].c_str());
-		int sprite_top_left = atoi(tokens[6].c_str());
-		int sprite_top_right = atoi(tokens[7].c_str());
-		int sprite_bottom_left = atoi(tokens[8].c_str());
-		int sprite_bottom_right = atoi(tokens[9].c_str());
-		obj = new CTree(
-			x, y,
-			cell_width, cell_height, height,
-			sprite_top_left, sprite_top_right,
-			sprite_bottom_left, sprite_bottom_right
-		);
-		break;
-	}
-
-	case OBJECT_TYPE_PIPE:
-	{
-		if (tokens.size() < 10) {
-			DebugOut(L"[WARN] Skipping PIPE - Insufficient params in chunk %d: %hs\n", targetChunk->GetID(), line.c_str());
-			return;
+		case OBJECT_TYPE_LIFE_BRICK:
+		{
+			// Create owned object first
+			CLifeMushroom* mushroom = new CLifeMushroom(x, y);
+			obj = new CLifeBrick(x, y, mushroom);
+			targetChunk->AddObject(mushroom);
+			targetChunk->AddObject(obj);
+			return; // Handled
 		}
-		float cell_width = (float)atof(tokens[3].c_str());
-		float cell_height = (float)atof(tokens[4].c_str());
-		int height = atoi(tokens[5].c_str());
-		int sprite_top_left = atoi(tokens[6].c_str());
-		int sprite_top_right = atoi(tokens[7].c_str());
-		int sprite_bottom_left = atoi(tokens[8].c_str());
-		int sprite_bottom_right = atoi(tokens[9].c_str());
-		obj = new CPipe(
-			x, y,
-			cell_width, cell_height, height,
-			sprite_top_left, sprite_top_right,
-			sprite_bottom_left, sprite_bottom_right
-		);
-		break;
-	}
-
-	case OBJECT_TYPE_BUSH:
-	{
-		if (tokens.size() < 4) {
-			DebugOut(L"[WARN] Skipping BUSH - Insufficient params in chunk %d: %hs\n", targetChunk->GetID(), line.c_str());
-			return;
+		case OBJECT_TYPE_BOX:
+		{
+			if (tokens.size() < 6) throw runtime_error("Insufficient params for BOX");
+			float width = stof(tokens[3]);
+			float height = stof(tokens[4]);
+			int color = stoi(tokens[5]);
+			int bottomShadow = (tokens.size() >= 7) ? stoi(tokens[6]) : 0; // Optional param
+			obj = new CBox(x, y, width, height, color, bottomShadow);
+			break;
 		}
-		float width = (float)atof(tokens[3].c_str());
-		obj = new CBush(
-			x, y, width
-		);
-		break;
-	}
+		case OBJECT_TYPE_TREE:
+		case OBJECT_TYPE_PIPE: // Shared logic for grid-based sprites
+		{
+			if (tokens.size() < 10) throw runtime_error("Insufficient params for TREE/PIPE");
+			float cell_width = stof(tokens[3]);
+			float cell_height = stof(tokens[4]);
+			int height = stoi(tokens[5]);
+			int sprite_top_left = stoi(tokens[6]);
+			int sprite_top_right = stoi(tokens[7]);
+			int sprite_bottom_left = stoi(tokens[8]);
+			int sprite_bottom_right = stoi(tokens[9]);
 
-	case OBJECT_TYPE_CLOUD:
-	{
-		if (tokens.size() < 4) {
-			DebugOut(L"[WARN] Skipping CLOUD - Insufficient params in chunk %d: %hs\n", targetChunk->GetID(), line.c_str());
-			return;
+			if (object_type == OBJECT_TYPE_TREE) {
+				obj = new CTree(x, y, cell_width, cell_height, height, sprite_top_left, sprite_top_right, sprite_bottom_left, sprite_bottom_right);
+			}
+			else { // PIPE
+				obj = new CPipe(x, y, cell_width, cell_height, height, sprite_top_left, sprite_top_right, sprite_bottom_left, sprite_bottom_right);
+			}
+			break;
 		}
-		float width = (float)atof(tokens[3].c_str());
-		obj = new CCloud(
-			x, y, width
-		);
-		break;
-	}
-
-	case OBJECT_TYPE_TRINKET:
-	{
-		if (tokens.size() < 4) {
-			DebugOut(L"[WARN] Skipping TRINKET - Insufficient params in chunk %d: %hs\n", targetChunk->GetID(), line.c_str());
-			return;
+		case OBJECT_TYPE_BUSH:
+		case OBJECT_TYPE_CLOUD: // Shared logic for simple width-based sprites
+		{
+			if (tokens.size() < 4) throw runtime_error("Insufficient params for BUSH/CLOUD");
+			float width = stof(tokens[3]);
+			if (object_type == OBJECT_TYPE_BUSH) {
+				obj = new CBush(x, y, width);
+			}
+			else { // CLOUD
+				obj = new CCloud(x, y, width);
+			}
+			break;
 		}
-		float type = (float)atof(tokens[3].c_str());
-		obj = new CTrinket(
-			x, y, type
-		);
-		break;
-	}
-
-	case OBJECT_TYPE_PORTAL:
-	{
-		if (tokens.size() < 6) {
-			DebugOut(L"[WARN] Skipping PORTAL - Insufficient params in chunk %d: %hs\n", targetChunk->GetID(), line.c_str());
-			return;
+		case OBJECT_TYPE_TRINKET:
+		{
+			if (tokens.size() < 4) throw runtime_error("Insufficient params for TRINKET");
+			float type = stof(tokens[3]); // Assuming type is float? Could be int.
+			obj = new CTrinket(x, y, type);
+			break;
 		}
-		float r = (float)atof(tokens[3].c_str());
-		float b = (float)atof(tokens[4].c_str());
-		int scene_id = atoi(tokens[5].c_str());
-		obj = new CPortal(x, y, r, b, scene_id);
-		break;
-	}
+		case OBJECT_TYPE_PORTAL:
+		{
+			if (tokens.size() < 6) throw runtime_error("Insufficient params for PORTAL");
+			float r = stof(tokens[4]); // Correct index? Should be 3 & 4 for r, b
+			float b = stof(tokens[5]); // Check portal definition expected order
+			int scene_id = stoi(tokens[6]); // Assuming r,b,scene_id order
+			// TODO: Double check CPortal constructor argument order and token indices!
+			// Assuming CPortal(x, y, right, bottom, scene_id)
+			obj = new CPortal(x, y, stof(tokens[3]), stof(tokens[4]), stoi(tokens[5]));
+			break;
+		}
+		// Remove cases for base items if they are only created via QBlocks
+		// case OBJECT_TYPE_MUSHROOM: // Only created via BuffQBlock/LifeBrick now
+		// case OBJECT_TYPE_SUPERLEAF: // Only created via BuffQBlock now
+		// case OBJECT_TYPE_QUESTION_BLOCK: // Abstract? Use CoinQBlock/BuffQBlock
 
-	default:
-		DebugOut(L"[ERROR] Invalid object type: %d in chunk %d for line: %hs\n", object_type, targetChunk->GetID(), line.c_str());
-		return;
-	}
+		default:
+			DebugOut(L"[WARN] Unhandled object type %d in chunk %d for line: %hs\n", object_type, targetChunk->GetID(), line.c_str());
+			return; // Don't add unknown objects
+		}
 
-	// General object adding for simple cases
-	if (obj != NULL)
-	{
-		targetChunk->AddObject(obj);
+		// Add the object to the chunk if it was created and not handled by a special case return
+		if (obj != NULL) {
+			targetChunk->AddObject(obj);
+		}
+
+	}
+	catch (const exception& e) {
+		// Catch errors from stoi/stof or runtime_error for insufficient params
+		DebugOut(L"[ERROR] Failed processing object line: %hs in chunk %d. Exception: %hs\n", line.c_str(), targetChunk->GetID(), e.what());
+		if (obj) { // Clean up partially created object if exception happened after 'new'
+			//delete obj; // This is risky if AddObject took ownership! Best practice: use smart pointers or ensure AddObject handles cleanup on failure. For now, just log.
+			DebugOut(L"[WARN] Object of type %d might have leaked memory due to parsing error.\n", object_type);
+		}
 	}
 }
 
+// --- Loading Functions ---
+
 void CPlayScene::LoadAssets(LPCWSTR assetFile)
 {
-	DebugOut(L"[INFO] Start loading assets from : %s \n", assetFile);
-	ifstream f;
-	f.open(assetFile);
+	DebugOut(L"[INFO] Start loading assets from: %ls\n", assetFile);
+	ifstream f(assetFile); // Use constructor for RAII
+	if (!f.is_open()) {
+		DebugOut(L"[ERROR] Failed to open asset file: %ls\n", assetFile);
+		return;
+	}
+
 	int section = ASSETS_SECTION_UNKNOWN;
-	char str[MAX_SCENE_LINE];
-	while (f.getline(str, MAX_SCENE_LINE))
+	string line;
+	int lineNum = 0;
+	while (getline(f, line))
 	{
-		string line(str);
-		if (line[0] == '#') continue;
+		lineNum++;
+		if (line.empty() || line[0] == '#') continue; // Skip empty lines and comments
+
 		if (line == "[SPRITES]") { section = ASSETS_SECTION_SPRITES; continue; }
 		if (line == "[ANIMATIONS]") { section = ASSETS_SECTION_ANIMATIONS; continue; }
-		if (line[0] == '[') { section = SCENE_SECTION_UNKNOWN; continue; }
+		if (line[0] == '[') {
+			DebugOut(L"[WARN] Unknown section %hs in asset file %ls at line %d\n", line.c_str(), assetFile, lineNum);
+			section = ASSETS_SECTION_UNKNOWN; continue;
+		}
+
 		switch (section)
 		{
 		case ASSETS_SECTION_SPRITES: _ParseSection_SPRITES(line); break;
 		case ASSETS_SECTION_ANIMATIONS: _ParseSection_ANIMATIONS(line); break;
+			// default: // No action needed if section is unknown or not sprites/animations
 		}
 	}
-	f.close();
-	DebugOut(L"[INFO] Done loading assets from %s\n", assetFile);
+	// f closes automatically due to RAII
+	DebugOut(L"[INFO] Done loading assets from %ls\n", assetFile);
 }
 
 void CPlayScene::LoadChunkObjects(int chunk_id, LPCHUNK targetChunk)
 {
-	ifstream f;
-	f.open(scene_file_path);
+	// Use stored scene_file_path (wstring)
+	ifstream f(scene_file_path); // Use wstring constructor
+	if (!f.is_open()) {
+		DebugOut(L"[ERROR] Failed to open scene file for chunk loading: %ls\n", scene_file_path.c_str());
+		return;
+	}
+
 	string line;
 	bool in_target_section = false;
-
-	string target_section = "[CHUNK\t" + to_string(chunk_id) + "\t";
+	string target_section_header = "[CHUNK\t" + to_string(chunk_id) + "\t"; // Pre-calculate
 
 	while (getline(f, line))
 	{
 		if (line.empty() || line[0] == '#') continue;
 
-		if (line[0] == '[')
-		{
-			// Check if this is our target chunk section
-			in_target_section = (line.find(target_section) == 0);
-			continue;
+		if (line[0] == '[') {
+			// Check if this line starts with the target section header
+			in_target_section = (line.rfind(target_section_header, 0) == 0); // Use rfind for prefix check
+			continue; // Move to next line after processing section header
 		}
 
-		if (in_target_section)
-		{
+		if (in_target_section) {
 			_ParseSection_CHUNK_OBJECTS(line, targetChunk);
 		}
 	}
-
-	f.close();
+	// f closes automatically
 	targetChunk->SetLoaded(true);
 	DebugOut(L"[INFO] Loaded objects for chunk %d\n", chunk_id);
 }
 
 void CPlayScene::LoadChunksInRange(float cam_x, float cam_width)
 {
-	float buffer = CGame::GetInstance()->GetBackBufferWidth();
-	float view_left = cam_x - buffer;
-	float view_right = cam_x + cam_width + buffer;
+	// Consider adding a small buffer if objects slightly outside the view need to be loaded early
+	// float load_buffer = chunkWidth; // Example: Load one chunk ahead? Depends on chunk size.
+	float load_buffer = CGame::GetInstance()->GetBackBufferWidth() * 0.5f; // Example: Half screen buffer
+	float view_left = cam_x - load_buffer;
+	float view_right = cam_x + cam_width + load_buffer;
 
-	for (LPCHUNK chunk : chunks)
+	for (LPCHUNK chunk : chunks) // Use range-based for loop
 	{
-		if (!chunk->IsLoaded() && chunk->GetStartX() <= view_right && chunk->GetEndX() >= view_left)
+		// Check if chunk overlaps with the view + buffer and is not already loaded
+		if (!chunk->IsLoaded() && chunk->GetEndX() >= view_left && chunk->GetStartX() <= view_right)
 		{
 			LoadChunkObjects(chunk->GetID(), chunk);
 		}
 	}
 }
 
-void CPlayScene::UnloadChunksOutOfRange(float cam_x, float cam_width)
+void CPlayScene::UnloadChunksOutOfRange(float cam_x, float cam_width) // **** MODIFIED ****
 {
-	float buffer = CGame::GetInstance()->GetBackBufferWidth();
-	float view_left = cam_x - buffer;
-	float view_right = cam_x + cam_width + buffer;
+	float unload_buffer = CGame::GetInstance()->GetBackBufferWidth() * 1.5f;
+	float view_left = cam_x - unload_buffer;
+	float view_right = cam_x + cam_width + unload_buffer;
 
-	for (auto it = chunks.begin(); it != chunks.end(); )
+	for (LPCHUNK chunk : chunks)
 	{
-		LPCHUNK chunk = *it;
-		if (chunk->IsLoaded() && (chunk->GetEndX() < view_left || chunk->GetStartX() > view_right))
+		if (chunk && chunk->IsLoaded() && (chunk->GetEndX() < view_left || chunk->GetStartX() > view_right))
 		{
-			bool hasMario = false;
-			for (LPGAMEOBJECT obj : chunk->GetObjects())
-			{
-				if (obj == player)
-				{
-					hasMario = true;
-					break;
-				}
-			}
-			if (hasMario)
-			{
-				++it;
-				continue;
-			}
 			chunk->Clear();
 			chunk->SetLoaded(false);
-			++it;
 			DebugOut(L"[INFO] Unloaded objects for chunk %d\n", chunk->GetID());
-		}
-		else
-		{
-			++it;
 		}
 	}
 }
 
-// In CPlayScene::Load()
-
 void CPlayScene::Load()
 {
-	DebugOut(L"[INFO] Start loading scene from : %s \n", sceneFilePath);
-	ifstream f;
-	f.open(sceneFilePath);
+	DebugOut(L"[INFO] Start loading scene from: %ls\n", sceneFilePath);
+	ifstream f(sceneFilePath); // Use wstring path
+	if (!f.is_open()) {
+		DebugOut(L"[ERROR] Failed to open scene file: %ls\n", sceneFilePath);
+		return;
+	}
+
+	// Reset or default values
+	startCamX = 0.0f; startCamY = 0.0f; mapWidth = 0.0f; mapHeight = 0.0f;
+	marginX = 0.0f; marginY = 0.0f;
+	// current_cam_base_y removed
+	player = NULL; // Ensure player is null before loading
+	chunks.clear(); // Clear existing chunks if reloading scene
+
 	int section = SCENE_SECTION_UNKNOWN;
-	char str[MAX_SCENE_LINE];
+	string line;
+	int lineNum = 0;
+	currentParsingChunk = nullptr; // Reset parsing chunk pointer
 
-	// Reset settings to defaults before parsing, in case the file is missing some
-	startCamX = 0.0f;
-	startCamY = 0.0f;
-	mapWidth = 0.0f; // Or perhaps screen width as default?
-	mapHeight = 0.0f; // Or screen height?
-	marginX = 0.0f;
-	marginY = 0.0f;
-	current_cam_base_y = 0.0f;
-	currentParsingChunk = nullptr; // Reset parsing state
-
-	while (f.getline(str, MAX_SCENE_LINE))
+	while (getline(f, line))
 	{
-		string line(str);
+		lineNum++;
+		// Trim whitespace (optional but good practice)
+		//line = trim(line); // Assumes 'trim' exists in Utils.h
+
 		if (line.empty() || line[0] == '#') continue;
 
-		// Section checks
-		if (line == "[SCENE_SETTINGS]") { section = SCENE_SECTION_SETTINGS; continue; } // Add this check
+		if (line == "[SCENE_SETTINGS]") { section = SCENE_SECTION_SETTINGS; continue; }
 		if (line == "[ASSETS]") { section = SCENE_SECTION_ASSETS; continue; }
-		if (line.substr(0, 6) == "[CHUNK")
-		{
-			// Extract the content inside brackets
+		if (line.rfind("[CHUNK", 0) == 0) { // Check prefix using rfind
+			section = SCENE_SECTION_CHUNK_OBJECT; // Mark section type
+
+			// --- Parse Chunk Header ---
 			size_t closeBracketPos = line.find(']');
 			if (closeBracketPos != string::npos) {
-				string chunkHeader = line.substr(1, closeBracketPos - 1); // Remove [ and ]
+				string chunkHeader = line.substr(1, closeBracketPos - 1);
 				vector<string> tokens = split(chunkHeader);
+				if (tokens.size() >= 4 && tokens[0] == "CHUNK") {
+					try {
+						int chunkId = stoi(tokens[1]);
+						float chunk_Start_X = stof(tokens[2]);
+						float chunk_End_X = stof(tokens[3]);
 
-				if (tokens.size() >= 4) { // "CHUNK", ID, start_X, end_X
-					int chunkId = atoi(tokens[1].c_str());
-					float chunk_Start_X = atof(tokens[2].c_str());
-					float chunk_End_X = atof(tokens[3].c_str());
-
-					if (GetChunk(chunkId) == nullptr) { // Avoid recreating chunks on reload
-						LPCHUNK chunk = new CChunk(chunkId, chunk_Start_X, chunk_End_X);
-						chunks.push_back(chunk);
-						DebugOut(L"[INFO] Registered chunk %d (%f, %f)\n", chunkId, chunk_Start_X, chunk_End_X);
-						currentParsingChunk = chunk; // Keep track for potential object parsing immediately after
+						if (GetChunk(chunkId) == nullptr) {
+							LPCHUNK chunk = new CChunk(chunkId, chunk_Start_X, chunk_End_X);
+							chunks.push_back(chunk);
+							currentParsingChunk = chunk; // Set for subsequent object lines
+							DebugOut(L"[INFO] Registered chunk %d (%f, %f)\n", chunkId, chunk_Start_X, chunk_End_X);
+						}
+						else {
+							DebugOut(L"[WARN] Chunk %d already exists, attempting to reuse (potential issue?).\n", chunkId);
+							currentParsingChunk = GetChunk(chunkId); // Re-use existing
+						}
 					}
-					else {
-						currentParsingChunk = GetChunk(chunkId); // Point to existing chunk
-						DebugOut(L"[INFO] Chunk %d already exists, reusing.\n", chunkId);
+					catch (const exception& e) {
+						DebugOut(L"[ERROR] Failed to parse chunk header: %hs. Exception: %hs\n", line.c_str(), e.what());
+						currentParsingChunk = nullptr;
 					}
 				}
 				else {
 					DebugOut(L"[ERROR] Malformed chunk header: %hs\n", line.c_str());
 					currentParsingChunk = nullptr;
 				}
-				section = SCENE_SECTION_CHUNK_OBJECT; // Set section type
-				continue; // Process next line
-				// --- End chunk header parsing ---
 			}
+			else {
+				DebugOut(L"[ERROR] Malformed chunk header (no closing bracket): %hs\n", line.c_str());
+				currentParsingChunk = nullptr;
+			}
+			continue; // Move to next line after processing chunk header
 		}
-		if (line[0] == '[') { section = SCENE_SECTION_UNKNOWN; continue; } // Generic section skip
+		// If it's another section type, reset currentParsingChunk
+		if (line[0] == '[') {
+			section = SCENE_SECTION_UNKNOWN;
+			currentParsingChunk = nullptr;
+			DebugOut(L"[WARN] Unknown section %hs in scene file at line %d\n", line.c_str(), lineNum);
+			continue;
+		}
 
-		// Line processing based on section
+		// Process line based on current section
 		switch (section)
 		{
-		case SCENE_SECTION_ASSETS:
-			_ParseSection_ASSETS(line);
-			break;
-		case SCENE_SECTION_SETTINGS:    // Add this case
-			_ParseSection_SETTINGS(line);
-			break;
+		case SCENE_SECTION_ASSETS:   _ParseSection_ASSETS(line); break;
+		case SCENE_SECTION_SETTINGS: _ParseSection_SETTINGS(line); break;
 		case SCENE_SECTION_CHUNK_OBJECT:
-			// If using Solution 2 (find player during load), you might parse here.
-			// Otherwise, skip object lines during initial load.
-			// Example for Solution 2:
-			// if (currentParsingChunk != nullptr && !playerFoundInFile) {
-			//     // Check if line is Mario definition and store info
-			// }
+			// Objects are loaded later via LoadChunkObjects, skip here
+			// We only parse the chunk headers during this initial pass.
 			break;
+			// No default needed, handled by unknown section check
 		}
 	}
-	f.close();
+	// f closes automatically
 
-	scene_file_path = sceneFilePath; // Store for later chunk object loading
+	scene_file_path = sceneFilePath; // Store for LoadChunkObjects
 
-	// --- Set Initial Camera and Base Y ---
+	// --- Initialize Camera ---
 	CGame* game = CGame::GetInstance();
-	float initial_cam_x = startCamX;
-	// We'll set initial_cam_y based on the calculated base_y later
 	float cam_width = (float)game->GetBackBufferWidth();
 	float cam_height = (float)game->GetBackBufferHeight();
 
-	// Initialize camera base Y based on mapHeight (most reliable starting point)
+	// Calculate initial ground cam Y (if possible)
+	float initial_cam_y = 0.0f;
 	if (mapHeight > 0) {
-		current_cam_base_y = mapHeight - cam_height - 8; // Default base = ground view (-8 offset)
-		if (current_cam_base_y < 0) current_cam_base_y = 0; // Clamp to top
+		initial_cam_y = mapHeight - cam_height + CAMERA_BOUNDARY_MARGIN; // Use constant
+		if (initial_cam_y < 0) initial_cam_y = 0;
 	}
-	else {
-		current_cam_base_y = 0; // Default if no mapHeight specified
+	// Allow override from settings file if provided
+	if (startCamY != 0.0f) { // Assuming 0.0f means not set
+		initial_cam_y = startCamY;
 	}
-	// You could override with startCamY here if needed: current_cam_base_y = startCamY;
+	float initial_cam_x = startCamX; // Use setting directly
 
-	float initial_cam_y = current_cam_base_y; // Start the camera at the calculated base
-
-	// Clamp initial camera position (using the determined initial_cam_y)
-	if (mapWidth > 0 && initial_cam_x > mapWidth - cam_width - 8) initial_cam_x = mapWidth - cam_width - 8;
-	if (initial_cam_x < -8) initial_cam_x = -8;
-	// Clamp Y based on mapHeight, ensuring it respects the base we just set
-	if (mapHeight > 0 && initial_cam_y > mapHeight - cam_height - 8) initial_cam_y = mapHeight - cam_height - 8;
-	if (initial_cam_y < 0) initial_cam_y = 0;
+	// Clamp initial camera position
+	// Use max/min for clarity (requires <algorithm>)
+	initial_cam_x = max(CAMERA_BOUNDARY_MARGIN, initial_cam_x); // Left bound
+	if (mapWidth > 0) {
+		initial_cam_x = min(initial_cam_x, mapWidth - cam_width + CAMERA_BOUNDARY_MARGIN); // Right bound
+	}
+	initial_cam_y = max(0.0f, initial_cam_y); // Top bound
+	if (mapHeight > 0) {
+		initial_cam_y = min(initial_cam_y, mapHeight - cam_height + CAMERA_BOUNDARY_MARGIN); // Bottom bound
+	}
 
 	game->SetCamPos(initial_cam_x, initial_cam_y);
 	DebugOut(L"[INFO] Initial camera set to (%f, %f).\n", initial_cam_x, initial_cam_y);
-	DebugOut(L"[INFO] Initial camera base Y set to %f.\n", current_cam_base_y);
 
-	// --- Load initial chunks based on the camera position we just set ---
+	// --- Load Initial Chunks ---
 	LoadChunksInRange(initial_cam_x, cam_width);
 
-	// --- If using Solution 2, ensure player's chunk is loaded if not already ---
-	// if (playerFoundInFile) {
-	//    LPCHUNK playerChunk = GetChunk(playerStartChunkId);
-	//    if (playerChunk && !playerChunk->IsLoaded()) {
-	//        LoadChunkObjects(playerStartChunkId, playerChunk);
-	//    }
-	//    // Error checking if player object wasn't created
-	// }
+	// Ensure player exists after loading initial chunks (should be in one of them)
+	if (player == NULL) {
+		DebugOut(L"[FATAL ERROR] Player object not found after loading initial chunks!\n");
+		// Handle this error appropriately - maybe load ALL chunks or throw exception?
+		// For now, just warn. Could indicate player defined outside initial view.
+	}
 
-
-	DebugOut(L"[INFO] Done loading scene %s\n", sceneFilePath);
+	DebugOut(L"[INFO] Done loading scene %ls\n", sceneFilePath);
 }
+
+// --- Update Functions ---
 
 void CPlayScene::UpdateChunks(float cam_x, float cam_width)
 {
+	// These seem okay, buffers can be tuned if needed
 	LoadChunksInRange(cam_x, cam_width);
 	UnloadChunksOutOfRange(cam_x, cam_width);
 }
 
 void CPlayScene::UpdateObjects(DWORD dt, CMario* mario, vector<LPGAMEOBJECT>& coObjects)
 {
-	for (LPCHUNK chunk : chunks)
-	{
+	// 1. Collect potential colliders (excluding player)
+	coObjects.clear(); // Clear from previous frame
+	for (LPCHUNK chunk : chunks) {
+		if (!chunk->IsLoaded()) continue; // Optimization: Skip unloaded chunks
 		vector<LPGAMEOBJECT>& chunkObjects = chunk->GetObjects();
-		for (LPGAMEOBJECT obj : chunkObjects)
-		{
-			if (obj != mario)
+		for (LPGAMEOBJECT obj : chunkObjects) {
+			if (obj != mario) // Simple exclusion
 				coObjects.push_back(obj);
 		}
 	}
 
+	// 2. Update all loaded objects (including player within its chunk iteration)
+	// Check for time freeze effect
 	bool isChronoStopped = mario->GetIsPowerUp() || mario->GetIsTailUp() ||
 		mario->GetIsPowerDown() || mario->GetIsTailDown();
 
-	for (LPCHUNK chunk : chunks)
-	{
-		vector<LPGAMEOBJECT> chunkObjects = chunk->GetObjects();
-		for (LPGAMEOBJECT obj : chunkObjects)
-		{
-			if (isChronoStopped && obj != mario)
+	for (LPCHUNK chunk : chunks) {
+		if (!chunk->IsLoaded()) continue; // Optimization: Skip unloaded chunks
+		// Important: Iterate over a *copy* if obj->Update might modify the chunk's object list (e.g., spawning items)
+		// However, since we purge deleted objects later, iterating the original might be okay if adds happen at end.
+		// Safest is often a copy, but less performant. Sticking with original for now based on existing code.
+		vector<LPGAMEOBJECT>& chunkObjects = chunk->GetObjects(); // Get reference
+		for (size_t i = 0; i < chunkObjects.size(); ++i) { // Use index loop if Update might invalidate iterators
+			LPGAMEOBJECT obj = chunkObjects[i];
+			if (obj == nullptr) continue; // Skip if already marked for deletion? (Purge handles this later)
+
+			// Skip updates if time is stopped (except for Mario himself)
+			if (isChronoStopped && obj != mario) {
 				continue;
-			obj->Update(dt, &coObjects);
+			}
+
+			obj->Update(dt, &coObjects); // Pass the collected colliders
 		}
 	}
 }
@@ -718,179 +671,260 @@ void CPlayScene::UpdateCamera(CMario* mario, float player_cx, float player_cy, f
 	mario->GetBoundingBox(mario_l, mario_t, mario_r, mario_b);
 	float mario_center_y = mario_t + (mario_b - mario_t) / 2.0f;
 
-	// --- Smooth Mario's Center Y to Reduce Jitter ---
-	static float smoothed_center_y = mario_center_y;
-	smoothed_center_y += (mario_center_y - smoothed_center_y) * 0.5f;
+	// Smooth Mario's Y
+	static float smoothed_center_y = mario_center_y; // Initialize first time?
+	// A better init might be in Load() or first Update() call, but static works.
+	smoothed_center_y += (mario_center_y - smoothed_center_y) * 0.5f; // Use a smoothing factor constant?
 
-	// --- Horizontal Following with Dead Zone ---
-	static float last_mario_x = player_cx;
-	static bool moving_right = mario_vx >= 0;
-	bool direction_changed = (mario_vx >= 0) != moving_right;
-	moving_right = mario_vx >= 0;
+	// --- Horizontal Following ---
+	static bool moving_right_prev = mario_vx >= 0;
+	static bool isHorizontallyPaused = false;
+	static float playerXatTurn = 0.0f;
+	static float targetXatTurn = 0.0f;
+	// float dead_zone_threshold = HORIZONTAL_DEAD_ZONE_THRESHOLD; // Use constant
+	float target_cam_x;
+	bool current_moving_right = mario_vx >= 0;
+	bool direction_changed = (mario_vx > 0.01f && !moving_right_prev) || (mario_vx < -0.01f && moving_right_prev);
 
-	float dead_zone = 16.0f;
-	float target_cam_x = player_cx - cam_width / 2.0f;
-	if (direction_changed && abs(player_cx - last_mario_x) < dead_zone) {
-		target_cam_x = cam_x;
-	}
-	last_mario_x = player_cx;
-
-	// --- Absolute Ground Level ---
-	float absolute_ground_cam_y = 0;
-	if (mapHeight > 0) {
-		absolute_ground_cam_y = mapHeight - cam_height - 8;
-		if (absolute_ground_cam_y < 0) absolute_ground_cam_y = 0;
-	}
-
-	// --- Mario States ---
-	bool is_flying_state = (mario->GetLevel() == MARIO_LEVEL_TAIL && (mario->GetJumpCount() > 0 || mario->GetIsHovering()));
-	bool is_on_platform = mario->IsOnPlatform();
-	bool is_in_water = false;
-	bool is_on_vine = false;
-	bool is_vertical_level = true;
-
-	// --- Identify Sky Platform ---
-	float platform_height_threshold = 200.0f;
-	bool is_on_sky_platform = is_on_platform && is_vertical_level && (mario_b < mapHeight - platform_height_threshold);
-
-	// --- Update Vertical Lock State ---
-	is_camera_vertically_locked = is_flying_state || is_in_water || is_on_vine;
-
-	// --- Falling State with Hysteresis ---
-	static bool is_falling = false;
-	static float last_platform_base_y = current_cam_base_y; // Track last platform's base
-	float fall_threshold = last_platform_base_y + cam_height * 0.75f;
-	float hysteresis_margin = 50.0f;
-	if (mario_vy > 0 && smoothed_center_y > fall_threshold + hysteresis_margin) {
-		is_falling = true;
-	}
-	else if (is_on_platform || smoothed_center_y < fall_threshold - hysteresis_margin) {
-		is_falling = false;
-		last_platform_base_y = current_cam_base_y; // Update on landing or above platform
-	}
-
-	// --- Determine Target Camera Y ---
-	float target_cam_y;
-	float smooth_factor = 0.3f;
-	if (is_in_water || is_on_vine) {
-		target_cam_x = player_cx - cam_width / 2.0f;
-		target_cam_y = smoothed_center_y - cam_height / 2.0f;
-		current_cam_base_y = target_cam_y;
-	}
-	else if (is_flying_state) {
-		target_cam_y = smoothed_center_y - cam_height / 2.0f;
-		current_cam_base_y = target_cam_y;
-	}
-	else if (is_on_sky_platform) {
-		target_cam_y = mario_b - cam_height * 0.75f;
-		current_cam_base_y = target_cam_y;
-		smooth_factor = 0.5f;
-	}
-	else if (is_on_platform || !is_vertical_level) {
-		target_cam_y = absolute_ground_cam_y;
-		current_cam_base_y = absolute_ground_cam_y;
-		smooth_factor = 0.5f;
+	if (isHorizontallyPaused) {
+		target_cam_x = targetXatTurn;
+		if (abs(player_cx - playerXatTurn) >= HORIZONTAL_DEAD_ZONE_THRESHOLD) { // Use constant
+			isHorizontallyPaused = false;
+			target_cam_x = player_cx - cam_width / 2.0f; // Recalculate immediately
+		}
 	}
 	else {
-		// Jumping or falling
-		if (is_falling) {
-			target_cam_y = smoothed_center_y - cam_height / 2.0f; // Track Mario
+		target_cam_x = player_cx - cam_width / 2.0f;
+		if (direction_changed) {
+			isHorizontallyPaused = true;
+			playerXatTurn = player_cx;
+			targetXatTurn = cam_x; // Lock target to current camera pos
+			target_cam_x = targetXatTurn;
 		}
-		else {
-			target_cam_y = current_cam_base_y; // Lock to last platform
+	}
+	if (abs(mario_vx) > 0.01f) {
+		moving_right_prev = current_moving_right;
+	}
+
+	// --- Vertical Camera Logic ---
+	static bool bypassGroundLock = false;
+	static bool was_on_platform_prev = mario->IsOnPlatform(); // Init in Load?
+
+	float absolute_ground_cam_y = 0;
+	if (mapHeight > 0) {
+		absolute_ground_cam_y = mapHeight - cam_height + CAMERA_BOUNDARY_MARGIN; // Use constant
+		absolute_ground_cam_y = max(0.0f, absolute_ground_cam_y); // Clamp >= 0
+	}
+
+	float upward_allowance_threshold_y = absolute_ground_cam_y - VERTICAL_GROUND_LOCK_BUFFER;
+	float tracking_target_y = smoothed_center_y - cam_height / 2.0f; // Target to center Mario
+
+	bool is_flying_state = (mario->GetLevel() == MARIO_LEVEL_TAIL && mario->GetIsFlying()); // Assume GetIsFlying exists
+	bool is_in_water = false;
+	bool is_on_vine = false;
+	bool is_on_platform = mario->IsOnPlatform();
+
+	// Calculate mario height status once
+	bool isMarioHigh = (smoothed_center_y < upward_allowance_threshold_y);
+
+	// Update Bypass Flag State
+	if (is_on_platform) {
+		bypassGroundLock = false;
+	}
+	else if (was_on_platform_prev && !is_on_platform) { // Just became airborne
+		if (isMarioHigh) { // Was high when leaving platform?
+			bypassGroundLock = true;
+		}
+	} // else bypass state persists while airborne
+
+	// Determine Target Camera Y
+	float target_cam_y;
+	if (is_in_water || is_on_vine || is_flying_state) {
+		target_cam_y = tracking_target_y;
+	}
+	else if (bypassGroundLock) {
+		target_cam_y = tracking_target_y;
+	}
+	else { // Default: Not special, not bypassing
+		if (isMarioHigh) { // High -> Track center (covers ON sky platform)
+			target_cam_y = tracking_target_y;
+		}
+		else { // Low -> Lock ground (covers ON ground platform or airborne low)
+			target_cam_y = absolute_ground_cam_y;
 		}
 	}
 
-	// --- Clamp Camera ---
-	if (target_cam_x < -8) target_cam_x = -8;
-	if (mapWidth > 0 && target_cam_x > mapWidth - cam_width - 8) target_cam_x = mapWidth - cam_width - 8;
-	if (target_cam_y < 0) target_cam_y = 0;
-	if (mapHeight > 0 && target_cam_y > mapHeight - cam_height - 8) target_cam_y = mapHeight - cam_height - 8;
+	// --- Clamping ---
+	// Clamp Target Y
+	target_cam_y = max(0.0f, target_cam_y); // Clamp above 0
+	if (mapHeight > 0) {
+		target_cam_y = min(target_cam_y, absolute_ground_cam_y); // Clamp below ground level
+	}
+	// Clamp Target X
+	target_cam_x = max(CAMERA_BOUNDARY_MARGIN, target_cam_x);
+	if (mapWidth > 0) {
+		target_cam_x = min(target_cam_x, mapWidth - cam_width + CAMERA_BOUNDARY_MARGIN);
+	}
 
-	// --- Apply Camera Position with Smoothing ---
-	cam_x += (target_cam_x - cam_x) * smooth_factor;
-	cam_y += (target_cam_y - cam_y) * smooth_factor;
+	// --- Apply Smoothing ---
+	cam_x += (target_cam_x - cam_x) * DEFAULT_HORIZONTAL_SMOOTH; // Use constants
+	cam_y += (target_cam_y - cam_y) * DEFAULT_VERTICAL_SMOOTH;
 
+	// --- Final Clamping on Actual Position ---
+	cam_x = max(CAMERA_BOUNDARY_MARGIN, cam_x);
+	if (mapWidth > 0) {
+		cam_x = min(cam_x, mapWidth - cam_width + CAMERA_BOUNDARY_MARGIN);
+	}
+	cam_y = max(0.0f, cam_y);
+	if (mapHeight > 0) {
+		cam_y = min(cam_y, absolute_ground_cam_y);
+	}
+
+	// Set Camera Position
 	game->SetCamPos(cam_x, cam_y);
 
-	// --- Debug Output ---
-	DebugOut(L"CamX:%.1f TgtX:%.1f CamY:%.1f TgtY:%.1f BaseY:%.1f SkyP:%d OnP:%d Vx:%.2f Vy:%.2f FeetY:%.1f CenterY:%.1f SmoothedY:%.1f MapH:%.1f CamH:%.1f AbsGndY:%.1f VertLev:%d Smooth:%.2f Falling:%d FallThresh:%.1f\n",
-		cam_x, target_cam_x, cam_y, target_cam_y, current_cam_base_y, is_on_sky_platform, is_on_platform, mario_vx, mario_vy, mario_b, mario_center_y, smoothed_center_y, mapHeight, cam_height, absolute_ground_cam_y, is_vertical_level, smooth_factor, is_falling, fall_threshold);
+	// Update previous state
+	was_on_platform_prev = is_on_platform;
+
+	// --- Final Debug Output --- (Simplified)
+	//DebugOut(L"Cam:(%.1f, %.1f) Tgt:(%.1f, %.1f) M:(%.1f, %.1f) V:(%.2f, %.2f) OnP:%d Byp:%d HPa:%d\n",
+	//	cam_x, cam_y, target_cam_x, target_cam_y,
+	//	player_cx, smoothed_center_y, // Using smoothed Y for consistency with logic
+	//	mario_vx, mario_vy,
+	//	is_on_platform, bypassGroundLock, isHorizontallyPaused);
 }
+
+
+// Inside CPlayScene::Update(DWORD dt)
+
 void CPlayScene::Update(DWORD dt)
 {
-	if (player == NULL) return;
+	if (player == NULL) {
+		return;
+	}
 
 	CMario* mario = (CMario*)player;
 	CGame* game = CGame::GetInstance();
-	float cam_x, cam_y;
-	game->GetCamPos(cam_x, cam_y);
+
 	float cam_width = (float)game->GetBackBufferWidth();
 	float cam_height = (float)game->GetBackBufferHeight();
+	float current_cam_x, current_cam_y;
+	game->GetCamPos(current_cam_x, current_cam_y);
 
-	float cx, cy;
-	mario->GetPosition(cx, cy);
+	// Update Chunks based on current camera
+	UpdateChunks(current_cam_x, cam_width);
 
+	// --- Build the Comprehensive coObjects list for this frame ---
 	vector<LPGAMEOBJECT> coObjects;
-	UpdateChunks(cam_x, cam_width); // Load/unload chunks based on current camera
-	UpdateObjects(dt, mario, coObjects); // Update all loaded objects
+	coObjects.clear(); // Start fresh
 
-	// Update camera using player pos and loaded scene settings
-	UpdateCamera(mario, cx, cy, cam_width, cam_height);
+	// 1. Add all objects from loaded chunks
+	for (LPCHUNK chunk : chunks) {
+		if (!chunk->IsLoaded()) continue;
+		vector<LPGAMEOBJECT>& chunkObjects = chunk->GetObjects();
+		for (LPGAMEOBJECT obj : chunkObjects) {
+			if (obj && !obj->IsDeleted()) // Check if object is valid and not deleted
+				coObjects.push_back(obj);
+		}
+	}
 
-	PurgeDeletedObjects(); // Clean up deleted objects
+	// 2. Add Mario's ACTIVE TailWhip (if any) to the list
+	CTailWhip* activeWhip = mario->GetActiveTailWhip();
+	if (activeWhip != nullptr) {
+		coObjects.push_back(activeWhip);
+	}
+
+	// --- Update Player ---
+	// Pass the comprehensive list (including the whip if active)
+	player->Update(dt, &coObjects);
+
+	// --- Update all OTHER game objects within chunks ---
+	bool isChronoStopped = mario->GetIsPowerUp() || mario->GetIsTailUp() ||
+		mario->GetIsPowerDown() || mario->GetIsTailDown();
+
+	for (LPCHUNK chunk : chunks) {
+		if (!chunk->IsLoaded()) continue;
+		vector<LPGAMEOBJECT>& chunkObjects = chunk->GetObjects();
+		// Iterate carefully, as Update might delete objects or add new ones
+		// Using index loop is safer if list can change during iteration
+		for (size_t i = 0; i < chunkObjects.size(); ++i) {
+			LPGAMEOBJECT obj = chunkObjects[i];
+			// Check if obj is still valid (might have been deleted by player update?)
+			// A robust system might queue deletions instead of immediate delete.
+			// Assuming objects marked deleted are handled by Purge later.
+			if (obj == nullptr || obj->IsDeleted()) continue;
+
+			// Skip updates if time is stopped
+			if (isChronoStopped) continue; // Player already updated
+
+			// Pass the comprehensive list
+			obj->Update(dt, &coObjects);
+		}
+	}
+
+	// --- Update Camera ---
+	float player_cx, player_cy;
+	mario->GetPosition(player_cx, player_cy);
+	UpdateCamera(mario, player_cx, player_cy, cam_width, cam_height);
+
+	// --- Clean up ---
+	PurgeDeletedObjects(); // Handle objects marked for deletion
 }
 
-void CPlayScene::Render()
-{
-	CAttackParticle* attackParticle = player ? ((CMario*)player)->GetTailWhip()->GetAttackParticle() : NULL;
+// --- Render & Cleanup Functions --- (Largely unchanged)
 
-	for (LPCHUNK chunk : chunks)
-	{
+void CPlayScene::Render() // **** MODIFIED ****
+{
+	// Render non-player chunk objects first
+	for (LPCHUNK chunk : chunks) {
+		if (!chunk->IsLoaded()) continue;
 		vector<LPGAMEOBJECT>& chunkObjects = chunk->GetObjects();
-		for (LPGAMEOBJECT obj : chunkObjects)
-		{
-			if (obj != player && obj != attackParticle)
+		for (LPGAMEOBJECT obj : chunkObjects) {
+			if (obj && !obj->IsDeleted()) // Check validity
 				obj->Render();
 		}
 	}
 
-	if (player != NULL)
-	{
+	if (player != NULL && !player->IsDeleted()) { // Check validity
 		player->Render();
-		if (attackParticle != NULL)
-			attackParticle->Render();
 	}
-}
-
-void CPlayScene::Clear()
-{
-	Unload();
 }
 
 void CPlayScene::Unload()
 {
-	for (LPCHUNK chunk : chunks)
-	{
-		chunk->Clear();
-		delete chunk;
+	DebugOut(L"[INFO] Unloading scene %d...\n", id);
+	// Unload objects chunk by chunk
+	for (LPCHUNK chunk : chunks) {
+		if (chunk) { // Check if chunk pointer is valid
+			chunk->Clear(); // Clear objects within the chunk
+			delete chunk;   // Delete the chunk itself
+		}
 	}
-	chunks.clear();
+	chunks.clear(); // Clear the vector of pointers
 
-	CAnimations::GetInstance()->Clear();
-	CSprites::GetInstance()->Clear();
+	// Clear Assets (Important!) - Should be done *carefully* if assets are shared between scenes
+	// Assuming CAnimations/CSprites are scene-specific or managed elsewhere appropriately.
+	// If they are truly global singletons used across scenes, clearing them here is WRONG.
+	// If they are scene-specific asset managers, clearing here is correct.
+	// Based on name "GetInstance", they seem global. Let's assume assets are managed elsewhere
+	// and this scene doesn't own their lifetime beyond loading them.
+	// CAnimations::GetInstance()->Clear(); // POTENTIALLY DANGEROUS if global
+	// CSprites::GetInstance()->Clear();    // POTENTIALLY DANGEROUS if global
 
+	// Reset player pointer
 	player = NULL;
 
-	DebugOut(L"[INFO] Scene %d unloaded! \n", id);
+	DebugOut(L"[INFO] Scene %d unloaded.\n", id);
 }
 
-bool CPlayScene::IsGameObjectDeleted(const LPGAMEOBJECT& o) { return o == NULL; }
+// Keep IsGameObjectDeleted as is, used by PurgeDeletedObjects
+bool CPlayScene::IsGameObjectDeleted(const LPGAMEOBJECT& o) { return o == NULL || o->IsDeleted(); } // Add IsDeleted check
 
 void CPlayScene::PurgeDeletedObjects()
 {
-	for (LPCHUNK chunk : chunks)
-	{
-		chunk->PurgeDeletedObjects();
+	for (LPCHUNK chunk : chunks) {
+		if (chunk && chunk->IsLoaded()) { // Check if chunk is valid and loaded
+			chunk->PurgeDeletedObjects(); // Delegate purging to the chunk
+		}
 	}
 }
