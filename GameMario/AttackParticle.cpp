@@ -3,7 +3,7 @@
 
 #include "PlayScene.h"
 
-CAttackParticle::CAttackParticle(float x, float y) : CGameObject(x, y) {
+CAttackParticle::CAttackParticle(float x, float y, int z) : CGameObject(x, y, z) {
 	isEmerging = 0;
 	emergingStart = -1;
 }

@@ -24,8 +24,8 @@ void CBrick::RenderBoundingBox()
 	float cx, cy;
 	CGame::GetInstance()->GetCamPos(cx, cy);
 
-	float xx = x - this->cellWidth / 2 + rect.right / 2;
-	float yy = y - this->cellHeight / 2 + rect.bottom / 2;
+	float xx = x - BRICK_CELL_WIDTH / 2 + rect.right / 2;
+	float yy = y - BRICK_CELL_HEIGHT / 2 + rect.bottom / 2;
 
 	CGame::GetInstance()->Draw(xx - cx, yy - cy, bbox, nullptr, BBOX_ALPHA, rect.right - 1, rect.bottom - 1);
 }
@@ -46,10 +46,10 @@ void CBrick::Render()
 
 void CBrick::GetBoundingBox(float& l, float& t, float& r, float& b)
 {
-	l = x - this->cellWidth / 2;
-	t = y - this->cellHeight / 2;
-	r = l + this->cellWidth;
-	b = t + this->cellHeight;
+	l = x - BRICK_CELL_WIDTH / 2;
+	t = y - BRICK_CELL_HEIGHT / 2;
+	r = l + BRICK_CELL_WIDTH;
+	b = t + BRICK_CELL_HEIGHT;
 }
 
 int CBrick::IsDirectionColliable(float nx, float ny)

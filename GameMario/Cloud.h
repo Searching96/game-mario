@@ -18,7 +18,7 @@ protected:
 	//int height; default = 2				// Unit: cell
 
 public:
-	CCloud(float x, float y, int width) : CGameObject(x, y)
+	CCloud(float x, float y, int z, int width) : CGameObject(x, y, z)
 	{
 		this->width = width;
 	}

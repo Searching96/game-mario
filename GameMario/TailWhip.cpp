@@ -10,9 +10,9 @@
 
 #include "PlayScene.h"
 
-CTailWhip::CTailWhip(float x, float y) : CGameObject(x, y)
+CTailWhip::CTailWhip(float x, float y, int z) : CGameObject(x, y, z)
 {
-	this->attackParticle = new CAttackParticle(x, y);
+	this->attackParticle = new CAttackParticle(x, y, z + 10);
 	notWhipping = 1;
 	whippingLeft = 0;
 	whippingRight = 0;

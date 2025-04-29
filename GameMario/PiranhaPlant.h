@@ -55,7 +55,7 @@ protected:
 	bool IsMarioOnTop();
 
 public:
-	CPiranhaPlant(float x, float y, CFireball* fireball);
+	CPiranhaPlant(float x, float y, int z, CFireball* fireball);
 
 	void Render();
 	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);

@@ -3,7 +3,7 @@
 #include "SuperLeaf.h"
 #include "Game.h"
 
-CBuffQBlock::CBuffQBlock(float x, float y, CMushroom* mushroom, CSuperLeaf* superleaf) : CGameObject(x, y)
+CBuffQBlock::CBuffQBlock(float x, float y, int z, CMushroom* mushroom, CSuperLeaf* superleaf) : CGameObject(x, y, z)
 {
 	this->mushroom = mushroom;
 	this->superleaf = superleaf;

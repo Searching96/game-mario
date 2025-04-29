@@ -3,7 +3,7 @@
 #include "QuestionBlock.h"
 #include "CoinQBlock.h"
 
-CMushroom::CMushroom(float x, float y) : CGameObject(x, y)
+CMushroom::CMushroom(float x, float y, int z) : CGameObject(x, y, z)
 {
     this->ax = 0;
     this->ay = 0;

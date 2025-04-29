@@ -305,7 +305,7 @@ class CMario : public CGameObject
 	void HandleTailWhip(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 
 public:
-	CMario(float x, float y);
+	CMario(float x, float y, int z);
 	virtual ~CMario();
 
 	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);

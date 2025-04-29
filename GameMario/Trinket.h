@@ -14,7 +14,7 @@ protected:
 	int type;
 
 public:
-	CTrinket(float x, float y, int type) : CGameObject(x, y)
+	CTrinket(float x, float y, int z, int type) : CGameObject(x, y, z)
 	{
 		this->type = type;
 	}

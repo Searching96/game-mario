@@ -20,7 +20,7 @@ protected:
 	int isEmerging = 0;
 	ULONGLONG emergingStart = -1;
 public:
-	CAttackParticle(float x, float y);
+	CAttackParticle(float x, float y, int z);
 	virtual ~CAttackParticle() {}
 	void Render();
 	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects = nullptr);

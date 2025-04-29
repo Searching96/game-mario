@@ -9,6 +9,7 @@
 void CBush::RenderBoundingBox()
 {
 	D3DXVECTOR3 p(x, y, 0);
+
 	RECT rect;
 
 	LPTEXTURE bbox = CTextures::GetInstance()->Get(ID_TEX_BBOX);

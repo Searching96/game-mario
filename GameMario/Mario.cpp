@@ -19,9 +19,9 @@
 
 #include "Collision.h"
 
-CMario::CMario(float x, float y) : CGameObject(x, y)
+CMario::CMario(float x, float y, int z) : CGameObject(x, y, z)
 {
-	this->tailWhip = new CTailWhip(x, y);
+	this->tailWhip = new CTailWhip(x, y, z + 10);
 
 	isSitting = false;
 	maxVx = 0.0f;
