@@ -67,7 +67,6 @@ using namespace std;
 #define ZINDEX_ITEMS                80 // Coins (when static), Mushrooms, Leaves (after spawning)
 #define ZINDEX_ENEMIES              90 // Goombas, Koopas, Piranhas (usually behind player)
 #define ZINDEX_PLAYER              100 // Mario
-#define ZINDEX_KOOPA			   105 // Koopa (when in shell state)
 #define ZINDEX_PLAYER_EFFECTS      110 // Tail Whip visual (Mario renders this), maybe held Koopa?
 #define ZINDEX_PARTICLES           120 // Attack Particle (rendered by whip/Mario)
 #define ZINDEX_FOREGROUND_EFFECTS  150 // Foreground elements, UI overlays (if part of game objects)
