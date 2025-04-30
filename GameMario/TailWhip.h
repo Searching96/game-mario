@@ -45,6 +45,7 @@ public:
 	int IsCollidable() { return (state != TAIL_STATE_NOT_WHIPPING); };
 	int IsBlocking() { return 0; }
 	void SetState(int state);
+	void SetNx(int nx) { this->nx = nx; }
 	//void StartWhippingLeft() { whippingLeft = 1; whipLeftStart = GetTickCount64(); }
 	//void StartWhippingRight() { whippingRight = 1; whipRightStart = GetTickCount64(); }
 	void OnNoCollision(DWORD dt) {};
