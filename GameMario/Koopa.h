@@ -56,8 +56,6 @@ protected:
 	bool isKicked = false;
 	bool isFlying = false;
 
-	LPGAMEOBJECT ground;
-
 	ULONGLONG shellStart;
 	ULONGLONG dieStart;
 
@@ -66,10 +64,7 @@ protected:
 	virtual void GetBoundingBox(float& left, float& top, float& right, float& bottom);
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 	virtual void Render();
-	bool IsPlatformEdge(float checkDistance,vector<LPGAMEOBJECT>& possibleGrounds);
-	void UpdateMovement(DWORD dt,vector<LPGAMEOBJECT>* coObjects);
-	void HandleTimers(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
-	void HandleBeingHeld(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
+	bool IsPlatformEdge(float checkDistance, vector<LPGAMEOBJECT>& possibleGrounds);
 
 	virtual int IsCollidable() { return (state != KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY && state != KOOPA_STATE_DIE_ON_COLLIDE_WITH_TERRAIN); };
 	virtual int IsBlocking() { return 0; }
@@ -84,7 +79,7 @@ protected:
 	void OnCollisionWithCoinQBlock(LPCOLLISIONEVENT e);
 
 public:
-	CKoopa(float x, float y);
+	CKoopa(float x, float y, int z);
 	virtual void SetState(int state);
 	void StartShell();
 	int GetBeingHeld() { return beingHeld; }

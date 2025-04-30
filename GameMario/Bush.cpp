@@ -9,6 +9,7 @@
 void CBush::RenderBoundingBox()
 {
 	D3DXVECTOR3 p(x, y, 0);
+
 	RECT rect;
 
 	LPTEXTURE bbox = CTextures::GetInstance()->Get(ID_TEX_BBOX);
@@ -24,8 +25,8 @@ void CBush::RenderBoundingBox()
 	float cx, cy;
 	CGame::GetInstance()->GetCamPos(cx, cy);
 
-	float xx = x - this->cellWidth / 2 + rect.right / 2;
-	float yy = y - this->cellHeight / 2 + rect.bottom / 2;
+	float xx = x - BUSH_WIDTH / 2 + rect.right / 2;
+	float yy = y - BUSH_HEIGHT / 2 + rect.bottom / 2;
 
 	CGame::GetInstance()->Draw(xx - cx, yy - cy, bbox, nullptr, BBOX_ALPHA, rect.right - 1, rect.bottom - 1);
 }
@@ -36,8 +37,8 @@ void CBush::Render()
 
 	for (int j = 0; j < this->width; j++)
 	{
-		float xx = x + j * this->cellWidth;
-		s->Get(this->spriteId)->Draw(xx, y);
+		float xx = x + j * BUSH_WIDTH;
+		s->Get(ID_TEX_BUSH)->Draw(xx, y);
 	}
 
 	//RenderBoundingBox();
@@ -45,10 +46,10 @@ void CBush::Render()
 
 void CBush::GetBoundingBox(float& l, float& t, float& r, float& b)
 {
-	l = x - this->cellWidth / 2;
-	t = y - this->cellHeight / 2;
-	r = l + this->cellWidth * this->width;
-	b = t + this->cellHeight;
+	l = x - BUSH_WIDTH / 2;
+	t = y - BUSH_HEIGHT / 2;
+	r = l + BUSH_WIDTH * this->width;
+	b = t + BUSH_HEIGHT;
 }
 
 int CBush::IsDirectionColliable(float nx, float ny)

@@ -3,7 +3,7 @@
 #include "PlayScene.h"
 #include "Koopa.h"
 
-CPiranhaPlant::CPiranhaPlant(float x, float y, CFireball* fireball) : CGameObject(x, y)
+CPiranhaPlant::CPiranhaPlant(float x, float y, int z, CFireball* fireball) : CGameObject(x, y, z)
 {
 	this->fireball = fireball;
 	this->x = x;

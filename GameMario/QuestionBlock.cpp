@@ -1,7 +1,7 @@
 #include "QuestionBlock.h"
 #include "Game.h"
 
-CQuestionBlock::CQuestionBlock(float x, float y) : CGameObject(x, y)
+CQuestionBlock::CQuestionBlock(float x, float y, int z) : CGameObject(x, y, z)
 {
 	this->x = x;
 	this->y = y;

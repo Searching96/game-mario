@@ -24,8 +24,8 @@ void CTrinket::RenderBoundingBox()
 	float cx, cy;
 	CGame::GetInstance()->GetCamPos(cx, cy);
 
-	float xx = x - this->cellWidth / 2 + rect.right / 2;
-	float yy = y - this->cellHeight / 2 + rect.bottom / 2;
+	float xx = x - TRINKET_WIDTH / 2 + rect.right / 2;
+	float yy = y - TRINKET_HEIGHT / 2 + rect.bottom / 2;
 
 	CGame::GetInstance()->Draw(xx - cx, yy - cy, bbox, nullptr, BBOX_ALPHA, rect.right - 1, rect.bottom - 1);
 }
@@ -34,17 +34,32 @@ void CTrinket::Render()
 {
 	CSprites* s = CSprites::GetInstance();
 
-	s->Get(this->spriteId)->Draw(x, y);
+	switch (type)
+	{
+	case 1:
+		s->Get(ID_TEX_FLOWER)->Draw(x, y);
+		break;
+	case 2:
+		s->Get(ID_TEX_STAR)->Draw(x, y);
+		break;
+	case 3:
+		s->Get(ID_TEX_MUSHROOM)->Draw(x, y);
+		break;
+	default :
+		s->Get(ID_TEX_FLOWER)->Draw(x, y);
+		break;
+	}
+
 
 	//RenderBoundingBox();
 }
 
 void CTrinket::GetBoundingBox(float& l, float& t, float& r, float& b)
 {
-	l = x - this->cellWidth / 2;
-	t = y - this->cellHeight / 2;
-	r = l + this->cellWidth;
-	b = t + this->cellHeight;
+	l = x - TRINKET_WIDTH / 2;
+	t = y - TRINKET_HEIGHT / 2;
+	r = l + TRINKET_WIDTH;
+	b = t + TRINKET_HEIGHT;
 }
 
 int CTrinket::IsDirectionColliable(float nx, float ny)

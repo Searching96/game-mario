@@ -3,7 +3,7 @@
 #include "QuestionBlock.h"
 #include "CoinQBlock.h"
 
-CMushroom::CMushroom(float x, float y) : CGameObject(x, y)
+CMushroom::CMushroom(float x, float y, int z) : CGameObject(x, y, z)
 {
     this->ax = 0;
     this->ay = 0;
@@ -71,7 +71,6 @@ void CMushroom::OnCollisionWith(LPCOLLISIONEVENT e)
 	if (e->ny != 0 && e->obj->IsBlocking())
 	{
 		vy = vy - vy / 50;
-		isOnPlatform = 1;
 	}
 	if (dynamic_cast<CCoinQBlock*>(e->obj))
 		x += 1;

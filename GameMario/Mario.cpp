@@ -19,9 +19,10 @@
 
 #include "Collision.h"
 
-CMario::CMario(float x, float y, CTailWhip* tailWhip) : CGameObject(x, y)
+CMario::CMario(float x, float y, int z) : CGameObject(x, y, z)
 {
-	this->tailWhip = tailWhip;
+	this->tailWhip = new CTailWhip(x, y, z + 10);
+
 	isSitting = false;
 	maxVx = 0.0f;
 	ax = 0.0f;
@@ -34,6 +35,39 @@ CMario::CMario(float x, float y, CTailWhip* tailWhip) : CGameObject(x, y)
 	coin = 0;
 	jumpCount = 0;
 	frictionX = 0;
+	powerUp = 0;
+	powerUpStart = -1;
+	tailUp = 0;
+	tailUpStart = -1;
+	powerDown = 0;
+	powerDownStart = -1;
+	tailDown = 0;
+	tailDownStart = -1;
+	isRendering = true;
+	lastRenderTime = -1;
+	isHovering = 0;
+	hoveringStart = -1;
+	isBraking = 0;
+	vxBeforeBraking = 0;
+	brakingStart = -1;
+	isTailWhipping = 0;
+	tailWhipStart = -1;
+	isKicking = 0;
+	kickStart = -1;
+	isHoldingKoopa = 0;
+	tailWagged = 1;
+	isMoving = 0;
+	isRunning = 0;
+	isJumpButtonHeld = 0;
+
+	SetState(MARIO_STATE_IDLE);
+}
+
+
+CMario::~CMario()
+{
+	delete tailWhip;
+	tailWhip = nullptr;
 }
 
 // In CMario::Update method, modify the hover handling
@@ -162,10 +196,13 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	if (vy > MARIO_MAX_FALLING_SPEED) vy = MARIO_MAX_FALLING_SPEED;
 	if (vy < MARIO_MAX_JUMP_SPEED) vy = MARIO_MAX_JUMP_SPEED;
 
-	//if (nx > 0)
-	//	tailWhip->SetPosition(x + 6, y + 6);
-	//else
-	//	tailWhip->SetPosition(x - 6, y + 6);
+	if (tailWhip != nullptr) {
+		// Pass Mario's current position and facing direction (nx) to the whip
+		// TailWhip's Update should use these to set its own x, y, nx
+		tailWhip->UpdatePosition(this->x, this->y, this->nx); // Need to add UpdatePosition to TailWhip
+		// Pass the collidable objects list for whip's collision checks
+		tailWhip->Update(dt, coObjects);
+	}
 
 	//DebugOutTitle(L"vx=%f, ax=%f, vy=%f, ay=%f, jc=%d, fx=%f, iop=%d, imv=%d\n",
 		//vx, ax, vy, ay, jumpCount, frictionX, isOnPlatform, isMoving);
@@ -927,17 +964,17 @@ int CMario::GetAniIdTail()
 
 void CMario::Render()
 {
-	if (untouchable)
-	{
+	if (untouchable) {
 		ULONGLONG currentTime = GetTickCount64();
-		if (currentTime - lastRenderTime > MARIO_UNTOUCHABLE_RENDER_INTERVAL)
-		{
+		if (lastRenderTime == (ULONGLONG)-1) lastRenderTime = currentTime;
+		if (currentTime - lastRenderTime > MARIO_UNTOUCHABLE_RENDER_INTERVAL) {
 			isRendering = !isRendering;
 			lastRenderTime = currentTime;
 		}
-
-		if (!isRendering)
-			return;
+		if (!isRendering) return;
+	}
+	else {
+		isRendering = true;
 	}
 
 	CAnimations* animations = CAnimations::GetInstance();
@@ -953,6 +990,10 @@ void CMario::Render()
 		aniId = GetAniIdTail();
 
 	animations->Get(aniId)->Render(x, y);
+
+	if (tailWhip != nullptr) {
+		tailWhip->Render();
+	}
 
 	//RenderBoundingBox();
 
@@ -979,11 +1020,12 @@ void CMario::SetState(int state)
 	switch (state)
 	{
 	case MARIO_STATE_TAIL_WHIP:
-		if (nx > 0)
-			tailWhip->SetState(TAIL_STATE_WHIPPING_RIGHT);
-		else
-			tailWhip->SetState(TAIL_STATE_WHIPPING_LEFT);
-		StartTailWhip();
+		if (level == MARIO_LEVEL_TAIL && tailWhip != nullptr && !tailWhip->IsActive())
+		{
+			StartTailWhip();
+			if (nx > 0) tailWhip->SetState(TAIL_STATE_WHIPPING_RIGHT);
+			else tailWhip->SetState(TAIL_STATE_WHIPPING_LEFT);
+		}
 		break;
 
 	case MARIO_STATE_RUNNING_RIGHT:
@@ -1296,4 +1338,16 @@ void CMario::StartBraking()
 	else if (vx < 0) {
 		nx = 1;  // Face right when braking from left movement
 	}
+}
+
+void CMario::StartTailWhip() {
+	isTailWhipping = 1;
+	tailWhipStart = GetTickCount64();
+}
+
+CTailWhip* CMario::GetActiveTailWhip() {
+	if (tailWhip != nullptr && tailWhip->IsActive()) {
+		return tailWhip;
+	}
+	return nullptr;
 }

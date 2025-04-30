@@ -17,7 +17,7 @@
 #define TAIL_WHIP_LEFT_TIME			200
 #define TAIL_WHIP_RIGHT_TIME		200
 
-class CTailWhip : public CGameObject 
+class CTailWhip : public CGameObject
 {
 protected:
 	CAttackParticle* attackParticle;
@@ -37,16 +37,20 @@ protected:
 
 	void OnCollisionWithQuestionBlock(LPCOLLISIONEVENT e);
 public:
-	CTailWhip(float x, float y, CAttackParticle* attackParticle);
+	CTailWhip(float x, float y, int z);
+	virtual ~CTailWhip();
 	void Render();
 	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 	void GetBoundingBox(float& l, float& t, float& r, float& b);
-	int IsCollidable() { return 1; };
+	int IsCollidable() { return (state != TAIL_STATE_NOT_WHIPPING); };
 	int IsBlocking() { return 0; }
 	void SetState(int state);
-	void StartWhippingLeft() { whippingLeft = 1; whipLeftStart = GetTickCount64(); }
-	void StartWhippingRight() { whippingRight = 1; whipRightStart = GetTickCount64(); }
+	void SetNx(int nx) { this->nx = nx; }
+	//void StartWhippingLeft() { whippingLeft = 1; whipLeftStart = GetTickCount64(); }
+	//void StartWhippingRight() { whippingRight = 1; whipRightStart = GetTickCount64(); }
 	void OnNoCollision(DWORD dt) {};
 	void OnCollisionWith(LPCOLLISIONEVENT e);
-	CAttackParticle* GetAttackParticle() { return attackParticle; }
+	CAttackParticle* GetAttackParticle() const { return attackParticle; }
+	bool IsActive() const { return notWhipping == 0; }
+	void UpdatePosition(float marioX, float marioY, int marioNx);
 };

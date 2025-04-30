@@ -6,6 +6,8 @@
 #include "Textures.h"
 #include "Game.h"
 
+#include "debug.h"
+
 void CBox::RenderBoundingBox()
 {
 	D3DXVECTOR3 p(x, y, 0);
@@ -30,182 +32,178 @@ void CBox::RenderBoundingBox()
 	CGame::GetInstance()->Draw(xx - cx, yy - cy, bbox, nullptr, BBOX_ALPHA, rect.right - 1, rect.bottom - 1);
 }
 
-void CBox::Render()
+void CBox::RenderBox(CSprites* s)
 {
-	if (this->height <= 0 || this->width <= 0) return;
-	CSprites* s = CSprites::GetInstance();
+	if (width <= 0 || height <= 0) return;
 
-	int idTopLeft, idTopCenter, idTopRight;
-	int idMiddleLeft, idMiddleCenter, idMiddleRight;
-	int idBottomLeft, idBottomCenter, idBottomRight;
+	// Sprite IDs for each position based on color
+	struct BoxSprites {
+		int topLeft, topCenter, topRight;
+		int middleLeft, middleCenter, middleRight;
+		int bottomLeft, bottomCenter, bottomRight;
+	};
 
-	switch (this->color)
+	BoxSprites sprites;
+	switch (color)
 	{
 	case 0: // Orange
-		idTopLeft = SPRITE_ID_ORANGE_TOP_LEFT;
-		idTopCenter = SPRITE_ID_ORANGE_TOP_CENTER;
-		idTopRight = SPRITE_ID_ORANGE_TOP_RIGHT;
-		idMiddleLeft = SPRITE_ID_ORANGE_MIDDLE_LEFT;
-		idMiddleCenter = SPRITE_ID_ORANGE_MIDDLE_CENTER;
-		idMiddleRight = SPRITE_ID_ORANGE_MIDDLE_RIGHT;
-		idBottomLeft = SPRITE_ID_ORANGE_BOTTOM_LEFT;
-		idBottomCenter = SPRITE_ID_ORANGE_BOTTOM_CENTER;
-		idBottomRight = SPRITE_ID_ORANGE_BOTTOM_RIGHT;
+		sprites = {
+			SPRITE_ID_ORANGE_TOP_LEFT, SPRITE_ID_ORANGE_TOP_CENTER, SPRITE_ID_ORANGE_TOP_RIGHT,
+			SPRITE_ID_ORANGE_MIDDLE_LEFT, SPRITE_ID_ORANGE_MIDDLE_CENTER, SPRITE_ID_ORANGE_MIDDLE_RIGHT,
+			SPRITE_ID_ORANGE_BOTTOM_LEFT, SPRITE_ID_ORANGE_BOTTOM_CENTER, SPRITE_ID_ORANGE_BOTTOM_RIGHT
+		};
 		break;
 	case 1: // Blue
-		idTopLeft = SPRITE_ID_BLUE_TOP_LEFT;
-		idTopCenter = SPRITE_ID_BLUE_TOP_CENTER;
-		idTopRight = SPRITE_ID_BLUE_TOP_RIGHT;
-		idMiddleLeft = SPRITE_ID_BLUE_MIDDLE_LEFT;
-		idMiddleCenter = SPRITE_ID_BLUE_MIDDLE_CENTER;
-		idMiddleRight = SPRITE_ID_BLUE_MIDDLE_RIGHT;
-		idBottomLeft = SPRITE_ID_BLUE_BOTTOM_LEFT;
-		idBottomCenter = SPRITE_ID_BLUE_BOTTOM_CENTER;
-		idBottomRight = SPRITE_ID_BLUE_BOTTOM_RIGHT;
+		sprites = {
+			SPRITE_ID_BLUE_TOP_LEFT, SPRITE_ID_BLUE_TOP_CENTER, SPRITE_ID_BLUE_TOP_RIGHT,
+			SPRITE_ID_BLUE_MIDDLE_LEFT, SPRITE_ID_BLUE_MIDDLE_CENTER, SPRITE_ID_BLUE_MIDDLE_RIGHT,
+			SPRITE_ID_BLUE_BOTTOM_LEFT, SPRITE_ID_BLUE_BOTTOM_CENTER, SPRITE_ID_BLUE_BOTTOM_RIGHT
+		};
 		break;
 	case 2: // Green
-		idTopLeft = SPRITE_ID_GREEN_TOP_LEFT;
-		idTopCenter = SPRITE_ID_GREEN_TOP_CENTER;
-		idTopRight = SPRITE_ID_GREEN_TOP_RIGHT;
-		idMiddleLeft = SPRITE_ID_GREEN_MIDDLE_LEFT;
-		idMiddleCenter = SPRITE_ID_GREEN_MIDDLE_CENTER;
-		idMiddleRight = SPRITE_ID_GREEN_MIDDLE_RIGHT;
-		idBottomLeft = SPRITE_ID_GREEN_BOTTOM_LEFT;
-		idBottomCenter = SPRITE_ID_GREEN_BOTTOM_CENTER;
-		idBottomRight = SPRITE_ID_GREEN_BOTTOM_RIGHT;
+		sprites = {
+			SPRITE_ID_GREEN_TOP_LEFT, SPRITE_ID_GREEN_TOP_CENTER, SPRITE_ID_GREEN_TOP_RIGHT,
+			SPRITE_ID_GREEN_MIDDLE_LEFT, SPRITE_ID_GREEN_MIDDLE_CENTER, SPRITE_ID_GREEN_MIDDLE_RIGHT,
+			SPRITE_ID_GREEN_BOTTOM_LEFT, SPRITE_ID_GREEN_BOTTOM_CENTER, SPRITE_ID_GREEN_BOTTOM_RIGHT
+		};
 		break;
 	case 3: // White
-		idTopLeft = SPRITE_ID_WHITE_TOP_LEFT;
-		idTopCenter = SPRITE_ID_WHITE_TOP_CENTER;
-		idTopRight = SPRITE_ID_WHITE_TOP_RIGHT;
-		idMiddleLeft = SPRITE_ID_WHITE_MIDDLE_LEFT;
-		idMiddleCenter = SPRITE_ID_WHITE_MIDDLE_CENTER;
-		idMiddleRight = SPRITE_ID_WHITE_MIDDLE_RIGHT;
-		// Missing bottom row sprites for white, use middle row instead
-		idBottomLeft = SPRITE_ID_BLANK;
-		idBottomCenter = SPRITE_ID_BLANK;
-		idBottomRight = SPRITE_ID_BLANK;
+		sprites = {
+			SPRITE_ID_WHITE_TOP_LEFT, SPRITE_ID_WHITE_TOP_CENTER, SPRITE_ID_WHITE_TOP_RIGHT,
+			SPRITE_ID_WHITE_MIDDLE_LEFT, SPRITE_ID_WHITE_MIDDLE_CENTER, SPRITE_ID_WHITE_MIDDLE_RIGHT,
+			SPRITE_ID_WHITE_MIDDLE_LEFT, SPRITE_ID_WHITE_MIDDLE_CENTER, SPRITE_ID_WHITE_MIDDLE_RIGHT // Use middle row for bottom
+		};
 		break;
 	case 4: // Black
-		idTopLeft = SPRITE_ID_BLACK_TOP_LEFT;
-		idTopCenter = SPRITE_ID_BLACK_TOP_CENTER;
-		idTopRight = SPRITE_ID_BLACK_TOP_RIGHT;
-		idMiddleLeft = SPRITE_ID_BLACK_MIDDLE_LEFT;
-		idMiddleCenter = SPRITE_ID_BLACK_MIDDLE_CENTER;
-		idMiddleRight = SPRITE_ID_BLACK_MIDDLE_RIGHT;
-		idBottomLeft = SPRITE_ID_BLACK_BOTTOM_LEFT;
-		idBottomCenter = SPRITE_ID_BLACK_BOTTOM_CENTER;
-		idBottomRight = SPRITE_ID_BLACK_BOTTOM_RIGHT;
+		sprites = {
+			SPRITE_ID_BLACK_TOP_LEFT, SPRITE_ID_BLACK_TOP_CENTER, SPRITE_ID_BLACK_TOP_RIGHT,
+			SPRITE_ID_BLACK_MIDDLE_LEFT, SPRITE_ID_BLACK_MIDDLE_CENTER, SPRITE_ID_BLACK_MIDDLE_RIGHT,
+			SPRITE_ID_BLACK_BOTTOM_LEFT, SPRITE_ID_BLACK_BOTTOM_CENTER, SPRITE_ID_BLACK_BOTTOM_RIGHT
+		};
 		break;
 	case 5: // Ending background
-		idTopLeft = SPRITE_ID_ENDING_BORDER;
-		idTopCenter = SPRITE_ID_ENDING_BACKGROUND;
-		idTopRight = SPRITE_ID_ENDING_BACKGROUND;
-		idMiddleLeft = SPRITE_ID_ENDING_BORDER;
-		idMiddleCenter = SPRITE_ID_ENDING_BACKGROUND;
-		idMiddleRight = SPRITE_ID_ENDING_BACKGROUND;
-		idBottomLeft = SPRITE_ID_ENDING_BORDER;
-		idBottomCenter = SPRITE_ID_ENDING_BACKGROUND;
-		idBottomRight = SPRITE_ID_ENDING_BACKGROUND;
+		sprites = {
+			SPRITE_ID_ENDING_BORDER, SPRITE_ID_ENDING_BACKGROUND, SPRITE_ID_ENDING_BACKGROUND,
+			SPRITE_ID_ENDING_BORDER, SPRITE_ID_ENDING_BACKGROUND, SPRITE_ID_ENDING_BACKGROUND,
+			SPRITE_ID_ENDING_BORDER, SPRITE_ID_ENDING_BACKGROUND, SPRITE_ID_ENDING_BACKGROUND
+		};
 		break;
 	default:
-		idTopLeft = SPRITE_ID_BLANK;
-		idTopCenter = SPRITE_ID_BLANK;
-		idTopRight = SPRITE_ID_BLANK;
-		idMiddleLeft = SPRITE_ID_BLANK;
-		idMiddleCenter = SPRITE_ID_BLANK;
-		idMiddleRight = SPRITE_ID_BLANK;
-		idBottomLeft = SPRITE_ID_BLANK;
-		idBottomCenter = SPRITE_ID_BLANK;
-		idBottomRight = SPRITE_ID_BLANK;
-		return;
+		return; // No rendering for invalid color
 	}
 
-	for (int i = 0; i < this->height; i++)
+	for (int i = 0; i < height; i++)
 	{
-		for (int j = 0; j < this->width; j++)
+		for (int j = 0; j < width; j++)
 		{
 			float current_x = x + j * BOX_CELL_WIDTH;
 			float current_y = y + i * BOX_CELL_HEIGHT;
-			int spriteIdToDraw = -1; // Use -1 to indicate no sprite selected yet
+			int spriteId = -1;
 
-			// Determine Row Type
 			bool isTopRow = (i == 0);
-			bool isBottomRow = (i == this->height - 1);
-			bool isMiddleRow = (!isTopRow && !isBottomRow);
-
-			// Determine Column Type
+			bool isBottomRow = (i == height - 1);
 			bool isLeftCol = (j == 0);
-			bool isRightCol = (j == this->width - 1);
-			bool isCenterCol = (!isLeftCol && !isRightCol);
+			bool isRightCol = (j == width - 1);
 
-			// Select the correct sprite ID based on position
-			if (isTopRow)
+			if (isTopRow || (height == 1)) // Single-row boxes use top sprites
 			{
-				if (isLeftCol) spriteIdToDraw = idTopLeft;
-				else if (isRightCol) spriteIdToDraw = idTopRight;
-				else spriteIdToDraw = idTopCenter; // isCenterCol
+				spriteId = isLeftCol ? sprites.topLeft :
+					isRightCol ? sprites.topRight : sprites.topCenter;
 			}
 			else if (isBottomRow)
 			{
-				// Handle single-row boxes (height=1 means top row IS bottom row)
-				if (this->height == 1) {
-					if (isLeftCol) spriteIdToDraw = idTopLeft;
-					else if (isRightCol) spriteIdToDraw = idTopRight;
-					else spriteIdToDraw = idTopCenter;
-				}
-				// Handle multi-row boxes
-				else {
-					if (isLeftCol) spriteIdToDraw = idBottomLeft;
-					else if (isRightCol) spriteIdToDraw = idBottomRight;
-					else spriteIdToDraw = idBottomCenter; // isCenterCol
-				}
+				spriteId = isLeftCol ? sprites.bottomLeft :
+					isRightCol ? sprites.bottomRight : sprites.bottomCenter;
 			}
-			else // isMiddleRow
+			else // Middle row
 			{
-				if (isLeftCol) spriteIdToDraw = idMiddleLeft;
-				else if (isRightCol) spriteIdToDraw = idMiddleRight;
-				else spriteIdToDraw = idMiddleCenter; // isCenterCol
+				spriteId = isLeftCol ? sprites.middleLeft :
+					isRightCol ? sprites.middleRight : sprites.middleCenter;
 			}
-			if (spriteIdToDraw != -1) {
-				LPSPRITE sprite = s->Get(spriteIdToDraw);
-				if (sprite) {
+
+			if (spriteId != -1)
+			{
+				LPSPRITE sprite = s->Get(spriteId);
+				if (sprite)
+				{
 					sprite->Draw(current_x, current_y);
 				}
-				else {
-					// Handle error: Sprite ID not found
-					// Example: DebugOut(L"[ERROR] Sprite ID %d not found in CBox::Render\n", spriteIdToDraw);
+				else
+				{
+					//DebugOut(L"[ERROR] Box Sprite ID %d not found in CBox::RenderBox\n", spriteId);
 				}
 			}
 		}
-		float shadow_x = x + this->width * BOX_CELL_WIDTH;
-		for (int i = 0; i < this->height; i++)
+	}
+}
+
+void CBox::RenderShadow(CSprites* s)
+{
+	if (width <= 0 || height <= 0) return;
+
+	// Right edge shadow (always rendered, outside right border)
+	for (int j = 0; j < height; j++)
+	{
+		float shadow_x = x + width * BOX_CELL_WIDTH; // Right of the box's rightmost column
+		float shadow_y = y + j * BOX_CELL_HEIGHT;   // Aligned with box rows
+		int shadowSpriteId = -1;
+
+		if (j == 0)
+			shadowSpriteId = SPRITE_ID_SHADOW_TOP_RIGHT;      // Top-right corner
+		else
+			shadowSpriteId = SPRITE_ID_SHADOW_MIDDLE_RIGHT;   // Middle-right cells
+
+		if (shadowSpriteId != -1)
 		{
-			float shadow_y = y + i * BOX_CELL_HEIGHT;
-			int shadowSpriteId = -1;
-
-			if (i == 0) {
-				shadowSpriteId = SPRITE_ID_SHADOW_TOP_RIGHT;
+			LPSPRITE shadowSprite = s->Get(shadowSpriteId);
+			if (shadowSprite)
+			{
+				shadowSprite->Draw(shadow_x, shadow_y);
 			}
-			else {
-				shadowSpriteId = SPRITE_ID_SHADOW_MIDDLE_RIGHT;
-			}
-
-			if (shadowSpriteId != -1) {
-				LPSPRITE shadowSprite = s->Get(shadowSpriteId);
-				if (shadowSprite) {
-					shadowSprite->Draw(shadow_x, shadow_y);
-				}
-				else {
-					// Handle error: Shadow Sprite ID not found
-					// Example: DebugOut(L"[ERROR] Shadow Sprite ID %d not found in CBox::Render\n", shadowSpriteId);
-				}
+			else
+			{
+				DebugOut(L"[ERROR] Shadow Sprite ID %d not found in CBox::RenderShadow\n", shadowSpriteId);
 			}
 		}
-
 	}
 
-	//RenderBoundingBox();
+	// Bottom shadow (rendered only when bottomShadow == 1, outside bottom border)
+	if (bottomShadow == 1)
+	{
+		for (int i = 0; i <= width; i++)
+		{
+			float shadow_x = x + i * BOX_CELL_WIDTH;         // Aligned with box columns
+			float shadow_y = y + height * BOX_CELL_HEIGHT;   // Below the box's bottommost row
+			int shadowSpriteId = -1;
+
+			if (i == 0)
+				shadowSpriteId = SPRITE_ID_SHADOW_BOTTOM_LEFT;    // Bottom-left corner
+			else if (i == width)
+				shadowSpriteId = SPRITE_ID_SHADOW_BOTTOM_RIGHT;   // Bottom-right corner (matches right edge)
+			else
+				shadowSpriteId = SPRITE_ID_SHADOW_BOTTOM_CENTER;  // Bottom-center cells
+
+			if (shadowSpriteId != -1)
+			{
+				LPSPRITE shadowSprite = s->Get(shadowSpriteId);
+				if (shadowSprite)
+				{
+					shadowSprite->Draw(shadow_x, shadow_y);
+				}
+				else
+				{
+					DebugOut(L"[ERROR] Shadow Sprite ID %d not found in CBox::RenderShadow\n", shadowSpriteId);
+				}
+			}
+		}
+	}
+}
+
+void CBox::Render()
+{
+	CSprites* s = CSprites::GetInstance();
+	RenderBox(s);
+	RenderShadow(s);
 }
 
 void CBox::GetBoundingBox(float& l, float& t, float& r, float& b)

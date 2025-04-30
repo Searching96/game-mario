@@ -38,7 +38,7 @@ protected:
 	float y0 = -1;
 
 public:
-	CLifeBrick(float x, float y, CLifeMushroom* mushroom);
+	CLifeBrick(float x, float y, int z, CLifeMushroom* mushroom);
 
 	void Render();
 	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);

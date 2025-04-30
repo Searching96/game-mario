@@ -22,7 +22,7 @@ protected:
 	int height;				// Unit: cell
 
 public:
-	CPlatform(float x, float y, int width, int height) : CGameObject(x, y)
+	CPlatform(float x, float y, int z, int width, int height) : CGameObject(x, y, z)
 	{
 		this->height = height;
 		this->width = width;

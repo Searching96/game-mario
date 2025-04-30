@@ -32,7 +32,7 @@ protected:
 	float y0 = -1;
 
 public:
-	CCoinQBlock(float x, float y, CCoin* coin);
+	CCoinQBlock(float x, float y, int z, CCoin* coin);
 
 	void Render();
 	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);

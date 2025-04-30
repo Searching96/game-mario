@@ -12,10 +12,10 @@ protected:
 		spriteIdBottomLeft, spriteIdBottomRight;
 
 public:
-	CTree(float x, float y,
+	CTree(float x, float y, int z,
 		float cell_width, float cell_height, int height,
 		int sprite_id_top_left, int sprite_id_top_right,
-		int sprite_id_bottom_left, int sprite_id_bottom_right) : CGameObject(x, y)
+		int sprite_id_bottom_left, int sprite_id_bottom_right) : CGameObject(x, y, z)
 	{
 		this->height = height;
 		this->cellWidth = cell_width;

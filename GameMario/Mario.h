@@ -237,20 +237,21 @@
 
 class CMario : public CGameObject
 {
-	CTailWhip* tailWhip;
+	CTailWhip* tailWhip = nullptr;
 
+	// --- State Variables ---
 	BOOLEAN isSitting;
 	float maxVx;
-	float ax;				// acceleration on x 
-	float ay;				// acceleration on y 
+	float ax;
+	float ay;
 
 	float frictionX;
 
-	int level; 
+	int level;
 	int untouchable;
 	ULONGLONG untouchableStart;
 	BOOLEAN isOnPlatform;
-	int coin; 
+	int coin;
 
 	int powerUp = 0;
 	ULONGLONG powerUpStart = -1;
@@ -260,22 +261,18 @@ class CMario : public CGameObject
 	ULONGLONG powerDownStart = -1;
 	int tailDown = 0;
 	ULONGLONG tailDownStart = -1;
-
-	bool isRendering = 0;
-	ULONGLONG lastRenderTime = -1;
-
 	int isHovering = 0;
 	ULONGLONG hoveringStart = -1;
-
 	int isBraking = 0;
 	float vxBeforeBraking = 0;
 	ULONGLONG brakingStart = -1;
-
 	int isTailWhipping = 0;
 	ULONGLONG tailWhipStart = -1;
-
 	int isKicking = 0;
 	ULONGLONG kickStart = -1;
+
+	bool isRendering = true;
+	ULONGLONG lastRenderTime = -1;
 
 	int isHoldingKoopa = 0;
 	int jumpCount = 0;
@@ -305,15 +302,17 @@ class CMario : public CGameObject
 	void HandleBraking(DWORD dt);
 	void HandleUntouchable(DWORD dt);
 	void HandleHovering(DWORD dt);
+	void HandleTailWhip(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 
 public:
-	CMario(float x, float y, CTailWhip* tailWhip);
+	CMario(float x, float y, int z);
+	virtual ~CMario();
+
 	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 	void Render();
 	void SetState(int state);
 
 	int IsCollidable() { return (state != MARIO_STATE_DIE); }
-
 	int IsBlocking() { return 0; }
 
 	void OnNoCollision(DWORD dt);
@@ -329,19 +328,25 @@ public:
 	void StartKick() { isKicking = 1; kickStart = GetTickCount64(); }
 	void StartBraking();
 	void StartHovering() { isHovering = 1; hoveringStart = GetTickCount64(); tailWagged = 0; }
-	void StartTailWhip() { isTailWhipping = 1; tailWhipStart = GetTickCount64(); }
+	void StartTailWhip();
 
-	int GetJumpCount() { return jumpCount; }
-	int GetLevel() { return level; }
-	int GetIsPowerUp() { return powerUp; }
-	int GetIsTailUp() { return tailUp; }
-	int GetIsPowerDown() { return powerDown; }
-	int GetIsTailDown() { return tailDown; }
-	int GetIsRunning() { return isRunning; }
-	void GetNx(float &nx) { nx = this->nx; }
-	CTailWhip* GetTailWhip() { return tailWhip; }
+	int GetJumpCount() const { return jumpCount; }
+	int GetLevel() const { return level; }
+	int GetIsPowerUp() const { return powerUp; }
+	int GetIsTailUp() const { return tailUp; }
+	int GetIsPowerDown() const { return powerDown; }
+	int GetIsTailDown() const { return tailDown; }
+	int GetIsHovering() const { return isHovering; }
+	int GetIsRunning() const { return isRunning; }
+	int GetIsFlying() { return !isOnPlatform && jumpCount > 1; }
+	void GetNx(float& nx_out) { nx_out = this->nx; }
+	BOOLEAN IsOnPlatform() const { return isOnPlatform; }
+
+	CTailWhip* GetTailWhip() const { return tailWhip; }
+	CTailWhip* GetActiveTailWhip();
 
 	void SetLevel(int l);
 	void SetIsRunning(int isRunning) { this->isRunning = isRunning; }
 	void SetIsHoldingKoopa(int isHoldingKoopa) { this->isHoldingKoopa = isHoldingKoopa; }
+	void SetIsJumpButtonHeld(int held) { this->isJumpButtonHeld = held; }
 };

@@ -7,20 +7,16 @@
 #define ID_SPRITE_BRICK 1000001
 #define ID_SPRITE_STRIPED_BRICK 1000002
 
+#define BRICK_CELL_WIDTH 16
+#define BRICK_CELL_HEIGHT 16
+
 class CBrick : public CGameObject {
 protected:
-	//int width; default = 1				// Unit: cell 
-	//int height; default = 1				// Unit: cell
-	float cellWidth;
-	float cellHeight;
 	int type; // 0: brick, 1: striped
 
 public:
-	CBrick(float x, float y,
-		float cell_width, float cell_height, int type) : CGameObject(x, y)
+	CBrick(float x, float y, int z, int type) : CGameObject(x, y, z)
 	{
-		this->cellWidth = cell_width;
-		this->cellHeight = cell_height;
 		this->type = type;
 	}
 
