@@ -42,8 +42,7 @@ protected:
 
 	int wingState = 0; // 0: flap, 1: fold
 
-	ULONGLONG dieOnStompStart = -1;
-	ULONGLONG dieOnWhipStart = -1;
+	ULONGLONG dieStart = -1;
 	ULONGLONG flapStart = -1;
 
 	int isWinged = 1;
@@ -54,20 +53,16 @@ protected:
 	ULONGLONG flyingStart = -1;
 
 	int bounceCount = 0;
+	int isDead = 0;
 
 	virtual void GetBoundingBox(float& left, float& top, float& right, float& bottom);
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 	virtual void Render();
 
-	virtual int IsCollidable() 
-	{ 
-		return (state != WINGED_GOOMBA_STATE_DIE_ON_STOMP
-			&& state != WINGED_GOOMBA_STATE_DIE_ON_TAIL_WHIP
-			&& state != WINGED_GOOMBA_STATE_DIE_ON_HELD_KOOPA); 
-	}
+	virtual int IsCollidable() { return (isDead == 0); }
 	virtual int IsBlocking() { return 0; }
-	virtual void OnNoCollision(DWORD dt);
 
+	virtual void OnNoCollision(DWORD dt);
 	virtual void OnCollisionWith(LPCOLLISIONEVENT e);
 
 public:
@@ -76,6 +71,7 @@ public:
 	void StartTracking() { isTracking = 1; trackingStart = GetTickCount64(); }
 	void StartBouncing() { isBouncing = 1; bounceCount++; }
 	void StartFlying() { isFlying = 1; flyingStart = GetTickCount64(); }
-	void SetWinged(int winged) { isWinged = winged; }
-	int GetWinged() { return isWinged; }
+	void SetIsWinged(int isWinged) { isWinged = isWinged; }
+	int GetIsWinged() { return isWinged; }
+	int GetIsDead() { return isDead; }
 };

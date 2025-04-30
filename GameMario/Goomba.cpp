@@ -36,15 +36,16 @@ void CGoomba::OnNoCollision(DWORD dt)
 
 void CGoomba::OnCollisionWith(LPCOLLISIONEVENT e)
 {
-	if (!e->obj->IsBlocking() && !dynamic_cast<CKoopa*>(e->obj))
+	if (!e->obj->IsBlocking())
 		return;
-	if (dynamic_cast<CGoomba*>(e->obj)) return;
+
+	if (dynamic_cast<CGoomba*>(e->obj)) vx = -vx;
 
 	if (CKoopa* koopa = dynamic_cast<CKoopa*>(e->obj))
 	{
 		if (koopa->GetState() == KOOPA_STATE_SHELL_DYNAMIC)
 		{
-			if (this->state != GOOMBA_STATE_DIE_ON_STOMP && this->state != GOOMBA_STATE_DIE_ON_TAIL_WHIP)
+			if (isDead == 0)
 			{
 				DebugOut(L"Shell hit Goomba (Detected in Goomba.cpp)");
 				this->SetState(GOOMBA_STATE_DIE_ON_TAIL_WHIP);
@@ -91,7 +92,6 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		return;
 	}
 
-
 	CGameObject::Update(dt, coObjects);
 	CCollision::GetInstance()->Process(this, dt, coObjects);
 }
@@ -101,13 +101,9 @@ void CGoomba::Render()
 {
 	int aniId = ID_ANI_GOOMBA_WALKING;
 	if (state == GOOMBA_STATE_DIE_ON_STOMP) 
-	{
 		aniId = ID_ANI_GOOMBA_DIE_ON_STOMP;
-	}
 	else if (state == GOOMBA_STATE_DIE_ON_TAIL_WHIP)
-	{
 		aniId = ID_ANI_GOOMBA_DIE_ON_TAIL_WHIP;
-	}
 
 	CAnimations::GetInstance()->Get(aniId)->Render(x,y);
 
@@ -116,6 +112,7 @@ void CGoomba::Render()
 
 void CGoomba::SetState(int state)
 {
+	if (isDead == 1) return;
 	CGameObject::SetState(state);
 	switch (state)
 	{

@@ -286,7 +286,6 @@ class CMario : public CGameObject
 	void OnCollisionWithGoomba(LPCOLLISIONEVENT e);
 	void OnCollisionWithCoin(LPCOLLISIONEVENT e);
 	void OnCollisionWithPortal(LPCOLLISIONEVENT e);
-	void OnCollisionWithQuestionBlock(LPCOLLISIONEVENT e);
 	void OnCollisionWithMushroom(LPCOLLISIONEVENT e);
 	void OnCollisionWithSuperLeaf(LPCOLLISIONEVENT e);
 	void OnCollisionWithPiranhaPlant(LPCOLLISIONEVENT e);
@@ -338,7 +337,7 @@ public:
 	int GetIsPowerDown() { return powerDown; }
 	int GetIsTailDown() { return tailDown; }
 	int GetIsRunning() { return isRunning; }
-	void GetNx(float &nx) { nx = this->nx; }
+	int GetNx() { return nx; }
 	CTailWhip* GetTailWhip() { return tailWhip; }
 
 	void SetLevel(int l);

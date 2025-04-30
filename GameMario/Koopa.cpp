@@ -161,7 +161,7 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		return;
 	}
 
-	CMario* mario = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+	CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
 
 	if (isFlying && vy == 0)
 	{
@@ -174,17 +174,17 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	if ((state == KOOPA_STATE_SHELL_STATIC || state == KOOPA_STATE_BEING_HELD)
 		&& !isKicked && (GetTickCount64() - shellStart > KOOPA_SHELL_TIMEOUT))
 	{
-		if (mario->GetIsRunning() == 1 && beingHeld == 1)
+		if (player->GetIsRunning() == 1 && beingHeld == 1)
 		{
-			if (mario->GetLevel() == MARIO_LEVEL_TAIL)
-				mario->SetState(MARIO_STATE_TAIL_DOWN);
-			else if (mario->GetLevel() == MARIO_LEVEL_BIG)
-				mario->SetState(MARIO_STATE_POWER_DOWN);
-			else if (mario->GetLevel() == MARIO_LEVEL_SMALL)
-				mario->SetState(MARIO_STATE_DIE);
+			if (player->GetLevel() == MARIO_LEVEL_TAIL)
+				player->SetState(MARIO_STATE_TAIL_DOWN);
+			else if (player->GetLevel() == MARIO_LEVEL_BIG)
+				player->SetState(MARIO_STATE_POWER_DOWN);
+			else if (player->GetLevel() == MARIO_LEVEL_SMALL)
+				player->SetState(MARIO_STATE_DIE);
 
 			beingHeld = 0;
-			mario->SetIsHoldingKoopa(0);
+			player->SetIsHoldingKoopa(0);
 
 			// Check for collision with blocking objects
 			vector<LPCOLLISIONEVENT> coEvents;
@@ -200,8 +200,8 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				{
 					this->SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_TERRAIN);
 					beingHeld = 0;
-					mario->SetIsHoldingKoopa(0);
-					mario->StartKick();
+					player->SetIsHoldingKoopa(0);
+					player->StartKick();
 					break;
 				}
 			}
@@ -241,23 +241,21 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		for (size_t i = 0; i < coEvents.size(); i++) delete coEvents[i];
 		if (isKilledOnCollideWithEnemy == 1)
 		{
-			mario->SetIsHoldingKoopa(0);
+			player->SetIsHoldingKoopa(0);
 			beingHeld = 0;
 			vy += ay * dt;
 			y += vy * dt;
 			return;
 		}
 
-		if (mario->GetIsRunning() == 0)
+		if (player->GetIsRunning() == 0)
 		{
-			float mNx;
-			mario->GetNx(mNx);
 			this->SetState(KOOPA_STATE_SHELL_DYNAMIC);
-			this->SetNx(mNx);
+			this->SetNx(player->GetNx());
 			this->SetSpeed((nx > 0) ? KOOPA_SHELL_SPEED : - KOOPA_SHELL_SPEED, 0);
 			beingHeld = 0;
-			mario->SetIsHoldingKoopa(0);
-			mario->StartKick();
+			player->SetIsHoldingKoopa(0);
+			player->StartKick();
 
 			// Kiểm tra va chạm với các đối tượng có IsBlocking = 1
 			vector<LPCOLLISIONEVENT> coEvents;
@@ -273,8 +271,8 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				{
 					SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_TERRAIN);
 					beingHeld = 0;
-					mario->SetIsHoldingKoopa(0);
-					mario->StartKick();
+					player->SetIsHoldingKoopa(0);
+					player->StartKick();
 					break;
 				}
 			}
@@ -284,10 +282,9 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		}
 
 		float mX, mY;
-		mario->GetPosition(mX, mY);
-		float mNx;
-		mario->GetNx(mNx);
-		if (mario->GetLevel() == MARIO_LEVEL_BIG || mario->GetLevel() == MARIO_LEVEL_TAIL)
+		player->GetPosition(mX, mY);
+		float mNx = player->GetNx();
+		if (player->GetLevel() == MARIO_LEVEL_BIG || player->GetLevel() == MARIO_LEVEL_TAIL)
 		{
 			if (mNx > 0)
 				x = mX + 8;
@@ -400,9 +397,7 @@ void CKoopa::SetState(int state)
 		{
 			dieStart = GetTickCount64();
 			CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
-			float mNx;
-			player->GetNx(mNx);
-			vx = (mNx > 0) ? 0.2f : -0.2f;
+			vx = (player->GetNx() > 0) ? 0.2f : -0.2f;
 			vy = -0.35f;
 			ax = 0;
 			ay = KOOPA_GRAVITY;
