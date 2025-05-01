@@ -41,8 +41,9 @@ using namespace std;
 // --- Constants ---
 #define SCENE_SECTION_UNKNOWN -1
 #define SCENE_SECTION_ASSETS	1
-#define SCENE_SECTION_CHUNK_OBJECT 2
-#define SCENE_SECTION_SETTINGS 3
+#define SCENE_SECTION_SETTINGS 2
+#define SCENE_SECTION_MARIO	3
+#define SCENE_SECTION_CHUNK_OBJECT 4
 
 #define ASSETS_SECTION_UNKNOWN -1
 #define ASSETS_SECTION_SPRITES 1
@@ -176,6 +177,27 @@ void CPlayScene::_ParseSection_SETTINGS(string line)
 	}
 }
 
+void CPlayScene::_ParseSection_MARIO(string line)
+{
+	vector<string> tokens = split(line);
+	if (tokens.size() < 2) { // Need coords X and Y
+		DebugOut(L"[WARN] Invalid mario line format: %hs\n", line.c_str());
+		return;
+	}
+
+	float x, y;
+	try {
+		x = stoi(tokens[0]);
+		y = stof(tokens[1]);
+	}
+	catch (const exception& e) {
+		DebugOut(L"[ERROR] Failed to parse basic Mario data (type,x,y) for line: %hs. Exception: %hs\n", line.c_str(), e.what());
+		return;
+	}
+	player = (CMario*)(new CMario(x, y, ZINDEX_PLAYER));
+	return;
+}
+
 void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 {
 	if (targetChunk == nullptr) {
@@ -207,13 +229,6 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 	try {
 		switch (object_type)
 		{
-		case OBJECT_TYPE_MARIO:
-		{
-			zIndex = ZINDEX_PLAYER;
-			obj = new CMario(x, y, zIndex);
-			player = (CMario*)obj;
-			return;
-		}
 		case OBJECT_TYPE_GOOMBA:
 		{
 			zIndex = ZINDEX_ENEMIES;
@@ -594,6 +609,7 @@ void CPlayScene::Load()
 			}
 			continue; // Move to next line after processing chunk header
 		}
+		if (line == "[MARIO]") { section = SCENE_SECTION_MARIO; continue; }
 		// If it's another section type, reset currentParsingChunk
 		if (line[0] == '[') {
 			section = SCENE_SECTION_UNKNOWN;
@@ -607,6 +623,7 @@ void CPlayScene::Load()
 		{
 		case SCENE_SECTION_ASSETS:   _ParseSection_ASSETS(line); break;
 		case SCENE_SECTION_SETTINGS: _ParseSection_SETTINGS(line); break;
+		case SCENE_SECTION_MARIO: _ParseSection_MARIO(line); break;
 		case SCENE_SECTION_CHUNK_OBJECT:
 			// Objects are loaded later via LoadChunkObjects, skip here
 			// We only parse the chunk headers during this initial pass.
