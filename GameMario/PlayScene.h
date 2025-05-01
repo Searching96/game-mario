@@ -30,6 +30,7 @@ protected:
 	void _ParseSection_ANIMATIONS(string line);
 	void _ParseSection_ASSETS(string line);
 	void _ParseSection_SETTINGS(string line);
+	void _ParseSection_MARIO(string line);
 	void _ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk);
 
 	void LoadAssets(LPCWSTR assetFile);
