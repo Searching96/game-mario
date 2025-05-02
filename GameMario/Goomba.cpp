@@ -37,15 +37,16 @@ void CGoomba::OnNoCollision(DWORD dt)
 // Corrected Goomba::OnCollisionWith
 void CGoomba::OnCollisionWith(LPCOLLISIONEVENT e)
 {
-	if (!e->obj->IsBlocking() && !dynamic_cast<CKoopa*>(e->obj))
+	if (!e->obj->IsBlocking())
 		return;
-	if (dynamic_cast<CGoomba*>(e->obj)) return;
+
+	if (dynamic_cast<CGoomba*>(e->obj)) vx = -vx;
 
 	if (CKoopa* koopa = dynamic_cast<CKoopa*>(e->obj))
 	{
 		if (koopa->GetState() == KOOPA_STATE_SHELL_DYNAMIC)
 		{
-			if (this->state != GOOMBA_STATE_DIE_ON_STOMP && this->state != GOOMBA_STATE_DIE_ON_TAIL_WHIP)
+			if (isDead == 0)
 			{
 				DebugOut(L"Shell hit Goomba (Detected in Goomba.cpp)");
 				this->SetState(GOOMBA_STATE_DIE_ON_TAIL_WHIP);
@@ -86,17 +87,11 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	vy += ay * dt;
 	vx += ax * dt;
 
-	if ((state==GOOMBA_STATE_DIE_ON_STOMP) && (GetTickCount64() - dieOnStompStart > GOOMBA_DIE_TIMEOUT))
+	if (isDead == 1 && (GetTickCount64() - dieStart > GOOMBA_DIE_TIMEOUT))
 	{
 		isDeleted = true;
 		return;
 	}
-	if ((state == GOOMBA_STATE_DIE_ON_TAIL_WHIP) && (GetTickCount64() - dieOnWhipStart > GOOMBA_DIE_TIMEOUT))
-	{
-		isDeleted = true;
-		return;
-	}
-
 
 	CGameObject::Update(dt, coObjects);
 	CCollision::GetInstance()->Process(this, dt, coObjects);
@@ -107,13 +102,9 @@ void CGoomba::Render()
 {
 	int aniId = ID_ANI_GOOMBA_WALKING;
 	if (state == GOOMBA_STATE_DIE_ON_STOMP) 
-	{
 		aniId = ID_ANI_GOOMBA_DIE_ON_STOMP;
-	}
 	else if (state == GOOMBA_STATE_DIE_ON_TAIL_WHIP)
-	{
 		aniId = ID_ANI_GOOMBA_DIE_ON_TAIL_WHIP;
-	}
 
 	CAnimations::GetInstance()->Get(aniId)->Render(x,y);
 
@@ -122,20 +113,29 @@ void CGoomba::Render()
 
 void CGoomba::SetState(int state)
 {
+	if (isDead == 1) return;
 	CGameObject::SetState(state);
 	switch (state)
 	{
 	case GOOMBA_STATE_DIE_ON_STOMP:
-		dieOnStompStart = GetTickCount64();
+		dieStart = GetTickCount64();
 		y += (GOOMBA_BBOX_HEIGHT - GOOMBA_BBOX_HEIGHT_DIE)/2 - 3;
 		vx = 0;
 		vy = 0;
-		ay = 0; 
+		ay = 0;
+		isDead = 1;
 		break;
 	case GOOMBA_STATE_DIE_ON_TAIL_WHIP:
-		dieOnWhipStart = GetTickCount64();
+		dieStart = GetTickCount64();
 		vy = -0.5f;
 		ay = GOOMBA_GRAVITY;
+		isDead = 1;
+		break;
+	case GOOMBA_STATE_DIE_ON_HELD_KOOPA:
+		dieStart = GetTickCount64();
+		vy = -0.35f;
+		ay = GOOMBA_GRAVITY;
+		isDead = 1;
 		break;
 	case GOOMBA_STATE_WALKING: 
 		vx = -GOOMBA_WALKING_SPEED;

@@ -118,15 +118,6 @@ void CTailWhip::OnCollisionWith(LPCOLLISIONEVENT e)
 		OnCollisionWithCoinQBlock(e);
 	else if (dynamic_cast<CPiranhaPlant*>(e->obj))
 		OnCollisionWithPiranhaPlant(e);
-	else if (dynamic_cast<CQuestionBlock*>(e->obj))
-		OnCollisionWithQuestionBlock(e);
-}
-
-void CTailWhip::OnCollisionWithQuestionBlock(LPCOLLISIONEVENT e)
-{
-	CQuestionBlock* qb = dynamic_cast<CQuestionBlock*>(e->obj);
-	if (qb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
-		qb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
 }
 
 void CTailWhip::OnCollisionWithBuffQBlock(LPCOLLISIONEVENT e)
@@ -139,15 +130,15 @@ void CTailWhip::OnCollisionWithBuffQBlock(LPCOLLISIONEVENT e)
 		{
 			if (player->GetLevel() == MARIO_LEVEL_SMALL)
 			{
-				CMushroom* mushroom = bqb->GetMushroom();
-				if (mushroom)
+				CMushroom* mr = bqb->GetMushroom();
+				if (mr)
 				{
 					float mX, mY;
-					mushroom->GetPosition(mX, mY);
+					mr->GetPosition(mX, mY);
 					if (x < mX)
-						mushroom->SetCollisionNx(1);
+						mr->SetCollisionNx(1);
 					else
-						mushroom->SetCollisionNx(-1);
+						mr->SetCollisionNx(-1);
 				}
 				bqb->SetToSpawn(0);
 			}
@@ -167,47 +158,52 @@ void CTailWhip::OnCollisionWithCoinQBlock(LPCOLLISIONEVENT e) {
 
 void CTailWhip::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
 {
-	CGoomba* goomba = dynamic_cast<CGoomba*>(e->obj);
-	if (goomba && goomba->GetState() != GOOMBA_STATE_DIE_ON_STOMP && goomba->GetState() != GOOMBA_STATE_DIE_ON_TAIL_WHIP)
+	CGoomba* g = dynamic_cast<CGoomba*>(e->obj);
+	if (g)
 	{
+		if (g->GetIsDead() == 1) return;
+
 		if (attackParticle) attackParticle->SetState(ATTACK_PARTICLE_STATE_EMERGING);
-		goomba->SetState(GOOMBA_STATE_DIE_ON_TAIL_WHIP);
+		g->SetState(GOOMBA_STATE_DIE_ON_TAIL_WHIP);
 	}
 }
 
 void CTailWhip::OnCollisionWithPiranhaPlant(LPCOLLISIONEVENT e)
 {
-	CPiranhaPlant* plant = dynamic_cast<CPiranhaPlant*>(e->obj);
-	if (plant && plant->GetState() != PIRANHA_PLANT_STATE_HIDDEN)
+	CPiranhaPlant* pp = dynamic_cast<CPiranhaPlant*>(e->obj);
+	if (pp)
 	{
+		if (pp->GetState() == PIRANHA_PLANT_STATE_HIDDEN) return;
 		if (attackParticle) attackParticle->SetState(ATTACK_PARTICLE_STATE_EMERGING);
-		plant->Delete();
+		pp->SetState(PIRANHA_PLANT_STATE_DIED);
 	}
 }
 
 void CTailWhip::OnCollisionWithKoopa(LPCOLLISIONEVENT e)
 {
-	CKoopa* koopa = dynamic_cast<CKoopa*>(e->obj);
-	if (koopa && koopa->GetState() != KOOPA_STATE_BEING_HELD)
+	CKoopa* k = dynamic_cast<CKoopa*>(e->obj);
+	if (k)
 	{
 		if (attackParticle) attackParticle->SetState(ATTACK_PARTICLE_STATE_EMERGING);
-		koopa->StartShell();
-		koopa->SetState(KOOPA_STATE_SHELL_STATIC);
+		k->StartShell();
+		k->SetState(KOOPA_STATE_SHELL_STATIC);
 		float knockback_vx = (this->nx > 0) ? 0.1f : -0.1f;
 		float knockback_vy = -0.5f;
-		koopa->SetFlying(true);
-		koopa->SetReversed(true);
+		k->SetFlying(true);
+		k->SetReversed(true);
 		koopa->SetSpeed(knockback_vx, knockback_vy);
 	}
 }
 
 void CTailWhip::OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e)
 {
-	CWingedGoomba* wingedGoomba = dynamic_cast<CWingedGoomba*>(e->obj);
-	if (wingedGoomba && wingedGoomba->GetState() != WINGED_GOOMBA_STATE_DIE_ON_STOMP && wingedGoomba->GetState() != WINGED_GOOMBA_STATE_DIE_ON_TAIL_WHIP)
+	CWingedGoomba* wg = dynamic_cast<CWingedGoomba*>(e->obj);
+	if (wg)
 	{
+		if (wg->GetIsDead() == 1) return;
+
 		if (attackParticle) attackParticle->SetState(ATTACK_PARTICLE_STATE_EMERGING);
-		wingedGoomba->SetState(WINGED_GOOMBA_STATE_DIE_ON_TAIL_WHIP);
+		wg->SetState(WINGED_GOOMBA_STATE_DIE_ON_TAIL_WHIP);
 	}
 }
 

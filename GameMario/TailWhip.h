@@ -35,7 +35,6 @@ protected:
 	void OnCollisionWithCoinQBlock(LPCOLLISIONEVENT e);
 	void OnCollisionWithPiranhaPlant(LPCOLLISIONEVENT e);
 
-	void OnCollisionWithQuestionBlock(LPCOLLISIONEVENT e);
 public:
 	CTailWhip(float x, float y, int z);
 	virtual ~CTailWhip();

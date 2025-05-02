@@ -73,7 +73,7 @@ void CMushroom::OnCollisionWith(LPCOLLISIONEVENT e)
 		vy = vy - vy / 50;
 	}
 	if (dynamic_cast<CCoinQBlock*>(e->obj))
-		x += 1;
+		x += 3;
 	//if (dynamic_cast<CCoin*>(e->obj)) return;
 	if (e->nx != 0)
 		vx = -vx;

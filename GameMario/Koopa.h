@@ -71,9 +71,6 @@ protected:
 	virtual void OnNoCollision(DWORD dt);
 
 	virtual void OnCollisionWith(LPCOLLISIONEVENT e);
-	void OnCollisionWithMario(LPCOLLISIONEVENT e);
-	void OnCollisionWithBlock(LPCOLLISIONEVENT e);
-	void OnCollisionWithEnemy(LPCOLLISIONEVENT e);
 	void OnCollisionWithQuestionBlock(LPCOLLISIONEVENT e);
 	void OnCollisionWithBuffQBlock(LPCOLLISIONEVENT e);
 	void OnCollisionWithCoinQBlock(LPCOLLISIONEVENT e);
@@ -86,5 +83,6 @@ public:
 	void SetBeingHeld(int beingHeld) { this->beingHeld = beingHeld; }
 	void SetFlying(bool isFlying) { this->isFlying = isFlying; }
 	void SetReversed(bool isReversed) { this->isReversed = isReversed; }
+	void SetNx(int nx) { this->nx = nx; }
 };
 

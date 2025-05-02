@@ -24,18 +24,18 @@ void CCoin::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
 	if (bounceUp == 1)
 	{
-		if (fabs(y - y0) >= COIN_BOUNCE_OFFSET)
+		if (fabs(y - y0) >= COIN_BOUNCE_UP_OFFSET)
 		{
-			y = y0 - COIN_BOUNCE_OFFSET;
+			y = y0 - COIN_BOUNCE_UP_OFFSET;
 			bounceUp = 0;
 			SetState(COIN_STATE_BOUNCE_DOWN);
 		}
 	}
 	if (bounceDown == 1)
 	{
-		if (fabs(y - y0) >= COIN_BOUNCE_OFFSET)
+		if (fabs(y - y0) >= COIN_BOUNCE_DOWN_OFFSET)
 		{
-			y = y0 + COIN_BOUNCE_OFFSET;
+			y = y0 + COIN_BOUNCE_DOWN_OFFSET;
 			bounceDown = 0;
 			SetState(COIN_STATE_BOUNCE_COMPLETE);
 		}

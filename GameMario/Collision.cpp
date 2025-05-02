@@ -189,6 +189,20 @@ void CCollision::SweptAABB(float ml, float mt, float mr, float mb,
 		}
 	}
 
+	if (dynamic_cast<CKoopa*>(objDest) && (dynamic_cast<CGoomba*>(objSrc)
+		|| dynamic_cast<CWingedGoomba*>(objSrc) || dynamic_cast<CPiranhaPlant*>(objSrc)))
+	{
+		if (dynamic_cast<CKoopa*>(objDest)->GetState() == KOOPA_STATE_SHELL_DYNAMIC)
+		{
+			if (ml < sr && mr > sl && mt < sb && mb > st)
+			{
+				t = 0.0f;      // collision at the start of the frame
+				nx = ny = 0.0f;
+				return;
+			}
+		}
+	}
+
 	//
 	// Broad-phase test 
 	//

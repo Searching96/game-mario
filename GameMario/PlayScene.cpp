@@ -33,6 +33,7 @@
 #include "Trinket.h"
 #include "SkyPlatform.h"
 #include "AttackParticle.h"
+#include "FallPitch.h"
 
 #include "SampleKeyEventHandler.h"
 
@@ -398,6 +399,18 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 			obj = new CPortal(x, y, zIndex, stof(tokens[3]), stof(tokens[4]), stoi(tokens[5]));
 			break;
 		}
+		case OBJECT_TYPE_FALL_PITCH:
+		{
+			if (tokens.size() < 5) {
+				DebugOut(L"[WARN] Skipping FALL_PITCH - Insufficient params in chunk %d: %hs\n", targetChunk->GetID(), line.c_str());
+				return;
+			}
+			float r = (float)atof(tokens[3].c_str());
+			float b = (float)atof(tokens[4].c_str());
+			obj = new CFallPitch(x, y, r, b);
+			break;
+		}
+
 		// Remove cases for base items if they are only created via QBlocks
 		// case OBJECT_TYPE_MUSHROOM: // Only created via BuffQBlock/LifeBrick now
 		// case OBJECT_TYPE_SUPERLEAF: // Only created via BuffQBlock now

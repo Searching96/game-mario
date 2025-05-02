@@ -2,6 +2,11 @@
 #include "GameObject.h"
 #include "Mario.h"
 #include "Fireball.h"
+#include "Koopa.h"
+
+#include "Game.h"
+#include "PlayScene.h"
+
 
 #define PIRANHA_PLANT_BBOX_WIDTH 16
 #define PIRANHA_PLANT_BBOX_HEIGHT 32

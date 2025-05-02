@@ -38,20 +38,17 @@ void CWingedGoomba::OnNoCollision(DWORD dt)
 
 void CWingedGoomba::OnCollisionWith(LPCOLLISIONEVENT e)
 {
-	if (!e->obj->IsBlocking() && !dynamic_cast<CKoopa*>(e->obj)) return;
-	if (dynamic_cast<CWingedGoomba*>(e->obj)) return;
+	if (!e->obj->IsBlocking() && !dynamic_cast<CKoopa*>(e->obj))
+		return;
 
-	// --- Collision with Koopa ---
 	if (CKoopa* koopa = dynamic_cast<CKoopa*>(e->obj))
 	{
 		if (koopa->GetState() == KOOPA_STATE_SHELL_DYNAMIC)
 		{
-			if (this->state == WINGED_GOOMBA_STATE_DIE_ON_STOMP || this->state == WINGED_GOOMBA_STATE_DIE_ON_TAIL_WHIP)
+			if (this->state != WINGED_GOOMBA_STATE_DIE_ON_STOMP && this->state != WINGED_GOOMBA_STATE_DIE_ON_TAIL_WHIP)
 			{
-				return;
+				this->SetState(WINGED_GOOMBA_STATE_DIE_ON_TAIL_WHIP);
 			}
-			DebugOut(L"Shell hit Winged Goomba - Detected in WingedGoomba.cpp\n");
-			this->SetState(WINGED_GOOMBA_STATE_DIE_ON_TAIL_WHIP);
 			return;
 		}
 		else
@@ -59,12 +56,10 @@ void CWingedGoomba::OnCollisionWith(LPCOLLISIONEVENT e)
 			if (e->nx != 0)
 			{
 				vx = -vx;
-				nx = -nx;
 			}
 			return;
 		}
 	}
-
 
 	if (e->obj->IsBlocking())
 	{
@@ -144,12 +139,11 @@ void CWingedGoomba::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	vy += ay * dt;
 	vx += ax * dt;
 
-	if ((state == WINGED_GOOMBA_STATE_DIE_ON_STOMP) && (GetTickCount64() - dieOnStompStart > WINGED_GOOMBA_DIE_TIMEOUT))
+	if (isDead == 1 && (GetTickCount64() - dieStart > GOOMBA_DIE_TIMEOUT))
 	{
 		isDeleted = true;
 		return;
 	}
-
 
 	if (GetTickCount64() - flapStart > 1000)
 	{
@@ -199,21 +193,30 @@ void CWingedGoomba::Render()
 
 void CWingedGoomba::SetState(int state)
 {
-	if (this->state == WINGED_GOOMBA_STATE_DIE_ON_STOMP || this->state == WINGED_GOOMBA_STATE_DIE_ON_TAIL_WHIP)
-		return;
+	if (isDead == 1) return;
+	
 	CGameObject::SetState(state);
 	switch (state)
 	{
 	case WINGED_GOOMBA_STATE_DIE_ON_STOMP:
-		dieOnStompStart = GetTickCount64();
+		dieStart = GetTickCount64();
 		y += (WINGED_GOOMBA_BBOX_HEIGHT - WINGED_GOOMBA_BBOX_HEIGHT_DIE) / 2 - 3;
 		vx = 0;
 		vy = 0;
 		ay = 0;
+		isDead = 1;
 		break;
 	case WINGED_GOOMBA_STATE_DIE_ON_TAIL_WHIP:
+		dieStart = GetTickCount64();
 		vy = -0.5f;
 		ay = WINGED_GOOMBA_GRAVITY;
+		isDead = 1;
+		break;
+	case WINGED_GOOMBA_STATE_DIE_ON_HELD_KOOPA:
+		dieStart = GetTickCount64();
+		vy = -0.35f;
+		ay = WINGED_GOOMBA_GRAVITY;
+		isDead = 1;
 		break;
 	case WINGED_GOOMBA_STATE_WALKING:
 		vx = -WINGED_GOOMBA_WALKING_SPEED;
