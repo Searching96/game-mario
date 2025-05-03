@@ -188,6 +188,22 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	{
 		vx = 0;
 		vy = 0;
+
+		vector<CChunk*> chunk_list = dynamic_cast<CPlayScene*>(CGame::GetInstance()->GetCurrentScene())->GetChunks();
+
+
+		for (auto chunk : chunk_list)
+		{
+			if (!chunk->IsLoaded()) continue;
+			for (auto obj : chunk->GetObjects())
+			{
+				if (obj == this) chunk->RemoveObject(this);
+			}
+			if (x < chunk->GetEndX() && x > chunk->GetStartX())
+			{
+				chunk->AddObject(this);
+			}
+		}
 	}
 
 	// Add blocking objects as potential ground

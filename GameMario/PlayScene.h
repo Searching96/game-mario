@@ -57,6 +57,10 @@ public:
 		}
 		return nullptr;
 	}
+	vector<LPCHUNK> GetChunks()
+	{
+		return chunks;
+	}
 
 	void PurgeDeletedObjects();
 

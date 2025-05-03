@@ -761,6 +761,11 @@ void CPlayScene::UpdateCamera(CMario* mario, float player_cx, float player_cy, f
 		targetCamY = groundLockedCamY;
 	}
 
+	if (!forceVerticalTracking && !isHigh && !s_bypassGroundLock &&
+		abs(cam_y - groundLockedCamY) < 5.0f) {
+		cam_y = groundLockedCamY; // Snap to exact ground level when close
+	}
+
 	// --- 6. Clamp Target Positions to Map Boundaries ---
 	const float minCamX = -VIEWPORT_OFFSET;
 	const float minCamY = 0.0f;
@@ -780,13 +785,12 @@ void CPlayScene::UpdateCamera(CMario* mario, float player_cx, float player_cy, f
 	cam_y = max(minCamY, min(cam_y, maxCamY));
 
 	// --- 9. Set Final Camera Position ---
+	DebugOut(L"Cam pos : %f, %f\n", cam_x, cam_y);
 	game->SetCamPos(round(cam_x), round(cam_y));
 
 	// --- 10. Update State for Next Frame ---
 	s_wasOnPlatform = isOnPlatform;
 }
-
-// Inside CPlayScene::Update(DWORD dt)
 
 void CPlayScene::Update(DWORD dt)
 {
