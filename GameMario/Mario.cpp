@@ -279,11 +279,13 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 		vy = 0;
 		if (e->ny < 0) isOnPlatform = true;
 	}
-	//else
-	//	if (e->nx != 0 && e->obj->IsBlocking())
-	//	{
-	//		vx = 0;
-	//	}
+	else
+		if (e->nx != 0 && e->obj->IsBlocking())
+		{
+			if (vx > MARIO_HALF_RUN_ACCEL_SPEED)
+				vx = (nx > 0) ? MARIO_HALF_RUN_ACCEL_SPEED : -MARIO_HALF_RUN_ACCEL_SPEED;
+				//	vx -= MARIO_DECELERATION_X / 4 * 16;
+		}
 
 	if (dynamic_cast<CGoomba*>(e->obj))
 		OnCollisionWithGoomba(e);
@@ -345,6 +347,13 @@ void CMario::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
 				{
 					DebugOut(L">>> Mario DIE >>> \n");
 					SetState(MARIO_STATE_DIE);
+				}
+
+				if (e->nx != 0 && this->isRunning == 1)
+				{
+					float eVx, eVy;
+					e->obj->GetSpeed(eVx, eVy);
+					e->obj->SetSpeed(-eVx, eVy);
 				}
 			}
 		}
@@ -612,6 +621,13 @@ void CMario::OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e)
 				{
 					SetState(MARIO_STATE_DIE);
 					DebugOut(L">>> Mario DIE >>> \n");
+				}
+
+				if (e->nx != 0 && this->isRunning == 1 && wg->GetIsWinged() == 0)
+				{
+					float eVx, eVy;
+					e->obj->GetSpeed(eVx, eVy);
+					e->obj->SetSpeed(-eVx, eVy);
 				}
 			}
 		}
