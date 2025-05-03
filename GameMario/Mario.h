@@ -302,7 +302,6 @@ class CMario : public CGameObject
 	void HandleBraking(DWORD dt);
 	void HandleUntouchable(DWORD dt);
 	void HandleHovering(DWORD dt);
-	void HandleTailWhip(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 
 public:
 	CMario(float x, float y, int z);
@@ -338,7 +337,7 @@ public:
 	int GetIsTailDown() const { return tailDown; }
 	int GetIsHovering() const { return isHovering; }
 	int GetIsRunning() const { return isRunning; }
-	int GetIsFlying() { return !isOnPlatform && jumpCount > 1; }
+	int GetIsFlying() { return !isOnPlatform && jumpCount > 1 || isHovering == 1; }
 	void GetNx(float& nx_out) { nx_out = this->nx; }
 	BOOLEAN IsOnPlatform() const { return isOnPlatform; }
 
