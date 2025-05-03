@@ -39,10 +39,15 @@ void CKoopa::OnCollisionWith(LPCOLLISIONEVENT e) {
 	if (e->ny < 0) {
 		vy = 0;
 	}
+	
 	if (e->nx != 0 && e->obj->IsBlocking()) {
 		if (state == KOOPA_STATE_SHELL_DYNAMIC) {
 			vx = -vx;
 			nx = -nx;
+		}
+		else
+		{
+			this->SetState((vx > 0) ? KOOPA_STATE_WALKING_LEFT : KOOPA_STATE_WALKING_RIGHT);
 		}
 	}
 

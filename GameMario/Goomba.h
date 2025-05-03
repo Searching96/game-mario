@@ -40,9 +40,10 @@ protected:
 
 	virtual int IsCollidable() { return (isDead == 0); }
 	virtual int IsBlocking() { return 0; }
-	virtual void OnNoCollision(DWORD dt);
 
+	virtual void OnNoCollision(DWORD dt);
 	virtual void OnCollisionWith(LPCOLLISIONEVENT e);
+	void OnCollisionWithKoopa(LPCOLLISIONEVENT e);
 
 public: 	
 	CGoomba(float x, float y, int z);

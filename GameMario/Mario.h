@@ -29,7 +29,7 @@
 
 #define MARIO_GRAVITY					0.00225f
 
-#define MARIO_JUMP_DEFLECT_SPEED		0.4f
+#define MARIO_JUMP_DEFLECT_SPEED		0.3f
 
 #define MARIO_HALF_RUN_ACCEL_SPEED		(MARIO_MAX_RUNNING_SPEED + MARIO_RUNNING_SPEED) / 2
 
@@ -301,7 +301,6 @@ class CMario : public CGameObject
 	void HandleBraking(DWORD dt);
 	void HandleUntouchable(DWORD dt);
 	void HandleHovering(DWORD dt);
-	void HandleTailWhip(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 
 public:
 	CMario(float x, float y, int z);

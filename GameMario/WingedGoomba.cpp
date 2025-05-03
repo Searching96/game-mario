@@ -38,29 +38,6 @@ void CWingedGoomba::OnNoCollision(DWORD dt)
 
 void CWingedGoomba::OnCollisionWith(LPCOLLISIONEVENT e)
 {
-	if (!e->obj->IsBlocking() && !dynamic_cast<CKoopa*>(e->obj))
-		return;
-
-	if (CKoopa* koopa = dynamic_cast<CKoopa*>(e->obj))
-	{
-		if (koopa->GetState() == KOOPA_STATE_SHELL_DYNAMIC)
-		{
-			if (this->state != WINGED_GOOMBA_STATE_DIE_ON_STOMP && this->state != WINGED_GOOMBA_STATE_DIE_ON_TAIL_WHIP)
-			{
-				this->SetState(WINGED_GOOMBA_STATE_DIE_ON_TAIL_WHIP);
-			}
-			return;
-		}
-		else
-		{
-			if (e->nx != 0)
-			{
-				vx = -vx;
-			}
-			return;
-		}
-	}
-
 	if (e->obj->IsBlocking())
 	{
 		if (e->ny != 0) // Vertical collision with blocking object
@@ -85,7 +62,8 @@ void CWingedGoomba::OnCollisionWith(LPCOLLISIONEVENT e)
 					isFlying = 0;
 					SetState(WINGED_GOOMBA_STATE_TRACKING); // Or WINGED_GOOMBA_STATE_WALKING?
 				}
-				else {
+				else 
+				{
 					vy = 0;
 				}
 			}
@@ -95,7 +73,8 @@ void CWingedGoomba::OnCollisionWith(LPCOLLISIONEVENT e)
 				{
 					vy = 0;
 				}
-				else {
+				else 
+				{
 					vy = 0;
 				}
 			}
@@ -104,6 +83,53 @@ void CWingedGoomba::OnCollisionWith(LPCOLLISIONEVENT e)
 		{
 			vx = -vx;
 			nx = -nx;
+		}
+	}
+
+	if (dynamic_cast<CGoomba*>(e->obj) || dynamic_cast<CWingedGoomba*>(e->obj))
+	{
+		do
+		{
+			if (this->isWinged == 1)
+				break;
+
+			if (CWingedGoomba* wg = dynamic_cast<CWingedGoomba*>(e->obj))
+				if (wg->GetIsWinged() == 1)
+					break;
+
+			if (e->nx != 0)
+			{
+				vx = -vx; // Bounce off another Goomba
+				float eVx, eVy;
+				e->obj->GetSpeed(eVx, eVy);
+				e->obj->SetSpeed(-eVx, eVy);
+			}
+		} while (false);
+	}
+
+	if (dynamic_cast<CKoopa*>(e->obj))
+		OnCollisionWithKoopa(e);
+}
+
+void CWingedGoomba::OnCollisionWithKoopa(LPCOLLISIONEVENT e)
+{
+	if (e->obj->GetState() == KOOPA_STATE_SHELL_DYNAMIC)
+	{
+		if (this->isDead == 0)
+		{
+			this->SetState(WINGED_GOOMBA_STATE_DIE_ON_TAIL_WHIP);
+		}
+	}
+	else
+	{
+		if (e->nx != 0 && isWinged == 0)
+		{
+			vx = -vx;
+			nx = -nx;
+			CKoopa* k = dynamic_cast<CKoopa*>(e->obj);
+			float eVx, eVy;
+			k->GetSpeed(eVx, eVy);
+			k->SetState(eVx > 0 ? KOOPA_STATE_WALKING_LEFT : KOOPA_STATE_WALKING_RIGHT);
 		}
 	}
 }

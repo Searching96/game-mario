@@ -56,7 +56,6 @@ CMario::CMario(float x, float y, int z) : CGameObject(x, y, z)
 	isKicking = 0;
 	kickStart = -1;
 	isHoldingKoopa = 0;
-	tailWagged = 1;
 	isMoving = 0;
 	isRunning = 0;
 	isJumpButtonHeld = 0;

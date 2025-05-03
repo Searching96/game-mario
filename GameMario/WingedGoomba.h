@@ -64,6 +64,7 @@ protected:
 
 	virtual void OnNoCollision(DWORD dt);
 	virtual void OnCollisionWith(LPCOLLISIONEVENT e);
+	void OnCollisionWithKoopa(LPCOLLISIONEVENT e);
 
 public:
 	CWingedGoomba(float x, float y, int z);
@@ -71,7 +72,7 @@ public:
 	void StartTracking() { isTracking = 1; trackingStart = GetTickCount64(); }
 	void StartBouncing() { isBouncing = 1; bounceCount++; }
 	void StartFlying() { isFlying = 1; flyingStart = GetTickCount64(); }
-	void SetIsWinged(int isWinged) { isWinged = isWinged; }
+	void SetIsWinged(int isWinged) { this->isWinged = isWinged; }
 	int GetIsWinged() { return isWinged; }
 	int GetIsDead() { return isDead; }
 };

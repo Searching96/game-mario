@@ -72,8 +72,6 @@ protected:
 
 	virtual void OnCollisionWith(LPCOLLISIONEVENT e);
 	void OnCollisionWithQuestionBlock(LPCOLLISIONEVENT e);
-	void OnCollisionWithBuffQBlock(LPCOLLISIONEVENT e);
-	void OnCollisionWithCoinQBlock(LPCOLLISIONEVENT e);
 
 public:
 	CKoopa(float x, float y, int z);

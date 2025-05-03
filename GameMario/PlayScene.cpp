@@ -65,7 +65,9 @@ using namespace std;
 #define ZINDEX_PLATFORMS            40 // Ground platforms, Sky Platforms (usually behind pipes/blocks)
 #define ZINDEX_PIRANHA_PLANT		45 // Piranha Plants behind pipes.
 #define ZINDEX_PIPES                50 // Standard Pipes
-#define ZINDEX_BLOCKS               60 // Bricks, Q-Blocks, Boxes
+#define ZINDEX_MUSHROOM             60 // Mushroom
+#define ZINDEX_HIDDEN_COIN			65 // Q-Block Coins
+#define ZINDEX_BLOCKS               70 // Bricks, Q-Blocks, Boxes
 #define ZINDEX_ITEMS                80 // Coins (when static), Mushrooms, Leaves (after spawning)
 #define ZINDEX_ENEMIES              90 // Goombas, Koopas, Piranhas (usually behind player)
 #define ZINDEX_PLAYER              100 // Mario
@@ -295,7 +297,7 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 		case OBJECT_TYPE_COIN_QBLOCK:
 		{
 			zIndex = ZINDEX_BLOCKS;
-			int coin_zIndex = ZINDEX_ITEMS;
+			int coin_zIndex = ZINDEX_HIDDEN_COIN;
 			CCoin* coin = new CCoin(x, y, coin_zIndex, 1); // Coin type 1 for QBlock?
 			obj = new CCoinQBlock(x, y, zIndex, coin);
 			targetChunk->AddObject(coin);
@@ -305,9 +307,10 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 		case OBJECT_TYPE_BUFF_QBLOCK:
 		{
 			zIndex = ZINDEX_BLOCKS;
-			int buff_zIndex = ZINDEX_ITEMS;
-			CMushroom* mushroom = new CMushroom(x, y, buff_zIndex);
-			CSuperLeaf* superleaf = new CSuperLeaf(x, y, buff_zIndex);
+			int leaf_zIndex = ZINDEX_ITEMS;
+			int mushroom_zIndex = ZINDEX_MUSHROOM;
+			CMushroom* mushroom = new CMushroom(x, y, mushroom_zIndex);
+			CSuperLeaf* superleaf = new CSuperLeaf(x, y, leaf_zIndex);
 			obj = new CBuffQBlock(x, y, zIndex, mushroom, superleaf);
 			targetChunk->AddObject(mushroom);
 			targetChunk->AddObject(superleaf);

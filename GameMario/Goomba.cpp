@@ -37,32 +37,6 @@ void CGoomba::OnNoCollision(DWORD dt)
 // Corrected Goomba::OnCollisionWith
 void CGoomba::OnCollisionWith(LPCOLLISIONEVENT e)
 {
-	if (!e->obj->IsBlocking())
-		return;
-
-	if (dynamic_cast<CGoomba*>(e->obj)) vx = -vx;
-
-	if (CKoopa* koopa = dynamic_cast<CKoopa*>(e->obj))
-	{
-		if (koopa->GetState() == KOOPA_STATE_SHELL_DYNAMIC)
-		{
-			if (isDead == 0)
-			{
-				DebugOut(L"Shell hit Goomba (Detected in Goomba.cpp)");
-				this->SetState(GOOMBA_STATE_DIE_ON_TAIL_WHIP);
-			}
-			return;
-		}
-		else
-		{
-			if (e->nx != 0)
-			{
-				vx = -vx;
-			}
-			return;
-		}
-	}
-
 	if (e->obj->IsBlocking())
 	{
 		if (e->ny != 0)
@@ -72,6 +46,49 @@ void CGoomba::OnCollisionWith(LPCOLLISIONEVENT e)
 		else if (e->nx != 0)
 		{
 			vx = -vx; // Turn around when hitting a wall
+		}
+	}
+
+	if (dynamic_cast<CGoomba*>(e->obj) || dynamic_cast<CWingedGoomba*>(e->obj))
+	{
+		do
+		{
+			if (CWingedGoomba* wg = dynamic_cast<CWingedGoomba*>(e->obj))
+				if (wg->GetIsWinged() == 1)
+					break;
+
+			if (e->nx != 0)
+			{
+				vx = -vx; // Bounce off another Goomba
+				float eVx, eVy;
+				e->obj->GetSpeed(eVx, eVy);
+				e->obj->SetSpeed(-eVx, eVy);
+			}
+		} while (false);
+	}
+
+	if (dynamic_cast<CKoopa*>(e->obj))
+		OnCollisionWithKoopa(e);
+}
+
+void CGoomba::OnCollisionWithKoopa(LPCOLLISIONEVENT e)
+{
+	if (e->obj->GetState() == KOOPA_STATE_SHELL_DYNAMIC)
+	{
+		if (isDead == 0)
+		{
+			this->SetState(GOOMBA_STATE_DIE_ON_TAIL_WHIP);
+		}
+	}
+	else
+	{
+		if (e->nx != 0)
+		{
+			vx = -vx;
+			CKoopa* k = dynamic_cast<CKoopa*>(e->obj);
+			float eVx, eVy;
+			k->GetSpeed(eVx, eVy);
+			k->SetState(eVx > 0 ? KOOPA_STATE_WALKING_LEFT : KOOPA_STATE_WALKING_RIGHT);
 		}
 	}
 }
