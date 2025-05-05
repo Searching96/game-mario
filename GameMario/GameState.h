@@ -84,6 +84,7 @@ public:
 	void AddScore(int score) { this->score += score; }
 	int GetScore() { return score; }
 	DWORD GetTime() { return time / 1000; } // Return time in seconds for display
+	void Reset() { time = 300000; lives = 3; score = 0; coins = 0; }
 	void AddCoin() { this->coins = min(this->coins + 1, 99); } // Max 99 coins
 	int GetCoins() { return coins; }
 	void AddCard(int card_type); // Logic to add a card

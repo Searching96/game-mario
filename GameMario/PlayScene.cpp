@@ -55,7 +55,7 @@ using namespace std;
 #define HORIZONTAL_MARGIN 12.0f   // 12px margin on each side of center (middle 24px is free zone)
 #define VERTICAL_SMOOTH_FACTOR 0.1f     // Smaller value = smoother/slower vertical follow
 #define VERTICAL_LOCK_BUFFER 40.0f      // How far Mario needs to be above the ground-lock level to trigger tracking
-#define VIEWPORT_OFFSET 8.0f
+#define VIEWPORT_OFFSET 14.0f
 
 // --- Suggested Z-Index Hierarchy ---
 #define ZINDEX_BACKGROUND_EFFECTS   10 // Clouds, distant background elements
