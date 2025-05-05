@@ -708,7 +708,7 @@ void CPlayScene::UpdateCamera(CMario* mario, float player_cx, float player_cy, f
 
 	// Initialize static state
 	static bool s_isLockedToGround = true;
-	float visible_world_cam_height = cam_height - HUD_HEIGHT - HUD_Y_OFFSET + VIEWPORT_OFFSET / 2;
+	float visible_world_cam_height = cam_height - HUD_BACKGROUND_HEIGHT + VIEWPORT_OFFSET / 2;
 
 	// Determine if Mario is flying with Tail
 	bool isMaxPMeter = (mario->GetLevel() == MARIO_LEVEL_TAIL && mario->GetPMeter() == 1.0f);

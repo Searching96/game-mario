@@ -32,7 +32,6 @@ CMario::CMario(float x, float y, int z) : CGameObject(x, y, z)
 	untouchable = 0;
 	untouchableStart = -1;
 	isOnPlatform = false;
-	coin = 0;
 	jumpCount = 0;
 	frictionX = 0;
 	powerUp = 0;
@@ -367,8 +366,7 @@ void CMario::OnCollisionWithCoin(LPCOLLISIONEVENT e)
 			c->Delete();
 		else if (e->ny > 0 && e->nx == 0 && c->GetState() == COIN_STATE_DYNAMIC)
 			c->SetState(COIN_STATE_BOUNCE_UP);
-
-		coin++;
+		CGame::GetInstance()->GetGameState()->AddCoin();
 	}
 }
 

@@ -19,7 +19,7 @@ void CGame::Init(HWND hWnd, HINSTANCE hInstance)
 {
 	this->hWnd = hWnd;
 	this->hInstance = hInstance;
-	this->gameState = new CGameState(NULL, 3, 300, 0);
+	this->gameState = new CGameState(NULL, 3, 300000, 0, 0);
 
 	// retrieve client area width & height so that we can create backbuffer height & width accordingly 
 	RECT r;

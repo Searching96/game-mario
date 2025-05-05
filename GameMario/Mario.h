@@ -252,7 +252,6 @@ class CMario : public CGameObject
 	ULONGLONG untouchableStart;
 	BOOLEAN isOnPlatform;
 	float pMeter;
-	int coin;
 
 	int powerUp = 0;
 	ULONGLONG powerUpStart = -1;
