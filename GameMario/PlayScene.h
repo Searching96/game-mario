@@ -50,6 +50,7 @@ public:
 	virtual void Render();
 	virtual void Unload();
 
+	int GetId() const { return id; }
 	LPGAMEOBJECT GetPlayer() { return player; }
 	LPCHUNK GetChunk(int id) {
 		for (LPCHUNK chunk : chunks) {

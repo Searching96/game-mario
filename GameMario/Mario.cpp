@@ -196,6 +196,9 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	if (vy > MARIO_MAX_FALLING_SPEED) vy = MARIO_MAX_FALLING_SPEED;
 	if (vy < MARIO_MAX_JUMP_SPEED) vy = MARIO_MAX_JUMP_SPEED;
 
+	// PMeter update
+	pMeter = fabs(vx / MARIO_MAX_RUNNING_SPEED);
+
 	if (tailWhip != nullptr) {
 		// Pass Mario's current position and facing direction (nx) to the whip
 		// TailWhip's Update should use these to set its own x, y, nx

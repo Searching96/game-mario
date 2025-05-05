@@ -697,99 +697,65 @@ void CPlayScene::UpdateObjects(DWORD dt, CMario* mario, vector<LPGAMEOBJECT>& co
 }
 
 void CPlayScene::UpdateCamera(CMario* mario, float player_cx, float player_cy, float cam_width, float cam_height) {
-	// (player_cx, player_cy arguments are not used in this version)
-
-	if (!mario) return; // Essential safety check
+	if (!mario) return; // Safety check
 
 	CGame* game = CGame::GetInstance();
 	float cam_x, cam_y;
 	game->GetCamPos(cam_x, cam_y); // Current camera position
 
 	float mario_x, mario_y;
-	mario->GetPosition(mario_x, mario_y); // Mario's precise world position
+	mario->GetPosition(mario_x, mario_y); // Mario's world position
 
-	float mario_vx, mario_vy;
-	mario->GetSpeed(mario_vx, mario_vy); // Mario's velocity
+	// Initialize static state
+	static bool s_isLockedToGround = true;
+	float visible_world_cam_height = cam_height - HUD_HEIGHT - HUD_Y_OFFSET + VIEWPORT_OFFSET / 2;
 
-	// --- Camera State (CRITICAL: Initialize these in CPlayScene::Load!) ---
-	static float s_smoothedMarioY = mario_y;
-	static bool s_bypassGroundLock = false;
-	static bool s_wasOnPlatform = mario->IsOnPlatform();
+	// Determine if Mario is flying with Tail
+	bool isMaxPMeter = (mario->GetLevel() == MARIO_LEVEL_TAIL && mario->GetPMeter() == 1.0f);
+	bool cameraTouchedGround = cam_y >= (mapHeight - visible_world_cam_height);
 
-	// --- 1. Update Smoothed Mario Y (Vertical Target Smoothing) ---
-	s_smoothedMarioY += (mario_y - s_smoothedMarioY) * VERTICAL_SMOOTH_FACTOR;
+	// Update lock state
+	if (isMaxPMeter) {
+		s_isLockedToGround = false; // Unlock camera when max P meter
+	}
+	else if (cameraTouchedGround) {
+		s_isLockedToGround = true; // Lock camera when on ground
+	}
 
-	// --- 2. Calculate Target Horizontal Position (Clamping-Based Dead Zone Logic) ---
+	// Calculate target horizontal position with margin
 	float desiredCamX = mario_x - (cam_width / 2.0f);
 	float minCamXDeadZone = cam_x - HORIZONTAL_MARGIN;
 	float maxCamXDeadZone = cam_x + HORIZONTAL_MARGIN;
 	float targetCamX = max(minCamXDeadZone, min(desiredCamX, maxCamXDeadZone));
 
-	// --- 3. Calculate Vertical Parameters & State ---
-	float groundLockedCamY = 0.0f;
-	if (mapHeight > 0) {
-		groundLockedCamY = mapHeight - cam_height - VIEWPORT_OFFSET;
-		groundLockedCamY = max(0.0f, groundLockedCamY);
-	}
-	const float highThresholdY = groundLockedCamY - VERTICAL_LOCK_BUFFER;
-	const float trackPlayerCenterY = s_smoothedMarioY - cam_height / 2.0f;
-	const bool isOnPlatform = mario->IsOnPlatform();
-	const bool isHigh = s_smoothedMarioY < highThresholdY;
-	const bool isFalling = mario_vy > 0;
-	const bool justLeftPlatform = s_wasOnPlatform && !isOnPlatform;
-	const bool isInWater = false; // Placeholder
-	const bool isOnVine = false;  // Placeholder
-	const bool isFlyingOrHovering = (mario->GetLevel() == MARIO_LEVEL_TAIL 
-										&& mario->GetIsFlying());
-
-	// --- 4. Update Bypass Ground Lock State ---
-	if (justLeftPlatform && isHigh && isFalling) {
-		s_bypassGroundLock = true;
-	}
-	else if (!isHigh) {
-		s_bypassGroundLock = false;
-	}
-
-	// --- 5. Determine Target Vertical Position ---
+	// Calculate target vertical position
 	float targetCamY;
-	const bool forceVerticalTracking = isInWater || isOnVine || isFlyingOrHovering;
-
-	if (forceVerticalTracking || isHigh || s_bypassGroundLock) {
-		targetCamY = trackPlayerCenterY;
+	if (s_isLockedToGround) {
+		// Lock to ground level
+		targetCamY = (mapHeight > visible_world_cam_height) ? (mapHeight - visible_world_cam_height) : 0.0f;
+		targetCamY = max(0.0f, targetCamY);
 	}
 	else {
-		targetCamY = groundLockedCamY;
+		// Center on Mario vertically when unlocked
+		targetCamY = mario_y - (cam_height / 2.0f);
 	}
 
-	if (!forceVerticalTracking && !isHigh && !s_bypassGroundLock &&
-		abs(cam_y - groundLockedCamY) < 5.0f) {
-		cam_y = groundLockedCamY; // Snap to exact ground level when close
-	}
-
-	// --- 6. Clamp Target Positions to Map Boundaries ---
-	const float minCamX = -VIEWPORT_OFFSET;
-	const float minCamY = 0.0f;
+	// Clamp camera to map boundaries
+	float minCamX = -VIEWPORT_OFFSET;
 	float maxCamX = (mapWidth > cam_width) ? (mapWidth - cam_width - VIEWPORT_OFFSET) : minCamX;
 	maxCamX = max(minCamX, maxCamX);
-	float maxCamY = (mapHeight > cam_height) ? groundLockedCamY : minCamY;
+	float minCamY = 0.0f;
+	float maxCamY = (mapHeight > visible_world_cam_height) ? (mapHeight - visible_world_cam_height) : minCamY;
 	maxCamY = max(minCamY, maxCamY);
 
-	targetCamX = max(minCamX, min(targetCamX, maxCamX));
-	targetCamY = max(minCamY, min(targetCamY, maxCamY));
+	cam_x = max(minCamX, min(targetCamX, maxCamX));
+	cam_y = max(minCamY, min(targetCamY, maxCamY));
 
-	// --- 7. Apply Updates (Instant Horizontal, Smoothed Vertical) ---
-	cam_x = targetCamX;
-	cam_y += (targetCamY - cam_y) * VERTICAL_SMOOTH_FACTOR;
-
-	// --- 8. Clamp Final Vertical Position ---
-	cam_y = max(minCamY, min(cam_y, maxCamY));
-
-	// --- 9. Set Final Camera Position ---
-	DebugOut(L"Cam pos : %f, %f\n", cam_x, cam_y);
+	// Set final camera position
 	game->SetCamPos(round(cam_x), round(cam_y));
 
-	// --- 10. Update State for Next Frame ---
-	s_wasOnPlatform = isOnPlatform;
+	// Debug output
+	//DebugOut(L"Cam pos: %f, %f\n", cam_x, cam_y);
 }
 
 void CPlayScene::Update(DWORD dt)

@@ -12,6 +12,7 @@
 
 # list of object assets to load in this scene
 [ASSETS]
+assets\hud.txt
 assets\mario.txt
 assets\brick.txt
 assets\coin.txt

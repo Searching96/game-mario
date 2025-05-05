@@ -251,6 +251,7 @@ class CMario : public CGameObject
 	int untouchable;
 	ULONGLONG untouchableStart;
 	BOOLEAN isOnPlatform;
+	float pMeter;
 	int coin;
 
 	int powerUp = 0;
@@ -339,8 +340,8 @@ public:
 	int GetIsRunning() const { return isRunning; }
 	int GetIsFlying() { return !isOnPlatform && jumpCount > 1 || isHovering == 1; }
 	void GetNx(float& nx_out) { nx_out = this->nx; }
+	float GetPMeter() const { return pMeter; }
 	BOOLEAN IsOnPlatform() const { return isOnPlatform; }
-
 	CTailWhip* GetTailWhip() const { return tailWhip; }
 	CTailWhip* GetActiveTailWhip();
 
