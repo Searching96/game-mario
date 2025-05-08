@@ -1,7 +1,8 @@
 ﻿#include "Koopa.h"
 
-CKoopa::CKoopa(int id, float x, float y, int z) : CGameObject(id, x, y, z)
+CKoopa::CKoopa(int id, float x, float y, int z, int originalChunkId) : CGameObject(id, x, y, z)
 {
+	this->originalChunkId = originalChunkId;
 	this->ax = 0;
 	this->ay = KOOPA_GRAVITY;
 	shellStart = -1;
@@ -168,6 +169,11 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		}
 	}
 
+	if (state == KOOPA_STATE_SHELL_DYNAMIC)
+	{
+		vx = (nx > 0) ? KOOPA_SHELL_SPEED : -KOOPA_SHELL_SPEED;
+	}
+
 	vector<LPGAMEOBJECT> potentialGrounds;
 	float koopa_l_bbox, koopa_t_bbox, koopa_r_bbox, koopa_b_bbox;
 	GetBoundingBox(koopa_l_bbox, koopa_t_bbox, koopa_r_bbox, koopa_b_bbox);
@@ -202,8 +208,10 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 	//DebugOutTitle(L"Being held: %d, vx=%f, vy=%f\n", beingHeld, vx, vy);
 
-	if ((state == KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY) && (GetTickCount64() - dieStart > KOOPA_DIE_TIMEOUT))
+	if ((state == KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY || state == KOOPA_STATE_DIE_ON_COLLIDE_WITH_TERRAIN) && (GetTickCount64() - dieStart > KOOPA_DIE_TIMEOUT))
 	{
+		LPCHUNK chunk = ((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetChunk(originalChunkId);
+		chunk->SetObjectIsDeleted(this->GetId(), true);
 		isDeleted = true;
 		return;
 	}

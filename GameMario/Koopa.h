@@ -61,6 +61,8 @@ protected:
 
 	int beingHeld = 0;
 
+	int originalChunkId;
+
 	virtual void GetBoundingBox(float& left, float& top, float& right, float& bottom);
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 	virtual void Render();
@@ -74,7 +76,7 @@ protected:
 	void OnCollisionWithQuestionBlock(LPCOLLISIONEVENT e);
 
 public:
-	CKoopa(int id, float x, float y, int z);
+	CKoopa(int id, float x, float y, int z, int originalChunkId);
 	virtual void SetState(int state);
 	void StartShell();
 	int GetBeingHeld() { return beingHeld; }

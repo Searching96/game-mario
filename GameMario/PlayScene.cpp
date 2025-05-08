@@ -249,7 +249,7 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 			break;
 		case OBJECT_TYPE_KOOPA:
 			zIndex = ZINDEX_ENEMIES;
-			obj = new CKoopa(id, x, y, zIndex);
+			obj = new CKoopa(id, x, y, zIndex, targetChunk->GetID());
 			break;
 		case OBJECT_TYPE_PIRANHA_PLANT:
 		{
