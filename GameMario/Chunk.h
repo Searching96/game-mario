@@ -43,6 +43,20 @@ public:
 	bool IsLoaded() const { return isLoaded; }
 	void SetLoaded(bool loaded) { isLoaded = loaded; }
 
+	int IsObjectInChunk(CGameObject* obj)
+	{
+		// find in objects vector whether its has this obj using foreach loop
+		for (int i = 0; i < objects.size(); i++)
+		{
+			if (objects[i] == obj)
+			{
+				return objects[i]->GetId();
+			}
+		}
+
+		return -1;
+	}
+
 	void SetObjectIsDeleted(int id, int isDel)
 	{
 		if (isDel) {

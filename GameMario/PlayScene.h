@@ -58,6 +58,17 @@ public:
 		return nullptr;
 	}
 
+	vector<LPCHUNK> GetLoadedChunks()
+	{
+		vector<LPCHUNK> loadedChunks;
+		for (LPCHUNK chunk : chunks) {
+			if (chunk->IsLoaded()) {
+				loadedChunks.push_back(chunk);
+			}
+		}
+		return loadedChunks;
+	}
+
 	void PurgeDeletedObjects();
 
 	static bool IsGameObjectDeleted(const LPGAMEOBJECT& o);

@@ -17,7 +17,7 @@ void CChunk::Clear()
 			delete obj;
 	}
 	objects.clear();
-	isDeleted.clear();
+	//isDeleted.clear();
 	isLoaded = false;
 }
 

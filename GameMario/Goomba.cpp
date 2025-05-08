@@ -106,6 +106,15 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 
 	if (isDead == 1 && (GetTickCount64() - dieStart > GOOMBA_DIE_TIMEOUT))
 	{
+		vector<LPCHUNK> loadedChunks = ((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetLoadedChunks();
+		for (LPCHUNK chunk : loadedChunks)
+		{
+			if (chunk->IsObjectInChunk(this) != -1)
+			{
+				chunk->SetObjectIsDeleted(this->GetId(), true);
+				break;
+			}
+		}
 		isDeleted = true;
 		return;
 	}
@@ -135,6 +144,7 @@ void CGoomba::SetState(int state)
 	switch (state)
 	{
 	case GOOMBA_STATE_DIE_ON_STOMP:
+		// get current chunk
 		dieStart = GetTickCount64();
 		y += (GOOMBA_BBOX_HEIGHT - GOOMBA_BBOX_HEIGHT_DIE)/2 - 3;
 		vx = 0;
