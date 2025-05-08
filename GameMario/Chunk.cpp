@@ -17,7 +17,7 @@ void CChunk::Clear()
 			delete obj;
 	}
 	objects.clear();
-	isDefeated.clear();
+	//isDeleted.clear();
 	isLoaded = false;
 }
 
@@ -25,7 +25,7 @@ void CChunk::Render()
 {
 	for (LPGAMEOBJECT obj : objects)
 	{
-		if (obj != nullptr && !isDefeated[obj]) // Skip defeated objects
+		if (obj != nullptr)// && !isDeleted[obj]) // Skip defeated objects
 			obj->Render();
 	}
 }
@@ -35,10 +35,10 @@ void CChunk::PurgeDeletedObjects()
 	for (auto it = objects.begin(); it != objects.end(); )
 	{
 		LPGAMEOBJECT obj = *it;
-		if (obj != nullptr && (isDefeated[obj] || obj->IsDeleted()))
+		//if (obj != nullptr && (isDeleted[obj] || obj->IsDeleted()))
+		if (obj != nullptr && obj->IsDeleted())
 		{
 			delete obj; // Free memory
-			isDefeated.erase(obj); // Remove from map
 			it = objects.erase(it); // Erase and advance iterator
 		}
 		else

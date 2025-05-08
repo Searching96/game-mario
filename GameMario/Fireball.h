@@ -33,7 +33,7 @@ protected:
 	int x0, y0;
 	int isEnabled = 0;
 public:
-	CFireball(float x, float y, int z) :CGameObject(x, y, z)
+	CFireball(int id, float x, float y, int z) : CGameObject(id, x, y, z)
 	{
 		this->x0 = x;
 		this->y0 = y;

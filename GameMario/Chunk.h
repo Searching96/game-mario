@@ -5,27 +5,26 @@ class CChunk
 {
 protected:
 	int id;
-	float start_x, end_x;
+	float startX, endX;
 	bool isLoaded = false;
 
 	vector<LPGAMEOBJECT> objects;
-	map<LPGAMEOBJECT, bool> isDefeated;
+	map<int, bool> isDeleted;
 public:
-	CChunk(int id, float start_x, float end_x) : id(id), start_x(start_x), end_x(end_x) {};
+	CChunk(int id, float startX, float endX) : id(id), startX(startX), endX(endX) {};
 	~CChunk() {};
 	void AddObject(LPGAMEOBJECT obj)
 	{
 		if (obj != nullptr)
 		{
 			objects.push_back(obj);
-			isDefeated[obj] = false; // Initialize as not defeated
+			isDeleted[obj->GetId()] = false; // Initialize as not defeated
 		}
 	}
 
 	void RemoveObject(LPGAMEOBJECT obj)
 	{
 		objects.erase(std::remove(objects.begin(), objects.end(), obj), objects.end());
-		isDefeated.erase(obj); // Remove from defeated map
 	}
 
 	std::vector<LPGAMEOBJECT>& GetObjects()
@@ -39,10 +38,41 @@ public:
 	void PurgeDeletedObjects();
 
 	int GetID() const { return id; }
-	float GetStartX() const { return start_x; }
-	float GetEndX() const { return end_x; }
+	float GetStartX() const { return startX; }
+	float GetEndX() const { return endX; }
 	bool IsLoaded() const { return isLoaded; }
 	void SetLoaded(bool loaded) { isLoaded = loaded; }
+
+	int IsObjectInChunk(CGameObject* obj)
+	{
+		// find in objects vector whether its has this obj using foreach loop
+		for (int i = 0; i < objects.size(); i++)
+		{
+			if (objects[i] == obj)
+			{
+				return objects[i]->GetId();
+			}
+		}
+
+		return -1;
+	}
+
+	void SetObjectIsDeleted(int id, int isDel)
+	{
+		if (isDel) {
+			isDeleted[id] = true;
+		}
+		else {
+			// Only insert false if id is not already present
+			if (isDeleted.find(id) == isDeleted.end())
+				isDeleted[id] = false;
+		}
+	}
+
+	int GetObjectIsDeleted(int id)
+	{
+		return isDeleted[id];
+	}
 };
 
 typedef CChunk* LPCHUNK;

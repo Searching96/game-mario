@@ -2,6 +2,11 @@
 #include "GameObject.h"
 #include "Mario.h"
 #include "Fireball.h"
+#include "Koopa.h"
+
+#include "Game.h"
+#include "PlayScene.h"
+
 
 #define PIRANHA_PLANT_BBOX_WIDTH 16
 #define PIRANHA_PLANT_BBOX_HEIGHT 32
@@ -58,7 +63,7 @@ protected:
 	void OnCollisionWith(LPCOLLISIONEVENT e);
 
 public:
-	CPiranhaPlant(float x, float y, int z, CFireball* fireball);
+	CPiranhaPlant(int id, float x, float y, int z, CFireball* fireball);
 
 	void Render();
 	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);

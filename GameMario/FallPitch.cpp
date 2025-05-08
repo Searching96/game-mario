@@ -1,19 +1,17 @@
-#include "Portal.h"
+#include "FallPitch.h"
 #include "Game.h"
 #include "Textures.h"
 
-CPortal::CPortal(int id, float l, float t, float r, float b, int z, int scene_id )
+CFallPitch::CFallPitch(int id, float l, float t, float r, float b)
 {
-	this->scene_id = scene_id;
 	this->id = id;
-	x = l; 
+	x = l;
 	y = t;
 	width = r - l;
 	height = b - t;
-	zIndex = z;
 }
 
-void CPortal::RenderBoundingBox()
+void CFallPitch::RenderBoundingBox()
 {
 	D3DXVECTOR3 p(x, y, 0);
 	RECT rect;
@@ -34,15 +32,15 @@ void CPortal::RenderBoundingBox()
 	CGame::GetInstance()->Draw(x - cx, y - cy, bbox, nullptr, BBOX_ALPHA, rect.right - 1, rect.bottom - 1);
 }
 
-void CPortal::Render()
+void CFallPitch::Render()
 {
 	RenderBoundingBox();
 }
 
-void CPortal::GetBoundingBox(float &l, float &t, float &r, float &b)
+void CFallPitch::GetBoundingBox(float& l, float& t, float& r, float& b)
 {
-	l = x - width/2;
-	t = y - height/2;
-	r = x + width/2;
-	b = y + height/2;
+	l = x - width / 2;
+	t = y - height / 2;
+	r = x + width / 2;
+	b = y + height / 2;
 }

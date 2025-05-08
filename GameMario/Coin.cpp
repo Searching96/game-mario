@@ -1,7 +1,7 @@
 #include "Coin.h"
 #include "QuestionBlock.h"
 
-CCoin::CCoin(float x, float y, int z, int type) : CGameObject(x, y, z)
+CCoin::CCoin(int id, float x, float y, int z, int type) : CGameObject(id, x, y, z)
 {
 	this->type = type;
 	if (type == 0) this->SetState(COIN_STATE_STATIC);
@@ -26,18 +26,18 @@ void CCoin::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
 	if (bounceUp == 1)
 	{
-		if (fabs(y - y0) >= COIN_BOUNCE_OFFSET)
+		if (fabs(y - y0) >= COIN_BOUNCE_UP_OFFSET)
 		{
-			y = y0 - COIN_BOUNCE_OFFSET;
+			y = y0 - COIN_BOUNCE_UP_OFFSET;
 			bounceUp = 0;
 			SetState(COIN_STATE_BOUNCE_DOWN);
 		}
 	}
 	if (bounceDown == 1)
 	{
-		if (fabs(y - y0) >= COIN_BOUNCE_OFFSET)
+		if (fabs(y - y0) >= COIN_BOUNCE_DOWN_OFFSET)
 		{
-			y = y0 + COIN_BOUNCE_OFFSET;
+			y = y0 + COIN_BOUNCE_DOWN_OFFSET;
 			bounceDown = 0;
 			SetState(COIN_STATE_BOUNCE_COMPLETE);
 		}

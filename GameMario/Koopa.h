@@ -71,20 +71,16 @@ protected:
 	virtual void OnNoCollision(DWORD dt);
 
 	virtual void OnCollisionWith(LPCOLLISIONEVENT e);
-	void OnCollisionWithMario(LPCOLLISIONEVENT e);
-	void OnCollisionWithBlock(LPCOLLISIONEVENT e);
-	void OnCollisionWithEnemy(LPCOLLISIONEVENT e);
 	void OnCollisionWithQuestionBlock(LPCOLLISIONEVENT e);
-	void OnCollisionWithBuffQBlock(LPCOLLISIONEVENT e);
-	void OnCollisionWithCoinQBlock(LPCOLLISIONEVENT e);
 
 public:
-	CKoopa(float x, float y, int z);
+	CKoopa(int id, float x, float y, int z);
 	virtual void SetState(int state);
 	void StartShell();
 	int GetBeingHeld() { return beingHeld; }
 	void SetBeingHeld(int beingHeld) { this->beingHeld = beingHeld; }
 	void SetFlying(bool isFlying) { this->isFlying = isFlying; }
 	void SetReversed(bool isReversed) { this->isReversed = isReversed; }
+	void SetNx(int nx) { this->nx = nx; }
 };
 

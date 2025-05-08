@@ -29,7 +29,7 @@
 
 #define MARIO_GRAVITY					0.00225f
 
-#define MARIO_JUMP_DEFLECT_SPEED		0.4f
+#define MARIO_JUMP_DEFLECT_SPEED		0.3f
 
 #define MARIO_HALF_RUN_ACCEL_SPEED		(MARIO_MAX_RUNNING_SPEED + MARIO_RUNNING_SPEED) / 2
 
@@ -278,7 +278,6 @@ class CMario : public CGameObject
 
 	int isHoldingKoopa = 0;
 	int jumpCount = 0;
-	int tailWagged = 1;
 	int isMoving = 0;
 	int isRunning = 0;
 	int isJumpButtonHeld = 0;
@@ -286,7 +285,6 @@ class CMario : public CGameObject
 	void OnCollisionWithGoomba(LPCOLLISIONEVENT e);
 	void OnCollisionWithCoin(LPCOLLISIONEVENT e);
 	void OnCollisionWithPortal(LPCOLLISIONEVENT e);
-	void OnCollisionWithQuestionBlock(LPCOLLISIONEVENT e);
 	void OnCollisionWithMushroom(LPCOLLISIONEVENT e);
 	void OnCollisionWithSuperLeaf(LPCOLLISIONEVENT e);
 	void OnCollisionWithPiranhaPlant(LPCOLLISIONEVENT e);
@@ -296,6 +294,7 @@ class CMario : public CGameObject
 	void OnCollisionWithKoopa(LPCOLLISIONEVENT e);
 	void OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e);
 	void OnCollisionWithLifeMushroom(LPCOLLISIONEVENT e);
+	void OnCollisionWithFallPitch(LPCOLLISIONEVENT e);
 
 	int GetAniIdBig();
 	int GetAniIdSmall();
@@ -306,7 +305,7 @@ class CMario : public CGameObject
 	void HandleHovering(DWORD dt);
 
 public:
-	CMario(float x, float y, int z);
+	CMario(int id, float x, float y, int z);
 	virtual ~CMario();
 
 	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
@@ -328,7 +327,7 @@ public:
 	void StartTailDown() { tailDown = 1; tailDownStart = GetTickCount64(); }
 	void StartKick() { isKicking = 1; kickStart = GetTickCount64(); }
 	void StartBraking();
-	void StartHovering() { isHovering = 1; hoveringStart = GetTickCount64(); tailWagged = 0; }
+	void StartHovering() { isHovering = 1; hoveringStart = GetTickCount64(); }
 	void StartTailWhip();
 
 	int GetJumpCount() const { return jumpCount; }
@@ -340,7 +339,7 @@ public:
 	int GetIsHovering() const { return isHovering; }
 	int GetIsRunning() const { return isRunning; }
 	int GetIsFlying() { return !isOnPlatform && jumpCount > 1 || isHovering == 1; }
-	void GetNx(float& nx_out) { nx_out = this->nx; }
+	int GetNx() { return nx; }
 	float GetPMeter() const { return pMeter; }
 	BOOLEAN IsOnPlatform() const { return isOnPlatform; }
 	CTailWhip* GetTailWhip() const { return tailWhip; }

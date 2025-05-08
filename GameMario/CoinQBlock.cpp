@@ -1,7 +1,7 @@
 #include "CoinQBlock.h"
 #include "Game.h"
 
-CCoinQBlock::CCoinQBlock(float x, float y, int z, CCoin* coin) : CGameObject(x, y, z)
+CCoinQBlock::CCoinQBlock(int id, float x, float y, int z, CCoin* coin) : CGameObject(id, x, y, z)
 {
 	this->coin = coin;
 	SetState(QUESTIONBLOCK_STATE_NOT_HIT);

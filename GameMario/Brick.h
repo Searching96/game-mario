@@ -15,7 +15,7 @@ protected:
 	int type; // 0: brick, 1: striped
 
 public:
-	CBrick(float x, float y, int z, int type) : CGameObject(x, y, z)
+	CBrick(int id, float x, float y, int z, int type) : CGameObject(id, x, y, z)
 	{
 		this->type = type;
 	}

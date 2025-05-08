@@ -16,7 +16,8 @@
 #define COIN_STATE_BOUNCE_DOWN 300
 #define COIN_STATE_BOUNCE_COMPLETE 400
 
-#define COIN_BOUNCE_OFFSET 64
+#define COIN_BOUNCE_UP_OFFSET		64
+#define COIN_BOUNCE_DOWN_OFFSET		COIN_BOUNCE_UP_OFFSET - 8
 
 #define COIN_BOUNCE_SPEED -0.3f
 
@@ -28,7 +29,7 @@ protected:
 	int isVisible;
 	float y0 = -1;
 public:
-	CCoin(float x, float y, int z, int type);
+	CCoin(int id, float x, float y, int z, int type);
 	void Render();
 	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 	void GetBoundingBox(float& l, float& t, float& r, float& b);

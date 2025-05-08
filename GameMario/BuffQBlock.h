@@ -35,7 +35,7 @@ protected:
 	float y0 = -1;
 
 public:
-	CBuffQBlock(float x, float y, int z, CMushroom* mushroom, CSuperLeaf* superleaf);
+	CBuffQBlock(int id, float x, float y, int z, CMushroom* mushroom, CSuperLeaf* superleaf);
 
 	void Render();
 	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);

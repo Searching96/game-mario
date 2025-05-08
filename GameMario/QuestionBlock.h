@@ -30,7 +30,7 @@ protected:
 	float y0 = -1;
 
 public:
-	CQuestionBlock(float x, float y, int z);
+	CQuestionBlock(int id, float x, float y, int z);
 
 	void Render();
 	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);

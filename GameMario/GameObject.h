@@ -17,6 +17,7 @@ using namespace std;
 class CGameObject
 {
 protected:
+	int id;
 
 	float x; 
 	float y;
@@ -44,7 +45,7 @@ public:
 	void RenderBoundingBox();
 
 	CGameObject();
-	CGameObject(float x, float y, int zIndex = 0) :CGameObject() { this->x = x; this->y = y; this->zIndex = zIndex; }
+	CGameObject(int id, float x, float y, int zIndex = 0) : CGameObject() { this->id = id; this->x = x; this->y = y; this->zIndex = zIndex; }
 
 
 	virtual void GetBoundingBox(float &left, float &top, float &right, float &bottom) = 0;
@@ -53,6 +54,7 @@ public:
 	virtual void SetState(int state) { this->state = state; }
 
 	virtual void SetZIndex(int z) { zIndex = z; }
+	virtual int GetId() const { return id; }
 	virtual int GetZIndex() const { return zIndex; }
 
 	//

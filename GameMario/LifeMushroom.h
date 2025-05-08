@@ -7,7 +7,7 @@ class CLifeMushroom :
     public CMushroom
 {
 public:
-	CLifeMushroom(float x, float y, int z) : CMushroom(x, y, z)
+	CLifeMushroom(int id, float x, float y, int z) : CMushroom(id, x, y, z)
 	{
 	};
 	void Render();

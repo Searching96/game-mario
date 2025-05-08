@@ -3,7 +3,7 @@
 #include "SuperLeaf.h"
 #include "Game.h"
 
-CLifeBrick::CLifeBrick(float x, float y, int z, CLifeMushroom* mushroom) : CQuestionBlock(x, y, z)
+CLifeBrick::CLifeBrick(int id, float x, float y, int z, CLifeMushroom* mushroom) : CQuestionBlock(id, x, y, z)
 {
 	this->mushroom = mushroom;
 	SetState(QUESTIONBLOCK_STATE_NOT_HIT);

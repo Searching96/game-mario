@@ -1,9 +1,6 @@
 #include "PiranhaPlant.h"
-#include "Game.h"
-#include "PlayScene.h"
-#include "Koopa.h"
 
-CPiranhaPlant::CPiranhaPlant(float x, float y, int z, CFireball* fireball) : CGameObject(x, y, z)
+CPiranhaPlant::CPiranhaPlant(int id, float x, float y, int z, CFireball* fireball) : CGameObject(id, x, y, z)
 {
 	this->fireball = fireball;
 	this->x = x;
@@ -317,3 +314,4 @@ void CPiranhaPlant::SetState(int state)
 		break;
 	}
 }
+

@@ -16,12 +16,15 @@
 #include "BuffQBlock.h"
 #include "Koopa.h"
 #include "WingedGoomba.h"
+#include "FallPitch.h"
 
 #include "Collision.h"
 
-CMario::CMario(float x, float y, int z) : CGameObject(x, y, z)
+#define DEPENDENT_ID				9999 // taken from PlayScene.cpp
+
+CMario::CMario(int id, float x, float y, int z) : CGameObject(id, x, y, z)
 {
-	this->tailWhip = new CTailWhip(x, y, z + 10);
+	this->tailWhip = new CTailWhip(DEPENDENT_ID, x, y, z + 10);
 
 	isSitting = false;
 	maxVx = 0.0f;
@@ -54,7 +57,6 @@ CMario::CMario(float x, float y, int z) : CGameObject(x, y, z)
 	isKicking = 0;
 	kickStart = -1;
 	isHoldingKoopa = 0;
-	tailWagged = 1;
 	isMoving = 0;
 	isRunning = 0;
 	isJumpButtonHeld = 0;
@@ -307,12 +309,15 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 	{
 		vy = 0;
 		if (e->ny < 0) isOnPlatform = true;
-	}
-
-	if (e->nx != 0 && e->obj->IsBlocking())
-	{
 		pMeter = 0;
 	}
+	else
+		if (e->nx != 0 && e->obj->IsBlocking())
+		{
+			if (vx > MARIO_HALF_RUN_ACCEL_SPEED)
+				vx = (nx > 0) ? MARIO_HALF_RUN_ACCEL_SPEED : -MARIO_HALF_RUN_ACCEL_SPEED;
+				//	vx -= MARIO_DECELERATION_X / 4 * 16;
+		}
 
 	if (dynamic_cast<CGoomba*>(e->obj))
 		OnCollisionWithGoomba(e);
@@ -320,8 +325,6 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 	//	OnCollisionWithCoin(e);
 	else if (dynamic_cast<CPortal*>(e->obj))
 		OnCollisionWithPortal(e);
-	else if (dynamic_cast<CQuestionBlock*>(e->obj))
-		OnCollisionWithQuestionBlock(e);
 	else if (dynamic_cast<CLifeMushroom*>(e->obj))
 		OnCollisionWithLifeMushroom(e);
 	else if (dynamic_cast<CMushroom*>(e->obj))
@@ -340,22 +343,21 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 		OnCollisionWithKoopa(e);
 	else if (dynamic_cast<CWingedGoomba*>(e->obj))
 		OnCollisionWithWingedGoomba(e);
+	else if (dynamic_cast<CFallPitch*>(e->obj))
+		OnCollisionWithFallPitch(e);
 }
 
 void CMario::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
 {
-	CGoomba* goomba = dynamic_cast<CGoomba*>(e->obj);
-	if (goomba->GetState() == GOOMBA_STATE_DIE_ON_STOMP)
-		return;
-	if (goomba->GetState() == GOOMBA_STATE_DIE_ON_TAIL_WHIP)
-		return;
+	CGoomba* g = dynamic_cast<CGoomba*>(e->obj);
+	if (g->GetIsDead() == 1) return;
 
 	// jump on top >> kill Goomba and deflect a bit 
 	if (e->ny < 0)
 	{
-		if (goomba->GetState() != GOOMBA_STATE_DIE_ON_STOMP)
+		if (g->GetState() != GOOMBA_STATE_DIE_ON_STOMP)
 		{
-			goomba->SetState(GOOMBA_STATE_DIE_ON_STOMP);
+			g->SetState(GOOMBA_STATE_DIE_ON_STOMP);
 			vy = -MARIO_JUMP_DEFLECT_SPEED;
 		}
 	}
@@ -363,7 +365,7 @@ void CMario::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
 	{
 		if (untouchable == 0)
 		{
-			if (goomba->GetState() != GOOMBA_STATE_DIE_ON_STOMP)
+			if (g->GetState() != GOOMBA_STATE_DIE_ON_STOMP)
 			{
 				if (level == MARIO_LEVEL_BIG)
 				{
@@ -377,6 +379,13 @@ void CMario::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
 				{
 					DebugOut(L">>> Mario DIE >>> \n");
 					SetState(MARIO_STATE_DIE);
+				}
+
+				if (e->nx != 0 && this->isRunning == 1)
+				{
+					float eVx, eVy;
+					e->obj->GetSpeed(eVx, eVy);
+					e->obj->SetSpeed(-eVx, eVy);
 				}
 			}
 		}
@@ -403,16 +412,6 @@ void CMario::OnCollisionWithPortal(LPCOLLISIONEVENT e)
 	CGame::GetInstance()->InitiateSwitchScene(p->GetSceneId());
 }
 
-void CMario::OnCollisionWithQuestionBlock(LPCOLLISIONEVENT e)
-{
-	CQuestionBlock* qb = dynamic_cast<CQuestionBlock*>(e->obj);
-
-	if (qb)
-		if (e->ny > 0 && e->nx == 0 && qb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
-			qb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
-}
-
-
 void CMario::OnCollisionWithCoinQBlock(LPCOLLISIONEVENT e)
 {
 	CCoinQBlock* cqb = dynamic_cast<CCoinQBlock*>(e->obj);
@@ -429,15 +428,15 @@ void CMario::OnCollisionWithBuffQBlock(LPCOLLISIONEVENT e)
 		{
 			if (level == MARIO_LEVEL_SMALL)
 			{
-				CMushroom* mushroom = bqb->GetMushroom();
-				if (mushroom)
+				CMushroom* mr = bqb->GetMushroom();
+				if (mr)
 				{
 					float mX, mY;
-					mushroom->GetPosition(mX, mY);
+					mr->GetPosition(mX, mY);
 					if (x < mX)
-						mushroom->SetCollisionNx(1);
+						mr->SetCollisionNx(1);
 					else
-						mushroom->SetCollisionNx(-1);
+						mr->SetCollisionNx(-1);
 				}
 				bqb->SetToSpawn(0);
 			}
@@ -449,16 +448,21 @@ void CMario::OnCollisionWithBuffQBlock(LPCOLLISIONEVENT e)
 
 void CMario::OnCollisionWithLifeMushroom(LPCOLLISIONEVENT e)
 {
-	CLifeMushroom* mushroom = dynamic_cast<CLifeMushroom*>(e->obj);
+	CLifeMushroom* lmr = dynamic_cast<CLifeMushroom*>(e->obj);
 
-	if (mushroom)
+	if (lmr)
 	{
-		if (mushroom->GetState() == MUSHROOM_STATE_MOVING)
+		if (lmr->GetState() == MUSHROOM_STATE_MOVING)
 		{
-			mushroom->Delete();
+			lmr->Delete();
 			//Add 1 life
 		}
 	}
+}
+
+void CMario::OnCollisionWithFallPitch(LPCOLLISIONEVENT e)
+{
+	this->SetState(MARIO_STATE_DIE);
 }
 
 void CMario::OnCollisionWithMushroom(LPCOLLISIONEVENT e)
@@ -478,13 +482,13 @@ void CMario::OnCollisionWithMushroom(LPCOLLISIONEVENT e)
 
 void CMario::OnCollisionWithSuperLeaf(LPCOLLISIONEVENT e)
 {
-	CSuperLeaf* superleaf = dynamic_cast<CSuperLeaf*>(e->obj);
+	CSuperLeaf* sl = dynamic_cast<CSuperLeaf*>(e->obj);
 
-	if (superleaf)
+	if (sl)
 	{
-		if (superleaf->GetState() == SUPERLEAF_STATE_FLOATING_RIGHT || superleaf->GetState() == SUPERLEAF_STATE_FLOATING_LEFT)
+		if (sl->GetState() == SUPERLEAF_STATE_FLOATING_RIGHT || sl->GetState() == SUPERLEAF_STATE_FLOATING_LEFT)
 		{
-			superleaf->Delete();
+			sl->Delete();
 			if (level == MARIO_LEVEL_BIG)
 				this->SetState(MARIO_STATE_TAIL_UP);
 		}
@@ -493,10 +497,10 @@ void CMario::OnCollisionWithSuperLeaf(LPCOLLISIONEVENT e)
 
 void CMario::OnCollisionWithPiranhaPlant(LPCOLLISIONEVENT e)
 {
-	CPiranhaPlant* plant = dynamic_cast<CPiranhaPlant*>(e->obj);
+	CPiranhaPlant* pp = dynamic_cast<CPiranhaPlant*>(e->obj);
 	if (untouchable == 0)
 	{
-		if (plant->GetState() != PIRANHA_PLANT_STATE_HIDDEN)
+		if (pp->GetState() != PIRANHA_PLANT_STATE_HIDDEN)
 		{
 			if (level == MARIO_LEVEL_TAIL)
 			{
@@ -519,10 +523,10 @@ void CMario::OnCollisionWithPiranhaPlant(LPCOLLISIONEVENT e)
 
 void CMario::OnCollisionWithFireball(LPCOLLISIONEVENT e)
 {
-	CFireball* fireball = dynamic_cast<CFireball*>(e->obj);
+	CFireball* fb = dynamic_cast<CFireball*>(e->obj);
 	if (untouchable == 0)
 	{
-		if (fireball->GetState() != FIREBALL_STATE_STATIC)
+		if (fb->GetState() != FIREBALL_STATE_STATIC)
 		{
 			if (level == MARIO_LEVEL_TAIL)
 			{
@@ -546,96 +550,87 @@ void CMario::OnCollisionWithFireball(LPCOLLISIONEVENT e)
 void CMario::OnCollisionWithKoopa(LPCOLLISIONEVENT e) {
 	// Early exit if Mario is invulnerable
 
-	CKoopa* koopa = dynamic_cast<CKoopa*>(e->obj);
+	CKoopa* k = dynamic_cast<CKoopa*>(e->obj);
 
 	// Jumped on top
 	if (e->ny < 0) {
-		if (koopa->GetState() == KOOPA_STATE_WALKING_LEFT ||
-			koopa->GetState() == KOOPA_STATE_WALKING_RIGHT) {
-			koopa->StartShell();
+		if (k->GetState() == KOOPA_STATE_WALKING_LEFT ||
+			k->GetState() == KOOPA_STATE_WALKING_RIGHT) {
+			k->StartShell();
 			vy = -MARIO_JUMP_DEFLECT_SPEED;
 			return;
 		}
-		if (koopa->GetState() == KOOPA_STATE_SHELL_DYNAMIC) {
-			koopa->SetState(KOOPA_STATE_SHELL_STATIC);
+		if (k->GetState() == KOOPA_STATE_SHELL_DYNAMIC) {
+			k->SetState(KOOPA_STATE_SHELL_STATIC);
+			k->StartShell();
 			vy = -MARIO_JUMP_DEFLECT_SPEED;
 			return;
 		}
 	}
 
-	else if (e->ny > 0)
-	{
-		if (koopa->GetState() == KOOPA_STATE_SHELL_DYNAMIC)
+	//if (e->ny > 0) { //Shell fell on mario
+	//	return; //Processed in Koopa.cpp
+	//}
+	if (k->GetState() == KOOPA_STATE_SHELL_STATIC) {
+		// Kick the shell
+		if (isRunning == 0)
 		{
-			// Take damage if hitting a moving shell from below
-			if (untouchable == 0)
-			{
-				if (level == MARIO_LEVEL_TAIL) SetState(MARIO_STATE_TAIL_DOWN);
-				else if (level > MARIO_LEVEL_SMALL) SetState(MARIO_STATE_POWER_DOWN);
-				else SetState(MARIO_STATE_DIE);
-				StartUntouchable(); // Start untouchable regardless of level change
-			}
+			k->SetSpeed(0, 0);
+			StartKick();
+			k->SetState(KOOPA_STATE_SHELL_DYNAMIC);
+			k->SetSpeed((nx > 0) ? KOOPA_SHELL_SPEED : -KOOPA_SHELL_SPEED, 0);
+			k->SetNx(nx);
+			return;
 		}
-		else if (koopa->GetState() == KOOPA_STATE_SHELL_STATIC)
+		else
 		{
-			// Optional: Treat static shell like a block? Kick it upwards?
-			// For simplicity, let's just make it bounce slightly and maybe kick it
-			koopa->SetSpeed(vx * 0.2f, -KOOPA_SHELL_DEFLECT_SPEED * 0.5f); // Small upward kick
-			koopa->SetState(KOOPA_STATE_SHELL_DYNAMIC); // Make it dynamic after hit
+			k->SetState(KOOPA_STATE_BEING_HELD);
+			k->SetSpeed(0, 0);
+			this->SetIsHoldingKoopa(1);
 		}
-		// If it's a walking Koopa, hitting from below doesn't usually do anything specific
+		return;
 	}
-	// Side collision logic (ensure this comes after ny checks or uses nx explicitly)
-	else if (e->nx != 0) // Added explicit check for horizontal collision
-	{
-		if (koopa->GetState() == KOOPA_STATE_SHELL_STATIC) {
-			// Kick the shell or hold it (existing logic is likely fine here)
-			if (isRunning == 0)
-			{
-				StartKick();
-				koopa->SetState(KOOPA_STATE_SHELL_DYNAMIC);
-				koopa->SetSpeed((nx > 0) ? KOOPA_SHELL_SPEED : -KOOPA_SHELL_SPEED, 0);
-			}
-			else
-			{
-				koopa->SetState(KOOPA_STATE_BEING_HELD);
-				this->SetIsHoldingKoopa(1);
-			}
-			return; // Return after kicking/holding
+	// Side collision with walking or moving shell
+	if (k->GetState() == KOOPA_STATE_WALKING_LEFT ||
+		k->GetState() == KOOPA_STATE_WALKING_RIGHT ||
+		k->GetState() == KOOPA_STATE_SHELL_DYNAMIC) {
+		if (untouchable) return;
+		if (level == MARIO_LEVEL_TAIL)
+		{
+			SetState(MARIO_STATE_TAIL_DOWN);
+			StartUntouchable();
 		}
-		// Side collision with walking or moving shell (existing damage logic)
-		else if (koopa->GetState() == KOOPA_STATE_WALKING_LEFT ||
-			koopa->GetState() == KOOPA_STATE_WALKING_RIGHT ||
-			koopa->GetState() == KOOPA_STATE_SHELL_DYNAMIC) {
-			if (untouchable) return;
-			if (level == MARIO_LEVEL_TAIL) SetState(MARIO_STATE_TAIL_DOWN);
-			else if (level > MARIO_LEVEL_SMALL) SetState(MARIO_STATE_POWER_DOWN);
-			else SetState(MARIO_STATE_DIE);
-			StartUntouchable(); // Start untouchable here too
+		else if (level > MARIO_LEVEL_SMALL)
+		{
+			SetState(MARIO_STATE_POWER_DOWN);
+			StartUntouchable();
+		}
+		else
+		{
+			DebugOut(L">>> Mario DIE >>> \n");
+			SetState(MARIO_STATE_DIE);
 		}
 	}
 }
 
 void CMario::OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e)
 {
-	CWingedGoomba* wingedGoomba = dynamic_cast<CWingedGoomba*>(e->obj);
-	if (wingedGoomba->GetState() == WINGED_GOOMBA_STATE_DIE_ON_STOMP)
-		return;
-	if (wingedGoomba->GetState() == WINGED_GOOMBA_STATE_DIE_ON_TAIL_WHIP)
-		return;
+	CWingedGoomba* wg = dynamic_cast<CWingedGoomba*>(e->obj);
+	if (wg->GetIsDead() == 1) return;
+	
 	// jump on top >> kill Goomba and deflect a bit 
 	if (e->ny < 0)
 	{
-		if (wingedGoomba->GetWinged() == 1)
+		if (wg->GetIsWinged() == 1)
 		{
-			wingedGoomba->SetWinged(0);
-			wingedGoomba->SetState(WINGED_GOOMBA_STATE_WALKING);
+			wg->SetIsWinged(0);
+			wg->SetState(WINGED_GOOMBA_STATE_WALKING);
 			vy = -MARIO_JUMP_DEFLECT_SPEED;
 			return;
 		}
-		if (wingedGoomba->GetState() != WINGED_GOOMBA_STATE_DIE_ON_STOMP)
+		if (wg->GetState() != WINGED_GOOMBA_STATE_DIE_ON_STOMP)
 		{
-			wingedGoomba->SetState(WINGED_GOOMBA_STATE_DIE_ON_STOMP);
+			wg->SetState(WINGED_GOOMBA_STATE_DIE_ON_STOMP);
 			vy = -MARIO_JUMP_DEFLECT_SPEED;
 		}
 	}
@@ -643,7 +638,7 @@ void CMario::OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e)
 	{
 		if (untouchable == 0)
 		{
-			if (wingedGoomba->GetState() != WINGED_GOOMBA_STATE_DIE_ON_STOMP)
+			if (wg->GetState() != WINGED_GOOMBA_STATE_DIE_ON_STOMP)
 			{
 				if (level == MARIO_LEVEL_BIG)
 				{
@@ -657,6 +652,13 @@ void CMario::OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e)
 				{
 					SetState(MARIO_STATE_DIE);
 					DebugOut(L">>> Mario DIE >>> \n");
+				}
+
+				if (e->nx != 0 && this->isRunning == 1 && wg->GetIsWinged() == 0)
+				{
+					float eVx, eVy;
+					e->obj->GetSpeed(eVx, eVy);
+					e->obj->SetSpeed(-eVx, eVy);
 				}
 			}
 		}
@@ -938,7 +940,6 @@ int CMario::GetAniIdTail()
 	{
 		if (nx > 0) aniId = ID_ANI_MARIO_TAIL_HOVERING_RIGHT;
 		else aniId = ID_ANI_MARIO_TAIL_HOVERING_LEFT;
-		tailWagged = 1;
 	}
 
 	if (tailDown)
@@ -1038,9 +1039,9 @@ void CMario::SetState(int state)
 		return;
 	if (this->state == MARIO_STATE_TAIL_UP && (GetTickCount64() - tailUpStart <= MARIO_TAIL_UP_TIME))
 		return;
-	if (this->state == MARIO_STATE_POWER_DOWN && (GetTickCount64() - powerUpStart <= MARIO_POWER_DOWN_TIME))
+	if (this->state == MARIO_STATE_POWER_DOWN && (GetTickCount64() - powerDownStart <= MARIO_POWER_DOWN_TIME))
 		return;
-	if (this->state == MARIO_STATE_TAIL_DOWN && (GetTickCount64() - tailUpStart <= MARIO_TAIL_DOWN_TIME))
+	if (this->state == MARIO_STATE_TAIL_DOWN && (GetTickCount64() - tailDownStart <= MARIO_TAIL_DOWN_TIME))
 		return;
 
 	int previousState = this->state;
@@ -1213,8 +1214,7 @@ void CMario::SetState(int state)
 			else if (jumpCount >= 1)
 			{
 				jumpCount++;
-				vy = -MARIO_JUMP_SPEED_Y / 2.0f;
-				//vx = (nx > 0) ? MARIO_MAX_WALKING_SPEED : -MARIO_MAX_WALKING_SPEED;
+				vy = -MARIO_JUMP_SPEED_Y / 1.5f;
 				maxVx = (nx > 0) ? MARIO_MAX_WALKING_SPEED : -MARIO_MAX_WALKING_SPEED;
 			}
 			else if (jumpCount == 0)
@@ -1231,6 +1231,7 @@ void CMario::SetState(int state)
 
 	case MARIO_STATE_SIT:
 		if (isMoving == 1) break;
+		if (isHoldingKoopa == 1) break;
 		if (isOnPlatform && level != MARIO_LEVEL_SMALL)
 		{
 			state = MARIO_STATE_IDLE;
@@ -1305,7 +1306,7 @@ void CMario::SetState(int state)
 		break;
 	}
 
-	//DebugOut(L"SetState: %d\n", state);
+	DebugOutTitle(L"nx=: %d\n", nx);
 	CGameObject::SetState(state);
 }
 

@@ -42,7 +42,7 @@ protected:
     int isVisible = 0;
 
 public:
-    CMushroom(float x, float y, int z);
+    CMushroom(int id, float x, float y, int z);
     void Render();
     void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
     void GetBoundingBox(float& l, float& t, float& r, float& b);
