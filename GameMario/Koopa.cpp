@@ -292,9 +292,9 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		if (player->GetLevel() == MARIO_LEVEL_BIG || player->GetLevel() == MARIO_LEVEL_TAIL)
 		{
 			if (mNx > 0)
-				x = mX + 8;
+				x = mX + 10;
 			else
-				x = mX - 8;
+				x = mX - 10;
 			y = mY + 1;
 		}
 		else

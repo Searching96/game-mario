@@ -35,7 +35,7 @@
 #define OBJECT_TYPE_TRINKET 106
 #define OBJECT_TYPE_FALL_PITCH 107
 
-#define OBJECT_TYPE_PORTAL	50
+#define OBJECT_TYPE_PORTAL 50
 
 #pragma region MARIO 
 

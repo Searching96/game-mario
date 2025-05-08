@@ -1183,8 +1183,7 @@ void CMario::SetState(int state)
 			else if (jumpCount >= 1)
 			{
 				jumpCount++;
-				vy = -MARIO_JUMP_SPEED_Y / 2.0f;
-				//vx = (nx > 0) ? MARIO_MAX_WALKING_SPEED : -MARIO_MAX_WALKING_SPEED;
+				vy = -MARIO_JUMP_SPEED_Y / 1.5f;
 				maxVx = (nx > 0) ? MARIO_MAX_WALKING_SPEED : -MARIO_MAX_WALKING_SPEED;
 			}
 			else if (jumpCount == 0)
@@ -1201,6 +1200,7 @@ void CMario::SetState(int state)
 
 	case MARIO_STATE_SIT:
 		if (isMoving == 1) break;
+		if (isHoldingKoopa == 1) break;
 		if (isOnPlatform && level != MARIO_LEVEL_SMALL)
 		{
 			state = MARIO_STATE_IDLE;

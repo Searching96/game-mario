@@ -538,7 +538,7 @@ void CPlayScene::LoadChunksInRange(float cam_x, float cam_width)
 
 void CPlayScene::UnloadChunksOutOfRange(float cam_x, float cam_width) // **** MODIFIED ****
 {
-	float unload_buffer = CGame::GetInstance()->GetBackBufferWidth() * 1.5f;
+	float unload_buffer = CGame::GetInstance()->GetBackBufferWidth() * 0.5f;
 	float view_left = cam_x - unload_buffer;
 	float view_right = cam_x + cam_width + unload_buffer;
 
@@ -922,7 +922,7 @@ void CPlayScene::Update(DWORD dt)
 
 	// --- Update all OTHER game objects within chunks ---
 	bool isChronoStopped = mario->GetIsPowerUp() || mario->GetIsTailUp() ||
-		mario->GetIsPowerDown() || mario->GetIsTailDown();
+		mario->GetIsPowerDown() || mario->GetIsTailDown() || (mario->GetState() == MARIO_STATE_DIE);
 
 	for (LPCHUNK chunk : chunks) {
 		if (!chunk->IsLoaded()) continue;
