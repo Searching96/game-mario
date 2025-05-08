@@ -12,6 +12,8 @@
 #define HUD_BACKGROUND_HEIGHT 51 // Estimated height for the black bar
 #define HUD_MAIN_BOX_X_OFFSET 12  // Relative X offset of the main box inside the black bar
 #define HUD_MAIN_BOX_Y_OFFSET 3  // Relative Y offset of the main box inside the black bar
+#define CARD_BACKGROUND_WIDTH 72 // Width of a card slot
+#define CARD_X_OFFSET 10 // X offset from HUD main box right edge
 
 #define HUD_ELEMENT_Y_ROW1 11  // Y offset for first row elements from top of main box
 #define HUD_ELEMENT_Y_ROW2 19 // Y offset for second row elements from top of main box
@@ -40,8 +42,9 @@
 #define ID_SPRITE_ICON_P_FILLED 1120021   // P-meter filled triangle
 #define ID_SPRITE_ICON_P_NORMAL 1120030   // P-meter normal 'P'
 #define ID_ANI_ICON_P_FILLED 1120000 // P-meter flashing 'P' (or filled end triangle)
-//
-//// Card Icons
+
+// Card Icons
+#define ID_SPRITE_CARD_BACKGROUND 1120050
 //#define ID_SPRITE_CARD_SLOT_EMPTY 1120030 // Empty card slot
 //#define ID_SPRITE_CARD_MUSHROOM 1120031   // Mushroom card
 //#define ID_SPRITE_CARD_FLOWER 1120032     // Flower card

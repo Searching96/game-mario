@@ -130,58 +130,65 @@ void CKoopa::OnCollisionWithEnemy(LPCOLLISIONEVENT e) {
 	}
 }
 
-bool CKoopa::IsPlatformEdge(float checkDistance, vector<LPGAMEOBJECT>& possibleGrounds) {
-	float verticalTolerance = 5.0f;
-	float koopaL, koopaT, koopaR, koopaB;
-	GetBoundingBox(koopaL, koopaT, koopaR, koopaB);
-	float koopaBottom = koopaB;
-	float koopaWidth = koopaR - koopaL;
+bool CKoopa::IsPlatformEdge(float checkDistance, vector<LPGAMEOBJECT>& possibleGrounds)
+{
+	if (possibleGrounds.size() == 0) return false;
+	float verticalTolerance = 2.0f;
+	float l, t, r, b; // Koopa's current bounding box
+	GetBoundingBox(l, t, r, b);
+	float koopaBottomY = b;
+	float direction = (state == KOOPA_STATE_WALKING_LEFT) ? -1.0f : 1.0f;
 
-	// Define two check points slightly offset from the corners
-	float edgeOffset = koopaWidth * 0.4f; // Check near the corners, adjust as needed
+	bool isOnAnyPlatformInList = false;
 
-	float checkX_Outer, checkX_Inner;
-	if (state == KOOPA_STATE_WALKING_LEFT) {
-		checkX_Outer = koopaL - checkDistance;         // Point ahead of the outer edge
-		checkX_Inner = koopaL + edgeOffset - checkDistance; // Point ahead of an inner part
-	}
-	else { // Walking right
-		checkX_Outer = koopaR + checkDistance;         // Point ahead of the outer edge
-		checkX_Inner = koopaR - edgeOffset + checkDistance; // Point ahead of an inner part
-	}
-
-	bool groundFoundOuter = false;
-	bool groundFoundInner = false;
-
-
-	for (const auto& ground : possibleGrounds) {
+	for (const auto& ground : possibleGrounds)
+	{
 		if (ground == nullptr || ground->IsDeleted()) continue;
 
 		float groundL, groundT, groundR, groundB;
 		ground->GetBoundingBox(groundL, groundT, groundR, groundB);
 
+		bool verticallyOnThisGround = std::abs(koopaBottomY - groundT) <= verticalTolerance;
+		bool horizontallyOverlapping = (l < groundR && r > groundL);
 
-		// Check outer point
-		if (!groundFoundOuter && checkX_Outer >= groundL && checkX_Outer <= groundR) {
-			if (abs(koopaBottom - groundT) <= verticalTolerance) {
-				groundFoundOuter = true;
+		if (verticallyOnThisGround && horizontallyOverlapping)
+		{
+			isOnAnyPlatformInList = true;
+
+			float projectedX = x + direction * checkDistance;
+
+			//DebugOut(L"[INFO] On platform L=%f,R=%f. Koopa current L=%f,R=%f. Projected X=%f dir=%f dist=%f\n", groundL, groundR, l, r, projectedX, direction, checkDistance);
+
+
+			if (direction < 0) // Walking left
+			{
+				if (projectedX <= groundL + 0.001f)
+				{
+					//DebugOut(L"[INFO] Edge detected (walking left): projectedX=%f <= groundL=%f\n", projectedX, groundL);
+					return true;
+				}
+			}
+			else // Walking right
+			{
+				if (projectedX >= groundR - 0.001f)
+				{
+					//DebugOut(L"[INFO] Edge detected (walking right): projectedX=%f >= groundR=%f\n", projectedX, groundR);
+					return true;
+				}
 			}
 		}
-
-		// Check inner point
-		if (!groundFoundInner && checkX_Inner >= groundL && checkX_Inner <= groundR) {
-			if (abs(koopaBottom - groundT) <= verticalTolerance) {
-				groundFoundInner = true;
-			}
-		}
-
-		// If both points have found ground, no need to check further
-		if (groundFoundOuter && groundFoundInner) break;
 	}
 
-	// It's an edge if EITHER the inner OR outer check point fails to find ground
-	return !(groundFoundOuter && groundFoundInner);
+	if (isOnAnyPlatformInList) {
+		// DebugOut(L"[INFO] On platform, but no edge detected for any supporting platform.\n");
+		return false; // No edge found
+	}
+	else {
+		// DebugOut(L"[INFO] No supporting platform found in IsPlatformEdge for Koopa at Y_bottom=%f\n", koopaBottomY);
+		return false;
+	}
 }
+
 void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
 	if (beingHeld == 1)
@@ -206,15 +213,39 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		}
 	}
 
-	// Add blocking objects as potential ground
 	vector<LPGAMEOBJECT> potentialGrounds;
+	float koopa_l_bbox, koopa_t_bbox, koopa_r_bbox, koopa_b_bbox;
+	GetBoundingBox(koopa_l_bbox, koopa_t_bbox, koopa_r_bbox, koopa_b_bbox);
+
+	// A tolerance for how close the Koopa's bottom needs to be to the platform's top.
+	// This should match or be slightly larger than `verticalTolerance` in IsPlatformEdge.
+	float vertical_check_tolerance = 2.5f; // e.g., 2.0f used in IsPlatformEdge + 0.5f buffer
+
 	for (const auto& obj : *coObjects) {
-		if (obj != this && !obj->IsDeleted() && obj->IsBlocking()) {
+		if (obj == this || obj->IsDeleted() || !obj->IsBlocking())
+			continue;
+
+		float obj_L, obj_T, obj_R, obj_B;
+		obj->GetBoundingBox(obj_L, obj_T, obj_R, obj_B);
+
+		// Condition 1: Horizontal Bounding Box Overlap
+		bool horizontal_overlap = (koopa_l_bbox < obj_R && koopa_r_bbox > obj_L);
+
+		// Condition 2: Platform's top surface is near Koopa's bottom.
+		// This ensures we only consider objects that could actually be ground.
+		bool vertical_candidate = (std::abs(koopa_b_bbox - obj_T) <= vertical_check_tolerance);
+		// And ensure Koopa is generally above the platform, not under it
+		// (koopa_t_bbox < obj_B is a loose check, more accurately obj_T should be below koopa_b_bbox)
+		bool koopa_is_above_platform_top = koopa_b_bbox >= obj_T - vertical_check_tolerance;
+
+
+		if (horizontal_overlap && vertical_candidate && koopa_is_above_platform_top)
+		{
 			potentialGrounds.push_back(obj);
 		}
 	}
 
-	DebugOutTitle(L"Being held: %d, vx=%f, vy=%f\n", beingHeld, vx, vy);
+	//DebugOutTitle(L"Being held: %d, vx=%f, vy=%f\n", beingHeld, vx, vy);
 
 	if ((state == KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY) && (GetTickCount64() - dieStart > KOOPA_DIE_TIMEOUT))
 	{

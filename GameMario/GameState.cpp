@@ -165,6 +165,11 @@ void CGameState::RenderHUD()
 
 	//// --- Draw Item Card Slots ---
 	//// Positioned to the right of the main HUD box
+	//Draw Card background
+	float card_background_x = main_hud_box_center_x + HUD_WIDTH / 2 + CARD_X_OFFSET + CARD_BACKGROUND_WIDTH / 2;
+	float card_background_y = main_hud_box_center_y;
+	s->Get(ID_SPRITE_CARD_BACKGROUND)->Draw(card_background_x, card_background_y);
+	 
 	//float card_start_x = content_x + 208; // Adjust X offset for the first card
 	//float card_y = content_y + 6;       // Adjust Y offset
 	//float card_spacing = 24 + 1;        // Width of card + spacing

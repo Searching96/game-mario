@@ -231,6 +231,7 @@
 #define MARIO_KICK_TIME								150
 #define MARIO_UNTOUCHABLE_RENDER_INTERVAL			75
 #define MARIO_TAIL_WHIP_TIME						305
+#define MARIO_PMETER_MAX_TIME						7000
 
 #define MAX_JUMP_COUNT 10
 #define SPEED_DIVISOR 4.0f;
@@ -252,6 +253,7 @@ class CMario : public CGameObject
 	ULONGLONG untouchableStart;
 	BOOLEAN isOnPlatform;
 	float pMeter;
+	ULONGLONG pMeterMax;
 
 	int powerUp = 0;
 	ULONGLONG powerUpStart = -1;

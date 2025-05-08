@@ -23,4 +23,5 @@ height	240
 21	textures\misc-flipped-horizontally.png
 22	textures\misc-new-ver.png
 23	textures\misc-new-ver-flipped.png
+24	textures\misc-2.png
 30	textures\tiles.png

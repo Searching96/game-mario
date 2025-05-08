@@ -55,7 +55,8 @@ using namespace std;
 #define HORIZONTAL_MARGIN 12.0f   // 12px margin on each side of center (middle 24px is free zone)
 #define VERTICAL_SMOOTH_FACTOR 0.1f     // Smaller value = smoother/slower vertical follow
 #define VERTICAL_LOCK_BUFFER 40.0f      // How far Mario needs to be above the ground-lock level to trigger tracking
-#define VIEWPORT_OFFSET 14.0f
+#define VIEWPORT_X_OFFSET 8.0f
+#define VIEWPORT_Y_OFFSET 14.0f
 
 // --- Suggested Z-Index Hierarchy ---
 #define ZINDEX_BACKGROUND_EFFECTS   10 // Clouds, distant background elements
@@ -294,7 +295,7 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 		{
 			zIndex = ZINDEX_BLOCKS;
 			int coin_zIndex = ZINDEX_ITEMS;
-			CCoin* coin = new CCoin(x, y, coin_zIndex, 1); // Coin type 1 for QBlock?
+			CCoin* coin = new CCoin(x, y, coin_zIndex, 1); // Coin type 1 for Dynamic coin (moving coin)
 			obj = new CCoinQBlock(x, y, zIndex, coin);
 			targetChunk->AddObject(coin);
 			targetChunk->AddObject(obj);
@@ -708,14 +709,14 @@ void CPlayScene::UpdateCamera(CMario* mario, float player_cx, float player_cy, f
 
 	// Initialize static state
 	static bool s_isLockedToGround = true;
-	float visible_world_cam_height = cam_height - HUD_BACKGROUND_HEIGHT + VIEWPORT_OFFSET / 2;
+	float visible_world_cam_height = cam_height - HUD_BACKGROUND_HEIGHT + VIEWPORT_Y_OFFSET / 2;
 
 	// Determine if Mario is flying with Tail
-	bool isMaxPMeter = (mario->GetLevel() == MARIO_LEVEL_TAIL && mario->GetPMeter() == 1.0f);
+	bool is_Racoon_and_MaxPMeter = (mario->GetLevel() == MARIO_LEVEL_TAIL && mario->GetPMeter() == 1.0f);
 	bool cameraTouchedGround = cam_y >= (mapHeight - visible_world_cam_height);
 
 	// Update lock state
-	if (isMaxPMeter) {
+	if (is_Racoon_and_MaxPMeter) {
 		s_isLockedToGround = false; // Unlock camera when max P meter
 	}
 	else if (cameraTouchedGround) {
@@ -741,8 +742,8 @@ void CPlayScene::UpdateCamera(CMario* mario, float player_cx, float player_cy, f
 	}
 
 	// Clamp camera to map boundaries
-	float minCamX = -VIEWPORT_OFFSET;
-	float maxCamX = (mapWidth > cam_width) ? (mapWidth - cam_width - VIEWPORT_OFFSET) : minCamX;
+	float minCamX = -VIEWPORT_X_OFFSET;
+	float maxCamX = (mapWidth > cam_width) ? (mapWidth - cam_width - VIEWPORT_X_OFFSET) : minCamX;
 	maxCamX = max(minCamX, maxCamX);
 	float minCamY = 0.0f;
 	float maxCamY = (mapHeight > visible_world_cam_height) ? (mapHeight - visible_world_cam_height) : minCamY;
@@ -752,7 +753,7 @@ void CPlayScene::UpdateCamera(CMario* mario, float player_cx, float player_cy, f
 	cam_y = max(minCamY, min(targetCamY, maxCamY));
 
 	// Set final camera position
-	game->SetCamPos(round(cam_x), round(cam_y));
+	game->SetCamPos(cam_x, cam_y);
 
 	// Debug output
 	//DebugOut(L"Cam pos: %f, %f\n", cam_x, cam_y);

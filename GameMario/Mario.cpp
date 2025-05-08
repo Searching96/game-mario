@@ -159,6 +159,35 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	vx += ax * dt;
 	vy += ay * dt;
 
+	//Power Meter calculation
+	//Staying still or reversing
+	if (isSitting || isBraking == 1)
+	{
+		pMeter = 0;
+	}
+	else if (isRunning == 1) //Running => Charging
+	{
+		pMeter += dt / 1500.0f;
+	}
+	else //Not running => Depleting
+	{
+		pMeter -= dt / 4000.0f;
+	}
+
+	if (pMeter == 1 && pMeterMax == -1) //Trigger full pMeter
+	{
+		pMeterMax = GetTickCount64();
+
+	}
+	if (pMeterMax != -1 && GetTickCount64() - pMeterMax > MARIO_PMETER_MAX_TIME)
+	{
+		if (pMeter == 1.0f)
+			pMeter = 0;
+		pMeterMax = -1;
+	}
+
+	pMeter = max(0.0f, min(pMeter, 1.0f));
+
 	// Friction when not moving and not jumping
 	if (jumpCount < 1 && isHovering == 0 && isMoving == 0 && isBraking == 0)
 	{
@@ -195,9 +224,6 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	if (vy > MARIO_MAX_FALLING_SPEED) vy = MARIO_MAX_FALLING_SPEED;
 	if (vy < MARIO_MAX_JUMP_SPEED) vy = MARIO_MAX_JUMP_SPEED;
 
-	// PMeter update
-	pMeter = fabs(vx / MARIO_MAX_RUNNING_SPEED);
-
 	if (tailWhip != nullptr) {
 		// Pass Mario's current position and facing direction (nx) to the whip
 		// TailWhip's Update should use these to set its own x, y, nx
@@ -211,6 +237,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	//DebugOut(L"mario: x=%f, y=%f, nx=%d, state=%d\n", x, y, nx, state);
 
 	// Process collisions
+	isOnPlatform = false;
 	CCollision::GetInstance()->Process(this, dt, coObjects);
 }
 
@@ -281,11 +308,11 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 		vy = 0;
 		if (e->ny < 0) isOnPlatform = true;
 	}
-	//else
-	//	if (e->nx != 0 && e->obj->IsBlocking())
-	//	{
-	//		vx = 0;
-	//	}
+
+	if (e->nx != 0 && e->obj->IsBlocking())
+	{
+		pMeter = 0;
+	}
 
 	if (dynamic_cast<CGoomba*>(e->obj))
 		OnCollisionWithGoomba(e);
