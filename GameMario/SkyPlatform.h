@@ -7,8 +7,8 @@ class CSkyPlatform :
 	public CPlatform
 {
 public:
-	CSkyPlatform(float x, float y, int z, int width, int height)
-		: CPlatform(x, y, z, width, height)
+	CSkyPlatform(int id, float x, float y, int z, int width, int height)
+		: CPlatform(id, x, y, z, width, height)
 	{
 
 	};

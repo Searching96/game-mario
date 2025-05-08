@@ -36,7 +36,7 @@ protected:
 	void OnCollisionWithPiranhaPlant(LPCOLLISIONEVENT e);
 
 public:
-	CTailWhip(float x, float y, int z);
+	CTailWhip(int id, float x, float y, int z);
 	virtual ~CTailWhip();
 	void Render();
 	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);

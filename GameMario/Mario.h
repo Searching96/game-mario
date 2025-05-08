@@ -303,7 +303,7 @@ class CMario : public CGameObject
 	void HandleHovering(DWORD dt);
 
 public:
-	CMario(float x, float y, int z);
+	CMario(int id, float x, float y, int z);
 	virtual ~CMario();
 
 	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);

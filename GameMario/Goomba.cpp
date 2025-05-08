@@ -3,7 +3,7 @@
 #include "Koopa.h"
 #include "PlayScene.h"
 
-CGoomba::CGoomba(float x, float y, int z):CGameObject(x, y, z)
+CGoomba::CGoomba(int id, float x, float y, int z): CGameObject(id, x, y, z)
 {
 	this->ax = 0;
 	this->ay = GOOMBA_GRAVITY;

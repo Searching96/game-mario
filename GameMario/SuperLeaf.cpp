@@ -1,6 +1,6 @@
 #include "SuperLeaf.h"
 
-CSuperLeaf::CSuperLeaf(float x, float y, int z) : CGameObject(x, y, z)
+CSuperLeaf::CSuperLeaf(int id, float x, float y, int z) : CGameObject(id, x, y, z)
 {
 	this->ax = 0;
 	this->ay = 0;

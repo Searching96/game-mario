@@ -5,7 +5,7 @@
 
 #include "debug.h"
 
-CWingedGoomba::CWingedGoomba(float x, float y, int z) : CGameObject(x, y, z)
+CWingedGoomba::CWingedGoomba(int id, float x, float y, int z) : CGameObject(id, x, y, z)
 {
 	this->ax = 0;
 	this->ay = WINGED_GOOMBA_GRAVITY;

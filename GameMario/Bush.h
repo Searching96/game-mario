@@ -13,7 +13,7 @@ protected:
 	//int height; default = 1				// Unit: cell
 
 public:
-	CBush(float x, float y, int z, int width) : CGameObject(x, y, z)
+	CBush(int id, float x, float y, int z, int width) : CGameObject(id, x, y, z)
 	{
 		this->width = width;
 	}

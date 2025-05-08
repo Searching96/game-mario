@@ -1,7 +1,7 @@
 #include "Coin.h"
 #include "QuestionBlock.h"
 
-CCoin::CCoin(float x, float y, int z, int type) : CGameObject(x, y, z)
+CCoin::CCoin(int id, float x, float y, int z, int type) : CGameObject(id, x, y, z)
 {
 	this->type = type;
 	if (type == 0) this->SetState(COIN_STATE_STATIC);

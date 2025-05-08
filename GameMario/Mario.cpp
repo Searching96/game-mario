@@ -20,9 +20,11 @@
 
 #include "Collision.h"
 
-CMario::CMario(float x, float y, int z) : CGameObject(x, y, z)
+#define DEPENDENT_ID				9999 // taken from PlayScene.cpp
+
+CMario::CMario(int id, float x, float y, int z) : CGameObject(id, x, y, z)
 {
-	this->tailWhip = new CTailWhip(x, y, z + 10);
+	this->tailWhip = new CTailWhip(DEPENDENT_ID, x, y, z + 10);
 
 	isSitting = false;
 	maxVx = 0.0f;

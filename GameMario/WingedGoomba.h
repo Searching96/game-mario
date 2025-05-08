@@ -67,7 +67,7 @@ protected:
 	void OnCollisionWithKoopa(LPCOLLISIONEVENT e);
 
 public:
-	CWingedGoomba(float x, float y, int z);
+	CWingedGoomba(int id, float x, float y, int z);
 	virtual void SetState(int state);
 	void StartTracking() { isTracking = 1; trackingStart = GetTickCount64(); }
 	void StartBouncing() { isBouncing = 1; bounceCount++; }

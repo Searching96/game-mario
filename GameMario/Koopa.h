@@ -74,7 +74,7 @@ protected:
 	void OnCollisionWithQuestionBlock(LPCOLLISIONEVENT e);
 
 public:
-	CKoopa(float x, float y, int z);
+	CKoopa(int id, float x, float y, int z);
 	virtual void SetState(int state);
 	void StartShell();
 	int GetBeingHeld() { return beingHeld; }

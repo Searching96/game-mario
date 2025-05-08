@@ -10,7 +10,7 @@
 
 #include "PlayScene.h"
 
-CTailWhip::CTailWhip(float x, float y, int z) : CGameObject(x, y, z)
+CTailWhip::CTailWhip(int id, float x, float y, int z) : CGameObject(id, x, y, z)
 {
 	this->attackParticle = new CAttackParticle(x, y, z + 10);
 	notWhipping = 1;

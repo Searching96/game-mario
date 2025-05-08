@@ -1,6 +1,6 @@
 ﻿#include "Koopa.h"
 
-CKoopa::CKoopa(float x, float y, int z) :CGameObject(x, y, z)
+CKoopa::CKoopa(int id, float x, float y, int z) : CGameObject(id, x, y, z)
 {
 	this->ax = 0;
 	this->ay = KOOPA_GRAVITY;

@@ -78,7 +78,7 @@ protected:
 	int color; // 0: orange, 1: blue, 2: green, 3: white, 4: black, 5: ending
 	int bottomShadow;
 public:
-	CBox(float x, float y, int z, int width, int height, int color, int bottomShadow)  : CGameObject(x, y, z)
+	CBox(int id, float x, float y, int z, int width, int height, int color, int bottomShadow)  : CGameObject(id, x, y, z)
 	{
 		this->height = height;
 		this->width = width;

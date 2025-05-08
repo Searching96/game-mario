@@ -2,8 +2,9 @@
 #include "Game.h"
 #include "Textures.h"
 
-CFallPitch::CFallPitch(float l, float t, float r, float b)
+CFallPitch::CFallPitch(int id, float l, float t, float r, float b)
 {
+	this->id = id;
 	x = l;
 	y = t;
 	width = r - l;

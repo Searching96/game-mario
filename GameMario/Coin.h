@@ -29,7 +29,7 @@ protected:
 	int isVisible;
 	float y0 = -1;
 public:
-	CCoin(float x, float y, int z, int type);
+	CCoin(int id, float x, float y, int z, int type);
 	void Render();
 	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 	void GetBoundingBox(float& l, float& t, float& r, float& b);

@@ -46,7 +46,7 @@ protected:
 	void OnCollisionWithKoopa(LPCOLLISIONEVENT e);
 
 public: 	
-	CGoomba(float x, float y, int z);
+	CGoomba(int id, float x, float y, int z);
 	virtual void SetState(int state);
 	int GetIsDead() { return isDead; }
 };

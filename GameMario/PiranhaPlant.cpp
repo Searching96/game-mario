@@ -1,6 +1,6 @@
 #include "PiranhaPlant.h"
 
-CPiranhaPlant::CPiranhaPlant(float x, float y, int z, CFireball* fireball) : CGameObject(x, y, z)
+CPiranhaPlant::CPiranhaPlant(int id, float x, float y, int z, CFireball* fireball) : CGameObject(id, x, y, z)
 {
 	this->fireball = fireball;
 	this->x = x;
