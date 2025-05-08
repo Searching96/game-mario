@@ -339,7 +339,7 @@ public:
 	int GetIsHovering() const { return isHovering; }
 	int GetIsRunning() const { return isRunning; }
 	int GetIsFlying() { return !isOnPlatform && jumpCount > 1 || isHovering == 1; }
-	void GetNx(float& nx_out) { nx_out = this->nx; }
+	int GetNx() { return nx; }
 	float GetPMeter() const { return pMeter; }
 	BOOLEAN IsOnPlatform() const { return isOnPlatform; }
 	CTailWhip* GetTailWhip() const { return tailWhip; }
