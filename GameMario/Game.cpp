@@ -19,6 +19,7 @@ void CGame::Init(HWND hWnd, HINSTANCE hInstance)
 {
 	this->hWnd = hWnd;
 	this->hInstance = hInstance;
+	this->gameState = new CGameState(NULL, 3, 300000, 0, 0);
 
 	// retrieve client area width & height so that we can create backbuffer height & width accordingly 
 	RECT r;
@@ -516,12 +517,13 @@ void CGame::SwitchScene()
 
 	if (scenes[current_scene]!=NULL)
 		scenes[current_scene]->Unload();
-
+	
 	CSprites::GetInstance()->Clear();
 	CAnimations::GetInstance()->Clear();
 
 	current_scene = next_scene;
 	LPSCENE s = scenes[next_scene];
+	gameState->SetScene(s);
 	this->SetKeyHandler(s->GetKeyEventHandler());
 	s->Load();
 }

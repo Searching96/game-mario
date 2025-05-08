@@ -12,6 +12,7 @@
 
 # list of object assets to load in this scene
 [ASSETS]
+assets\hud.txt
 assets\mario.txt
 assets\brick.txt
 assets\coin.txt
@@ -203,7 +204,7 @@ margin_y	40
 # Sky Brick
 21	14	1440	128
 
-[CHUNK	4	1504	1696]
+[CHUNK	4	1504	1664]
 # Platform
 1	5	1536	416	5	1
 2	5	1664	416	36	1
@@ -245,7 +246,11 @@ margin_y	40
 28	107	1510	466	1560	530
 29	107	1630	466	1685	530
 
-[CHUNK	5	1696	2240]
+[CHUNK	5	1664	2240]
+
+#Platform
+5	1664	416	36	1
+
 # Brick
 1	1	1696	400	16	16	1
 2	1	1952	400	16	16	0

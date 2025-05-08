@@ -12,8 +12,10 @@ void CCoin::Render()
 {
 	if (isVisible == 0)
 		return;
-
-	int aniId = ID_ANI_COIN_DYNAMIC;
+	int aniId;
+	if (type == 1)
+		aniId = ID_ANI_COIN_DYNAMIC;
+	else aniId = ID_ANI_COIN_STATIC;
 	CAnimations* animations = CAnimations::GetInstance();
 	animations->Get(aniId)->Render(x, y);
 

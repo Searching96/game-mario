@@ -231,6 +231,7 @@
 #define MARIO_KICK_TIME								150
 #define MARIO_UNTOUCHABLE_RENDER_INTERVAL			75
 #define MARIO_TAIL_WHIP_TIME						305
+#define MARIO_PMETER_MAX_TIME						7000
 
 #define MAX_JUMP_COUNT 10
 #define SPEED_DIVISOR 4.0f;
@@ -251,7 +252,8 @@ class CMario : public CGameObject
 	int untouchable;
 	ULONGLONG untouchableStart;
 	BOOLEAN isOnPlatform;
-	int coin;
+	float pMeter;
+	ULONGLONG pMeterMax;
 
 	int powerUp = 0;
 	ULONGLONG powerUpStart = -1;
@@ -336,10 +338,10 @@ public:
 	int GetIsTailDown() const { return tailDown; }
 	int GetIsHovering() const { return isHovering; }
 	int GetIsRunning() const { return isRunning; }
-	int GetIsFlying() { return !isOnPlatform && jumpCount > 1; }
-	int GetNx() { return nx; }
+	int GetIsFlying() { return !isOnPlatform && jumpCount > 1 || isHovering == 1; }
+	void GetNx(float& nx_out) { nx_out = this->nx; }
+	float GetPMeter() const { return pMeter; }
 	BOOLEAN IsOnPlatform() const { return isOnPlatform; }
-
 	CTailWhip* GetTailWhip() const { return tailWhip; }
 	CTailWhip* GetActiveTailWhip();
 
