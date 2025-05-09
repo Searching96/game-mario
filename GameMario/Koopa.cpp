@@ -208,7 +208,7 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 	//DebugOutTitle(L"Being held: %d, vx=%f, vy=%f\n", beingHeld, vx, vy);
 
-	if ((state == KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY || state == KOOPA_STATE_DIE_ON_COLLIDE_WITH_TERRAIN) && (GetTickCount64() - dieStart > KOOPA_DIE_TIMEOUT))
+	if ((isDead == 1) && (GetTickCount64() - dieStart > KOOPA_DIE_TIMEOUT))
 	{
 		LPCHUNK chunk = ((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetChunk(originalChunkId);
 		chunk->SetObjectIsDeleted(this->GetId(), true);
@@ -433,7 +433,7 @@ void CKoopa::Render()
 }
 void CKoopa::SetState(int state)
 {
-	if (this->state == KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY) return;
+	if (isDead == 1) return;
 
 	// If transitioning from shell to walking state
 	if ((this->state == KOOPA_STATE_SHELL_STATIC || this->state == KOOPA_STATE_SHELL_DYNAMIC) &&
@@ -456,6 +456,7 @@ void CKoopa::SetState(int state)
 			vy = -0.35f;
 			ax = 0;
 			ay = KOOPA_GRAVITY;
+			isDead = 1;
 			break;
 		}
 		case KOOPA_STATE_DIE_ON_COLLIDE_WITH_TERRAIN:
@@ -464,6 +465,7 @@ void CKoopa::SetState(int state)
 			vy = -0.4f;
 			ax = 0;
 			ay = KOOPA_GRAVITY;
+			isDead = 1;
 			break;
 		case KOOPA_STATE_SHELL_STATIC:
 			vx = 0;

@@ -5,8 +5,9 @@
 
 #include "debug.h"
 
-CWingedGoomba::CWingedGoomba(int id, float x, float y, int z) : CGameObject(id, x, y, z)
+CWingedGoomba::CWingedGoomba(int id, float x, float y, int z, int originalChunkId) : CGameObject(id, x, y, z)
 {
+	this->originalChunkId = originalChunkId;
 	this->ax = 0;
 	this->ay = WINGED_GOOMBA_GRAVITY;
 	SetState(WINGED_GOOMBA_STATE_TRACKING);
@@ -165,8 +166,10 @@ void CWingedGoomba::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	vy += ay * dt;
 	vx += ax * dt;
 
-	if (isDead == 1 && (GetTickCount64() - dieStart > GOOMBA_DIE_TIMEOUT))
+	if ((isDead == 1) && (GetTickCount64() - dieStart > GOOMBA_DIE_TIMEOUT))
 	{
+		LPCHUNK chunk = ((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetChunk(originalChunkId);
+		chunk->SetObjectIsDeleted(this->GetId(), true);
 		isDeleted = true;
 		return;
 	}

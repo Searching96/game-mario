@@ -1,7 +1,8 @@
 #include "PiranhaPlant.h"
 
-CPiranhaPlant::CPiranhaPlant(int id, float x, float y, int z, CFireball* fireball) : CGameObject(id, x, y, z)
+CPiranhaPlant::CPiranhaPlant(int id, float x, float y, int z, int originalChunkId, CFireball* fireball) : CGameObject(id, x, y, z)
 {
+	this->originalChunkId = originalChunkId;
 	this->fireball = fireball;
 	this->x = x;
 	this->y = y;
@@ -220,6 +221,8 @@ void CPiranhaPlant::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	{
 		if (GetTickCount64() - deathStart > PIRANHA_PLANT_DIE_TIMEOUT)
 		{
+			LPCHUNK chunk = ((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetChunk(originalChunkId);
+			chunk->SetObjectIsDeleted(this->GetId(), true);
 			isDeleted = true;
 		}
 		return;

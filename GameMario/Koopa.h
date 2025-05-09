@@ -60,6 +60,7 @@ protected:
 	ULONGLONG dieStart;
 
 	int beingHeld = 0;
+	int isDead = 0;
 
 	int originalChunkId;
 
@@ -68,7 +69,7 @@ protected:
 	virtual void Render();
 	bool IsPlatformEdge(float checkDistance, vector<LPGAMEOBJECT>& possibleGrounds);
 
-	virtual int IsCollidable() { return (state != KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY && state != KOOPA_STATE_DIE_ON_COLLIDE_WITH_TERRAIN); };
+	virtual int IsCollidable() { return (isDead == 0); };
 	virtual int IsBlocking() { return 0; }
 	virtual void OnNoCollision(DWORD dt);
 

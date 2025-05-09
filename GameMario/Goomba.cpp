@@ -3,8 +3,9 @@
 #include "Koopa.h"
 #include "PlayScene.h"
 
-CGoomba::CGoomba(int id, float x, float y, int z): CGameObject(id, x, y, z)
+CGoomba::CGoomba(int id, float x, float y, int z, int originalChunkId) : CGameObject(id, x, y, z)
 {
+	this->originalChunkId = originalChunkId;
 	this->ax = 0;
 	this->ay = GOOMBA_GRAVITY;
 	SetState(GOOMBA_STATE_WALKING);
@@ -104,17 +105,10 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	vy += ay * dt;
 	vx += ax * dt;
 
-	if (isDead == 1 && (GetTickCount64() - dieStart > GOOMBA_DIE_TIMEOUT))
+	if ((isDead == 1) && (GetTickCount64() - dieStart > GOOMBA_DIE_TIMEOUT))
 	{
-		vector<LPCHUNK> loadedChunks = ((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetLoadedChunks();
-		for (LPCHUNK chunk : loadedChunks)
-		{
-			if (chunk->IsObjectInChunk(this) != -1)
-			{
-				chunk->SetObjectIsDeleted(this->GetId(), true);
-				break;
-			}
-		}
+		LPCHUNK chunk = ((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetChunk(originalChunkId);
+		chunk->SetObjectIsDeleted(this->GetId(), true);
 		isDeleted = true;
 		return;
 	}

@@ -245,7 +245,7 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 		{
 		case OBJECT_TYPE_GOOMBA:
 			zIndex = ZINDEX_ENEMIES;
-			obj = new CGoomba(id, x, y, zIndex);
+			obj = new CGoomba(id, x, y, zIndex, targetChunk->GetID());
 			break;
 		case OBJECT_TYPE_KOOPA:
 			zIndex = ZINDEX_ENEMIES;
@@ -256,14 +256,14 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 			zIndex = ZINDEX_PIRANHA_PLANT;
 			int fireball_zIndex = ZINDEX_FOREGROUND_EFFECTS;
 			CFireball* fireball = new CFireball(DEPENDENT_ID, x, y - PIRANHA_PLANT_BBOX_HEIGHT - PIRANHA_PLANT_BBOX_OFFSET, fireball_zIndex);
-			obj = new CPiranhaPlant(id, x, y, zIndex, fireball);
+			obj = new CPiranhaPlant(id, x, y, zIndex, targetChunk->GetID(), fireball);
 			targetChunk->AddObject(fireball);
 			targetChunk->AddObject(obj);
 			return;
 		}
 		case OBJECT_TYPE_WINGED_GOOMBA:
 			zIndex = ZINDEX_ENEMIES;
-			obj = new CWingedGoomba(id, x, y, zIndex);
+			obj = new CWingedGoomba(id, x, y, zIndex, targetChunk->GetID());
 			break;
 		case OBJECT_TYPE_BRICK:
 		{

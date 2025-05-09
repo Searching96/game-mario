@@ -55,6 +55,8 @@ protected:
 	int bounceCount = 0;
 	int isDead = 0;
 
+	int originalChunkId;
+
 	virtual void GetBoundingBox(float& left, float& top, float& right, float& bottom);
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 	virtual void Render();
@@ -67,7 +69,7 @@ protected:
 	void OnCollisionWithKoopa(LPCOLLISIONEVENT e);
 
 public:
-	CWingedGoomba(int id, float x, float y, int z);
+	CWingedGoomba(int id, float x, float y, int z, int originalChunkId);
 	virtual void SetState(int state);
 	void StartTracking() { isTracking = 1; trackingStart = GetTickCount64(); }
 	void StartBouncing() { isBouncing = 1; bounceCount++; }

@@ -48,6 +48,8 @@ protected:
 	float y0 = -1;
 	bool hasShot = false;
 
+	int originalChunkId;
+
 	CFireball* fireball = NULL;
 
 	// 0 bottom left, 1 lower center left, 2 upper center left, 3 top left
@@ -63,7 +65,7 @@ protected:
 	void OnCollisionWith(LPCOLLISIONEVENT e);
 
 public:
-	CPiranhaPlant(int id, float x, float y, int z, CFireball* fireball);
+	CPiranhaPlant(int id, float x, float y, int z, int originalChunkId, CFireball* fireball);
 
 	void Render();
 	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
