@@ -10,6 +10,8 @@ CWingedGoomba::CWingedGoomba(int id, float x, float y, int z, int originalChunkI
 	this->originalChunkId = originalChunkId;
 	this->ax = 0;
 	this->ay = WINGED_GOOMBA_GRAVITY;
+	x0 = x;
+	y0 = y;
 	SetState(WINGED_GOOMBA_STATE_TRACKING);
 }
 

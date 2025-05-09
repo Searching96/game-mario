@@ -45,8 +45,13 @@ protected:
 	ULONGLONG hoverStart = -1;
 	ULONGLONG moveDownStart = -1;
 	ULONGLONG lastMove = -1;
-	float y0 = -1;
+	float y00 = -1;
 	bool hasShot = false;
+
+	float x0;
+	float y0;
+
+	int isDefeated = 0;
 
 	int originalChunkId;
 
@@ -86,5 +91,10 @@ public:
 		moveDown = 1;
 		moveDownStart = GetTickCount64();
 	}
+	void GetOriginalPosition(float& x0, float& y0) { x0 = this->x0; y0 = this->y0; }
+	int GetIsDefeated() { return isDefeated; }
+	void SetIsDefeated(int isDefeated) { this->isDefeated = isDefeated; }
+	int GetOriginalChunkId() { return originalChunkId; }
+	CFireball* GetFireball() { return fireball; }
 };
 

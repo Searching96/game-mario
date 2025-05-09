@@ -57,5 +57,6 @@ public:
 	int GetIsDead() { return isDead; }
 	int GetIsDefeated() { return isDefeated; }
 	void SetIsDefeated(int defeated) { isDefeated = defeated; }
-	void GetOriginalPosition(float& x, float& y) { x = x0; y = y0; }
+	void GetOriginalPosition(float& x0, float& y0) { x0 = this->x0; y0 = this->y0; }
+	int GetOriginalChunkId() { return originalChunkId; }
 };

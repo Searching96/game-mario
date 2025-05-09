@@ -40,6 +40,9 @@ protected:
 	float ax;
 	float ay;
 
+	float x0;
+	float y0;
+
 	int wingState = 0; // 0: flap, 1: fold
 
 	ULONGLONG dieStart = -1;
@@ -54,6 +57,7 @@ protected:
 
 	int bounceCount = 0;
 	int isDead = 0;
+	int isDefeated = 0;
 
 	int originalChunkId;
 
@@ -77,4 +81,8 @@ public:
 	void SetIsWinged(int isWinged) { this->isWinged = isWinged; }
 	int GetIsWinged() { return isWinged; }
 	int GetIsDead() { return isDead; }
+	void GetOriginalPosition(float& x0, float& y0) { x0 = this->x0; y0 = this->y0; }
+	int GetIsDefeated() { return isDefeated; }
+	void SetIsDefeated(int isDefeated) { this->isDefeated = isDefeated; }
+	int GetOriginalChunkId() { return originalChunkId; }
 };

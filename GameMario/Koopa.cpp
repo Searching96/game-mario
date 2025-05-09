@@ -5,6 +5,8 @@ CKoopa::CKoopa(int id, float x, float y, int z, int originalChunkId) : CGameObje
 	this->originalChunkId = originalChunkId;
 	this->ax = 0;
 	this->ay = KOOPA_GRAVITY;
+	x0 = x;
+	y0 = y;
 	shellStart = -1;
 	SetState(KOOPA_STATE_WALKING_LEFT);
 }

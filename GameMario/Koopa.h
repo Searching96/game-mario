@@ -52,6 +52,9 @@ protected:
 	float ax;
 	float ay;
 
+	float x0;
+	float y0;
+
 	bool isReversed = false;
 	bool isKicked = false;
 	bool isFlying = false;
@@ -61,6 +64,7 @@ protected:
 
 	int beingHeld = 0;
 	int isDead = 0;
+	int isDefeated = 0;
 
 	int originalChunkId;
 
@@ -85,5 +89,9 @@ public:
 	void SetFlying(bool isFlying) { this->isFlying = isFlying; }
 	void SetReversed(bool isReversed) { this->isReversed = isReversed; }
 	void SetNx(int nx) { this->nx = nx; }
+	void GetOriginalPosition(float& x0, float& y0) { x0 = this->x0; y0 = this->y0; }
+	int GetIsDefeated() { return isDefeated; }
+	void SetIsDefeated(int isDefeated) { this->isDefeated = isDefeated; }
+	int GetOriginalChunkId() { return originalChunkId; }
 };
 

@@ -6,7 +6,9 @@ CPiranhaPlant::CPiranhaPlant(int id, float x, float y, int z, int originalChunkI
 	this->fireball = fireball;
 	this->x = x;
 	this->y = y;
-	SetState(PIRANHA_PLANT_STATE_HIDDEN);
+	x0 = x;
+	y0 = y;
+	SetState(PIRANHA_PLANT_STATE_ASCEND);
 }
 
 void CPiranhaPlant::Render()
@@ -246,21 +248,21 @@ void CPiranhaPlant::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	}
 	else if (moveUp == 1)
 	{
-		if (fabs(y - y0) >= PIRANHA_PLANT_MOVE_OFFSET)
+		if (fabs(y - y00) >= PIRANHA_PLANT_MOVE_OFFSET)
 		{
 			moveUp = 0;
 			moveUpStart = -1;
-			y = y0 - PIRANHA_PLANT_MOVE_OFFSET;
+			y = y00 - PIRANHA_PLANT_MOVE_OFFSET;
 			SetState(PIRANHA_PLANT_STATE_HOVER);
 		}
 	}
 	else if (moveDown == 1)
 	{
-		if (fabs(y - y0) >= PIRANHA_PLANT_MOVE_OFFSET)
+		if (fabs(y - y00) >= PIRANHA_PLANT_MOVE_OFFSET)
 		{
 			moveDown = 0;
 			moveDownStart = -1;
-			y = y0 + PIRANHA_PLANT_MOVE_OFFSET;
+			y = y00 + PIRANHA_PLANT_MOVE_OFFSET;
 			fireball->SetEnable(0);
 			SetState(PIRANHA_PLANT_STATE_HIDDEN);
 		}
@@ -299,12 +301,12 @@ void CPiranhaPlant::SetState(int state)
 		lastMove = GetTickCount64();
 		break;
 	case PIRANHA_PLANT_STATE_ASCEND:
-		y0 = y;
+		y00 = y;
 		vy = PIRANHA_PLANT_MOVE_SPEED;
 		StartMoveUp();
 		break;
 	case PIRANHA_PLANT_STATE_DESCEND:
-		y0 = y;
+		y00 = y;
 		vy = -PIRANHA_PLANT_MOVE_SPEED;
 		StartMoveDown();
 		break;

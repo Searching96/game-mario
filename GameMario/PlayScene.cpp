@@ -1,4 +1,4 @@
-#include <iostream>
+﻿#include <iostream>
 #include <fstream>
 #include <vector>     // Make sure vector is included if not implicitly
 #include <string>     // Make sure string is included if not implicitly
@@ -901,61 +901,141 @@ void CPlayScene::Unload()
 
 void CPlayScene::DefeatEnemiesOutOfRange()
 {
+	const float DEFEAT_RANGE = 30.0f;
+
 	float camStartX, camStartY;
 	CGame::GetInstance()->GetCamPos(camStartX, camStartY);
 	float camEndX = camStartX + CGame::GetInstance()->GetBackBufferWidth();
 	vector<LPCHUNK> loadedChunks = GetLoadedChunks();
 	vector<LPGAMEOBJECT> allEnemies;
 
+	// Lấy tất cả các enemy từ các chunk đã load
 	for (LPCHUNK chunk : loadedChunks) {
 		const vector<LPGAMEOBJECT>& enemies = chunk->GetEnemies();
 		allEnemies.insert(allEnemies.end(), enemies.begin(), enemies.end());
 	}
 
+	// Duyệt qua tất cả các enemy
 	for (LPGAMEOBJECT enemy : allEnemies)
 	{
+		if (enemy == nullptr || enemy->IsDeleted()) continue;
+
 		float eX, eY;
 		enemy->GetPosition(eX, eY);
-		// if enemy is out of camera, delete it
-		if (eX < camStartX - 20 || eX > camEndX + 20)
-			if (enemy != nullptr || !enemy->IsDeleted())
-				if (CGoomba* g = dynamic_cast<CGoomba*>(enemy))
-					g->SetIsDefeated(true);
+
+		// Nếu enemy nằm ngoài phạm vi camera + defeat range
+		if (eX < camStartX - DEFEAT_RANGE || eX > camEndX + DEFEAT_RANGE)
+		{
+			// Kiểm tra loại enemy cụ thể và đánh bại nó
+			if (CGoomba* goomba = dynamic_cast<CGoomba*>(enemy))
+			{
+				if (!goomba->GetIsDefeated())
+					goomba->SetIsDefeated(true);
+			}
+			else if (CKoopa* koopa = dynamic_cast<CKoopa*>(enemy))
+			{
+				if (!koopa->GetIsDefeated())
+					koopa->SetIsDefeated(true);
+			}
+			else if (CPiranhaPlant* piranha = dynamic_cast<CPiranhaPlant*>(enemy))
+			{
+				if (!piranha->GetIsDefeated())
+					piranha->SetIsDefeated(true);
+			}
+			else if (CWingedGoomba* wingedGoomba = dynamic_cast<CWingedGoomba*>(enemy))
+			{
+				if (!wingedGoomba->GetIsDefeated())
+					wingedGoomba->SetIsDefeated(true);
+			}
+		}
 	}
 }
 
 void CPlayScene::RespawnEnemiesInRange()
 {
+	const float RESPAWN_RANGE_MIN = 30.0f;
+	const float RESPAWN_RANGE_MAX = 100.0f;
+
 	float camStartX, camStartY;
 	CGame::GetInstance()->GetCamPos(camStartX, camStartY);
 	float camEndX = camStartX + CGame::GetInstance()->GetBackBufferWidth();
 	vector<LPCHUNK> loadedChunks = GetLoadedChunks();
 	vector<LPGAMEOBJECT> allEnemies;
+
 	for (LPCHUNK chunk : loadedChunks) {
 		const vector<LPGAMEOBJECT>& enemies = chunk->GetEnemies();
 		allEnemies.insert(allEnemies.end(), enemies.begin(), enemies.end());
 	}
+
 	for (LPGAMEOBJECT enemy : allEnemies)
 	{
-		float eX, eY;
-		enemy->GetPosition(eX, eY);
+		if (enemy == nullptr || enemy->IsDeleted()) continue;
 
-		bool isNearCamLeft = (eX >= camStartX - 20 && eX < camStartX);
-		bool isNearCamRight = (eX > camEndX && eX <= camEndX + 20);
+		float eX0, eY0;
 
-		if (isNearCamLeft || isNearCamRight)
+		auto shouldRespawn = [&](float posX) {
+			bool left = posX > camStartX - RESPAWN_RANGE_MAX && posX <= camStartX - RESPAWN_RANGE_MIN;
+			bool right = posX >= camEndX + RESPAWN_RANGE_MIN && posX < camEndX + RESPAWN_RANGE_MAX;
+			return left || right;
+			};
+
+		if (CGoomba* goomba = dynamic_cast<CGoomba*>(enemy))
 		{
-			if (enemy != nullptr && !enemy->IsDeleted())
+			goomba->GetOriginalPosition(eX0, eY0);
+			if (goomba->GetIsDefeated() && shouldRespawn(eX0))
 			{
-				if (CGoomba* g = dynamic_cast<CGoomba*>(enemy))
+				LPCHUNK originalChunk = GetChunk(goomba->GetOriginalChunkId());
+				if (originalChunk)
 				{
-					if (g->GetIsDefeated())
-					{
-						g->SetIsDefeated(false);
-						float x0, y0;
-						g->GetOriginalPosition(x0, y0);
-						g->SetPosition(x0, y0);
-					}
+					originalChunk->RemoveObject(goomba);
+					CGoomba* newGoomba = new CGoomba(goomba->GetId(), eX0, eY0, goomba->GetZIndex(), goomba->GetOriginalChunkId());
+					originalChunk->AddObject(newGoomba);
+					originalChunk->AddEnemy(newGoomba);
+				}
+			}
+		}
+		else if (CKoopa* koopa = dynamic_cast<CKoopa*>(enemy))
+		{
+			koopa->GetOriginalPosition(eX0, eY0);
+			if (koopa->GetIsDefeated() && shouldRespawn(eX0))
+			{
+				LPCHUNK originalChunk = GetChunk(koopa->GetOriginalChunkId());
+				if (originalChunk)
+				{
+					originalChunk->RemoveObject(koopa);
+					CKoopa* newKoopa = new CKoopa(koopa->GetId(), eX0, eY0, koopa->GetZIndex(), koopa->GetOriginalChunkId());
+					originalChunk->AddObject(newKoopa);
+					originalChunk->AddEnemy(newKoopa);
+				}
+			}
+		}
+		else if (CPiranhaPlant* piranha = dynamic_cast<CPiranhaPlant*>(enemy))
+		{
+			piranha->GetOriginalPosition(eX0, eY0);
+			if (piranha->GetIsDefeated() && shouldRespawn(eX0))
+			{
+				LPCHUNK originalChunk = GetChunk(piranha->GetOriginalChunkId());
+				if (originalChunk)
+				{
+					originalChunk->RemoveObject(piranha);
+					CPiranhaPlant* newPiranha = new CPiranhaPlant(piranha->GetId(), eX0, eY0, piranha->GetZIndex(), piranha->GetOriginalChunkId(), piranha->GetFireball());
+					originalChunk->AddObject(newPiranha);
+					originalChunk->AddEnemy(newPiranha);
+				}
+			}
+		}
+		else if (CWingedGoomba* wingedGoomba = dynamic_cast<CWingedGoomba*>(enemy))
+		{
+			wingedGoomba->GetOriginalPosition(eX0, eY0);
+			if (wingedGoomba->GetIsDefeated() && shouldRespawn(eX0))
+			{
+				LPCHUNK originalChunk = GetChunk(wingedGoomba->GetOriginalChunkId());
+				if (originalChunk)
+				{
+					originalChunk->RemoveObject(wingedGoomba);
+					CWingedGoomba* newWingedGoomba = new CWingedGoomba(wingedGoomba->GetId(), eX0, eY0, wingedGoomba->GetZIndex(), wingedGoomba->GetOriginalChunkId());
+					originalChunk->AddObject(newWingedGoomba);
+					originalChunk->AddEnemy(newWingedGoomba);
 				}
 			}
 		}
