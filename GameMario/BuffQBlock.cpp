@@ -2,9 +2,12 @@
 #include "Mushroom.h"
 #include "SuperLeaf.h"
 #include "Game.h"
+#include "Chunk.h"
+#include "PlayScene.h"
 
-CBuffQBlock::CBuffQBlock(int id, float x, float y, int z, CMushroom* mushroom, CSuperLeaf* superleaf) : CGameObject(id, x, y, z)
+CBuffQBlock::CBuffQBlock(int id, float x, float y, int z, int originalChunkId, CMushroom* mushroom, CSuperLeaf* superleaf) : CGameObject(id, x, y, z)
 {
+	this->originalChunkId = originalChunkId;
 	this->mushroom = mushroom;
 	this->superleaf = superleaf;
 	SetState(QUESTIONBLOCK_STATE_NOT_HIT);
@@ -66,7 +69,10 @@ void CBuffQBlock::SetState(int state)
 		isHit = false;
 		break;
 	case QUESTIONBLOCK_STATE_BOUNCE_UP:
+	{
 		isHit = true;
+		LPCHUNK chunk = ((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetChunk(originalChunkId);
+		chunk->SetIsObjectConsumed(this->GetId(), true);
 		y0 = y;
 		vy = QUESTIONBLOCK_BOUNCE_SPEED;
 		if (toSpawn == 1)
@@ -76,6 +82,7 @@ void CBuffQBlock::SetState(int state)
 		}
 		StartBounceUp();
 		break;
+	}
 	case QUESTIONBLOCK_STATE_BOUNCE_DOWN:
 		y0 = y;
 		vy = -QUESTIONBLOCK_BOUNCE_SPEED;

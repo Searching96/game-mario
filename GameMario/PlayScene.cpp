@@ -316,10 +316,13 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 			int mushroom_zIndex = ZINDEX_MUSHROOM;
 			CMushroom* mushroom = new CMushroom(DEPENDENT_ID, x, y, mushroom_zIndex);
 			CSuperLeaf* superleaf = new CSuperLeaf(DEPENDENT_ID, x, y, leaf_zIndex);
-			obj = new CBuffQBlock(id, x, y, zIndex, mushroom, superleaf);
+			obj = new CBuffQBlock(id, x, y, zIndex, targetChunk->GetID(), mushroom, superleaf);
 			targetChunk->AddObject(mushroom);
 			targetChunk->AddObject(superleaf);
 			targetChunk->AddObject(obj);
+			targetChunk->SetIsObjectConsumed(obj->GetId(), false);
+			if (targetChunk->GetIsObjectConsumed(obj->GetId()))
+				((CBuffQBlock*)obj)->SetIsHit(true);
 			return;
 		}
 		case OBJECT_TYPE_LIFE_BRICK:
@@ -327,9 +330,12 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 			zIndex = ZINDEX_BLOCKS;
 			int mushroom_zIndex = ZINDEX_ITEMS;
 			CLifeMushroom* mushroom = new CLifeMushroom(DEPENDENT_ID, x, y, mushroom_zIndex);
-			obj = new CLifeBrick(id, x, y, zIndex, mushroom);
+			obj = new CLifeBrick(id, x, y, zIndex, targetChunk->GetID(), mushroom);
 			targetChunk->AddObject(mushroom);
 			targetChunk->AddObject(obj);
+			targetChunk->SetIsObjectConsumed(obj->GetId(), false);
+			if (targetChunk->GetIsObjectConsumed(obj->GetId()))
+				((CLifeBrick*)obj)->SetIsHit(true);
 			return;
 		}
 		case OBJECT_TYPE_BOX:

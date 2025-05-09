@@ -33,9 +33,10 @@ protected:
 	ULONGLONG bounceUpStart = -1;
 	ULONGLONG bounceDownStart = -1;
 	float y0 = -1;
+	int originalChunkId;
 
 public:
-	CBuffQBlock(int id, float x, float y, int z, CMushroom* mushroom, CSuperLeaf* superleaf);
+	CBuffQBlock(int id, float x, float y, int z, int originalChunkId, CMushroom* mushroom, CSuperLeaf* superleaf);
 
 	void Render();
 	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
@@ -44,6 +45,7 @@ public:
 	void StartBounceUp() { bounceUp = 1; bounceUpStart = GetTickCount64(); }
 	void StartBounceDown() { bounceDown = 1; bounceDownStart = GetTickCount64(); }
 	void SetToSpawn(int toSpawn) { this->toSpawn = toSpawn; }
+	void SetIsHit(bool isHit) { this->isHit = isHit; }
 	CMushroom* GetMushroom() { return mushroom; }
 };
 

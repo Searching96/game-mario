@@ -2,9 +2,12 @@
 #include "Mushroom.h"
 #include "SuperLeaf.h"
 #include "Game.h"
+#include "Chunk.h"
+#include "PlayScene.h"
 
-CLifeBrick::CLifeBrick(int id, float x, float y, int z, CLifeMushroom* mushroom) : CQuestionBlock(id, x, y, z)
+CLifeBrick::CLifeBrick(int id, float x, float y, int z, int orignalChunkId, CLifeMushroom* mushroom) : CQuestionBlock(id, x, y, z)
 {
+	this->originalChunkId = originalChunkId;
 	this->mushroom = mushroom;
 	SetState(QUESTIONBLOCK_STATE_NOT_HIT);
 }
@@ -19,7 +22,6 @@ void CLifeBrick::Render()
 		return;
 	}
 	CSprites::GetInstance()->Get(aniId)->Draw(x, y);
-
 
 	//RenderBoundingBox();
 }
@@ -67,11 +69,15 @@ void CLifeBrick::SetState(int state)
 		isHit = false;
 		break;
 	case QUESTIONBLOCK_STATE_BOUNCE_UP:
+	{
 		isHit = true;
+		LPCHUNK chunk = ((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetChunk(originalChunkId);
+		chunk->SetIsObjectConsumed(this->GetId(), true);
 		y0 = y;
 		vy = QUESTIONBLOCK_BOUNCE_SPEED;
 		StartBounceUp();
 		break;
+	}
 	case QUESTIONBLOCK_STATE_BOUNCE_DOWN:
 		y0 = y;
 		vy = -QUESTIONBLOCK_BOUNCE_SPEED;
