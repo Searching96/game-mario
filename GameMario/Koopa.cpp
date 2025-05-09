@@ -339,7 +339,15 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		float mX, mY;
 		player->GetPosition(mX, mY);
 		float mNx = player->GetNx();
-		if (player->GetLevel() == MARIO_LEVEL_BIG || player->GetLevel() == MARIO_LEVEL_TAIL)
+		if (player->GetLevel() == MARIO_LEVEL_TAIL)
+		{
+			if (mNx > 0)
+				x = mX + 12;
+			else
+				x = mX - 12;
+			y = mY + 1;
+		}
+		else if (player->GetLevel() == MARIO_LEVEL_BIG)
 		{
 			if (mNx > 0)
 				x = mX + 10;
@@ -347,12 +355,12 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				x = mX - 10;
 			y = mY + 1;
 		}
-		else
+		else if (player->GetLevel() == MARIO_LEVEL_SMALL)
 		{
 			if (mNx > 0)
-				x = mX + 6;
+				x = mX + 8;
 			else
-				x = mX - 6;
+				x = mX - 8;
 			y = mY - 1;
 		}
 		return;
