@@ -285,6 +285,8 @@ void CMario::HandleHovering(DWORD dt)
 	{
 		ay = MARIO_GRAVITY * 0.3f;
 		if (vy > 0) vy = MARIO_HOVER_SPEED_Y;
+		if (fabs(vx) > MARIO_MAX_WALKING_SPEED / 2)
+			vx = (nx > 0) ? MARIO_MAX_WALKING_SPEED / 2 : -MARIO_MAX_WALKING_SPEED / 2;
 		if (GetTickCount64() - hoveringStart > MARIO_HOVER_TIME || isOnPlatform)
 		{
 			isHovering = 0;
@@ -890,6 +892,7 @@ int CMario::GetAniIdBig()
 //
 int CMario::GetAniIdTail()
 {
+	static int preAniId = -1;
 	int aniId = -1;
 	if (!isOnPlatform)
 	{
@@ -944,10 +947,7 @@ int CMario::GetAniIdTail()
 				else if (fabs(vx) == MARIO_MAX_RUNNING_SPEED)
 					aniId = ID_ANI_MARIO_TAIL_RUNNING_LEFT;
 			}
-
-	if (jumpCount > 0)
-		if (nx > 0) aniId = ID_ANI_MARIO_TAIL_MULTIJUMP_RIGHT;
-		else aniId = ID_ANI_MARIO_TAIL_MULTIJUMP_LEFT;
+//
 
 	if (isHovering)
 	{
@@ -999,10 +999,17 @@ int CMario::GetAniIdTail()
 		}
 	}
 
-	if (isOnPlatform == 0 && isHovering == 0 && vy > 0)
-		aniId = (nx > 0) ? ID_ANI_MARIO_TAIL_FALLING_RIGHT : ID_ANI_MARIO_TAIL_FALLING_LEFT;
+	if (preAniId != ID_ANI_MARIO_TAIL_JUMP_RUN_RIGHT && preAniId != ID_ANI_MARIO_TAIL_JUMP_RUN_LEFT)
+		if (isOnPlatform == 0 && isHovering == 0 && isHoldingKoopa == 0 && jumpCount < 1 && vy > 0)
+			aniId = (nx > 0) ? ID_ANI_MARIO_TAIL_FALLING_RIGHT : ID_ANI_MARIO_TAIL_FALLING_LEFT;
+
+	if (jumpCount > 0)
+		if (nx > 0) aniId = ID_ANI_MARIO_TAIL_MULTIJUMP_RIGHT;
+		else aniId = ID_ANI_MARIO_TAIL_MULTIJUMP_LEFT;
 
 	if (aniId == -1) aniId = ID_ANI_MARIO_TAIL_IDLE_RIGHT;
+
+	preAniId = aniId;
 
 	return aniId;
 }
