@@ -48,6 +48,7 @@ public:
 	void StartBounceUp() { bounceUp = 1; bounceUpStart = GetTickCount64(); }
 	void StartBounceDown() { bounceDown = 1; bounceDownStart = GetTickCount64(); }
 	void SetToSpawn(int toSpawn) { this->toSpawn = toSpawn; }
+	bool GetIsHit() { return isHit; }
 	void SetIsHit(bool isHit) { this->isHit = isHit; }
 	CLifeMushroom* GetLifeMushroom() { return mushroom; }
 };

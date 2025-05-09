@@ -41,6 +41,7 @@ public:
 	void SetState(int state);
 	void StartBounceUp() { bounceUp = 1; bounceUpStart = GetTickCount64(); }
 	void StartBounceDown() { bounceDown = 1; bounceDownStart = GetTickCount64(); }
+	bool GetIsHit() { return isHit; }
 	void SetIsHit(bool isHit) { this->isHit = isHit; }
 };
 

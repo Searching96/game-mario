@@ -417,7 +417,7 @@ void CMario::OnCollisionWithCoinQBlock(LPCOLLISIONEVENT e)
 {
 	CCoinQBlock* cqb = dynamic_cast<CCoinQBlock*>(e->obj);
 	if (cqb)
-		if (e->ny > 0 && e->nx == 0 && cqb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
+		if (e->ny > 0 && e->nx == 0 && !cqb->GetIsHit())
 			cqb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
 }
 
@@ -425,7 +425,7 @@ void CMario::OnCollisionWithLifeBrick(LPCOLLISIONEVENT e)
 {
 	CLifeBrick* lb = dynamic_cast<CLifeBrick*>(e->obj);
 	if (lb)
-		if (e->ny > 0 && e->nx == 0 && lb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
+		if (e->ny > 0 && e->nx == 0 && !lb->GetIsHit())
 			lb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
 }
 
@@ -433,7 +433,7 @@ void CMario::OnCollisionWithBuffQBlock(LPCOLLISIONEVENT e)
 {
 	CBuffQBlock* bqb = dynamic_cast<CBuffQBlock*>(e->obj);
 	if (bqb)
-		if (e->ny > 0 && e->nx == 0 && bqb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
+		if (e->ny > 0 && e->nx == 0 && !bqb->GetIsHit())
 		{
 			if (level == MARIO_LEVEL_SMALL)
 			{
