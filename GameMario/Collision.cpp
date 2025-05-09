@@ -529,6 +529,15 @@ void CCollision::Process(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* co
 		if (CGoomba* g = dynamic_cast<CGoomba*>(e->obj))
 			if (g->GetIsDefeated() == true)
 				continue;
+		else if (CPiranhaPlant* p = dynamic_cast<CPiranhaPlant*>(e->obj))
+			if (p->GetIsDefeated() == true)
+				continue;
+		else if (CKoopa* k = dynamic_cast<CKoopa*>(e->obj))
+			if (k->GetIsDefeated() == true)
+				continue;
+		else if (CWingedGoomba* wg = dynamic_cast<CWingedGoomba*>(e->obj))
+			if (wg->GetIsDefeated() == true)
+				continue;
 
 		if ((dynamic_cast<CCoinQBlock*>(e->obj) || dynamic_cast<CBuffQBlock*>(e->obj))
 			&& dynamic_cast<CTailWhip*>(objSrc))
