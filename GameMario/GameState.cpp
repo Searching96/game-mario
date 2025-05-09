@@ -124,7 +124,7 @@ void CGameState::RenderHUD()
 	int p_level = 0;
 	bool p_is_max = false;
 	if (player) {
-		p_level = round(player->GetPMeter() * 7); // Assuming GetPowerMeter() returns 0-7
+		//p_level = round(player->GetPMeter() * 7); // Assuming GetPowerMeter() returns 0-7
 		p_is_max = p_level == 7;
 	}
 	float p_meter_start_x = content_x + 56; // Adjust X offset

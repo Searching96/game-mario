@@ -353,7 +353,8 @@ public:
 	int GetIsRunning() const { return isRunning; }
 	int GetIsFlying() { return !isOnPlatform && (jumpCount > 1 || isHovering == 1); }
 	int GetNx() { return nx; }
-	float GetPMeter() const { return pMeter; }
+	//float GetPMeter() const { return pMeter; }
+	bool MaxPMeter() const { return fabs(vx) == MARIO_MAX_RUNNING_SPEED; }
 	BOOLEAN IsOnPlatform() const { return isOnPlatform; }
 	CTailWhip* GetTailWhip() const { return tailWhip; }
 	CTailWhip* GetActiveTailWhip();
