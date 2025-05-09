@@ -562,3 +562,26 @@ CGame* CGame::GetInstance()
 	return __instance;
 }
 
+void CGame::DecreaseGameSpeed() {
+	gameSpeed -= 0.1f;
+	if (gameSpeed < 0)
+		gameSpeed = 0;
+	DebugOut(L"[INFO] Game speed: %f\n", gameSpeed);
+}
+void CGame::IncreaseGameSpeed() {
+	gameSpeed += 0.1f;
+	//if (gameSpeed > 1)
+	//	gameSpeed = 1;
+	DebugOut(L"[INFO] Game speed: %f\n", gameSpeed);
+}
+void CGame::PauseGame() {
+	if (gameSpeed > 0) {
+		prevGameSpeed = gameSpeed;
+		gameSpeed = 0;
+	}
+	else {
+		gameSpeed = prevGameSpeed;
+	}
+	DebugOut(L"[INFO] Game speed: %f\n", gameSpeed);
+
+}

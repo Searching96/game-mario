@@ -186,8 +186,6 @@ void CWingedGoomba::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			flapStart = GetTickCount64();
 			wingState = 1 - wingState;
 		}
-		DebugOut(L"[WINGED_GOOMBA] wingState=%d, flapInterval=%d, timeSinceFlap=%llu\n",
-			wingState, flapInterval, GetTickCount64() - flapStart);
 	}
 
 

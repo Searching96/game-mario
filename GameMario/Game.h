@@ -55,6 +55,8 @@ class CGame
 	unordered_map<int, LPSCENE> scenes;
 	int current_scene = -1;
 	int next_scene = -1;
+	float gameSpeed = 1.0f;
+	float prevGameSpeed = 1.0f;
 	LPGAMESTATE gameState = nullptr;
 
 	void _ParseSection_SETTINGS(string line);
@@ -101,6 +103,11 @@ public:
 	int GetBackBufferHeight() { return backBufferHeight; }
 
 	static CGame* GetInstance();
+
+	float GetGameSpeed() { return gameSpeed; }
+	void DecreaseGameSpeed();
+	void IncreaseGameSpeed();
+	void PauseGame();
 
 	void SetPointSamplerState();
 

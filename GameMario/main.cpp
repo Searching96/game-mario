@@ -71,6 +71,8 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 */
 void Update(DWORD dt)
 {
+	if (dt == 0) return;
+
 	CGame::GetInstance()->GetCurrentScene()->Update(dt);
 	CGame::GetInstance()->GetGameState()->Update(dt);
 }
@@ -184,8 +186,9 @@ int Run()
 		{
 			frameStart = now;
 
-			CGame::GetInstance()->ProcessKeyboard();			
-			Update(dt);
+			CGame* game = CGame::GetInstance();
+			game->ProcessKeyboard();	
+			Update(dt * game->GetGameSpeed());
 			Render();
 
 			CGame::GetInstance()->SwitchScene();
