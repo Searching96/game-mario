@@ -15,5 +15,4 @@ void CLifeMushroom::Render()
 void CLifeMushroom::Activate()
 {
     CGame::GetInstance()->GetGameState()->AddLives();
-    this->Delete();
 }

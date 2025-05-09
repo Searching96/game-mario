@@ -23,7 +23,7 @@ struct CCollisionEvent
 	bool isDeleted;		
 
 	CCollisionEvent(float t, float nx, float ny, float dx = 0, float dy = 0, 
-		LPGAMEOBJECT obj = NULL, LPGAMEOBJECT src_obj = NULL)
+		LPGAMEOBJECT obj = nullptr, LPGAMEOBJECT src_obj = nullptr)
 	{
 		this->t = t;
 		this->nx = nx;

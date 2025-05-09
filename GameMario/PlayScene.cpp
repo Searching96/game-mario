@@ -80,7 +80,7 @@ using namespace std;
 CPlayScene::CPlayScene(int id, LPCWSTR filePath) :
 	CScene(id, filePath)
 {
-	player = NULL;
+	player = nullptr;
 	key_handler = new CSampleKeyHandler(this); // 'this' is the CPlayScene instance
 }
 
@@ -100,7 +100,7 @@ void CPlayScene::_ParseSection_SPRITES(string line)
 		int texID = stoi(tokens[5]);
 
 		LPTEXTURE tex = CTextures::GetInstance()->Get(texID);
-		if (tex == NULL) {
+		if (tex == nullptr) {
 			DebugOut(L"[ERROR] Texture ID %d not found for sprite %d!\n", texID, ID);
 			return;
 		}
@@ -235,7 +235,7 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 		return;
 	}
 
-	CGameObject* obj = NULL;
+	CGameObject* obj = nullptr;
 	int zIndex = ZINDEX_DEFAULT;
 
 	try {
@@ -539,7 +539,7 @@ void CPlayScene::Load()
 	startCamX = 0.0f; startCamY = 0.0f; mapWidth = 0.0f; mapHeight = 0.0f;
 	marginX = 0.0f; marginY = 0.0f;
 	// current_cam_base_y removed
-	player = NULL; // Ensure player is null before loading
+	player = nullptr; // Ensure player is null before loading
 	chunks.clear(); // Clear existing chunks if reloading scene
 
 	int section = SCENE_SECTION_UNKNOWN;
@@ -750,7 +750,7 @@ void CPlayScene::UpdateCamera(CMario* mario, float player_cx, float player_cy, f
 
 void CPlayScene::Update(DWORD dt)
 {
-	if (player == NULL) {
+	if (player == nullptr) {
 		return;
 	}
 
@@ -875,13 +875,13 @@ void CPlayScene::Unload()
 	// CSprites::GetInstance()->Clear();    // POTENTIALLY DANGEROUS if global
 
 	// Reset player pointer
-	player = NULL;
+	player = nullptr;
 
 	DebugOut(L"[INFO] Scene %d unloaded.\n", id);
 }
 
 // Keep IsGameObjectDeleted as is, used by PurgeDeletedObjects
-bool CPlayScene::IsGameObjectDeleted(const LPGAMEOBJECT& o) { return o == NULL || o->IsDeleted(); } // Add IsDeleted check
+bool CPlayScene::IsGameObjectDeleted(const LPGAMEOBJECT& o) { return o == nullptr || o->IsDeleted(); } // Add IsDeleted check
 
 void CPlayScene::PurgeDeletedObjects()
 {

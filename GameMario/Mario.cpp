@@ -461,6 +461,7 @@ void CMario::OnCollisionWithLifeMushroom(LPCOLLISIONEVENT e)
 		{
 			lmr->Activate();
 			CalculateScore(lmr);
+			lmr->Delete();
 		}
 	}
 }
