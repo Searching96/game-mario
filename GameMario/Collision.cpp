@@ -143,6 +143,15 @@ void CCollision::SweptAABB(float ml, float mt, float mr, float mb,
 	t = -1.0f;			// no collision
 	nx = ny = 0.0f;
 
+	if (dynamic_cast<CMario*>(objSrc) && dynamic_cast<CMushroom*>(objDest))
+	{
+		if (ml < sr && mr > sl && mt < sb && mb > st) {
+			t = 0.0f;      // collision at the start of the frame
+			nx = ny = 0.0f;
+			return;
+		}
+	}
+
 	if (dynamic_cast<CTailWhip*>(objSrc)) {
 		if (ml < sr && mr > sl && mt < sb && mb > st) {
 			t = 0.0f;      // collision at the start of the frame

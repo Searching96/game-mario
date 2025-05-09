@@ -139,6 +139,8 @@ void CWingedGoomba::OnCollisionWithKoopa(LPCOLLISIONEVENT e)
 
 void CWingedGoomba::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
+	if (isDefeated == 1)
+		return;
 
 	CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
 	float mX, mY;
@@ -196,6 +198,9 @@ void CWingedGoomba::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 void CWingedGoomba::Render()
 {
+	if (isDefeated == 1)
+		return;
+
 	int aniId = ID_ANI_WINGED_GOOMBA_WALKING;
 	if (state == WINGED_GOOMBA_STATE_DIE_ON_STOMP)
 	{

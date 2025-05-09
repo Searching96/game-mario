@@ -80,6 +80,15 @@ public:
 	int GetIsObjectConsumed(int id) { return isConsumed[id]; }
 
 	vector<LPGAMEOBJECT> GetEnemies() { return enemies; }
+
+	// function to check if a lpgameobject is in this chunk
+	bool IsObjectInChunk(LPGAMEOBJECT obj)
+	{
+		if (obj == nullptr) return false;
+		float obj_x, obj_y;
+		obj->GetPosition(obj_x, obj_y);
+		return (obj_x >= startX && obj_x <= endX);
+	}
 };
 
 typedef CChunk* LPCHUNK;

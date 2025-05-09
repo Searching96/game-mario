@@ -149,6 +149,9 @@ bool CKoopa::IsPlatformEdge(float checkDistance, vector<LPGAMEOBJECT>& possibleG
 
 void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
+	if (isDefeated == 1) 
+		return;
+
 	if (beingHeld == 1)
 	{
 		vx = 0;
@@ -405,6 +408,9 @@ void CKoopa::StartShell()
 
 void CKoopa::Render()
 {
+	if (isDefeated == 1)
+		return;
+
 	int aniId;
 	if (state == KOOPA_STATE_SHELL_STATIC || state == KOOPA_STATE_BEING_HELD)
 	{

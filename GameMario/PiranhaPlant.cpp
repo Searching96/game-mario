@@ -13,6 +13,9 @@ CPiranhaPlant::CPiranhaPlant(int id, float x, float y, int z, int originalChunkI
 
 void CPiranhaPlant::Render()
 {
+	if (isDefeated == 1)
+		return;
+
 	if (state == PIRANHA_PLANT_STATE_HIDDEN) return;
 	int aniId = ID_ANI_PIRANHA_PLANT_LEFT_MOVE;
 	int direction = GetAiming();
@@ -219,6 +222,9 @@ void CPiranhaPlant::OnCollisionWith(LPCOLLISIONEVENT e)
 
 void CPiranhaPlant::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
+	if (isDefeated == 1)
+		return;
+
 	if (state == PIRANHA_PLANT_STATE_DIED)
 	{
 		if (GetTickCount64() - deathStart > PIRANHA_PLANT_DIE_TIMEOUT)

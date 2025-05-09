@@ -313,7 +313,9 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 		if (e->nx != 0 && e->obj->IsBlocking())
 		{
 			if (vx > MARIO_HALF_RUN_ACCEL_SPEED)
-				vx = (nx > 0) ? MARIO_HALF_RUN_ACCEL_SPEED : -MARIO_HALF_RUN_ACCEL_SPEED;
+				vx = MARIO_HALF_RUN_ACCEL_SPEED;
+			else if (vx < -MARIO_HALF_RUN_ACCEL_SPEED)
+				vx = -MARIO_HALF_RUN_ACCEL_SPEED;
 			//	vx -= MARIO_DECELERATION_X / 4 * 16;
 		}
 
@@ -996,6 +998,9 @@ int CMario::GetAniIdTail()
 				aniId = ID_ANI_MARIO_TAIL_HOLDING_KOOPA_RUNNING_LEFT;
 		}
 	}
+
+	if (isOnPlatform == 0 && isHovering == 0 && vy > 0)
+		aniId = (nx > 0) ? ID_ANI_MARIO_TAIL_FALLING_RIGHT : ID_ANI_MARIO_TAIL_FALLING_LEFT;
 
 	if (aniId == -1) aniId = ID_ANI_MARIO_TAIL_IDLE_RIGHT;
 

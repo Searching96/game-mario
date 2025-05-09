@@ -77,6 +77,8 @@ using namespace std;
 
 #define DEPENDENT_ID				9999	// ID for objects those are not listed in text file and initiate via another object initiation
 
+#define SPAWN_CAMERA_BUFFER			20.0f
+
 CPlayScene::CPlayScene(int id, LPCWSTR filePath) :
 	CScene(id, filePath)
 {
@@ -899,7 +901,7 @@ void CPlayScene::Unload()
 
 void CPlayScene::DefeatEnemiesOutOfRange()
 {
-	const float DEFEAT_RANGE = 30.0f;
+	const float DEFEAT_RANGE = SPAWN_CAMERA_BUFFER;
 
 	float camStartX, camStartY;
 	CGame::GetInstance()->GetCamPos(camStartX, camStartY);
@@ -951,8 +953,8 @@ void CPlayScene::DefeatEnemiesOutOfRange()
 
 void CPlayScene::RespawnEnemiesInRange()
 {
-	const float RESPAWN_RANGE_MIN = 30.0f;
-	const float RESPAWN_RANGE_MAX = 100.0f;
+	const float RESPAWN_RANGE_MIN = SPAWN_CAMERA_BUFFER;
+	const float RESPAWN_RANGE_MAX = SPAWN_CAMERA_BUFFER + 80.0f;
 
 	float camStartX, camStartY;
 	CGame::GetInstance()->GetCamPos(camStartX, camStartY);
