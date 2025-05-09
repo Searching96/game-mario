@@ -288,21 +288,21 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			LPCOLLISIONEVENT e = coEvents[i];
 			if (CGoomba* g = dynamic_cast<CGoomba*>(e->obj))
 			{
-				if (g->GetIsDefeated() == 1) continue;
+				if (g->GetIsDefeated() == 1 || g->GetIsDead() == 1) continue;
 				this->SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY);
 				e->obj->SetState(WINGED_GOOMBA_STATE_DIE_ON_HELD_KOOPA);
 				isKilledOnCollideWithEnemy = 1;
 			}
 			else if (CWingedGoomba* wg = dynamic_cast<CWingedGoomba*>(e->obj))
 			{
-				if (wg->GetIsDefeated() == 1) continue;
+				if (wg->GetIsDefeated() == 1 || wg->GetIsDead() == 1) continue;
 				this->SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY);
 				e->obj->SetState(GOOMBA_STATE_DIE_ON_HELD_KOOPA);
 				isKilledOnCollideWithEnemy = 1;
 			}
 			else if (CPiranhaPlant* pp = dynamic_cast<CPiranhaPlant*>(e->obj))
 			{
-				if (pp->GetIsDefeated() == 1) continue;
+				if (pp->GetIsDefeated() == 1 || pp->GetState() == PIRANHA_PLANT_STATE_DIED) continue;
 				this->SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY);
 				e->obj->SetState(PIRANHA_PLANT_STATE_DIED);
 				isKilledOnCollideWithEnemy = 1;

@@ -940,6 +940,18 @@ void CPlayScene::DefeatEnemiesOutOfRange()
 			{
 				if (!koopa->GetIsDefeated())
 					koopa->SetIsDefeated(true);
+				float koopa_x, koopa_y;
+				koopa->GetPosition(koopa_x, koopa_y);
+				vector<LPCHUNK> chunks = GetLoadedChunks();
+				for (LPCHUNK chunk : chunks)
+				{
+					if (chunk->GetID() != koopa->GetOriginalChunkId() && chunk->GetStartX() <= koopa_x && chunk->GetEndX() >= koopa_x)
+					{
+						chunk->RemoveObject(koopa);
+						koopa->Delete();
+						break;
+					}
+				}
 			}
 			else if (CPiranhaPlant* piranha = dynamic_cast<CPiranhaPlant*>(enemy))
 			{
@@ -1001,6 +1013,26 @@ void CPlayScene::RespawnEnemiesInRange()
 		else if (CKoopa* koopa = dynamic_cast<CKoopa*>(enemy))
 		{
 			koopa->GetOriginalPosition(eX0, eY0);
+
+			// --- Prevent respawn if a Koopa with the same ID exists in any loaded chunk (except original chunk) ---
+			bool koopaExistsInOtherChunk = false;
+			for (LPCHUNK chunk : loadedChunks)
+			{
+				if (chunk->GetID() == koopa->GetOriginalChunkId()) continue;
+				const vector<LPGAMEOBJECT>& chunkEnemies = chunk->GetEnemies();
+				for (LPGAMEOBJECT obj : chunkEnemies)
+				{
+					CKoopa* otherKoopa = dynamic_cast<CKoopa*>(obj);
+					if (otherKoopa && otherKoopa->GetId() == koopa->GetId())
+					{
+						koopaExistsInOtherChunk = true;
+						break;
+					}
+				}
+				if (koopaExistsInOtherChunk) break;
+			}
+			if (koopaExistsInOtherChunk) continue;
+
 			if (koopa->GetIsDefeated() && shouldRespawn(eX0))
 			{
 				LPCHUNK originalChunk = GetChunk(koopa->GetOriginalChunkId());

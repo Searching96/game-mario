@@ -564,6 +564,8 @@ void CMario::OnCollisionWithKoopa(LPCOLLISIONEVENT e) {
 	// Early exit if Mario is invulnerable
 
 	CKoopa* k = dynamic_cast<CKoopa*>(e->obj);
+	if (k->GetIsDefeated() == 1) 
+		return;
 
 	// Jumped on top
 	if (e->ny < 0) {
