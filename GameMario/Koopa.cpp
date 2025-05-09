@@ -1,4 +1,5 @@
 ﻿#include "Koopa.h"
+#include "Particle.h"
 
 CKoopa::CKoopa(int id, float x, float y, int z, int originalChunkId) : CGameObject(id, x, y, z)
 {
@@ -469,6 +470,8 @@ void CKoopa::SetState(int state)
 		{
 			dieStart = GetTickCount64();
 			CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+			CParticle::GenerateParticleInChunk(this, 100);
+			CGame::GetInstance()->GetGameState()->AddScore(100);
 			vx = (player->GetNx() > 0) ? 0.2f : -0.2f;
 			vy = -0.35f;
 			ax = 0;
@@ -478,6 +481,8 @@ void CKoopa::SetState(int state)
 		}
 		case KOOPA_STATE_DIE_ON_COLLIDE_WITH_TERRAIN:
 			dieStart = GetTickCount64();
+			CParticle::GenerateParticleInChunk(this, 100);
+			CGame::GetInstance()->GetGameState()->AddScore(100);
 			vx = 0;
 			vy = -0.4f;
 			ax = 0;

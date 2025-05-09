@@ -1050,7 +1050,7 @@ void CMario::Render()
 		tailWhip->Render();
 	}
 
-	RenderBoundingBox();
+	//RenderBoundingBox();
 
 	//DebugOutTitle(L"Coins: %d", coin);
 }
