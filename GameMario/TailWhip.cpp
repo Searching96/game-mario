@@ -36,7 +36,7 @@ void CTailWhip::UpdatePosition(float marioX, float marioY, int marioNx)
 	else if (whippingLeft == 1)
 		x = marioX - 8;
 	else // If not actively whipping left/right, maybe hide it or default position?
-		x = (marioNx > 0) ? marioX + 6 : marioX - 6; // Keep relative position even if mid-spin
+		x = (marioNx > 0) ? marioX + 6 : marioX - 8; // Keep relative position even if mid-spin
 
 	y = marioY + 6; // Adjust Y offset as needed
 

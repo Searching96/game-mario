@@ -1341,7 +1341,7 @@ void CMario::SetState(int state)
 		break;
 	}
 
-	DebugOutTitle(L"nx=: %d\n", nx);
+	//DebugOutTitle(L"nx=: %d\n", nx);
 	CGameObject::SetState(state);
 }
 
@@ -1368,16 +1368,16 @@ void CMario::GetBoundingBox(float& left, float& top, float& right, float& bottom
 	{
 		if (isSitting)
 		{
-			left = x - MARIO_TAIL_SITTING_BBOX_WIDTH / 2 - 2;
+			left = x - MARIO_TAIL_SITTING_BBOX_WIDTH / 2 - 1;
 			top = y - MARIO_TAIL_SITTING_BBOX_HEIGHT / 2;
-			right = left + MARIO_TAIL_SITTING_BBOX_WIDTH + 2;
+			right = left + MARIO_TAIL_SITTING_BBOX_WIDTH + 1;
 			bottom = top + MARIO_TAIL_SITTING_BBOX_HEIGHT;
 		}
 		else
 		{
-			left = x - MARIO_TAIL_BBOX_WIDTH / 2 - 2;
+			left = x - MARIO_TAIL_BBOX_WIDTH / 2 - 1;
 			top = y - MARIO_TAIL_BBOX_HEIGHT / 2;
-			right = left + MARIO_TAIL_BBOX_WIDTH + 2;
+			right = left + MARIO_TAIL_BBOX_WIDTH + 1;
 			bottom = top + MARIO_TAIL_BBOX_HEIGHT;
 		}
 	}
