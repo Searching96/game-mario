@@ -66,7 +66,6 @@ private:
 	int coins; // Added coins
 	int collected_cards[3]; // Added card storage (0: empty, 1: Mush, 2: Flower, 3: Star)
 
-
 	// Helper to draw numbers
 	void DrawNumber(float x, float y, int number, int max_digits, bool fill_with_0);
 

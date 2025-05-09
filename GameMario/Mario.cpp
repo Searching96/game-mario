@@ -1261,6 +1261,13 @@ void CMario::SetState(int state)
 		ax = 0;
 		break;
 
+	case MARIO_STATE_DIE_ON_FALLING:
+		vy = 0;
+		vx = 0;
+		ax = 0;
+		ay = 0;
+		break;
+
 	case MARIO_STATE_POWER_UP:
 		StartPowerUp();
 		break;

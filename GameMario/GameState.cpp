@@ -5,6 +5,11 @@
 #include "Sprites.h" // Include Sprites for GetInstance
 
 void CGameState::Update(DWORD dt) {
+	// get player
+	CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+	if (player->GetState() == MARIO_STATE_DIE || player->GetState() == MARIO_STATE_DIE_ON_FALLING || player == nullptr)
+		return;
+
 	// Only decrease time if it's positive to prevent underflow issues
 	if (time > 0) {
 		time -= dt;

@@ -246,10 +246,12 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 		case OBJECT_TYPE_GOOMBA:
 			zIndex = ZINDEX_ENEMIES;
 			obj = new CGoomba(id, x, y, zIndex, targetChunk->GetID());
+			targetChunk->AddEnemy(obj);
 			break;
 		case OBJECT_TYPE_KOOPA:
 			zIndex = ZINDEX_ENEMIES;
 			obj = new CKoopa(id, x, y, zIndex, targetChunk->GetID());
+			targetChunk->AddEnemy(obj);
 			break;
 		case OBJECT_TYPE_PIRANHA_PLANT:
 		{
@@ -259,11 +261,13 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 			obj = new CPiranhaPlant(id, x, y, zIndex, targetChunk->GetID(), fireball);
 			targetChunk->AddObject(fireball);
 			targetChunk->AddObject(obj);
+			targetChunk->AddEnemy(obj);
 			return;
 		}
 		case OBJECT_TYPE_WINGED_GOOMBA:
 			zIndex = ZINDEX_ENEMIES;
 			obj = new CWingedGoomba(id, x, y, zIndex, targetChunk->GetID());
+			targetChunk->AddEnemy(obj);
 			break;
 		case OBJECT_TYPE_BRICK:
 		{
@@ -659,43 +663,43 @@ void CPlayScene::UpdateChunks(float cam_x, float cam_width)
 	UnloadChunksOutOfRange(cam_x, cam_width);
 }
 
-void CPlayScene::UpdateObjects(DWORD dt, CMario* mario, vector<LPGAMEOBJECT>& coObjects)
-{
-	// 1. Collect potential colliders (excluding player)
-	coObjects.clear(); // Clear from previous frame
-	for (LPCHUNK chunk : chunks) {
-		if (!chunk->IsLoaded()) continue; // Optimization: Skip unloaded chunks
-		vector<LPGAMEOBJECT>& chunkObjects = chunk->GetObjects();
-		for (LPGAMEOBJECT obj : chunkObjects) {
-			if (obj != mario) // Simple exclusion
-				coObjects.push_back(obj);
-		}
-	}
-
-	// 2. Update all loaded objects (including player within its chunk iteration)
-	// Check for time freeze effect
-	bool isChronoStopped = mario->GetIsPowerUp() || mario->GetIsTailUp() ||
-		mario->GetIsPowerDown() || mario->GetIsTailDown();
-
-	for (LPCHUNK chunk : chunks) {
-		if (!chunk->IsLoaded()) continue; // Optimization: Skip unloaded chunks
-		// Important: Iterate over a *copy* if obj->Update might modify the chunk's object list (e.g., spawning items)
-		// However, since we purge deleted objects later, iterating the original might be okay if adds happen at end.
-		// Safest is often a copy, but less performant. Sticking with original for now based on existing code.
-		vector<LPGAMEOBJECT>& chunkObjects = chunk->GetObjects(); // Get reference
-		for (size_t i = 0; i < chunkObjects.size(); ++i) { // Use index loop if Update might invalidate iterators
-			LPGAMEOBJECT obj = chunkObjects[i];
-			if (obj == nullptr) continue; // Skip if already marked for deletion? (Purge handles this later)
-
-			// Skip updates if time is stopped (except for Mario himself)
-			if (isChronoStopped && obj != mario) {
-				continue;
-			}
-
-			obj->Update(dt, &coObjects); // Pass the collected colliders
-		}
-	}
-}
+//void CPlayScene::UpdateObjects(DWORD dt, CMario* mario, vector<LPGAMEOBJECT>& coObjects)
+//{
+//	// 1. Collect potential colliders (excluding player)
+//	coObjects.clear(); // Clear from previous frame
+//	for (LPCHUNK chunk : chunks) {
+//		if (!chunk->IsLoaded()) continue; // Optimization: Skip unloaded chunks
+//		vector<LPGAMEOBJECT>& chunkObjects = chunk->GetObjects();
+//		for (LPGAMEOBJECT obj : chunkObjects) {
+//			if (obj != mario) // Simple exclusion
+//				coObjects.push_back(obj);
+//		}
+//	}
+//
+//	// 2. Update all loaded objects (including player within its chunk iteration)
+//	// Check for time freeze effect
+//	bool isChronoStopped = mario->GetIsPowerUp() || mario->GetIsTailUp() ||
+//		mario->GetIsPowerDown() || mario->GetIsTailDown();
+//
+//	for (LPCHUNK chunk : chunks) {
+//		if (!chunk->IsLoaded()) continue; // Optimization: Skip unloaded chunks
+//		// Important: Iterate over a *copy* if obj->Update might modify the chunk's object list (e.g., spawning items)
+//		// However, since we purge deleted objects later, iterating the original might be okay if adds happen at end.
+//		// Safest is often a copy, but less performant. Sticking with original for now based on existing code.
+//		vector<LPGAMEOBJECT>& chunkObjects = chunk->GetObjects(); // Get reference
+//		for (size_t i = 0; i < chunkObjects.size(); ++i) { // Use index loop if Update might invalidate iterators
+//			LPGAMEOBJECT obj = chunkObjects[i];
+//			if (obj == nullptr) continue; // Skip if already marked for deletion? (Purge handles this later)
+//
+//			// Skip updates if time is stopped (except for Mario himself)
+//			if (isChronoStopped && obj != mario) {
+//				continue;
+//			}
+//
+//			obj->Update(dt, &coObjects); // Pass the collected colliders
+//		}
+//	}
+//}
 
 void CPlayScene::UpdateCamera(CMario* mario, float player_cx, float player_cy, float cam_width, float cam_height) {
 	if (!mario) return; // Safety check
@@ -801,8 +805,9 @@ void CPlayScene::Update(DWORD dt)
 	player->Update(dt, &coObjects);
 
 	// --- Update all OTHER game objects within chunks ---
-	bool isChronoStopped = mario->GetIsPowerUp() || mario->GetIsTailUp() ||
-		mario->GetIsPowerDown() || mario->GetIsTailDown() || (mario->GetState() == MARIO_STATE_DIE);
+	bool isChronoStopped = mario->GetIsPowerUp() || mario->GetIsTailUp() 
+		|| mario->GetIsPowerDown() || mario->GetIsTailDown() || (mario->GetState() == MARIO_STATE_DIE)
+		|| (mario->GetState() == MARIO_STATE_DIE_ON_FALLING);
 
 	for (LPCHUNK chunk : chunks) {
 		if (!chunk->IsLoaded()) continue;
@@ -828,6 +833,9 @@ void CPlayScene::Update(DWORD dt)
 	float player_cx, player_cy;
 	mario->GetPosition(player_cx, player_cy);
 	UpdateCamera(mario, player_cx, player_cy, cam_width, cam_height);
+
+	DefeatEnemiesOutOfRange();
+	RespawnEnemiesInRange();
 
 	// --- Clean up ---
 	PurgeDeletedObjects(); // Handle objects marked for deletion
@@ -889,6 +897,69 @@ void CPlayScene::Unload()
 	player = NULL;
 
 	DebugOut(L"[INFO] Scene %d unloaded.\n", id);
+}
+
+void CPlayScene::DefeatEnemiesOutOfRange()
+{
+	float camStartX, camStartY;
+	CGame::GetInstance()->GetCamPos(camStartX, camStartY);
+	float camEndX = camStartX + CGame::GetInstance()->GetBackBufferWidth();
+	vector<LPCHUNK> loadedChunks = GetLoadedChunks();
+	vector<LPGAMEOBJECT> allEnemies;
+
+	for (LPCHUNK chunk : loadedChunks) {
+		const vector<LPGAMEOBJECT>& enemies = chunk->GetEnemies();
+		allEnemies.insert(allEnemies.end(), enemies.begin(), enemies.end());
+	}
+
+	for (LPGAMEOBJECT enemy : allEnemies)
+	{
+		float eX, eY;
+		enemy->GetPosition(eX, eY);
+		// if enemy is out of camera, delete it
+		if (eX < camStartX - 20 || eX > camEndX + 20)
+			if (enemy != nullptr || !enemy->IsDeleted())
+				if (CGoomba* g = dynamic_cast<CGoomba*>(enemy))
+					g->SetIsDefeated(true);
+	}
+}
+
+void CPlayScene::RespawnEnemiesInRange()
+{
+	float camStartX, camStartY;
+	CGame::GetInstance()->GetCamPos(camStartX, camStartY);
+	float camEndX = camStartX + CGame::GetInstance()->GetBackBufferWidth();
+	vector<LPCHUNK> loadedChunks = GetLoadedChunks();
+	vector<LPGAMEOBJECT> allEnemies;
+	for (LPCHUNK chunk : loadedChunks) {
+		const vector<LPGAMEOBJECT>& enemies = chunk->GetEnemies();
+		allEnemies.insert(allEnemies.end(), enemies.begin(), enemies.end());
+	}
+	for (LPGAMEOBJECT enemy : allEnemies)
+	{
+		float eX, eY;
+		enemy->GetPosition(eX, eY);
+
+		bool isNearCamLeft = (eX >= camStartX - 20 && eX < camStartX);
+		bool isNearCamRight = (eX > camEndX && eX <= camEndX + 20);
+
+		if (isNearCamLeft || isNearCamRight)
+		{
+			if (enemy != nullptr && !enemy->IsDeleted())
+			{
+				if (CGoomba* g = dynamic_cast<CGoomba*>(enemy))
+				{
+					if (g->GetIsDefeated())
+					{
+						g->SetIsDefeated(false);
+						float x0, y0;
+						g->GetOriginalPosition(x0, y0);
+						g->SetPosition(x0, y0);
+					}
+				}
+			}
+		}
+	}
 }
 
 // Keep IsGameObjectDeleted as is, used by PurgeDeletedObjects

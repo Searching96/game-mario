@@ -1,4 +1,7 @@
 #include "Chunk.h"
+#include "Mario.h"
+#include "PlayScene.h"
+
 void CChunk::Update(DWORD dt, std::vector<LPGAMEOBJECT>* coObjects)
 {
 	for (LPGAMEOBJECT obj : objects)
@@ -17,6 +20,7 @@ void CChunk::Clear()
 			delete obj;
 	}
 	objects.clear();
+	enemies.clear();
 	//isDeleted.clear();
 	isLoaded = false;
 }
@@ -40,6 +44,20 @@ void CChunk::PurgeDeletedObjects()
 		{
 			delete obj; // Free memory
 			it = objects.erase(it); // Erase and advance iterator
+		}
+		else
+		{
+			++it;
+		}
+	}
+	// repeat deletion for enemies
+	for (auto it = enemies.begin(); it != enemies.end(); )
+	{
+		LPGAMEOBJECT obj = *it;
+		if (obj != nullptr && obj->IsDeleted())
+		{
+			//delete obj; // Free memory
+			it = enemies.erase(it); // Erase and advance iterator
 		}
 		else
 		{

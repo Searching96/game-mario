@@ -27,12 +27,16 @@ protected:
 	float ax;				
 	float ay; 
 
+	float x0;
+	float y0;
+
 	ULONGLONG dieStart = -1;
 
 	ULONGLONG dieOnStompStart = -1;
 	ULONGLONG dieOnWhipStart = -1;
 
 	int isDead = 0;
+	int isDefeated = 0;
 
 	int originalChunkId;
 
@@ -51,4 +55,7 @@ public:
 	CGoomba(int id, float x, float y, int z, int originalChunkId);
 	virtual void SetState(int state);
 	int GetIsDead() { return isDead; }
+	int GetIsDefeated() { return isDefeated; }
+	void SetIsDefeated(int defeated) { isDefeated = defeated; }
+	void GetOriginalPosition(float& x, float& y) { x = x0; y = y0; }
 };

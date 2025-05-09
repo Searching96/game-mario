@@ -165,6 +165,7 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			if (x < chunk->GetEndX() && x > chunk->GetStartX())
 			{
 				chunk->AddObject(this);
+				chunk->AddEnemy(this);
 			}
 		}
 	}

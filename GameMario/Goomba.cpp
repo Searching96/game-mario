@@ -8,6 +8,8 @@ CGoomba::CGoomba(int id, float x, float y, int z, int originalChunkId) : CGameOb
 	this->originalChunkId = originalChunkId;
 	this->ax = 0;
 	this->ay = GOOMBA_GRAVITY;
+	x0 = x;
+	y0 = y;
 	SetState(GOOMBA_STATE_WALKING);
 }
 
@@ -96,6 +98,9 @@ void CGoomba::OnCollisionWithKoopa(LPCOLLISIONEVENT e)
 
 void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 {
+	if (isDefeated)
+		return;
+
 	CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
 	float mX, mY;
 	player->GetPosition(mX, mY);
@@ -120,6 +125,9 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 
 void CGoomba::Render()
 {
+	if (isDefeated)
+		return;
+
 	int aniId = ID_ANI_GOOMBA_WALKING;
 	if (state == GOOMBA_STATE_DIE_ON_STOMP) 
 		aniId = ID_ANI_GOOMBA_DIE_ON_STOMP;

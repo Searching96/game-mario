@@ -9,7 +9,7 @@ protected:
 	bool isLoaded = false;
 
 	vector<LPGAMEOBJECT> objects;
-	vector<LPGAMEOBJECT> comsumableObjects;
+	vector<LPGAMEOBJECT> enemies;
 	map<int, bool> isDeleted;
 	map<int, bool> isConsumed;
 public:
@@ -18,18 +18,23 @@ public:
 	void AddObject(LPGAMEOBJECT obj)
 	{
 		if (obj != nullptr)
-		{
 			objects.push_back(obj);
-			isDeleted[obj->GetId()] = false; // Initialize as not defeated
-		}
+	}
+
+	void AddEnemy(LPGAMEOBJECT obj)
+	{
+		if (obj != nullptr)
+			enemies.push_back(obj);
 	}
 
 	void RemoveObject(LPGAMEOBJECT obj)
 	{
 		objects.erase(std::remove(objects.begin(), objects.end(), obj), objects.end());
+		// RED ALERT: do i need to erase koopa from enemies too?
+		enemies.erase(std::remove(enemies.begin(), enemies.end(), obj), enemies.end());
 	}
 
-	std::vector<LPGAMEOBJECT>& GetObjects()
+	vector<LPGAMEOBJECT>& GetObjects()
 	{
 		return objects; // Return reference to objects without modification
 	}
@@ -57,10 +62,7 @@ public:
 		}
 	}
 
-	int GetIsObjectDeleted(int id)
-	{
-		return isDeleted[id];
-	}
+	int GetIsObjectDeleted(int id) { return isDeleted[id]; }
 
 	int SetIsObjectConsumed(int id, int isCon)
 	{
@@ -75,10 +77,9 @@ public:
 		return isConsumed[id];
 	}
 
-	int GetIsObjectConsumed(int id)
-	{
-		return isConsumed[id];
-	}
+	int GetIsObjectConsumed(int id) { return isConsumed[id]; }
+
+	vector<LPGAMEOBJECT> GetEnemies() { return enemies; }
 };
 
 typedef CChunk* LPCHUNK;

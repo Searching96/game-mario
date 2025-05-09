@@ -39,8 +39,8 @@ protected:
 	void UnloadChunksOutOfRange(float cam_x, float cam_width);
 
 	void UpdateChunks(float cam_x, float cam_width);
-	void UpdateObjects(DWORD dt, CMario* mario, vector<LPGAMEOBJECT>& coObjects);
 	void UpdateCamera(CMario* mario, float player_cx, float player_cy, float cam_width, float cam_height);
+	//void UpdateObjects(DWORD dt, CMario* mario, vector<LPGAMEOBJECT>& coObjects);
 
 public:
 	CPlayScene(int id, LPCWSTR filePath);
@@ -49,6 +49,8 @@ public:
 	virtual void Update(DWORD dt);
 	virtual void Render();
 	virtual void Unload();
+	void DefeatEnemiesOutOfRange();
+	void RespawnEnemiesInRange();
 
 	int GetId() const { return id; }
 	LPGAMEOBJECT GetPlayer() { return player; }
