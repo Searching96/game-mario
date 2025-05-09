@@ -513,7 +513,7 @@ void CMario::OnCollisionWithPiranhaPlant(LPCOLLISIONEVENT e)
 	CPiranhaPlant* pp = dynamic_cast<CPiranhaPlant*>(e->obj);
 	if (untouchable == 0)
 	{
-		if (pp->GetState() != PIRANHA_PLANT_STATE_HIDDEN)
+		if (pp->GetState() != PIRANHA_PLANT_STATE_HIDDEN && pp->GetState() != PIRANHA_PLANT_STATE_DIED)
 		{
 			if (level == MARIO_LEVEL_TAIL)
 			{
