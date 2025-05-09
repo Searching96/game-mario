@@ -145,7 +145,7 @@ void CGameState::RenderHUD()
 
 	// Coin Count (Draw using helper, right-aligned)
 	float coin_num_x_right = content_x + 148; // Right edge for number drawing
-	DrawNumber(coin_num_x_right, y_row1, coins, HUD_MAX_COIN_DIGITS);
+	DrawNumber(coin_num_x_right, y_row1, coins, HUD_MAX_COIN_DIGITS, false);
 
 	// --- Draw Row 2 Elements ---
 	float y_row2 = content_y + HUD_ELEMENT_Y_ROW2;
