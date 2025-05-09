@@ -1,4 +1,6 @@
 #include "LifeMushroom.h"
+#include "Game.h"
+#include "Particle.h"
 
 void CLifeMushroom::Render()
 {
@@ -8,4 +10,9 @@ void CLifeMushroom::Render()
     animations->Get(ID_ANI_LIFE_MUSHROOM)->Render(x, y);
 
     //RenderBoundingBox();
+}
+
+void CLifeMushroom::Activate()
+{
+    CGame::GetInstance()->GetGameState()->AddLives();
 }

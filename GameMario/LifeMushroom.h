@@ -11,5 +11,6 @@ public:
 	{
 	};
 	void Render();
+	void Activate();
 };
 

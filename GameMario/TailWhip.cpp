@@ -61,7 +61,7 @@ void CTailWhip::Render()
 		attackParticle->Render();
 	}
 
-	 RenderBoundingBox(); // Debug only
+	RenderBoundingBox(); // Debug only
 }
 
 void CTailWhip::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
@@ -162,7 +162,8 @@ void CTailWhip::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
 	if (g)
 	{
 		if (g->GetIsDead() == 1) return;
-
+		CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+		player->CalculateScore(g);
 		if (attackParticle) attackParticle->SetState(ATTACK_PARTICLE_STATE_EMERGING);
 		g->SetState(GOOMBA_STATE_DIE_ON_TAIL_WHIP);
 	}
@@ -173,7 +174,10 @@ void CTailWhip::OnCollisionWithPiranhaPlant(LPCOLLISIONEVENT e)
 	CPiranhaPlant* pp = dynamic_cast<CPiranhaPlant*>(e->obj);
 	if (pp)
 	{
-		if (pp->GetState() == PIRANHA_PLANT_STATE_HIDDEN) return;
+		if (pp->GetState() == PIRANHA_PLANT_STATE_HIDDEN ||
+			pp->GetState() == PIRANHA_PLANT_STATE_DIED) return;
+		CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+		player->CalculateScore(pp);
 		if (attackParticle) attackParticle->SetState(ATTACK_PARTICLE_STATE_EMERGING);
 		pp->SetState(PIRANHA_PLANT_STATE_DIED);
 	}
@@ -184,6 +188,11 @@ void CTailWhip::OnCollisionWithKoopa(LPCOLLISIONEVENT e)
 	CKoopa* k = dynamic_cast<CKoopa*>(e->obj);
 	if (k)
 	{
+		if (k->GetState() == KOOPA_STATE_WALKING_LEFT || k->GetState() == KOOPA_STATE_WALKING_RIGHT)
+		{
+			CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+			player->CalculateScore(k);
+		}
 		if (attackParticle) attackParticle->SetState(ATTACK_PARTICLE_STATE_EMERGING);
 		k->StartShell();
 		k->SetState(KOOPA_STATE_SHELL_STATIC);
@@ -201,7 +210,8 @@ void CTailWhip::OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e)
 	if (wg)
 	{
 		if (wg->GetIsDead() == 1) return;
-
+		CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+		player->CalculateScore(wg);
 		if (attackParticle) attackParticle->SetState(ATTACK_PARTICLE_STATE_EMERGING);
 		wg->SetState(WINGED_GOOMBA_STATE_DIE_ON_TAIL_WHIP);
 	}

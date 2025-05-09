@@ -1,5 +1,8 @@
 #include "Coin.h"
+#include "Game.h"
+#include "PlayScene.h"
 #include "QuestionBlock.h"
+#include "Particle.h"
 
 CCoin::CCoin(int id, float x, float y, int z, int type) : CGameObject(id, x, y, z)
 {
@@ -46,6 +49,12 @@ void CCoin::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	y += vy * dt;
 }
 
+void CCoin::Activate()
+{
+	if (type == 0) this->SetState(COIN_STATE_BOUNCE_COMPLETE);
+	else this->SetState(COIN_STATE_BOUNCE_UP);
+}
+
 void CCoin::GetBoundingBox(float& l, float& t, float& r, float& b)
 {
 	l = x - COIN_BBOX_WIDTH / 2;
@@ -78,6 +87,9 @@ void CCoin::SetState(int state)
 		StartBounceDown();
 		break;
 	case COIN_STATE_BOUNCE_COMPLETE:
+		CGame::GetInstance()->GetGameState()->AddScore(100);
+		CParticle::GenerateParticleInChunk(this, 100);
+		CGame::GetInstance()->GetGameState()->AddCoin();
 		this->Delete();
 		break;
 	}

@@ -55,7 +55,7 @@ protected:
 
 	int originalChunkId;
 
-	CFireball* fireball = NULL;
+	CFireball* fireball = nullptr;
 
 	// 0 bottom left, 1 lower center left, 2 upper center left, 3 top left
 	//4 top right, 5 upper center right, 6 lower center right, 7 bottom right

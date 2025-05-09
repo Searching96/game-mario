@@ -259,6 +259,7 @@ class CMario : public CGameObject
 	BOOLEAN isOnPlatform;
 	float pMeter;
 	ULONGLONG pMeterMax;
+	int consecutiveEnemies;
 
 	int powerUp = 0;
 	ULONGLONG powerUpStart = -1;
@@ -300,6 +301,7 @@ class CMario : public CGameObject
 	void OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e);
 	void OnCollisionWithLifeMushroom(LPCOLLISIONEVENT e);
 	void OnCollisionWithFallPitch(LPCOLLISIONEVENT e);
+	void OnCollisionWithLifeBrick(LPCOLLISIONEVENT e);
 
 	int GetAniIdBig();
 	int GetAniIdSmall();
@@ -308,6 +310,7 @@ class CMario : public CGameObject
 	void HandleBraking(DWORD dt);
 	void HandleUntouchable(DWORD dt);
 	void HandleHovering(DWORD dt);
+
 
 public:
 	CMario(int id, float x, float y, int z);
@@ -322,6 +325,8 @@ public:
 
 	void OnNoCollision(DWORD dt);
 	void OnCollisionWith(LPCOLLISIONEVENT e);
+
+	void CalculateScore(LPGAMEOBJECT obj);
 
 	void GetBoundingBox(float& left, float& top, float& right, float& bottom);
 
@@ -343,7 +348,7 @@ public:
 	int GetIsTailDown() const { return tailDown; }
 	int GetIsHovering() const { return isHovering; }
 	int GetIsRunning() const { return isRunning; }
-	int GetIsFlying() { return !isOnPlatform && jumpCount > 1 || isHovering == 1; }
+	int GetIsFlying() { return !isOnPlatform && (jumpCount > 1 || isHovering == 1); }
 	int GetNx() { return nx; }
 	float GetPMeter() const { return pMeter; }
 	BOOLEAN IsOnPlatform() const { return isOnPlatform; }

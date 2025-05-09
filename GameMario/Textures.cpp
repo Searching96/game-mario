@@ -4,7 +4,7 @@
 #include "Game.h"
 #include "textures.h"
 
-CTextures* CTextures::__instance = NULL;
+CTextures* CTextures::__instance = nullptr;
 
 CTextures::CTextures()
 {
@@ -13,7 +13,7 @@ CTextures::CTextures()
 
 CTextures* CTextures::GetInstance()
 {
-	if (__instance == NULL) __instance = new CTextures();
+	if (__instance == nullptr) __instance = new CTextures();
 	return __instance;
 }
 
@@ -25,7 +25,7 @@ void CTextures::Add(int id, LPCWSTR filePath)
 LPTEXTURE CTextures::Get(unsigned int i)
 {
 	LPTEXTURE t = textures[i];
-	if (t == NULL)
+	if (t == nullptr)
 		DebugOut(L"[ERROR] Texture Id %d not found !\n", i);
 	
 	return t;
@@ -39,7 +39,7 @@ void CTextures::Clear()
 	for (auto x : textures)
 	{
 		LPTEXTURE tex = x.second;
-		if (tex != NULL) delete tex;
+		if (tex != nullptr) delete tex;
 	}
 
 	textures.clear();

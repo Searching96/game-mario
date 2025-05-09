@@ -147,7 +147,7 @@ bool CPiranhaPlant::IsMarioInRange()
 
 void CPiranhaPlant::Shoot(int direction)
 {
-	if (fireball == NULL) return;
+	if (fireball == nullptr) return;
 	switch (direction)
 	{
 	case 0:

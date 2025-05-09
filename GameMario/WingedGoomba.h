@@ -1,8 +1,8 @@
 #pragma once
 #include "GameObject.h"
 
-#define WINGED_GOOMBA_GRAVITY									0.002f
-#define WINGED_GOOMBA_WALKING_SPEED								0.05f
+#define WINGED_GOOMBA_GRAVITY									0.0015f
+#define WINGED_GOOMBA_WALKING_SPEED								0.032f
 #define WINGED_GOOMBA_BOUNCE_SPEED								0.135f
 
 #define WINGED_GOOMBA_BBOX_WIDTH								16
@@ -29,8 +29,8 @@
 #define ID_ANI_WING_CLOSE_RIGHT									160110
 
 #define WINGED_GOOMBA_TRACKING_TIME								1000
-#define WINGED_GOOMBA_BOUNCING_TIME								1000
-#define WINGED_GOOMBA_FLYING_TIME								1000
+#define WINGED_GOOMBA_BOUNCING_TIME								1500
+#define WINGED_GOOMBA_FLYING_TIME								1500
 
 #define WINGED_GOOMBA_MAX_BOUNCE_COUNT							4
 

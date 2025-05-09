@@ -65,7 +65,7 @@ void CWingedGoomba::OnCollisionWith(LPCOLLISIONEVENT e)
 					isFlying = 0;
 					SetState(WINGED_GOOMBA_STATE_TRACKING); // Or WINGED_GOOMBA_STATE_WALKING?
 				}
-				else 
+				else
 				{
 					vy = 0;
 				}
@@ -76,7 +76,7 @@ void CWingedGoomba::OnCollisionWith(LPCOLLISIONEVENT e)
 				{
 					vy = 0;
 				}
-				else 
+				else
 				{
 					vy = 0;
 				}
@@ -176,14 +176,18 @@ void CWingedGoomba::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		return;
 	}
 
-	if (GetTickCount64() - flapStart > 1000)
-	{
-		flapStart = GetTickCount64();
-		if (wingState == 0)
-			wingState = 1;
-		else
-			wingState = 0;
+	if (isWinged == 1) {
+		int flapInterval = 500;
+		if (isBouncing == 1) flapInterval = 1000;
+		else if (isFlying == 1) flapInterval = 500;
+		if (GetTickCount64() - flapStart > flapInterval) {
+			flapStart = GetTickCount64();
+			wingState = 1 - wingState;
+		}
+		DebugOut(L"[WINGED_GOOMBA] wingState=%d, flapInterval=%d, timeSinceFlap=%llu\n",
+			wingState, flapInterval, GetTickCount64() - flapStart);
 	}
+
 
 
 	CGameObject::Update(dt, coObjects);
@@ -225,7 +229,7 @@ void CWingedGoomba::Render()
 void CWingedGoomba::SetState(int state)
 {
 	if (isDead == 1) return;
-	
+
 	CGameObject::SetState(state);
 	switch (state)
 	{
@@ -274,6 +278,7 @@ void CWingedGoomba::SetState(int state)
 		ay = WINGED_GOOMBA_GRAVITY;
 		vy = -WINGED_GOOMBA_BOUNCE_SPEED;
 		wingState = 0;
+		flapStart = GetTickCount64();
 		StartBouncing();
 		break;
 	case WINGED_GOOMBA_STATE_FLYING:
@@ -282,6 +287,7 @@ void CWingedGoomba::SetState(int state)
 		vy = -0.35f;
 		ax = 0;
 		ay = WINGED_GOOMBA_GRAVITY;
+		flapStart = GetTickCount64();
 		StartFlying();
 		break;
 	}
