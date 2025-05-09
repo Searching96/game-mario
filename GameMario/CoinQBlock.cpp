@@ -1,8 +1,11 @@
 #include "CoinQBlock.h"
 #include "Game.h"
+#include "Chunk.h"
+#include "PlayScene.h"
 
-CCoinQBlock::CCoinQBlock(int id, float x, float y, int z, CCoin* coin) : CGameObject(id, x, y, z)
+CCoinQBlock::CCoinQBlock(int id, float x, float y, int z, int originalChunkId, CCoin* coin) : CGameObject(id, x, y, z)
 {
+	this->originalChunkId = originalChunkId;
 	this->coin = coin;
 	SetState(QUESTIONBLOCK_STATE_NOT_HIT);
 }
@@ -63,12 +66,16 @@ void CCoinQBlock::SetState(int state)
 		isHit = false;
 		break;
 	case QUESTIONBLOCK_STATE_BOUNCE_UP:
+	{
 		isHit = true;
+		LPCHUNK chunk = ((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetChunk(originalChunkId);
+		chunk->SetIsObjectConsumed(this->GetId(), true);
 		y0 = y;
 		vy = QUESTIONBLOCK_BOUNCE_SPEED;
 		coin->SetState(COIN_STATE_BOUNCE_UP);
 		StartBounceUp();
 		break;
+	}
 	case QUESTIONBLOCK_STATE_BOUNCE_DOWN:
 		y0 = y;
 		vy = -QUESTIONBLOCK_BOUNCE_SPEED;

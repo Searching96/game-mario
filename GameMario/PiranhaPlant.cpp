@@ -222,7 +222,7 @@ void CPiranhaPlant::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		if (GetTickCount64() - deathStart > PIRANHA_PLANT_DIE_TIMEOUT)
 		{
 			LPCHUNK chunk = ((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetChunk(originalChunkId);
-			chunk->SetObjectIsDeleted(this->GetId(), true);
+			chunk->SetIsObjectDeleted(this->GetId(), true);
 			isDeleted = true;
 		}
 		return;

@@ -9,7 +9,9 @@ protected:
 	bool isLoaded = false;
 
 	vector<LPGAMEOBJECT> objects;
+	vector<LPGAMEOBJECT> comsumableObjects;
 	map<int, bool> isDeleted;
+	map<int, bool> isConsumed;
 public:
 	CChunk(int id, float startX, float endX) : id(id), startX(startX), endX(endX) {};
 	~CChunk() {};
@@ -43,21 +45,7 @@ public:
 	bool IsLoaded() const { return isLoaded; }
 	void SetLoaded(bool loaded) { isLoaded = loaded; }
 
-	int IsObjectInChunk(CGameObject* obj)
-	{
-		// find in objects vector whether its has this obj using foreach loop
-		for (int i = 0; i < objects.size(); i++)
-		{
-			if (objects[i] == obj)
-			{
-				return objects[i]->GetId();
-			}
-		}
-
-		return -1;
-	}
-
-	void SetObjectIsDeleted(int id, int isDel)
+	void SetIsObjectDeleted(int id, int isDel)
 	{
 		if (isDel) {
 			isDeleted[id] = true;
@@ -69,9 +57,27 @@ public:
 		}
 	}
 
-	int GetObjectIsDeleted(int id)
+	int GetIsObjectDeleted(int id)
 	{
 		return isDeleted[id];
+	}
+
+	int SetIsObjectConsumed(int id, int isCon)
+	{
+		if (isCon) {
+			isConsumed[id] = true;
+		}
+		else {
+			// Only insert false if id is not already present
+			if (isConsumed.find(id) == isConsumed.end())
+				isConsumed[id] = false;
+		}
+		return isConsumed[id];
+	}
+
+	int GetIsObjectConsumed(int id)
+	{
+		return isConsumed[id];
 	}
 };
 

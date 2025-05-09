@@ -230,9 +230,9 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 		return;
 	}
 
-	targetChunk->SetObjectIsDeleted(id, false);
+	targetChunk->SetIsObjectDeleted(id, false);
 
-	if (targetChunk->GetObjectIsDeleted(id)) {
+	if (targetChunk->GetIsObjectDeleted(id)) {
 		DebugOut(L"[WARN] Object with ID %d already deleted in chunk %d. Skipping...\n", id, targetChunk->GetID());
 		return;
 	}
@@ -301,9 +301,12 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 			zIndex = ZINDEX_BLOCKS;
 			int coin_zIndex = ZINDEX_HIDDEN_COIN;
 			CCoin* coin = new CCoin(DEPENDENT_ID, x, y, coin_zIndex, 1);
-			obj = new CCoinQBlock(id, x, y, zIndex, coin);
+			obj = new CCoinQBlock(id, x, y, zIndex, targetChunk->GetID(), coin);
 			targetChunk->AddObject(coin);
 			targetChunk->AddObject(obj);
+			targetChunk->SetIsObjectConsumed(obj->GetId(), false);
+			if (targetChunk->GetIsObjectConsumed(obj->GetId()))
+				((CCoinQBlock*)obj)->SetIsHit(true);
 			return;
 		}
 		case OBJECT_TYPE_BUFF_QBLOCK:
