@@ -61,7 +61,7 @@ void CTailWhip::Render()
 		attackParticle->Render();
 	}
 
-	RenderBoundingBox(); // Debug only
+	//RenderBoundingBox(); // Debug only
 }
 
 void CTailWhip::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
