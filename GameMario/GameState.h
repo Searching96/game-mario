@@ -83,6 +83,7 @@ public:
 	void Update(DWORD dt);
 	void SetScene(LPSCENE scene) { current_scene = scene; }
 	void SetLives(int lives) { this->lives = lives; }
+	void AddLives() { this->lives += 1; }
 	int GetLives() { return lives; }
 	void AddScore(int score) { this->score += score; }
 	int GetScore() { return score; }

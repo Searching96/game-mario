@@ -66,7 +66,7 @@ void CCoinQBlock::SetState(int state)
 		isHit = true;
 		y0 = y;
 		vy = QUESTIONBLOCK_BOUNCE_SPEED;
-		coin->SetState(COIN_STATE_BOUNCE_UP);
+		coin->Activate();
 		StartBounceUp();
 		break;
 	case QUESTIONBLOCK_STATE_BOUNCE_DOWN:

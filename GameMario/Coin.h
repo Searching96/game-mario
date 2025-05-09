@@ -34,6 +34,8 @@ public:
 	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 	void GetBoundingBox(float& l, float& t, float& r, float& b);
 	int IsBlocking() { return 0; }
+	int GetType() { return type; }
+	void Activate();
 	void SetState(int state);
 	void StartBounceUp() { bounceUp = 1; }
 	void StartBounceDown() { bounceDown = 1; }

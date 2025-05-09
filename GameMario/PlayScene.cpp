@@ -54,8 +54,6 @@ using namespace std;
 
 // Camera specific constants
 #define HORIZONTAL_MARGIN 12.0f   // 12px margin on each side of center (middle 24px is free zone)
-#define VERTICAL_SMOOTH_FACTOR 0.1f     // Smaller value = smoother/slower vertical follow
-#define VERTICAL_LOCK_BUFFER 40.0f      // How far Mario needs to be above the ground-lock level to trigger tracking
 #define VIEWPORT_X_OFFSET 8.0f
 #define VIEWPORT_Y_OFFSET 14.0f
 
@@ -322,7 +320,7 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 		case OBJECT_TYPE_LIFE_BRICK:
 		{
 			zIndex = ZINDEX_BLOCKS;
-			int mushroom_zIndex = ZINDEX_ITEMS;
+			int mushroom_zIndex = ZINDEX_MUSHROOM;
 			CLifeMushroom* mushroom = new CLifeMushroom(DEPENDENT_ID, x, y, mushroom_zIndex);
 			obj = new CLifeBrick(id, x, y, zIndex, mushroom);
 			targetChunk->AddObject(mushroom);

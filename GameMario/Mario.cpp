@@ -17,6 +17,8 @@
 #include "Koopa.h"
 #include "WingedGoomba.h"
 #include "FallPitch.h"
+#include "Particle.h"
+#include "LifeBrick.h"
 
 #include "Collision.h"
 
@@ -162,18 +164,14 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	vy += ay * dt;
 
 	//Power Meter calculation
-	//Staying still or reversing
-	if (isSitting || isBraking == 1)
-	{
-		pMeter = 0;
-	}
-	else if (isRunning == 1) //Running => Charging
+
+	if (abs(vx) >= MARIO_HALF_RUN_ACCEL_SPEED)
 	{
 		pMeter += dt / 1500.0f;
 	}
-	else //Not running => Depleting
+	else if (!GetIsFlying()) //Not running => Depleting
 	{
-		pMeter -= dt / 4000.0f;
+		pMeter -= dt / 3000.0f;
 	}
 
 	if (pMeter == 1 && pMeterMax == -1) //Trigger full pMeter
@@ -309,20 +307,20 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 	{
 		vy = 0;
 		if (e->ny < 0) isOnPlatform = true;
-		pMeter = 0;
+		consecutiveEnemies = 0;
 	}
 	else
 		if (e->nx != 0 && e->obj->IsBlocking())
 		{
 			if (vx > MARIO_HALF_RUN_ACCEL_SPEED)
 				vx = (nx > 0) ? MARIO_HALF_RUN_ACCEL_SPEED : -MARIO_HALF_RUN_ACCEL_SPEED;
-				//	vx -= MARIO_DECELERATION_X / 4 * 16;
+			//	vx -= MARIO_DECELERATION_X / 4 * 16;
 		}
 
 	if (dynamic_cast<CGoomba*>(e->obj))
 		OnCollisionWithGoomba(e);
-	//else if (dynamic_cast<CCoin*>(e->obj))
-	//	OnCollisionWithCoin(e);
+	else if (dynamic_cast<CCoin*>(e->obj))
+		OnCollisionWithCoin(e);
 	else if (dynamic_cast<CPortal*>(e->obj))
 		OnCollisionWithPortal(e);
 	else if (dynamic_cast<CLifeMushroom*>(e->obj))
@@ -337,6 +335,8 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 		OnCollisionWithCoinQBlock(e);
 	else if (dynamic_cast<CBuffQBlock*>(e->obj))
 		OnCollisionWithBuffQBlock(e);
+	else if (dynamic_cast<CLifeBrick*>(e->obj))
+		OnCollisionWithLifeBrick(e);
 	else if (dynamic_cast<CFireball*>(e->obj))
 		OnCollisionWithFireball(e);
 	else if (dynamic_cast<CKoopa*>(e->obj))
@@ -359,6 +359,7 @@ void CMario::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
 		{
 			g->SetState(GOOMBA_STATE_DIE_ON_STOMP);
 			vy = -MARIO_JUMP_DEFLECT_SPEED;
+			CalculateScore(g);
 		}
 	}
 	else // hit by Goomba
@@ -398,11 +399,7 @@ void CMario::OnCollisionWithCoin(LPCOLLISIONEVENT e)
 
 	if (c)
 	{
-		if (c->GetState() == COIN_STATE_STATIC)
-			c->Delete();
-		else if (e->ny > 0 && e->nx == 0 && c->GetState() == COIN_STATE_DYNAMIC)
-			c->SetState(COIN_STATE_BOUNCE_UP);
-		CGame::GetInstance()->GetGameState()->AddCoin();
+		if (c->GetType() == 0) c->Activate();
 	}
 }
 
@@ -418,6 +415,14 @@ void CMario::OnCollisionWithCoinQBlock(LPCOLLISIONEVENT e)
 	if (cqb)
 		if (e->ny > 0 && e->nx == 0 && cqb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
 			cqb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
+}
+
+void CMario::OnCollisionWithLifeBrick(LPCOLLISIONEVENT e)
+{
+	CLifeBrick* lb = dynamic_cast<CLifeBrick*>(e->obj);
+	if (lb)
+		if (e->ny > 0 && e->nx == 0 && lb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
+			lb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
 }
 
 void CMario::OnCollisionWithBuffQBlock(LPCOLLISIONEVENT e)
@@ -454,8 +459,8 @@ void CMario::OnCollisionWithLifeMushroom(LPCOLLISIONEVENT e)
 	{
 		if (lmr->GetState() == MUSHROOM_STATE_MOVING)
 		{
-			lmr->Delete();
-			//Add 1 life
+			lmr->Activate();
+			CalculateScore(lmr);
 		}
 	}
 }
@@ -473,7 +478,9 @@ void CMario::OnCollisionWithMushroom(LPCOLLISIONEVENT e)
 	{
 		if (mushroom->GetState() == MUSHROOM_STATE_MOVING)
 		{
+			CalculateScore(mushroom);
 			mushroom->Delete();
+
 			if (level == MARIO_LEVEL_SMALL)
 				this->SetState(MARIO_STATE_POWER_UP);
 		}
@@ -488,6 +495,7 @@ void CMario::OnCollisionWithSuperLeaf(LPCOLLISIONEVENT e)
 	{
 		if (sl->GetState() == SUPERLEAF_STATE_FLOATING_RIGHT || sl->GetState() == SUPERLEAF_STATE_FLOATING_LEFT)
 		{
+			CalculateScore(sl);
 			sl->Delete();
 			if (level == MARIO_LEVEL_BIG)
 				this->SetState(MARIO_STATE_TAIL_UP);
@@ -554,6 +562,7 @@ void CMario::OnCollisionWithKoopa(LPCOLLISIONEVENT e) {
 
 	// Jumped on top
 	if (e->ny < 0) {
+		if (k->GetBeingHeld() == 0) CalculateScore(k);
 		if (k->GetState() == KOOPA_STATE_WALKING_LEFT ||
 			k->GetState() == KOOPA_STATE_WALKING_RIGHT) {
 			k->StartShell();
@@ -617,10 +626,11 @@ void CMario::OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e)
 {
 	CWingedGoomba* wg = dynamic_cast<CWingedGoomba*>(e->obj);
 	if (wg->GetIsDead() == 1) return;
-	
+
 	// jump on top >> kill Goomba and deflect a bit 
 	if (e->ny < 0)
 	{
+		CalculateScore(wg);
 		if (wg->GetIsWinged() == 1)
 		{
 			wg->SetIsWinged(0);
@@ -1379,4 +1389,47 @@ CTailWhip* CMario::GetActiveTailWhip() {
 		return tailWhip;
 	}
 	return nullptr;
+}
+
+int EnemiesToPoints(int enemies)
+{
+	switch (enemies)
+	{
+	case 2:
+		return 200;
+	case 3:
+		return 400;
+	case 4:
+		return 800;
+	case 5:
+		return 1000;
+	case 6:
+		return 2000;
+	case 7:
+		return 4000;
+	case 8:
+		return 8000;
+	case 1:
+	default:
+		return 100;
+	}
+}
+
+void CMario::CalculateScore(LPGAMEOBJECT obj)
+{
+	if (obj == nullptr || dynamic_cast<CMario*>(obj)) return;
+	int point;
+	if (dynamic_cast<CGoomba*>(obj)
+		|| dynamic_cast<CKoopa*>(obj)
+		|| dynamic_cast<CWingedGoomba*>(obj)
+		|| dynamic_cast<CPiranhaPlant*>(obj))
+	{
+		consecutiveEnemies += 1;
+		point = EnemiesToPoints(consecutiveEnemies);
+	}
+	else if (dynamic_cast<CLifeMushroom*>(obj))
+		point = 0;
+	else point = 1000;
+	CGame::GetInstance()->GetGameState()->AddScore(point);
+	CParticle::GenerateParticleInChunk(obj, point);
 }
