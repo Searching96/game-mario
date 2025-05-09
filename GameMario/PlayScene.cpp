@@ -284,7 +284,10 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 			zIndex = ZINDEX_ITEMS;
 			if (tokens.size() < 5) throw runtime_error("Insufficient params for COIN");
 			int type = stoi(tokens[4]);
-			obj = new CCoin(id, x, y, zIndex, type);
+			obj = new CCoin(id, x, y, zIndex, targetChunk->GetID(), type);
+			targetChunk->SetIsObjectConsumed(obj->GetId(), false);
+			if (targetChunk->GetIsObjectConsumed(obj->GetId()))
+				return;
 			break;
 		}
 		case OBJECT_TYPE_PLATFORM:
@@ -304,7 +307,7 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 		{
 			zIndex = ZINDEX_BLOCKS;
 			int coin_zIndex = ZINDEX_HIDDEN_COIN;
-			CCoin* coin = new CCoin(DEPENDENT_ID, x, y, coin_zIndex, 1);
+			CCoin* coin = new CCoin(DEPENDENT_ID, x, y, coin_zIndex, targetChunk->GetID(), 1);
 			obj = new CCoinQBlock(id, x, y, zIndex, targetChunk->GetID(), coin);
 			targetChunk->AddObject(coin);
 			targetChunk->AddObject(obj);

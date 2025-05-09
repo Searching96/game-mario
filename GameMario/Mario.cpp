@@ -882,6 +882,9 @@ int CMario::GetAniIdBig()
 		}
 	}
 
+	if (isOnPlatform == 0 && isHoldingKoopa == 0 && vy > 0)
+		aniId = (nx > 0) ? ID_ANI_MARIO_FALLING_RIGHT : ID_ANI_MARIO_FALLING_LEFT;
+
 	if (aniId == -1) aniId = ID_ANI_MARIO_IDLE_RIGHT;
 
 	return aniId;
@@ -1237,7 +1240,7 @@ void CMario::SetState(int state)
 			else if (jumpCount >= 1)
 			{
 				jumpCount++;
-				vy = -MARIO_JUMP_SPEED_Y / 1.5f;
+				vy = -MARIO_JUMP_SPEED_Y;
 				maxVx = (nx > 0) ? MARIO_MAX_WALKING_SPEED : -MARIO_MAX_WALKING_SPEED;
 			}
 			else if (jumpCount == 0)

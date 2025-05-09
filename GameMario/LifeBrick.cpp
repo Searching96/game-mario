@@ -7,7 +7,7 @@
 
 CLifeBrick::CLifeBrick(int id, float x, float y, int z, int orignalChunkId, CLifeMushroom* mushroom) : CQuestionBlock(id, x, y, z)
 {
-	this->originalChunkId = originalChunkId;
+	this->originalChunkId = orignalChunkId;
 	this->mushroom = mushroom;
 	SetState(QUESTIONBLOCK_STATE_NOT_HIT);
 }

@@ -4,9 +4,10 @@
 #include "QuestionBlock.h"
 #include "Particle.h"
 
-CCoin::CCoin(int id, float x, float y, int z, int type) : CGameObject(id, x, y, z)
+CCoin::CCoin(int id, float x, float y, int z, int originalChunkId, int type) : CGameObject(id, x, y, z)
 {
 	this->type = type;
+	this->originalChunkId = originalChunkId;
 	if (type == 0) this->SetState(COIN_STATE_STATIC);
 	else this->SetState(COIN_STATE_DYNAMIC);
 }
@@ -51,7 +52,12 @@ void CCoin::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 void CCoin::Activate()
 {
-	if (type == 0) this->SetState(COIN_STATE_BOUNCE_COMPLETE);
+	if (type == 0)
+	{
+		this->SetState(COIN_STATE_BOUNCE_COMPLETE);
+		LPCHUNK chunk = ((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetChunk(originalChunkId);
+		chunk->SetIsObjectConsumed(this->GetId(), true);
+	}
 	else this->SetState(COIN_STATE_BOUNCE_UP);
 }
 
