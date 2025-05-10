@@ -234,8 +234,8 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		tailWhip->Update(dt, coObjects);
 	}
 
-	//DebugOutTitle(L"vx=%f, ax=%f, vy=%f, ay=%f, jc=%d, fx=%f, iop=%d, imv=%d\n",
-		//vx, ax, vy, ay, jumpCount, frictionX, isOnPlatform, isMoving);
+	DebugOutTitle(L"vx=%f, ax=%f, vy=%f, ay=%f, jc=%d, fx=%f, iop=%d, imv=%d\n",
+		vx, ax, vy, ay, jumpCount, frictionX, isOnPlatform, isMoving);
 	//DebugOut(L"mario: x=%f, y=%f, nx=%d, state=%d\n", x, y, nx, state);
 
 	// Process collisions
@@ -566,7 +566,7 @@ void CMario::OnCollisionWithKoopa(LPCOLLISIONEVENT e) {
 	// Early exit if Mario is invulnerable
 
 	CKoopa* k = dynamic_cast<CKoopa*>(e->obj);
-	if (k->GetIsDefeated() == 1) 
+	if (k->GetIsDefeated() == 1)
 		return;
 
 	// Jumped on top
@@ -954,7 +954,7 @@ int CMario::GetAniIdTail()
 				else if (fabs(vx) > MARIO_HALF_RUN_ACCEL_SPEED && fabs(vx) <= MARIO_MAX_RUNNING_SPEED)
 					aniId = ID_ANI_MARIO_TAIL_HALF_RUN_ACCEL_LEFT;
 			}
-//
+	//
 
 	if (isHovering)
 	{
@@ -1065,14 +1065,14 @@ void CMario::SetState(int state)
 	// DIE is the end state, cannot be changed! 
 	if (this->state == MARIO_STATE_DIE) return;
 
-	if (this->state == MARIO_STATE_POWER_UP && (GetTickCount64() - powerUpStart <= MARIO_POWER_UP_TIME))
-		return;
-	if (this->state == MARIO_STATE_TAIL_UP && (GetTickCount64() - tailUpStart <= MARIO_TAIL_UP_TIME))
-		return;
-	if (this->state == MARIO_STATE_POWER_DOWN && (GetTickCount64() - powerDownStart <= MARIO_POWER_DOWN_TIME))
-		return;
-	if (this->state == MARIO_STATE_TAIL_DOWN && (GetTickCount64() - tailDownStart <= MARIO_TAIL_DOWN_TIME))
-		return;
+	//if (this->state == MARIO_STATE_POWER_UP && (GetTickCount64() - powerUpStart <= MARIO_POWER_UP_TIME))
+	//	return;
+	//if (this->state == MARIO_STATE_TAIL_UP && (GetTickCount64() - tailUpStart <= MARIO_TAIL_UP_TIME))
+	//	return;
+	//if (this->state == MARIO_STATE_POWER_DOWN && (GetTickCount64() - powerDownStart <= MARIO_POWER_DOWN_TIME))
+	//	return;
+	//if (this->state == MARIO_STATE_TAIL_DOWN && (GetTickCount64() - tailDownStart <= MARIO_TAIL_DOWN_TIME))
+	//	return;
 
 	int previousState = this->state;
 
@@ -1308,13 +1308,13 @@ void CMario::SetState(int state)
 
 	case MARIO_STATE_POWER_DOWN:
 		y += 6; // RED ALERT
-		vx = 0;
+		//vx = 0;
 		StartPowerDown();
 		break;
 
 	case MARIO_STATE_TAIL_DOWN:
 		StartTailDown();
-		vx = 0;
+		//vx = 0;
 		break;
 
 	case MARIO_STATE_BRAKE:
@@ -1338,7 +1338,12 @@ void CMario::SetState(int state)
 
 	case MARIO_STATE_RELEASE_MOVE:
 		isMoving = 0;
-		frictionX = MARIO_FRICTION_X;
+		if (fabs(vx) <= MARIO_MAX_WALKING_SPEED)
+		{
+			frictionX = MARIO_FRICTION_X * 5;
+		}
+		else
+			frictionX = MARIO_FRICTION_X * 2;
 		break;
 	case MARIO_STATE_RELEASE_RUN:
 		isRunning = 0;
