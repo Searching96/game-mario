@@ -193,4 +193,14 @@ void CGameState::RenderHUD()
 	//	if (s->Get(card_sprite_id)) // Check if sprite exists
 	//		s->Get(card_sprite_id)->Draw(card_x, card_y);
 	//}
+
+	if (game->GetGameSpeed() == 0) //Is Pausing game
+	{
+		float cam_x, cam_y;
+		game->GetCamPos(cam_x, cam_y);
+		// Draw the pause background
+		float pause_background_x = cam_x + screen_width / 2;
+		float pause_background_y = cam_y + screen_height / 2;
+		s->Get(ID_SPRITE_PAUSE)->Draw(pause_background_x, pause_background_y);
+	}
 }

@@ -1,16 +1,16 @@
 /* =============================================================
 	INTRODUCTION TO GAME PROGRAMMING SE102
-	
+
 	SAMPLE 05 - SCENE MANAGER
 
 	This sample illustrates how to:
 
-		1/ Read scene (textures, sprites, animations and objects) from files 
+		1/ Read scene (textures, sprites, animations and objects) from files
 		2/ Handle multiple scenes in game
 
 	Key classes/functions:
 		CScene
-		CPlayScene		
+		CPlayScene
 
 
 HOW TO INSTALL Microsoft.DXSDK.D3DX
@@ -78,7 +78,7 @@ void Update(DWORD dt)
 }
 
 /*
-	Render a frame 
+	Render a frame
 */
 void Render()
 {
@@ -146,7 +146,7 @@ HWND CreateGameWindow(HINSTANCE hInstance, int nCmdShow, int ScreenWidth, int Sc
 			hInstance,
 			nullptr);
 
-	if (!hWnd) 
+	if (!hWnd)
 	{
 		OutputDebugString(L"[ERROR] CreateWindow failed");
 		DWORD ErrCode = GetLastError();
@@ -166,35 +166,57 @@ int Run()
 	ULONGLONG frameStart = GetTickCount64();
 	DWORD tickPerFrame = 1000 / MAX_FRAME_RATE;
 
+	// Initialize high-precision timer
+	LARGE_INTEGER frequency, lastTime, currentTime;
+	QueryPerformanceFrequency(&frequency);
+	QueryPerformanceCounter(&lastTime);
+
+	// Game loop constants
+	const double targetSecondsPerFrame = 1.0 / MAX_FRAME_RATE;
+	CGame* game = CGame::GetInstance();
+
 	while (!done)
 	{
-		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+		while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
 		{
-			if (msg.message == WM_QUIT) done = 1;
-
+			if (msg.message == WM_QUIT)
+			{
+				done = 1;
+				break;
+			}
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
 
-		ULONGLONG now = GetTickCount64();
+		QueryPerformanceCounter(&currentTime);
+		double elapsedSeconds = (currentTime.QuadPart - lastTime.QuadPart) / (double)frequency.QuadPart;
 
-		// dt: the time between (beginning of last frame) and now
-		// this frame: the frame we are about to render
-		DWORD dt = (DWORD)(now - frameStart);
+		float gameSpeed = game->GetGameSpeed();
 
-		if (dt >= tickPerFrame)
+		if (gameSpeed == 0 || elapsedSeconds >= targetSecondsPerFrame * gameSpeed)
 		{
-			frameStart = now;
+			lastTime = currentTime;
 
-			CGame* game = CGame::GetInstance();
-			game->ProcessKeyboard();	
-			Update(dt * game->GetGameSpeed());
+			DWORD dt = (DWORD)(min(elapsedSeconds, 0.25) * 1000.0);
+
+			game->ProcessKeyboard();
+			Update(gameSpeed != 0 ? dt : 0);
 			Render();
-
-			CGame::GetInstance()->SwitchScene();
+			game->SwitchScene();
 		}
 		else
-			Sleep(tickPerFrame - dt);	
+		{
+			double timeToWait = gameSpeed != 0 ? targetSecondsPerFrame / gameSpeed - elapsedSeconds : 0.1;
+
+			if (timeToWait > 0.002)
+			{
+				Sleep((DWORD)((timeToWait * 1000.0) * 0.9));
+			}
+			else
+			{
+				Sleep(0);
+			}
+		}
 	}
 
 	return 1;
@@ -216,9 +238,9 @@ int WINAPI WinMain(
 
 
 	//IMPORTANT: this is the only place where a hardcoded file name is allowed ! 
-	game->Load(L"mario-sample.txt");  
+	game->Load(L"mario-sample.txt");
 
-	SetWindowPos(hWnd, 0, 0, 0, SCREEN_WIDTH*3, SCREEN_HEIGHT*3, SWP_NOMOVE | SWP_NOOWNERZORDER | SWP_NOZORDER);
+	SetWindowPos(hWnd, 0, 0, 0, SCREEN_WIDTH * 3, SCREEN_HEIGHT * 3, SWP_NOMOVE | SWP_NOOWNERZORDER | SWP_NOZORDER);
 
 	Run();
 

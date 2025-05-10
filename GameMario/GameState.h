@@ -50,6 +50,9 @@
 //#define ID_SPRITE_CARD_FLOWER 1120032     // Flower card
 //#define ID_SPRITE_CARD_STAR 1120033       // Star card
 
+//Pause
+#define ID_SPRITE_PAUSE	1120060
+
 // --- Other Constants ---
 #define HUD_MAX_SCORE_DIGITS 7
 #define HUD_MAX_TIME_DIGITS 3

@@ -1308,11 +1308,13 @@ void CMario::SetState(int state)
 
 	case MARIO_STATE_POWER_DOWN:
 		y += 6; // RED ALERT
+		vx = 0;
 		StartPowerDown();
 		break;
 
 	case MARIO_STATE_TAIL_DOWN:
 		StartTailDown();
+		vx = 0;
 		break;
 
 	case MARIO_STATE_BRAKE:
