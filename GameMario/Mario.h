@@ -263,8 +263,8 @@ class CMario : public CGameObject
 	int untouchable;
 	ULONGLONG untouchableStart;
 	BOOLEAN isOnPlatform;
-	float pMeter;
-	ULONGLONG pMeterMax;
+	float pMeter = 0.0f;
+	ULONGLONG pMeterMax = -1;
 	int consecutiveEnemies;
 
 	int powerUp = 0;
@@ -356,8 +356,8 @@ public:
 	int GetIsRunning() const { return isRunning; }
 	int GetIsFlying() { return !isOnPlatform && (jumpCount > 1 || isHovering == 1); }
 	int GetNx() { return nx; }
-	//float GetPMeter() const { return pMeter; }
-	bool MaxPMeter() const { return fabs(vx) == MARIO_MAX_RUNNING_SPEED; }
+	float GetPMeter() const { return pMeter; }
+	//bool MaxPMeter() const { return fabs(vx) == MARIO_MAX_RUNNING_SPEED; }
 	BOOLEAN IsOnPlatform() const { return isOnPlatform; }
 	CTailWhip* GetTailWhip() const { return tailWhip; }
 	CTailWhip* GetActiveTailWhip();

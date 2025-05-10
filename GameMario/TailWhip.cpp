@@ -100,23 +100,24 @@ void CTailWhip::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 void CTailWhip::OnCollisionWith(LPCOLLISIONEVENT e)
 {
+	if (e->obj->IsDeleted()) return;
 	if (dynamic_cast<CAttackParticle*>(e->obj))
 		return;
 	if (dynamic_cast<CTailWhip*>(e->obj))
 		return;
 	if (dynamic_cast<CMario*>(e->obj))
 		return;
-	if (dynamic_cast<CGoomba*>(e->obj))
+	if (dynamic_cast<CGoomba*>(e->obj) && dynamic_cast<CGoomba*>(e->obj)->GetIsDefeated() == 0)
 		OnCollisionWithGoomba(e);
-	else if (dynamic_cast<CWingedGoomba*>(e->obj))
+	else if (dynamic_cast<CWingedGoomba*>(e->obj) && dynamic_cast<CWingedGoomba*>(e->obj)->GetIsDefeated() == 0)
 		OnCollisionWithWingedGoomba(e);
-	else if (dynamic_cast<CKoopa*>(e->obj))
+	else if (dynamic_cast<CKoopa*>(e->obj) && dynamic_cast<CKoopa*>(e->obj)->GetIsDefeated() == 0)
 		OnCollisionWithKoopa(e);
-	else if (dynamic_cast<CBuffQBlock*>(e->obj))
+	else if (dynamic_cast<CBuffQBlock*>(e->obj) && dynamic_cast<CBuffQBlock*>(e->obj)->GetIsHit() == false)
 		OnCollisionWithBuffQBlock(e);
-	else if (dynamic_cast<CCoinQBlock*>(e->obj))
+	else if (dynamic_cast<CCoinQBlock*>(e->obj) && dynamic_cast<CCoinQBlock*>(e->obj)->GetIsHit() == false)
 		OnCollisionWithCoinQBlock(e);
-	else if (dynamic_cast<CPiranhaPlant*>(e->obj))
+	else if (dynamic_cast<CPiranhaPlant*>(e->obj) && dynamic_cast<CPiranhaPlant*>(e->obj)->GetIsDefeated() == 0)
 		OnCollisionWithPiranhaPlant(e);
 }
 

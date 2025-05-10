@@ -719,8 +719,8 @@ void CPlayScene::UpdateCamera(CMario* mario, float player_cx, float player_cy, f
 	float visible_world_cam_height = cam_height - HUD_BACKGROUND_HEIGHT + VIEWPORT_Y_OFFSET / 2;
 
 	// Determine if Mario is flying with Tail
-	//bool is_Racoon_and_MaxPMeter = (mario->GetLevel() == MARIO_LEVEL_TAIL && mario->GetPMeter() == 1.0f);
-	bool is_Racoon_and_MaxPMeter = (mario->GetLevel() == MARIO_LEVEL_TAIL && mario->MaxPMeter());
+	bool is_Racoon_and_MaxPMeter = (mario->GetLevel() == MARIO_LEVEL_TAIL && mario->GetPMeter() == 1.0f);
+	//bool is_Racoon_and_MaxPMeter = (mario->GetLevel() == MARIO_LEVEL_TAIL && mario->MaxPMeter());
 	bool cameraTouchedGround = cam_y >= (mapHeight - visible_world_cam_height);
 
 	// Update lock state
