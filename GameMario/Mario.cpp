@@ -21,6 +21,7 @@
 #include "LifeBrick.h"
 
 #include "Collision.h"
+extern int isPaused;
 
 #define DEPENDENT_ID				9999 // taken from PlayScene.cpp
 
@@ -1030,7 +1031,7 @@ void CMario::Render()
 			isRendering = !isRendering;
 			lastRenderTime = currentTime;
 		}
-		if (!isRendering) return;
+		if (!isRendering && isPaused == 0) return;
 	}
 	else {
 		isRendering = true;

@@ -347,7 +347,7 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 		}
 		case OBJECT_TYPE_BOX:
 		{
-			zIndex = ZINDEX_BLOCKS;
+			zIndex = ZINDEX_MUSHROOM - 1;
 			if (tokens.size() < 7) throw runtime_error("Insufficient params for BOX");
 			float width = stof(tokens[4]);
 			float height = stof(tokens[5]);

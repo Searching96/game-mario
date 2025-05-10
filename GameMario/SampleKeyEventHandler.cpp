@@ -74,7 +74,7 @@ void CSampleKeyHandler::OnKeyUp(int KeyCode)
 	case DIK_EQUALS:
 		CGame::GetInstance()->IncreaseGameSpeed();
 		break;
-	case DIK_P:
+	case DIK_W:
 		CGame::GetInstance()->PauseGame();
 		break;
 	case DIK_R:

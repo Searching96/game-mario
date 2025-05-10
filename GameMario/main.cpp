@@ -42,6 +42,7 @@ HOW TO INSTALL Microsoft.DXSDK.D3DX
 #include "SampleKeyEventHandler.h"
 
 #include "AssetIDs.h"
+extern int isPaused = 0;
 
 #define WINDOW_CLASS_NAME L"SampleWindow"
 #define MAIN_WINDOW_TITLE L"Super Mario Bros 3"
