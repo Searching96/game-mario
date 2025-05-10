@@ -172,9 +172,9 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	{
 		pMeter += dt / 1100.0f;
 	}
-	else if (!GetIsFlying()) //Not running => Depleting
+	else if (!GetIsFlying() && pMeterMax == -1) //Not running => Depleting
 	{
-		pMeter -= dt / fabs(vx) < MARIO_MAX_WALKING_SPEED ? 1500.0f : 3000.0f;
+		pMeter -= dt / (fabs(vx) < MARIO_WALKING_SPEED ? 2500.0f : 4500.0f);
 	}
 
 	if (pMeter == 1 && pMeterMax == -1) //Trigger full pMeter
@@ -235,8 +235,8 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		tailWhip->Update(dt, coObjects);
 	}
 
-	DebugOutTitle(L"vx=%f, ax=%f, vy=%f, ay=%f, jc=%d, fx=%f, iop=%d, imv=%d\n",
-		vx, ax, vy, ay, jumpCount, frictionX, isOnPlatform, isMoving);
+	//DebugOutTitle(L"vx=%f, ax=%f, vy=%f, ay=%f, jc=%d, fx=%f, iop=%d, imv=%d\n",
+	//	vx, ax, vy, ay, jumpCount, frictionX, isOnPlatform, isMoving);
 	//DebugOut(L"mario: x=%f, y=%f, nx=%d, state=%d\n", x, y, nx, state);
 
 	// Process collisions
