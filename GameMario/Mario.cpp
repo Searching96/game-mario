@@ -174,7 +174,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	}
 	else if (!GetIsFlying() && pMeterMax == -1) //Not running => Depleting
 	{
-		pMeter -= dt / (fabs(vx) < MARIO_WALKING_SPEED ? 2500.0f : 4500.0f);
+		pMeter -= dt / ((fabs(vx) < MARIO_WALKING_SPEED) ? 2500.0f : 4500.0f);
 	}
 
 	if (pMeter == 1 && pMeterMax == -1) //Trigger full pMeter
@@ -235,9 +235,8 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		tailWhip->Update(dt, coObjects);
 	}
 
-	//DebugOutTitle(L"vx=%f, ax=%f, vy=%f, ay=%f, jc=%d, fx=%f, iop=%d, imv=%d\n",
-	//	vx, ax, vy, ay, jumpCount, frictionX, isOnPlatform, isMoving);
-	//DebugOut(L"mario: x=%f, y=%f, nx=%d, state=%d\n", x, y, nx, state);
+	DebugOutTitle(L"vx=%f, ax=%f, mvx=%f, irn=%d, fx=%f, iop=%d, imv=%d\n",
+		vx, ax, maxVx, isRunning, frictionX, isOnPlatform, isMoving);
 
 	// Process collisions
 	isOnPlatform = false;
@@ -1107,13 +1106,15 @@ void CMario::SetState(int state)
 			if (vx <= 0)  // Đang đứng im hoặc đang đi sang trái trong không trung
 			{
 				vx = MARIO_MAX_RUNNING_SPEED / SPEED_DIVISOR;
-				ax = 0.0f;  // Đặt ax thành 0 một cách rõ ràng
+				ax = 0.0f;
 				//DebugOut(L"Air direction change - to right, ax set to 0\n");
 			}
+			else
+				ax = MARIO_ACCEL_RUN_X;
 		}
 		else
 		{
-			if (fabs(vx) < fabs(MARIO_RUNNING_SPEED)) vx = MARIO_RUNNING_SPEED;
+			//if (fabs(vx) < fabs(MARIO_RUNNING_SPEED)) vx = MARIO_RUNNING_SPEED / 2;
 			ax = MARIO_ACCEL_RUN_X;
 		}
 		frictionX = 0;
@@ -1139,14 +1140,16 @@ void CMario::SetState(int state)
 		{
 			if (vx >= 0)  // Đang đứng im hoặc đang đi sang phải trong không trung
 			{
-				vx = -MARIO_MAX_RUNNING_SPEED / SPEED_DIVISOR;
-				ax = 0.0f;  // Đặt ax thành 0 một cách rõ ràng
+				vx = MARIO_RUNNING_SPEED / 5;
+				ax = -0.00001f;
 				//DebugOut(L"Air direction change - to left, ax set to 0\n");
 			}
+			//else
+			//	ax = -MARIO_ACCEL_RUN_X;
 		}
 		else
 		{
-			if (fabs(vx) < fabs(MARIO_RUNNING_SPEED)) vx = -MARIO_RUNNING_SPEED;
+			//if (fabs(vx) < fabs(MARIO_RUNNING_SPEED)) vx = -MARIO_RUNNING_SPEED / 2;
 			ax = -MARIO_ACCEL_RUN_X;
 		}
 		frictionX = 0;
@@ -1172,14 +1175,15 @@ void CMario::SetState(int state)
 		{
 			if (vx <= 0)  // Đang đứng im hoặc đang đi sang trái trong không trung
 			{
-				vx = MARIO_MAX_WALKING_SPEED / SPEED_DIVISOR;
-				ax = 0.0f;  // Đặt ax thành 0 một cách rõ ràng
+				ax = 0.0f;
 				//DebugOut(L"Air direction change - to right, ax set to 0\n");
 			}
+			else
+				ax = MARIO_ACCEL_WALK_X;
 		}
 		else
 		{
-			if (fabs(vx) < fabs(MARIO_WALKING_SPEED)) vx = MARIO_WALKING_SPEED;
+			//if (fabs(vx) < fabs(MARIO_WALKING_SPEED)) vx = MARIO_WALKING_SPEED;
 			ax = MARIO_ACCEL_WALK_X;
 		}
 		frictionX = 0;
@@ -1205,13 +1209,15 @@ void CMario::SetState(int state)
 			if (vx >= 0)  // Đang đứng im hoặc đang đi sang phải trong không trung
 			{
 				vx = -MARIO_MAX_WALKING_SPEED / SPEED_DIVISOR;
-				ax = 0.0f;  // Đặt ax thành 0 một cách rõ ràng
+				ax = 0.0f;
 				//DebugOut(L"Air direction change - to left, ax set to 0\n");
 			}
+			else 
+				ax = -MARIO_ACCEL_WALK_X;
 		}
 		else
 		{
-			if (fabs(vx) < fabs(MARIO_WALKING_SPEED)) vx = -MARIO_WALKING_SPEED;
+			//if (fabs(vx) < fabs(MARIO_WALKING_SPEED)) vx = -MARIO_WALKING_SPEED;
 			ax = -MARIO_ACCEL_WALK_X;
 		}
 		frictionX = 0;
@@ -1339,19 +1345,22 @@ void CMario::SetState(int state)
 
 	case MARIO_STATE_RELEASE_MOVE:
 		isMoving = 0;
-		if (fabs(vx) <= MARIO_MAX_WALKING_SPEED)
+		if (!isOnPlatform)
 		{
-			frictionX = MARIO_FRICTION_X * 5;
+			frictionX = MARIO_FRICTION_X * 1.75;
+		}
+		else if (fabs(vx) <= MARIO_MAX_WALKING_SPEED)
+		{
+			frictionX = MARIO_FRICTION_X * 3.75;
 		}
 		else
-			frictionX = MARIO_FRICTION_X * 2;
+			frictionX = MARIO_FRICTION_X * 2.5;
 		break;
 	case MARIO_STATE_RELEASE_RUN:
 		isRunning = 0;
 		break;
 	}
 
-	//DebugOutTitle(L"nx=: %d\n", nx);
 	CGameObject::SetState(state);
 }
 
