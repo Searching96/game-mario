@@ -8,7 +8,7 @@
 
 #include "debug.h"
 
-#define MARIO_MAX_WALKING_SPEED			0.125f
+#define MARIO_MAX_WALKING_SPEED			0.10f
 #define MARIO_MAX_RUNNING_SPEED			0.20f
 #define MARIO_MAX_FALLING_SPEED			0.25f
 #define MARIO_MAX_JUMP_SPEED			-0.65f
@@ -24,7 +24,7 @@
 #define MARIO_JUMP_GRAVITY				0.00005f
 
 #define MARIO_JUMP_SPEED_Y				0.3f
-#define MARIO_JUMP_RUN_SPEED_Y			0.4f
+#define MARIO_JUMP_RUN_SPEED_Y			0.35f
 #define MARIO_HOVER_SPEED_Y				0.05f
 
 #define MARIO_GRAVITY					0.00225f
@@ -293,6 +293,7 @@ class CMario : public CGameObject
 	int isMoving = 0;
 	int isRunning = 0;
 	int isJumpButtonHeld = 0;
+	int isChangingLevel = 0;
 
 	void OnCollisionWithGoomba(LPCOLLISIONEVENT e);
 	void OnCollisionWithCoin(LPCOLLISIONEVENT e);
@@ -337,10 +338,10 @@ public:
 	void GetBoundingBox(float& left, float& top, float& right, float& bottom);
 
 	void StartUntouchable() { untouchable = 1; untouchableStart = GetTickCount64(); }
-	void StartPowerUp() { powerUp = 1; powerUpStart = GetTickCount64(); }
-	void StartTailUp() { tailUp = 1; tailUpStart = GetTickCount64(); }
-	void StartPowerDown() { powerDown = 1; powerDownStart = GetTickCount64(); }
-	void StartTailDown() { tailDown = 1; tailDownStart = GetTickCount64(); }
+	void StartPowerUp() { powerUp = 1; powerUpStart = GetTickCount64(); isChangingLevel = 1; }
+	void StartTailUp() { tailUp = 1; tailUpStart = GetTickCount64(); isChangingLevel = 1; }
+	void StartPowerDown() { powerDown = 1; powerDownStart = GetTickCount64(); isChangingLevel = 1; }
+	void StartTailDown() { tailDown = 1; tailDownStart = GetTickCount64(); isChangingLevel = 1; }
 	void StartKick() { isKicking = 1; kickStart = GetTickCount64(); }
 	void StartBraking();
 	void StartHovering() { isHovering = 1; hoveringStart = GetTickCount64(); }
@@ -359,6 +360,7 @@ public:
 	float GetPMeter() const { return pMeter; }
 	//bool MaxPMeter() const { return fabs(vx) == MARIO_MAX_RUNNING_SPEED; }
 	BOOLEAN IsOnPlatform() const { return isOnPlatform; }
+	BOOLEAN IsChangingLevel() const { return isChangingLevel; }
 	CTailWhip* GetTailWhip() const { return tailWhip; }
 	CTailWhip* GetActiveTailWhip();
 

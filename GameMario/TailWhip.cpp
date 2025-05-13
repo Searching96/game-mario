@@ -101,12 +101,6 @@ void CTailWhip::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 void CTailWhip::OnCollisionWith(LPCOLLISIONEVENT e)
 {
 	if (e->obj->IsDeleted()) return;
-	if (dynamic_cast<CAttackParticle*>(e->obj))
-		return;
-	if (dynamic_cast<CTailWhip*>(e->obj))
-		return;
-	if (dynamic_cast<CMario*>(e->obj))
-		return;
 	if (dynamic_cast<CGoomba*>(e->obj) && dynamic_cast<CGoomba*>(e->obj)->GetIsDefeated() == 0)
 		OnCollisionWithGoomba(e);
 	else if (dynamic_cast<CWingedGoomba*>(e->obj) && dynamic_cast<CWingedGoomba*>(e->obj)->GetIsDefeated() == 0)

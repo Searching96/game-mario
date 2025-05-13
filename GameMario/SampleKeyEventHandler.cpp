@@ -9,39 +9,42 @@
 void CSampleKeyHandler::OnKeyDown(int KeyCode)
 {
 	//DebugOut(L"[INFO] KeyDown: %d\n", KeyCode);
-	CMario* mario = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer(); 
+	CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer(); 
 
 	float x, y;
-	mario->GetPosition(x, y);
+	player->GetPosition(x, y);
 
 	switch (KeyCode)
 	{
 	case DIK_DOWN:
-		mario->SetState(MARIO_STATE_SIT);
+		if (player->IsChangingLevel())
+			return;
+
+		player->SetState(MARIO_STATE_SIT);
 		break;
 	case DIK_S:
-		if (mario->GetJumpCount() >= MAX_JUMP_COUNT && mario->GetLevel() == MARIO_LEVEL_TAIL)
-			mario->SetState(MARIO_STATE_HOVER);
+		if (player->GetJumpCount() >= MAX_JUMP_COUNT && player->GetLevel() == MARIO_LEVEL_TAIL)
+			player->SetState(MARIO_STATE_HOVER);
 		else
-			mario->SetState(MARIO_STATE_JUMP);
+			player->SetState(MARIO_STATE_JUMP);
 		break;
 	case DIK_A:
-		if (mario->GetLevel() == MARIO_LEVEL_TAIL)
-			mario->SetState(MARIO_STATE_TAIL_WHIP);
+		if (player->GetLevel() == MARIO_LEVEL_TAIL)
+			player->SetState(MARIO_STATE_TAIL_WHIP);
 		break;
 	case DIK_1:
-		mario->SetLevel(MARIO_LEVEL_SMALL);
+		player->SetLevel(MARIO_LEVEL_SMALL);
 		break;
 	case DIK_2:
-		mario->SetPosition(x, y - MARIO_BIG_BBOX_HEIGHT / 2);
-		mario->SetLevel(MARIO_LEVEL_BIG);
+		player->SetPosition(x, y - MARIO_BIG_BBOX_HEIGHT / 2);
+		player->SetLevel(MARIO_LEVEL_BIG);
 		break;
 	case DIK_3:
-		mario->SetPosition(x, y - MARIO_BIG_BBOX_HEIGHT / 2);
-		mario->SetLevel(MARIO_LEVEL_TAIL);
+		player->SetPosition(x, y - MARIO_BIG_BBOX_HEIGHT / 2);
+		player->SetLevel(MARIO_LEVEL_TAIL);
 		break;
 	case DIK_0:
-		mario->SetState(MARIO_STATE_DIE);
+		player->SetState(MARIO_STATE_DIE);
 		break;
 	}
 }
@@ -91,22 +94,28 @@ void CSampleKeyHandler::OnKeyUp(int KeyCode)
 void CSampleKeyHandler::KeyState(BYTE *states)
 {
 	LPGAME game = CGame::GetInstance();
-	CMario* mario = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+	CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
 
 	if (game->IsKeyDown(DIK_RIGHT))
 	{
+		if (player->IsChangingLevel())
+			return;
+
 		if (game->IsKeyDown(DIK_A))
-			mario->SetState(MARIO_STATE_RUNNING_RIGHT);
+			player->SetState(MARIO_STATE_RUNNING_RIGHT);
 		else
-			mario->SetState(MARIO_STATE_WALKING_RIGHT);
+			player->SetState(MARIO_STATE_WALKING_RIGHT);
 	}
 	else if (game->IsKeyDown(DIK_LEFT))
 	{
+		if (player->IsChangingLevel())
+			return;
+
 		if (game->IsKeyDown(DIK_A))
-			mario->SetState(MARIO_STATE_RUNNING_LEFT);
+			player->SetState(MARIO_STATE_RUNNING_LEFT);
 		else
-			mario->SetState(MARIO_STATE_WALKING_LEFT);
+			player->SetState(MARIO_STATE_WALKING_LEFT);
 	}
 	else
-		mario->SetState(MARIO_STATE_IDLE);
+		player->SetState(MARIO_STATE_IDLE);
 }
