@@ -21,7 +21,6 @@
 #include "LifeBrick.h"
 
 #include "Collision.h"
-extern int isPaused;
 
 #define DEPENDENT_ID				9999 // taken from PlayScene.cpp
 
@@ -320,7 +319,6 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 				vx = MARIO_HALF_RUN_ACCEL_SPEED;
 			else if (vx < -MARIO_HALF_RUN_ACCEL_SPEED)
 				vx = -MARIO_HALF_RUN_ACCEL_SPEED;
-			//	vx -= MARIO_DECELERATION_X / 4 * 16;
 		}
 
 	if (dynamic_cast<CGoomba*>(e->obj))
@@ -1030,7 +1028,8 @@ void CMario::Render()
 			isRendering = !isRendering;
 			lastRenderTime = currentTime;
 		}
-		if (!isRendering && isPaused == 0) return;
+		bool isPaused = CGame::GetInstance()->IsPaused();
+		if (!isRendering && !isPaused) return;
 	}
 	else {
 		isRendering = true;
@@ -1055,8 +1054,6 @@ void CMario::Render()
 	}
 
 	//RenderBoundingBox();
-
-	//DebugOutTitle(L"Coins: %d", coin);
 }
 
 // Modify the SetState method for improved braking and hovering handling
@@ -1065,6 +1062,7 @@ void CMario::SetState(int state)
 	// DIE is the end state, cannot be changed! 
 	if (this->state == MARIO_STATE_DIE) return;
 
+	if (CGame::GetInstance()->IsPaused()) return;
 	//if (this->state == MARIO_STATE_POWER_UP && (GetTickCount64() - powerUpStart <= MARIO_POWER_UP_TIME))
 	//	return;
 	//if (this->state == MARIO_STATE_TAIL_UP && (GetTickCount64() - tailUpStart <= MARIO_TAIL_UP_TIME))
@@ -1075,6 +1073,7 @@ void CMario::SetState(int state)
 	//	return;
 
 	int previousState = this->state;
+	static bool daChamDat = 1;
 
 	switch (state)
 	{
@@ -1105,11 +1104,11 @@ void CMario::SetState(int state)
 		{
 			if (vx <= 0)  // Đang đứng im hoặc đang đi sang trái trong không trung
 			{
-				vx = MARIO_MAX_RUNNING_SPEED / SPEED_DIVISOR;
-				ax = 0.0f;
+				vx = -MARIO_RUNNING_SPEED / 5;
+				ax = 0.00001f;
 				//DebugOut(L"Air direction change - to right, ax set to 0\n");
 			}
-			else
+			else if (daChamDat)
 				ax = MARIO_ACCEL_RUN_X;
 		}
 		else
@@ -1144,8 +1143,8 @@ void CMario::SetState(int state)
 				ax = -0.00001f;
 				//DebugOut(L"Air direction change - to left, ax set to 0\n");
 			}
-			//else
-			//	ax = -MARIO_ACCEL_RUN_X;
+			else if (daChamDat)
+				ax = -MARIO_ACCEL_RUN_X;
 		}
 		else
 		{
@@ -1227,6 +1226,7 @@ void CMario::SetState(int state)
 
 	case MARIO_STATE_JUMP:
 		if (isSitting) break;
+		daChamDat = false;
 		if (isOnPlatform)
 		{
 			if (fabs(vx) == MARIO_MAX_RUNNING_SPEED)

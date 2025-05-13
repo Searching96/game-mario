@@ -30,6 +30,8 @@ class CGame
 	int backBufferWidth = 0;					// Backbuffer width & height, will be set during Direct3D initialization
 	int backBufferHeight = 0;
 
+	bool isPaused = 0;
+
 	ID3D10Device* pD3DDevice = nullptr;
 	IDXGISwapChain* pSwapChain = nullptr;
 	ID3D10RenderTargetView* pRenderTargetView = nullptr;
@@ -108,6 +110,7 @@ public:
 	void DecreaseGameSpeed();
 	void IncreaseGameSpeed();
 	void PauseGame();
+	bool IsPaused() { return isPaused; }
 
 	void SetPointSamplerState();
 

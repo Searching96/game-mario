@@ -8,8 +8,6 @@
 #include "Animations.h"
 #include "PlayScene.h"
 
-extern int isPaused;
-
 CGame * CGame::__instance = nullptr;
 
 /*
@@ -580,11 +578,11 @@ void CGame::PauseGame() {
 	if (gameSpeed > 0) {
 		prevGameSpeed = gameSpeed;
 		gameSpeed = 0;
-		isPaused = 1;
+		isPaused = true;
 	}
 	else {
 		gameSpeed = prevGameSpeed;
-		isPaused = 0;
+		isPaused = false;
 	}
 	DebugOut(L"[INFO] Game speed: %f\n", gameSpeed);
 

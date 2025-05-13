@@ -78,6 +78,8 @@ void CSampleKeyHandler::OnKeyUp(int KeyCode)
 		CGame::GetInstance()->PauseGame();
 		break;
 	case DIK_R:
+		if (CGame::GetInstance()->IsPaused())
+			CGame::GetInstance()->PauseGame();
 		CGame::GetInstance()->GetCurrentScene()->Unload();
 		CGame::GetInstance()->GetCurrentScene()->Load();
 		CGame::GetInstance()->GetGameState()->Reset();

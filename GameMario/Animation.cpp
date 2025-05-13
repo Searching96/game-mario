@@ -1,6 +1,6 @@
 #include "Animation.h"
+#include "Game.h"
 #include "debug.h"
-extern int isPaused;
 
 void CAnimation::Add(int spriteId, DWORD time)
 {
@@ -26,7 +26,8 @@ void CAnimation::Render(float x, float y)
 	else
 	{
 		DWORD t = frames[currentFrame]->GetTime();
-		if (now - lastFrameTime > t && isPaused == 0)
+		bool isPaused = CGame::GetInstance()->IsPaused();
+		if (now - lastFrameTime > t && !isPaused)
 		{
 			currentFrame++;
 			lastFrameTime = now;
