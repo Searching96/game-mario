@@ -148,6 +148,8 @@ margin_y	40
 
 # Buff QBlock
 25	11	656	384
+# Life Brick
+6999	14	672	384
 
 # Coin
 26	4	1072	320	0
@@ -201,7 +203,7 @@ margin_y	40
 # Buff QBlock
 20	11	1472	368
 
-# Sky Brick
+# Life Brick
 21	14	1440	128
 
 [CHUNK	4	1504	1664]

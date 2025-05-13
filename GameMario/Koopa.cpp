@@ -213,8 +213,6 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		}
 	}
 
-	//DebugOutTitle(L"Being held: %d, vx=%f, vy=%f\n", beingHeld, vx, vy);
-
 	if ((isDead == 1) && (GetTickCount64() - dieStart > KOOPA_DIE_TIMEOUT))
 	{
 		LPCHUNK chunk = ((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetChunk(originalChunkId);
@@ -238,6 +236,8 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	{
 		if (player->GetIsRunning() == 1 && beingHeld == 1)
 		{
+			y -= 6;
+			this->SetState((player->GetNx() > 0) ? KOOPA_STATE_WALKING_RIGHT : KOOPA_STATE_WALKING_LEFT);
 			if (player->GetLevel() == MARIO_LEVEL_TAIL)
 				player->SetState(MARIO_STATE_TAIL_DOWN);
 			else if (player->GetLevel() == MARIO_LEVEL_BIG)

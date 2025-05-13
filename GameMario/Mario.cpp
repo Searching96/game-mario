@@ -694,7 +694,7 @@ int CMario::GetAniIdSmall()
 	int aniId = -1;
 	if (!isOnPlatform)
 	{
-		if (fabs(vx) == MARIO_MAX_RUNNING_SPEED)
+		if (pMeter == 1.0f)
 		{
 			if (nx >= 0)
 				aniId = ID_ANI_MARIO_SMALL_JUMP_RUN_RIGHT;
@@ -793,6 +793,7 @@ int CMario::GetAniIdSmall()
 //
 int CMario::GetAniIdBig()
 {
+	static int preAniId = -1;
 	int aniId = -1;
 	if (!isOnPlatform)
 	{
@@ -888,10 +889,13 @@ int CMario::GetAniIdBig()
 		}
 	}
 
-	if (isOnPlatform == 0 && isHoldingKoopa == 0 && vy > 0)
-		aniId = (nx > 0) ? ID_ANI_MARIO_FALLING_RIGHT : ID_ANI_MARIO_FALLING_LEFT;
+	if (preAniId != ID_ANI_MARIO_JUMP_RUN_RIGHT && preAniId != ID_ANI_MARIO_JUMP_RUN_LEFT)
+		if (isOnPlatform == 0 && isHoldingKoopa == 0 && vy > 0)
+			aniId = (nx > 0) ? ID_ANI_MARIO_FALLING_RIGHT : ID_ANI_MARIO_FALLING_LEFT;
 
 	if (aniId == -1) aniId = ID_ANI_MARIO_IDLE_RIGHT;
+
+	preAniId = aniId;
 
 	return aniId;
 }
@@ -905,7 +909,7 @@ int CMario::GetAniIdTail()
 	int aniId = -1;
 	if (!isOnPlatform)
 	{
-		if (fabs(vx) == MARIO_MAX_RUNNING_SPEED)
+		if (pMeter == 1.0f)
 		{
 			if (nx >= 0)
 				aniId = ID_ANI_MARIO_TAIL_JUMP_RUN_RIGHT;

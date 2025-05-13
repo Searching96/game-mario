@@ -33,6 +33,7 @@ protected:
 	void OnCollisionWithKoopa(LPCOLLISIONEVENT e);
 	void OnCollisionWithBuffQBlock(LPCOLLISIONEVENT e);
 	void OnCollisionWithCoinQBlock(LPCOLLISIONEVENT e);
+	void OnCollisionWithLifeBrick(LPCOLLISIONEVENT e);
 	void OnCollisionWithPiranhaPlant(LPCOLLISIONEVENT e);
 
 public:

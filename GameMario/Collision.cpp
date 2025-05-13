@@ -8,6 +8,7 @@
 #include "Goomba.h"
 #include "Koopa.h"
 #include "PiranhaPlant.h"
+#include "LifeBrick.h"
 
 #include "debug.h"
 
@@ -539,10 +540,10 @@ void CCollision::Process(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* co
 			if (wg->GetIsDefeated() == 1)
 				continue;
 
-		if ((dynamic_cast<CCoinQBlock*>(e->obj) || dynamic_cast<CBuffQBlock*>(e->obj))
+		if ((dynamic_cast<CCoinQBlock*>(e->obj) || dynamic_cast<CBuffQBlock*>(e->obj) || dynamic_cast<CLifeBrick*>(e->obj))
 			&& dynamic_cast<CTailWhip*>(objSrc))
 		{
-			objSrc->OnCollisionWith(e); // tail whip can hit buffqblock
+			objSrc->OnCollisionWith(e); // tail whip can hit consumable block
 			continue;
 		}
 		if ((dynamic_cast<CWingedGoomba*>(e->obj) || dynamic_cast<CGoomba*>(e->obj))
@@ -551,7 +552,6 @@ void CCollision::Process(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* co
 			objSrc->OnCollisionWith(e); // Koopa can hit WingedGoomba and Goomba
 			continue;
 		}
-		//if (e->obj->IsBlocking() && !dynamic_cast<CBuffQBlock*>(e->obj)) continue;  // blocking collisions were handled already, skip them
 		if (e->obj->IsBlocking()) continue;  // blocking collisions were handled already, skip them
 
 		objSrc->OnCollisionWith(e);

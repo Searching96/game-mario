@@ -7,6 +7,7 @@
 #include "BuffQBlock.h"
 #include "CoinQBlock.h"
 #include "PiranhaPlant.h"
+#include "LifeBrick.h"
 
 #include "PlayScene.h"
 
@@ -111,6 +112,8 @@ void CTailWhip::OnCollisionWith(LPCOLLISIONEVENT e)
 		OnCollisionWithBuffQBlock(e);
 	else if (dynamic_cast<CCoinQBlock*>(e->obj) && dynamic_cast<CCoinQBlock*>(e->obj)->GetIsHit() == false)
 		OnCollisionWithCoinQBlock(e);
+	else if (dynamic_cast<CLifeBrick*>(e->obj))
+		OnCollisionWithLifeBrick(e);
 	else if (dynamic_cast<CPiranhaPlant*>(e->obj) && dynamic_cast<CPiranhaPlant*>(e->obj)->GetIsDefeated() == 0)
 		OnCollisionWithPiranhaPlant(e);
 }
@@ -119,35 +122,40 @@ void CTailWhip::OnCollisionWithBuffQBlock(LPCOLLISIONEVENT e)
 {
 	CBuffQBlock* bqb = dynamic_cast<CBuffQBlock*>(e->obj);
 	CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
-	if (bqb)
+	if (bqb && !bqb->GetIsHit())
 	{
-		if (bqb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
+		if (player->GetLevel() == MARIO_LEVEL_SMALL)
 		{
-			if (player->GetLevel() == MARIO_LEVEL_SMALL)
+			CMushroom* mr = bqb->GetMushroom();
+			if (mr)
 			{
-				CMushroom* mr = bqb->GetMushroom();
-				if (mr)
-				{
-					float mX, mY;
-					mr->GetPosition(mX, mY);
-					if (x < mX)
-						mr->SetCollisionNx(1);
-					else
-						mr->SetCollisionNx(-1);
-				}
-				bqb->SetToSpawn(0);
+				float mX, mY;
+				mr->GetPosition(mX, mY);
+				if (x < mX)
+					mr->SetCollisionNx(1);
+				else
+					mr->SetCollisionNx(-1);
 			}
-			else
-				bqb->SetToSpawn(1);
-			bqb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
+			bqb->SetToSpawn(0);
 		}
+		else
+			bqb->SetToSpawn(1);
+		bqb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
 	}
 }
 
 void CTailWhip::OnCollisionWithCoinQBlock(LPCOLLISIONEVENT e) {
 	CCoinQBlock* cqb = dynamic_cast<CCoinQBlock*>(e->obj);
-	if (cqb && cqb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT) {
+	if (cqb && !cqb->GetIsHit()) {
 		cqb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
+	}
+}
+
+void CTailWhip::OnCollisionWithLifeBrick(LPCOLLISIONEVENT e)
+{
+	CLifeBrick* lb = dynamic_cast<CLifeBrick*>(e->obj);
+	if (lb && !lb->GetIsHit()) {
+		lb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
 	}
 }
 
