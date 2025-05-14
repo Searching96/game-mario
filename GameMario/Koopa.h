@@ -82,28 +82,6 @@ protected:
 	void OnCollisionWithGoomba(LPCOLLISIONEVENT e);
 	void OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e);
 	void OnCollisionWithPiranhaPlant(LPCOLLISIONEVENT e);
-	void OnCollisionWithTerrain(LPCOLLISIONEVENT e);
-
-	bool CheckAndDeleteIfDied();
-	void UpdateChunkMembershipWhileHeld();
-	void SetSpeedIfShellDynamic();
-	void FindPotentialGrounds(vector<LPGAMEOBJECT>* coObjects, vector<LPGAMEOBJECT>& outPotentialGrounds);
-	bool HandleFlyingLogic();
-
-	// Shell recovery logic
-	bool HandleShellRecoveryLogic(DWORD dt, vector<LPGAMEOBJECT>* coObjects, CMario* player);
-	void RecoverFromShellWhileHeldByRunningPlayer(CMario* player, DWORD dt, vector<LPGAMEOBJECT>* coObjects);
-	void RecoverFromShellNormally();
-
-	// Interactions while held logic
-	void ProcessInteractionsWhileHeld(DWORD dt, vector<LPGAMEOBJECT>* coObjects, CMario* player);
-	bool HandleHeldCollisionsWithEnemies(DWORD dt, vector<LPGAMEOBJECT>* coObjects, CMario* player);
-	void HandleKickingWhenPlayerNotRunning(DWORD dt, vector<LPGAMEOBJECT>* coObjects, CMario* player);
-	void UpdatePositionWhenHeldByRunningPlayer(CMario* player);
-
-	void ApplyPhysics(DWORD dt);
-	void HandleWalkingAndEdgeDetection(vector<LPGAMEOBJECT>& potentialGrounds);
-	void CheckShellStateTransition();
 
 public:
 	CKoopa(int id, float x, float y, int z, int originalChunkId);

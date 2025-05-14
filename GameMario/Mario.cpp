@@ -238,8 +238,8 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		tailWhip->Update(dt, coObjects);
 	}
 
-	DebugOutTitle(L"vx=%f, ax=%f, mvx=%f, irn=%d, fx=%f, iop=%d, imv=%d\n",
-		vx, ax, maxVx, isRunning, frictionX, isOnPlatform, isMoving);
+	//DebugOutTitle(L"vx=%f, ax=%f, mvx=%f, irn=%d, fx=%f, iop=%d, imv=%d\n",
+	//	vx, ax, maxVx, isRunning, frictionX, isOnPlatform, isMoving);
 
 	// Process collisions
 	isOnPlatform = false;
@@ -890,7 +890,7 @@ int CMario::GetAniIdBig()
 	}
 
 	if (preAniId != ID_ANI_MARIO_JUMP_RUN_RIGHT && preAniId != ID_ANI_MARIO_JUMP_RUN_LEFT)
-		if (isOnPlatform == 0 && isHoldingKoopa == 0 && vy > 0)
+		if (isOnPlatform == 0 && isHoldingKoopa == 0 && isChangingLevel == 0 && vy > 0)
 			aniId = (nx > 0) ? ID_ANI_MARIO_FALLING_RIGHT : ID_ANI_MARIO_FALLING_LEFT;
 
 	if (aniId == -1) aniId = ID_ANI_MARIO_IDLE_RIGHT;
@@ -1013,7 +1013,7 @@ int CMario::GetAniIdTail()
 	}
 
 	if (preAniId != ID_ANI_MARIO_TAIL_JUMP_RUN_RIGHT && preAniId != ID_ANI_MARIO_TAIL_JUMP_RUN_LEFT)
-		if (isOnPlatform == 0 && isHovering == 0 && isHoldingKoopa == 0 && jumpCount < 1 && vy > 0)
+		if (isOnPlatform == 0 && isHovering == 0 && isHoldingKoopa == 0 && isChangingLevel == 0 && jumpCount < 1 && vy > 0)
 			aniId = (nx > 0) ? ID_ANI_MARIO_TAIL_FALLING_RIGHT : ID_ANI_MARIO_TAIL_FALLING_LEFT;
 
 	if (jumpCount > 0)
