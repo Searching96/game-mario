@@ -185,7 +185,7 @@ void CCollision::SweptAABB(float ml, float mt, float mr, float mb,
 		}
 	}
 
-	if (dynamic_cast<CKoopa*>(objSrc) && (dynamic_cast<CBuffQBlock*>(objDest) || dynamic_cast<CCoinQBlock*>(objDest)))
+	if (dynamic_cast<CKoopa*>(objSrc) && (dynamic_cast<CBuffQBlock*>(objDest) || dynamic_cast<CCoinQBlock*>(objDest) || dynamic_cast<CLifeBrick*>(objDest)))
 	{
 		CKoopa* k = dynamic_cast<CKoopa*>(objSrc);
 		bool isAbleToBounce = (k->GetState() == KOOPA_STATE_WALKING_LEFT || k->GetState() == KOOPA_STATE_WALKING_RIGHT || k->GetState() == KOOPA_STATE_SHELL_STATIC);

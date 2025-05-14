@@ -1,5 +1,6 @@
 ﻿#include "Koopa.h"
 #include "Particle.h"
+#include "LifeBrick.h"
 
 CKoopa::CKoopa(int id, float x, float y, int z, int originalChunkId) : CGameObject(id, x, y, z)
 {
@@ -36,15 +37,19 @@ void CKoopa::OnNoCollision(DWORD dt)
 	y += vy * dt;
 }
 
-void CKoopa::OnCollisionWith(LPCOLLISIONEVENT e) {
+void CKoopa::OnCollisionWith(LPCOLLISIONEVENT e) 
+{
 	if (state == KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY) return;
 
-	if (e->ny < 0) {
+	if (e->ny < 0) 
+	{
 		vy = 0;
 	}
 	
-	if (e->nx != 0 && e->obj->IsBlocking()) {
-		if (state == KOOPA_STATE_SHELL_DYNAMIC) {
+	if (e->nx != 0 && e->obj->IsBlocking()) 
+	{
+		if (state == KOOPA_STATE_SHELL_DYNAMIC) 
+		{
 			vx = -vx;
 			nx = -nx;
 		}
@@ -56,6 +61,8 @@ void CKoopa::OnCollisionWith(LPCOLLISIONEVENT e) {
 
 	if (dynamic_cast<CCoinQBlock*>(e->obj) || dynamic_cast<CBuffQBlock*>(e->obj))
 		OnCollisionWithQuestionBlock(e);
+	else if (dynamic_cast<CLifeBrick*>(e->obj))
+		OnCollisionWithLifeBrick(e);
 	else if (dynamic_cast<CGoomba*>(e->obj))
 		OnCollisionWithGoomba(e);
 	else if (dynamic_cast<CWingedGoomba*>(e->obj))
@@ -64,7 +71,8 @@ void CKoopa::OnCollisionWith(LPCOLLISIONEVENT e) {
 		OnCollisionWithPiranhaPlant(e);
 }
 
-void CKoopa::OnCollisionWithQuestionBlock(LPCOLLISIONEVENT e) {
+void CKoopa::OnCollisionWithQuestionBlock(LPCOLLISIONEVENT e) 
+{
 	bool isAbleToBounce = (state == KOOPA_STATE_WALKING_LEFT || state == KOOPA_STATE_WALKING_RIGHT || state == KOOPA_STATE_SHELL_STATIC);
 	if (isAbleToBounce)
 	{
@@ -89,17 +97,25 @@ void CKoopa::OnCollisionWithQuestionBlock(LPCOLLISIONEVENT e) {
 		return;
 	}
 	
-	if (state == KOOPA_STATE_SHELL_DYNAMIC) {
-		if (CCoinQBlock* cqb = dynamic_cast<CCoinQBlock*>(e->obj)) {
+	if (state == KOOPA_STATE_SHELL_DYNAMIC) 
+	{
+		if (CCoinQBlock* cqb = dynamic_cast<CCoinQBlock*>(e->obj)) 
+		{
 			if (e->nx != 0 && cqb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
+			{
 				cqb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
+			}
 		}
-		else if (CBuffQBlock* bqb = dynamic_cast<CBuffQBlock*>(e->obj)) {
-			if (e->nx != 0 && bqb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT) {
+		else if (CBuffQBlock* bqb = dynamic_cast<CBuffQBlock*>(e->obj)) 
+		{
+			if (e->nx != 0 && bqb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT) 
+			{
 				CMario* player = (CMario*)(((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer());
-				if (player->GetLevel() == MARIO_LEVEL_SMALL) {
+				if (player->GetLevel() == MARIO_LEVEL_SMALL) 
+				{
 					CMushroom* mushroom = bqb->GetMushroom();
-					if (mushroom) {
+					if (mushroom) 
+					{
 						float mX, mY;
 						mushroom->GetPosition(mX, mY);
 						if (x < mX)
@@ -110,9 +126,43 @@ void CKoopa::OnCollisionWithQuestionBlock(LPCOLLISIONEVENT e) {
 					bqb->SetToSpawn(0);
 				}
 				else
+				{
 					bqb->SetToSpawn(1);
+				}
 				bqb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
 			}
+		}
+	}
+}
+
+
+void CKoopa::OnCollisionWithLifeBrick(LPCOLLISIONEVENT e)
+{
+	bool isAbleToBounce = (state == KOOPA_STATE_WALKING_LEFT || state == KOOPA_STATE_WALKING_RIGHT || state == KOOPA_STATE_SHELL_STATIC);
+	if (isAbleToBounce)
+	{
+		bool isHit = dynamic_cast<CLifeBrick*>(e->obj)->GetIsHit();
+		bool isBouncing = dynamic_cast<CLifeBrick*>(e->obj)->GetState() != QUESTIONBLOCK_STATE_NOT_HIT;
+		if (isBouncing && !isHit)
+		{
+			int preState = state;
+			this->StartShell();
+			this->SetState(KOOPA_STATE_SHELL_STATIC);
+			float knockbackVx = (preState == KOOPA_STATE_WALKING_RIGHT) ? 0.1f : -0.1f; // Bounce left for walking left and shell static
+			float knockbackVy = -0.5f;
+			this->SetIsFlying(true);
+			this->SetIsReversed(true);
+			this->SetSpeed(knockbackVx, knockbackVy);
+		}
+		return;
+	}
+
+	CLifeBrick* lb = dynamic_cast<CLifeBrick*>(e->obj);
+	if (state == KOOPA_STATE_SHELL_DYNAMIC)
+	{
+		if (e->nx != 0 && lb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
+		{
+			lb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
 		}
 	}
 }

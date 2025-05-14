@@ -26,7 +26,7 @@
 
 #define KOOPA_SHELL_TIMEOUT 7000
 #define KOOPA_SHELL_ALERT_TIMEOUT 5000
-#define KOOPA_DIE_TIMEOUT 500
+#define KOOPA_DIE_TIMEOUT 700
 
 #define KOOPA_STATE_WALKING_LEFT 100
 #define KOOPA_STATE_WALKING_RIGHT 110
@@ -82,6 +82,7 @@ protected:
 	void OnCollisionWithGoomba(LPCOLLISIONEVENT e);
 	void OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e);
 	void OnCollisionWithPiranhaPlant(LPCOLLISIONEVENT e);
+	void OnCollisionWithLifeBrick(LPCOLLISIONEVENT e);
 
 public:
 	CKoopa(int id, float x, float y, int z, int originalChunkId);
