@@ -62,7 +62,7 @@ protected:
 	ULONGLONG shellStart;
 	ULONGLONG dieStart;
 
-	int beingHeld = 0;
+	int isHeld = 0;
 	int isDead = 0;
 	int isDefeated = 0;
 
@@ -82,15 +82,37 @@ protected:
 	void OnCollisionWithGoomba(LPCOLLISIONEVENT e);
 	void OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e);
 	void OnCollisionWithPiranhaPlant(LPCOLLISIONEVENT e);
+	void OnCollisionWithTerrain(LPCOLLISIONEVENT e);
+
+	bool CheckAndDeleteIfDied();
+	void UpdateChunkMembershipWhileHeld();
+	void SetSpeedIfShellDynamic();
+	void FindPotentialGrounds(vector<LPGAMEOBJECT>* coObjects, vector<LPGAMEOBJECT>& outPotentialGrounds);
+	bool HandleFlyingLogic();
+
+	// Shell recovery logic
+	bool HandleShellRecoveryLogic(DWORD dt, vector<LPGAMEOBJECT>* coObjects, CMario* player);
+	void RecoverFromShellWhileHeldByRunningPlayer(CMario* player, DWORD dt, vector<LPGAMEOBJECT>* coObjects);
+	void RecoverFromShellNormally();
+
+	// Interactions while held logic
+	void ProcessInteractionsWhileHeld(DWORD dt, vector<LPGAMEOBJECT>* coObjects, CMario* player);
+	bool HandleHeldCollisionsWithEnemies(DWORD dt, vector<LPGAMEOBJECT>* coObjects, CMario* player);
+	void HandleKickingWhenPlayerNotRunning(DWORD dt, vector<LPGAMEOBJECT>* coObjects, CMario* player);
+	void UpdatePositionWhenHeldByRunningPlayer(CMario* player);
+
+	void ApplyPhysics(DWORD dt);
+	void HandleWalkingAndEdgeDetection(vector<LPGAMEOBJECT>& potentialGrounds);
+	void CheckShellStateTransition();
 
 public:
 	CKoopa(int id, float x, float y, int z, int originalChunkId);
 	virtual void SetState(int state);
 	void StartShell();
-	int GetBeingHeld() { return beingHeld; }
-	void SetBeingHeld(int beingHeld) { this->beingHeld = beingHeld; }
-	void SetFlying(bool isFlying) { this->isFlying = isFlying; }
-	void SetReversed(bool isReversed) { this->isReversed = isReversed; }
+	int IsHeld() { return isHeld; }
+	void SetIsHeld(int beingHeld) { this->isHeld = beingHeld; }
+	void SetIsFlying(bool isFlying) { this->isFlying = isFlying; }
+	void SetIsReversed(bool isReversed) { this->isReversed = isReversed; }
 	void SetNx(int nx) { this->nx = nx; }
 	void GetOriginalPosition(float& x0, float& y0) { x0 = this->x0; y0 = this->y0; }
 	int GetIsDefeated() { return isDefeated; }

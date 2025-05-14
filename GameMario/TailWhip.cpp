@@ -201,8 +201,8 @@ void CTailWhip::OnCollisionWithKoopa(LPCOLLISIONEVENT e)
 		k->SetState(KOOPA_STATE_SHELL_STATIC);
 		float knockback_vx = (this->nx > 0) ? 0.1f : -0.1f;
 		float knockback_vy = -0.5f;
-		k->SetFlying(true);
-		k->SetReversed(true);
+		k->SetIsFlying(true);
+		k->SetIsReversed(true);
 		k->SetSpeed(knockback_vx, knockback_vy);
 	}
 }

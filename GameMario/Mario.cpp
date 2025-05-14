@@ -573,7 +573,7 @@ void CMario::OnCollisionWithKoopa(LPCOLLISIONEVENT e) {
 
 	// Jumped on top
 	if (e->ny < 0) {
-		if (k->GetBeingHeld() == 0) CalculateScore(k);
+		if (k->IsHeld() == 0) CalculateScore(k);
 		if (k->GetState() == KOOPA_STATE_WALKING_LEFT ||
 			k->GetState() == KOOPA_STATE_WALKING_RIGHT) {
 			k->StartShell();
