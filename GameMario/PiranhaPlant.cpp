@@ -204,20 +204,8 @@ void CPiranhaPlant::OnNoCollision(DWORD dt)
 
 void CPiranhaPlant::OnCollisionWith(LPCOLLISIONEVENT e)
 {
-	if (!e->obj->IsBlocking() && !dynamic_cast<CKoopa*>(e->obj))
+	if (!e->obj->IsBlocking())
 		return;
-
-	if (CKoopa* koopa = dynamic_cast<CKoopa*>(e->obj))
-	{
-		if (koopa->GetState() == KOOPA_STATE_SHELL_DYNAMIC)
-		{
-			if (this->state != PIRANHA_PLANT_STATE_DIED)
-			{
-				this->SetState(PIRANHA_PLANT_STATE_DIED);
-			}
-			return;
-		}
-	}
 }
 
 void CPiranhaPlant::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)

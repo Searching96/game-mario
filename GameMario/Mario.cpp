@@ -358,7 +358,7 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 void CMario::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
 {
 	CGoomba* g = dynamic_cast<CGoomba*>(e->obj);
-	if (g->GetIsDead() == 1) return;
+	if (g->IsDead() == 1) return;
 
 	// jump on top >> kill Goomba and deflect a bit 
 	if (e->ny < 0)
@@ -636,13 +636,13 @@ void CMario::OnCollisionWithKoopa(LPCOLLISIONEVENT e) {
 void CMario::OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e)
 {
 	CWingedGoomba* wg = dynamic_cast<CWingedGoomba*>(e->obj);
-	if (wg->GetIsDead() == 1) return;
+	if (wg->IsDead() == 1) return;
 
 	// jump on top >> kill Goomba and deflect a bit 
 	if (e->ny < 0)
 	{
 		CalculateScore(wg);
-		if (wg->GetIsWinged() == 1)
+		if (wg->IsWinged() == 1)
 		{
 			wg->SetIsWinged(0);
 			wg->SetState(WINGED_GOOMBA_STATE_WALKING);
@@ -675,7 +675,7 @@ void CMario::OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e)
 					DebugOut(L">>> Mario DIE >>> \n");
 				}
 
-				if (e->nx != 0 && this->isRunning == 1 && wg->GetIsWinged() == 0)
+				if (e->nx != 0 && this->isRunning == 1 && wg->IsWinged() == 0)
 				{
 					float eVx, eVy;
 					e->obj->GetSpeed(eVx, eVy);

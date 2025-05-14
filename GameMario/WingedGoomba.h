@@ -2,7 +2,7 @@
 #include "GameObject.h"
 
 #define WINGED_GOOMBA_GRAVITY									0.0015f
-#define WINGED_GOOMBA_WALKING_SPEED								0.032f
+#define WINGED_GOOMBA_WALKING_SPEED								0.02f
 #define WINGED_GOOMBA_BOUNCE_SPEED								0.135f
 
 #define WINGED_GOOMBA_BBOX_WIDTH								16
@@ -70,7 +70,6 @@ protected:
 
 	virtual void OnNoCollision(DWORD dt);
 	virtual void OnCollisionWith(LPCOLLISIONEVENT e);
-	void OnCollisionWithKoopa(LPCOLLISIONEVENT e);
 
 public:
 	CWingedGoomba(int id, float x, float y, int z, int originalChunkId);
@@ -79,8 +78,8 @@ public:
 	void StartBouncing() { isBouncing = 1; bounceCount++; }
 	void StartFlying() { isFlying = 1; flyingStart = GetTickCount64(); }
 	void SetIsWinged(int isWinged) { this->isWinged = isWinged; }
-	int GetIsWinged() { return isWinged; }
-	int GetIsDead() { return isDead; }
+	int IsWinged() { return isWinged; }
+	int IsDead() { return isDead; }
 	void GetOriginalPosition(float& x0, float& y0) { x0 = this->x0; y0 = this->y0; }
 	int GetIsDefeated() { return isDefeated; }
 	void SetIsDefeated(int isDefeated) { this->isDefeated = isDefeated; }

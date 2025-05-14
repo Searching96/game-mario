@@ -37,7 +37,6 @@ void CGoomba::OnNoCollision(DWORD dt)
 	y += vy * dt;
 };
 
-// Corrected Goomba::OnCollisionWith
 void CGoomba::OnCollisionWith(LPCOLLISIONEVENT e)
 {
 	if (e->obj->IsBlocking())
@@ -57,7 +56,7 @@ void CGoomba::OnCollisionWith(LPCOLLISIONEVENT e)
 		do
 		{
 			if (CWingedGoomba* wg = dynamic_cast<CWingedGoomba*>(e->obj))
-				if (wg->GetIsWinged() == 1)
+				if (wg->IsWinged() == 1)
 					break;
 
 			if (e->nx != 0)
@@ -68,31 +67,6 @@ void CGoomba::OnCollisionWith(LPCOLLISIONEVENT e)
 				e->obj->SetSpeed(-eVx, eVy);
 			}
 		} while (false);
-	}
-
-	if (dynamic_cast<CKoopa*>(e->obj))
-		OnCollisionWithKoopa(e);
-}
-
-void CGoomba::OnCollisionWithKoopa(LPCOLLISIONEVENT e)
-{
-	if (e->obj->GetState() == KOOPA_STATE_SHELL_DYNAMIC)
-	{
-		if (isDead == 0)
-		{
-			this->SetState(GOOMBA_STATE_DIE_ON_TAIL_WHIP);
-		}
-	}
-	else
-	{
-		if (e->nx != 0)
-		{
-			vx = -vx;
-			CKoopa* k = dynamic_cast<CKoopa*>(e->obj);
-			float eVx, eVy;
-			k->GetSpeed(eVx, eVy);
-			k->SetState(eVx > 0 ? KOOPA_STATE_WALKING_LEFT : KOOPA_STATE_WALKING_RIGHT);
-		}
 	}
 }
 

@@ -2,7 +2,7 @@
 #include "GameObject.h"
 
 #define GOOMBA_GRAVITY 0.002f
-#define GOOMBA_WALKING_SPEED 0.05f
+#define GOOMBA_WALKING_SPEED 0.02f
 
 
 #define GOOMBA_BBOX_WIDTH 16
@@ -49,12 +49,11 @@ protected:
 
 	virtual void OnNoCollision(DWORD dt);
 	virtual void OnCollisionWith(LPCOLLISIONEVENT e);
-	void OnCollisionWithKoopa(LPCOLLISIONEVENT e);
 
 public: 	
 	CGoomba(int id, float x, float y, int z, int originalChunkId);
 	virtual void SetState(int state);
-	int GetIsDead() { return isDead; }
+	int IsDead() { return isDead; }
 	int GetIsDefeated() { return isDefeated; }
 	void SetIsDefeated(int defeated) { isDefeated = defeated; }
 	void GetOriginalPosition(float& x0, float& y0) { x0 = this->x0; y0 = this->y0; }
