@@ -89,63 +89,101 @@ void CKoopa::OnCollisionWithQuestionBlock(LPCOLLISIONEVENT e) {
 	}
 }
 
-bool CKoopa::IsPlatformEdge(float checkDistance, vector<LPGAMEOBJECT>& possibleGrounds)
+bool CKoopa::IsPlatformEdge(float checkDistance, vector<LPGAMEOBJECT>& coObjects)
 {
-	if (possibleGrounds.size() == 0) return false;
-	float verticalTolerance = 2.0f;
-	float l, t, r, b; // Koopa's current bounding box
+	float verticalTolerance = 2.5f;   // Use consistent tolerance (was 2.5f in provided code)
+	float horizontalTolerance = 2.0f; // For adjacency
+	float l, t, r, b;
 	GetBoundingBox(l, t, r, b);
 	float koopaBottomY = b;
 	float direction = (state == KOOPA_STATE_WALKING_LEFT) ? -1.0f : 1.0f;
 
-	bool isOnAnyPlatformInList = false;
-
-	for (const auto& ground : possibleGrounds)
+	// Find all platforms the Koopa is currently standing on
+	vector<LPGAMEOBJECT> supportingPlatforms;
+	for (const auto& obj : coObjects)
 	{
-		if (ground == nullptr || ground->IsDeleted()) continue;
+		if (obj == this || obj->IsDeleted() || !obj->IsBlocking()) continue;
 
-		float groundL, groundT, groundR, groundB;
-		ground->GetBoundingBox(groundL, groundT, groundR, groundB);
+		float objL, objT, objR, objB;
+		obj->GetBoundingBox(objL, objT, objR, objB);
 
-		bool verticallyOnThisGround = std::abs(koopaBottomY - groundT) <= verticalTolerance;
-		bool horizontallyOverlapping = (l < groundR && r > groundL);
-
-		if (verticallyOnThisGround && horizontallyOverlapping)
+		if (l < objR && r > objL && // Horizontal overlap
+			koopaBottomY >= objT - verticalTolerance && koopaBottomY <= objT + verticalTolerance) // Vertical proximity
 		{
-			isOnAnyPlatformInList = true;
-
-			float projectedX = x + direction * checkDistance;
-
-			//DebugOut(L"[INFO] On platform L=%f,R=%f. Koopa current L=%f,R=%f. Projected X=%f dir=%f dist=%f\n", groundL, groundR, l, r, projectedX, direction, checkDistance);
-
-
-			if (direction < 0) // Walking left
-			{
-				if (projectedX <= groundL + 0.001f)
-				{
-					//DebugOut(L"[INFO] Edge detected (walking left): projectedX=%f <= groundL=%f\n", projectedX, groundL);
-					return true;
-				}
-			}
-			else // Walking right
-			{
-				if (projectedX >= groundR - 0.001f)
-				{
-					//DebugOut(L"[INFO] Edge detected (walking right): projectedX=%f >= groundR=%f\n", projectedX, groundR);
-					return true;
-				}
-			}
+			supportingPlatforms.push_back(obj);
 		}
 	}
 
-	if (isOnAnyPlatformInList) {
-		// DebugOut(L"[INFO] On platform, but no edge detected for any supporting platform.\n");
-		return false; // No edge found
-	}
-	else {
-		// DebugOut(L"[INFO] No supporting platform found in IsPlatformEdge for Koopa at Y_bottom=%f\n", koopaBottomY);
+	if (supportingPlatforms.empty())
+	{
+		// DebugOut(L"[INFO] No supporting platform found for Koopa at Y_bottom=%f\n", koopaBottomY);
 		return false;
 	}
+
+	// Find consecutive platforms
+	float combinedLeft = FLT_MAX;
+	float combinedRight = -FLT_MAX;
+	float combinedTop = 0.0f;
+
+	for (const auto& platform : supportingPlatforms)
+	{
+		float platformL, platformT, platformR, platformB;
+		platform->GetBoundingBox(platformL, platformT, platformR, platformB);
+
+		if (combinedLeft == FLT_MAX)
+		{
+			combinedLeft = platformL;
+			combinedRight = platformR;
+			combinedTop = platformT;
+			continue;
+		}
+
+		if (std::abs(platformT - combinedTop) <= verticalTolerance)
+		{
+			combinedLeft = min(combinedLeft, platformL);
+			combinedRight = max(combinedRight, platformR);
+		}
+	}
+
+	// Check adjacent platforms
+	bool foundAdjacent;
+	do
+	{
+		foundAdjacent = false;
+		for (const auto& obj : coObjects)
+		{
+			if (obj == this || obj->IsDeleted() || !obj->IsBlocking()) continue;
+			if (find(supportingPlatforms.begin(), supportingPlatforms.end(), obj) != supportingPlatforms.end()) continue;
+
+			float objL, objT, objR, objB;
+			obj->GetBoundingBox(objL, objT, objR, objB);
+
+			bool isLeftAdjacent = (std::abs(objR - combinedLeft) <= horizontalTolerance);
+			bool isRightAdjacent = (std::abs(objL - combinedRight) <= horizontalTolerance);
+			bool isVerticallyAligned = (std::abs(objT - combinedTop) <= verticalTolerance);
+
+			if (isVerticallyAligned && (isLeftAdjacent || isRightAdjacent))
+			{
+				combinedLeft = min(combinedLeft, objL);
+				combinedRight = max(combinedRight, objR);
+				supportingPlatforms.push_back(obj);
+				foundAdjacent = true;
+			}
+		}
+	} while (foundAdjacent);
+
+	// Check edge
+	float projectedX = x + direction * checkDistance;
+	if (direction < 0)
+	{
+		if (projectedX <= combinedLeft + 0.001f) return true;
+	}
+	else
+	{
+		if (projectedX >= combinedRight - 0.001f) return true;
+	}
+
+	return false;
 }
 
 void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
@@ -179,38 +217,6 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	if (state == KOOPA_STATE_SHELL_DYNAMIC)
 	{
 		vx = (nx > 0) ? KOOPA_SHELL_SPEED : -KOOPA_SHELL_SPEED;
-	}
-
-	vector<LPGAMEOBJECT> potentialGrounds;
-	float koopa_l_bbox, koopa_t_bbox, koopa_r_bbox, koopa_b_bbox;
-	GetBoundingBox(koopa_l_bbox, koopa_t_bbox, koopa_r_bbox, koopa_b_bbox);
-
-	// A tolerance for how close the Koopa's bottom needs to be to the platform's top.
-	// This should match or be slightly larger than `verticalTolerance` in IsPlatformEdge.
-	float vertical_check_tolerance = 2.5f; // e.g., 2.0f used in IsPlatformEdge + 0.5f buffer
-
-	for (const auto& obj : *coObjects) {
-		if (obj == this || obj->IsDeleted() || !obj->IsBlocking())
-			continue;
-
-		float obj_L, obj_T, obj_R, obj_B;
-		obj->GetBoundingBox(obj_L, obj_T, obj_R, obj_B);
-
-		// Condition 1: Horizontal Bounding Box Overlap
-		bool horizontal_overlap = (koopa_l_bbox < obj_R && koopa_r_bbox > obj_L);
-
-		// Condition 2: Platform's top surface is near Koopa's bottom.
-		// This ensures we only consider objects that could actually be ground.
-		bool vertical_candidate = (std::abs(koopa_b_bbox - obj_T) <= vertical_check_tolerance);
-		// And ensure Koopa is generally above the platform, not under it
-		// (koopa_t_bbox < obj_B is a loose check, more accurately obj_T should be below koopa_b_bbox)
-		bool koopa_is_above_platform_top = koopa_b_bbox >= obj_T - vertical_check_tolerance;
-
-
-		if (horizontal_overlap && vertical_candidate && koopa_is_above_platform_top)
-		{
-			potentialGrounds.push_back(obj);
-		}
 	}
 
 	//DebugOutTitle(L"Being held: %d, vx=%f, vy=%f\n", beingHeld, vx, vy);
@@ -386,12 +392,12 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	vx += ax * dt;
 
 	if (state == KOOPA_STATE_WALKING_LEFT) {
-		if (IsPlatformEdge(0.1f, potentialGrounds)) {
+		if (IsPlatformEdge(0.1f, *coObjects)) {
 			SetState(KOOPA_STATE_WALKING_RIGHT);
 		}
 	}
 	else if (state == KOOPA_STATE_WALKING_RIGHT) {
-		if (IsPlatformEdge(0.1f, potentialGrounds)) {
+		if (IsPlatformEdge(0.1f, *coObjects)) {
 			SetState(KOOPA_STATE_WALKING_LEFT);
 		}
 	}

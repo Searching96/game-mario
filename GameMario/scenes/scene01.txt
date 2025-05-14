@@ -27,7 +27,6 @@ assets\trinket.txt
 assets\piranha.txt
 assets\fireball.txt
 assets\koopa.txt
-assets\tailwhip.txt
 assets\questionblock.txt
 assets\mushroom.txt
 assets\superleaf.txt
