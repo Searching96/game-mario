@@ -247,7 +247,6 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	vector<LPGAMEOBJECT> potentialGrounds;
 	float koopa_l_bbox, koopa_t_bbox, koopa_r_bbox, koopa_b_bbox;
 	GetBoundingBox(koopa_l_bbox, koopa_t_bbox, koopa_r_bbox, koopa_b_bbox);
-
 	// A tolerance for how close the Koopa's bottom needs to be to the platform's top.
 	// This should match or be slightly larger than verticalTolerance in IsPlatformEdge.
 	float vertical_check_tolerance = 2.5f; // e.g., 2.0f used in IsPlatformEdge + 0.5f buffer
@@ -299,18 +298,11 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	{
 		if (player->GetIsRunning() == 1 && isHeld == 1)
 		{
-			y -= 6; // RED ALLERT
-			this->SetState((player->GetNx() > 0) ? KOOPA_STATE_WALKING_RIGHT : KOOPA_STATE_WALKING_LEFT);
-			if (player->GetLevel() == MARIO_LEVEL_TAIL)
-				player->SetState(MARIO_STATE_TAIL_DOWN);
-			else if (player->GetLevel() == MARIO_LEVEL_BIG)
-				player->SetState(MARIO_STATE_POWER_DOWN);
-			else if (player->GetLevel() == MARIO_LEVEL_SMALL)
-				player->SetState(MARIO_STATE_DIE);
-
 			isHeld = 0;
 			player->SetIsHoldingKoopa(0);
 
+			int isKilledOnCollideWithTerrain = 0;
+			
 			// Check for collision with blocking objects
 			vector<LPCOLLISIONEVENT> coEvents;
 			vector<LPCOLLISIONEVENT> coEventsResult;
@@ -327,13 +319,24 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 					isHeld = 0;
 					player->SetIsHoldingKoopa(0);
 					player->StartKick();
+					isKilledOnCollideWithTerrain = 1;
 					break;
 				}
 			}
 
 			for (int i = 0; i < coEvents.size(); i++) delete coEvents[i];
-			//CCollision::GetInstance()->Process(this, dt, coObjects);
-			return;
+			if (isKilledOnCollideWithTerrain == 1)
+				return;
+
+			y -= 6; // RED ALLERT
+			this->SetState((player->GetNx() > 0) ? KOOPA_STATE_WALKING_RIGHT : KOOPA_STATE_WALKING_LEFT);
+			if (player->GetLevel() == MARIO_LEVEL_TAIL)
+				player->SetState(MARIO_STATE_TAIL_DOWN);
+			else if (player->GetLevel() == MARIO_LEVEL_BIG)
+				player->SetState(MARIO_STATE_POWER_DOWN);
+			else if (player->GetLevel() == MARIO_LEVEL_SMALL)
+				player->SetState(MARIO_STATE_DIE);
+
 		}
 		this->SetPosition(x, y - 2);
 		SetState(KOOPA_STATE_WALKING_LEFT);
