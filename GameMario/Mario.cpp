@@ -291,7 +291,9 @@ void CMario::HandleHovering(DWORD dt)
 		ay = MARIO_GRAVITY * 0.3f;
 		if (vy > 0) vy = MARIO_HOVER_SPEED_Y;
 		if (fabs(vx) > MARIO_MAX_WALKING_SPEED / 2)
+		{
 			vx = (nx > 0) ? MARIO_MAX_WALKING_SPEED / 2 : -MARIO_MAX_WALKING_SPEED / 2;
+		}
 		if (GetTickCount64() - hoveringStart > MARIO_HOVER_TIME || isOnPlatform)
 		{
 			isHovering = 0;
@@ -317,6 +319,7 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 		consecutiveEnemies = 0;
 	}
 	else
+	{
 		if (e->nx != 0 && e->obj->IsBlocking())
 		{
 			if (vx > MARIO_HALF_RUN_ACCEL_SPEED)
@@ -324,6 +327,7 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 			else if (vx < -MARIO_HALF_RUN_ACCEL_SPEED)
 				vx = -MARIO_HALF_RUN_ACCEL_SPEED;
 		}
+	}
 
 	if (dynamic_cast<CGoomba*>(e->obj))
 		OnCollisionWithGoomba(e);
@@ -421,23 +425,20 @@ void CMario::OnCollisionWithCoinQBlock(LPCOLLISIONEVENT e)
 {
 	CCoinQBlock* cqb = dynamic_cast<CCoinQBlock*>(e->obj);
 	if (cqb)
-		if (e->ny > 0 && e->nx == 0 && !cqb->GetIsHit())
+	{
+		if (e->ny > 0 && e->nx == 0 && !cqb->GetIsHit() && cqb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
+		{
 			cqb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
-}
-
-void CMario::OnCollisionWithLifeBrick(LPCOLLISIONEVENT e)
-{
-	CLifeBrick* lb = dynamic_cast<CLifeBrick*>(e->obj);
-	if (lb)
-		if (e->ny > 0 && e->nx == 0 && !lb->GetIsHit())
-			lb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
+		}
+	}
 }
 
 void CMario::OnCollisionWithBuffQBlock(LPCOLLISIONEVENT e)
 {
 	CBuffQBlock* bqb = dynamic_cast<CBuffQBlock*>(e->obj);
 	if (bqb)
-		if (e->ny > 0 && e->nx == 0 && !bqb->GetIsHit())
+	{
+		if (e->ny > 0 && e->nx == 0 && !bqb->GetIsHit() && bqb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
 		{
 			if (level == MARIO_LEVEL_SMALL)
 			{
@@ -457,6 +458,19 @@ void CMario::OnCollisionWithBuffQBlock(LPCOLLISIONEVENT e)
 				bqb->SetToSpawn(1);
 			bqb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
 		}
+	}
+}
+
+void CMario::OnCollisionWithLifeBrick(LPCOLLISIONEVENT e)
+{
+	CLifeBrick* lb = dynamic_cast<CLifeBrick*>(e->obj);
+	if (lb)
+	{
+		if (e->ny > 0 && e->nx == 0 && !lb->GetIsHit() && lb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
+		{
+			lb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
+		}
+	}
 }
 
 void CMario::OnCollisionWithLifeMushroom(LPCOLLISIONEVENT e)
@@ -568,7 +582,7 @@ void CMario::OnCollisionWithKoopa(LPCOLLISIONEVENT e) {
 	// Early exit if Mario is invulnerable
 
 	CKoopa* k = dynamic_cast<CKoopa*>(e->obj);
-	if (k->GetIsDefeated() == 1)
+	if (k->IsDefeated() == 1)
 		return;
 
 	// Jumped on top
@@ -925,6 +939,7 @@ int CMario::GetAniIdTail()
 		}
 	}
 	else
+	{
 		if (isSitting)
 		{
 			if (nx > 0)
@@ -933,6 +948,7 @@ int CMario::GetAniIdTail()
 				aniId = ID_ANI_MARIO_TAIL_SIT_LEFT;
 		}
 		else
+		{
 			if (vx == 0)
 			{
 				if (nx > 0) aniId = ID_ANI_MARIO_TAIL_IDLE_RIGHT;
@@ -960,7 +976,8 @@ int CMario::GetAniIdTail()
 				else if (fabs(vx) > MARIO_HALF_RUN_ACCEL_SPEED && fabs(vx) <= MARIO_MAX_RUNNING_SPEED)
 					aniId = ID_ANI_MARIO_TAIL_HALF_RUN_ACCEL_LEFT;
 			}
-	//
+		}
+	}
 
 	if (isHovering)
 	{
@@ -1029,17 +1046,20 @@ int CMario::GetAniIdTail()
 
 void CMario::Render()
 {
-	if (untouchable) {
+	if (untouchable) 
+	{
 		ULONGLONG currentTime = GetTickCount64();
 		if (lastRenderTime == (ULONGLONG)-1) lastRenderTime = currentTime;
-		if (currentTime - lastRenderTime > MARIO_UNTOUCHABLE_RENDER_INTERVAL) {
+		if (currentTime - lastRenderTime > MARIO_UNTOUCHABLE_RENDER_INTERVAL) 
+		{
 			isRendering = !isRendering;
 			lastRenderTime = currentTime;
 		}
 		bool isPaused = CGame::GetInstance()->IsPaused();
 		if (!isRendering && !isPaused) return;
 	}
-	else {
+	else 
+	{
 		isRendering = true;
 	}
 
@@ -1057,7 +1077,8 @@ void CMario::Render()
 
 	animations->Get(aniId)->Render(x, y);
 
-	if (tailWhip != nullptr) {
+	if (tailWhip != nullptr) 
+	{
 		tailWhip->Render();
 	}
 

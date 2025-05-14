@@ -81,7 +81,7 @@ public:
 	int IsWinged() { return isWinged; }
 	int IsDead() { return isDead; }
 	void GetOriginalPosition(float& x0, float& y0) { x0 = this->x0; y0 = this->y0; }
-	int GetIsDefeated() { return isDefeated; }
+	int IsDefeated() { return isDefeated; }
 	void SetIsDefeated(int isDefeated) { this->isDefeated = isDefeated; }
 	int GetOriginalChunkId() { return originalChunkId; }
 };

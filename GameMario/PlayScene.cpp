@@ -933,12 +933,12 @@ void CPlayScene::DefeatEnemiesOutOfRange()
 			// Kiểm tra loại enemy cụ thể và đánh bại nó
 			if (CGoomba* goomba = dynamic_cast<CGoomba*>(enemy))
 			{
-				if (!goomba->GetIsDefeated())
+				if (!goomba->IsDefeated())
 					goomba->SetIsDefeated(true);
 			}
 			else if (CKoopa* koopa = dynamic_cast<CKoopa*>(enemy))
 			{
-				if (!koopa->GetIsDefeated())
+				if (!koopa->IsDefeated())
 					koopa->SetIsDefeated(true);
 				float koopa_x, koopa_y;
 				koopa->GetPosition(koopa_x, koopa_y);
@@ -955,12 +955,12 @@ void CPlayScene::DefeatEnemiesOutOfRange()
 			}
 			else if (CPiranhaPlant* piranha = dynamic_cast<CPiranhaPlant*>(enemy))
 			{
-				if (!piranha->GetIsDefeated())
+				if (!piranha->IsDefeated())
 					piranha->SetIsDefeated(true);
 			}
 			else if (CWingedGoomba* wingedGoomba = dynamic_cast<CWingedGoomba*>(enemy))
 			{
-				if (!wingedGoomba->GetIsDefeated())
+				if (!wingedGoomba->IsDefeated())
 					wingedGoomba->SetIsDefeated(true);
 			}
 		}
@@ -998,7 +998,7 @@ void CPlayScene::RespawnEnemiesInRange()
 		if (CGoomba* goomba = dynamic_cast<CGoomba*>(enemy))
 		{
 			goomba->GetOriginalPosition(eX0, eY0);
-			if (goomba->GetIsDefeated() && shouldRespawn(eX0))
+			if (goomba->IsDefeated() && shouldRespawn(eX0))
 			{
 				LPCHUNK originalChunk = GetChunk(goomba->GetOriginalChunkId());
 				if (originalChunk)
@@ -1033,7 +1033,7 @@ void CPlayScene::RespawnEnemiesInRange()
 			}
 			if (koopaExistsInOtherChunk) continue;
 
-			if (koopa->GetIsDefeated() && shouldRespawn(eX0))
+			if (koopa->IsDefeated() && shouldRespawn(eX0))
 			{
 				LPCHUNK originalChunk = GetChunk(koopa->GetOriginalChunkId());
 				if (originalChunk)
@@ -1048,7 +1048,7 @@ void CPlayScene::RespawnEnemiesInRange()
 		else if (CPiranhaPlant* piranha = dynamic_cast<CPiranhaPlant*>(enemy))
 		{
 			piranha->GetOriginalPosition(eX0, eY0);
-			if (piranha->GetIsDefeated() && shouldRespawn(eX0))
+			if (piranha->IsDefeated() && shouldRespawn(eX0))
 			{
 				LPCHUNK originalChunk = GetChunk(piranha->GetOriginalChunkId());
 				if (originalChunk)
@@ -1063,7 +1063,7 @@ void CPlayScene::RespawnEnemiesInRange()
 		else if (CWingedGoomba* wingedGoomba = dynamic_cast<CWingedGoomba*>(enemy))
 		{
 			wingedGoomba->GetOriginalPosition(eX0, eY0);
-			if (wingedGoomba->GetIsDefeated() && shouldRespawn(eX0))
+			if (wingedGoomba->IsDefeated() && shouldRespawn(eX0))
 			{
 				LPCHUNK originalChunk = GetChunk(wingedGoomba->GetOriginalChunkId());
 				if (originalChunk)

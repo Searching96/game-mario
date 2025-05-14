@@ -43,5 +43,6 @@ public:
 	void StartBounceDown() { bounceDown = 1; bounceDownStart = GetTickCount64(); }
 	bool GetIsHit() { return isHit; }
 	void SetIsHit(bool isHit) { this->isHit = isHit; }
+	int GetBounceUp() { return bounceUp; }
 };
 

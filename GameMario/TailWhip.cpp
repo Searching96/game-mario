@@ -42,7 +42,8 @@ void CTailWhip::UpdatePosition(float marioX, float marioY, int marioNx)
 	y = marioY + 6; // Adjust Y offset as needed
 
 	// Also update particle position relative to whip/mario
-	if (attackParticle) {
+	if (attackParticle) 
+	{
 		// Example: particle appears where whip impacts
 		float particleX = (marioNx > 0) ? x + TAIL_WHIP_BBOX_WIDTH / 2 + 4 : x - TAIL_WHIP_BBOX_WIDTH / 2 - 4; // Offset from whip edge
 		float particleY = y;
@@ -55,10 +56,8 @@ void CTailWhip::Render()
 	// Don't render if not whipping
 	if (notWhipping == 1) return;
 
-	CAnimations* animations = CAnimations::GetInstance();
-	animations->Get(ID_ANI_TAIL_WHIP)->Render(x, y);
-
-	if (attackParticle != nullptr) {
+	if (attackParticle != nullptr) 
+	{
 		attackParticle->Render();
 	}
 
@@ -67,54 +66,58 @@ void CTailWhip::Render()
 
 void CTailWhip::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
-	if (notWhipping == 0) { // Only update timers if active
-		if (whipSpin >= 2) {
+	if (notWhipping == 0) // Only update timers if active 
+	{ 
+		if (whipSpin >= 2) 
+		{
 			whipSpin = 0;
 			SetState(TAIL_STATE_NOT_WHIPPING);
 		}
-		else if (whippingLeft == 1) {
-			if (GetTickCount64() - whipLeftStart > TAIL_WHIP_LEFT_TIME) {
+		else if (whippingLeft == 1) 
+		{
+			if (GetTickCount64() - whipLeftStart > TAIL_WHIP_LEFT_TIME) 
+			{
 				whippingLeft = 0;
 				SetState(TAIL_STATE_WHIPPING_RIGHT); // Transition state
 			}
 		}
-		else if (whippingRight == 1) {
-			if (GetTickCount64() - whipRightStart > TAIL_WHIP_RIGHT_TIME) {
+		else if (whippingRight == 1) 
+		{
+			if (GetTickCount64() - whipRightStart > TAIL_WHIP_RIGHT_TIME) 
+			{
 				whippingRight = 0;
 				SetState(TAIL_STATE_WHIPPING_LEFT); // Transition state
 			}
 		}
 	}
 
-	if (attackParticle != nullptr) {
+	if (attackParticle != nullptr) 
+	{
 		attackParticle->Update(dt, nullptr);
 	}
 
-
-	if (IsActive()) {
+	if (IsActive()) 
+	{
 		CCollision::GetInstance()->Process(this, dt, coObjects);
 	}
-	else {
-	}
-
 }
 
 void CTailWhip::OnCollisionWith(LPCOLLISIONEVENT e)
 {
 	if (e->obj->IsDeleted()) return;
-	if (dynamic_cast<CGoomba*>(e->obj) && dynamic_cast<CGoomba*>(e->obj)->GetIsDefeated() == 0)
+	if (dynamic_cast<CGoomba*>(e->obj))
 		OnCollisionWithGoomba(e);
-	else if (dynamic_cast<CWingedGoomba*>(e->obj) && dynamic_cast<CWingedGoomba*>(e->obj)->GetIsDefeated() == 0)
+	else if (dynamic_cast<CWingedGoomba*>(e->obj))
 		OnCollisionWithWingedGoomba(e);
-	else if (dynamic_cast<CKoopa*>(e->obj) && dynamic_cast<CKoopa*>(e->obj)->GetIsDefeated() == 0)
+	else if (dynamic_cast<CKoopa*>(e->obj))
 		OnCollisionWithKoopa(e);
-	else if (dynamic_cast<CBuffQBlock*>(e->obj) && dynamic_cast<CBuffQBlock*>(e->obj)->GetIsHit() == false)
+	else if (dynamic_cast<CBuffQBlock*>(e->obj))
 		OnCollisionWithBuffQBlock(e);
-	else if (dynamic_cast<CCoinQBlock*>(e->obj) && dynamic_cast<CCoinQBlock*>(e->obj)->GetIsHit() == false)
+	else if (dynamic_cast<CCoinQBlock*>(e->obj))
 		OnCollisionWithCoinQBlock(e);
 	else if (dynamic_cast<CLifeBrick*>(e->obj))
 		OnCollisionWithLifeBrick(e);
-	else if (dynamic_cast<CPiranhaPlant*>(e->obj) && dynamic_cast<CPiranhaPlant*>(e->obj)->GetIsDefeated() == 0)
+	else if (dynamic_cast<CPiranhaPlant*>(e->obj))
 		OnCollisionWithPiranhaPlant(e);
 }
 
@@ -122,7 +125,7 @@ void CTailWhip::OnCollisionWithBuffQBlock(LPCOLLISIONEVENT e)
 {
 	CBuffQBlock* bqb = dynamic_cast<CBuffQBlock*>(e->obj);
 	CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
-	if (bqb && !bqb->GetIsHit())
+	if (bqb && !bqb->GetIsHit() && bqb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
 	{
 		if (player->GetLevel() == MARIO_LEVEL_SMALL)
 		{
@@ -139,14 +142,18 @@ void CTailWhip::OnCollisionWithBuffQBlock(LPCOLLISIONEVENT e)
 			bqb->SetToSpawn(0);
 		}
 		else
+		{
 			bqb->SetToSpawn(1);
+		}
 		bqb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
 	}
 }
 
-void CTailWhip::OnCollisionWithCoinQBlock(LPCOLLISIONEVENT e) {
+void CTailWhip::OnCollisionWithCoinQBlock(LPCOLLISIONEVENT e) 
+{
 	CCoinQBlock* cqb = dynamic_cast<CCoinQBlock*>(e->obj);
-	if (cqb && !cqb->GetIsHit()) {
+	if (cqb && !cqb->GetIsHit() && cqb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
+	{
 		cqb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
 	}
 }
@@ -164,7 +171,10 @@ void CTailWhip::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
 	CGoomba* g = dynamic_cast<CGoomba*>(e->obj);
 	if (g)
 	{
-		if (g->IsDead() == 1) return;
+		if (g->IsDead() == 1 || g->IsDefeated() == 1) 
+		{
+			return;
+		}
 		CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
 		player->CalculateScore(g);
 		if (attackParticle) attackParticle->SetState(ATTACK_PARTICLE_STATE_EMERGING);
@@ -177,8 +187,12 @@ void CTailWhip::OnCollisionWithPiranhaPlant(LPCOLLISIONEVENT e)
 	CPiranhaPlant* pp = dynamic_cast<CPiranhaPlant*>(e->obj);
 	if (pp)
 	{
-		if (pp->GetState() == PIRANHA_PLANT_STATE_HIDDEN ||
-			pp->GetState() == PIRANHA_PLANT_STATE_DIED) return;
+		if (pp->GetState() == PIRANHA_PLANT_STATE_HIDDEN 
+			|| pp->GetState() == PIRANHA_PLANT_STATE_DIED
+			|| pp->IsDefeated() == 1) 
+		{
+			return;
+		}
 		CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
 		player->CalculateScore(pp);
 		if (attackParticle) attackParticle->SetState(ATTACK_PARTICLE_STATE_EMERGING);
@@ -191,6 +205,9 @@ void CTailWhip::OnCollisionWithKoopa(LPCOLLISIONEVENT e)
 	CKoopa* k = dynamic_cast<CKoopa*>(e->obj);
 	if (k)
 	{
+		if (k->IsDefeated() == 1)
+			return;
+
 		if (k->GetState() == KOOPA_STATE_WALKING_LEFT || k->GetState() == KOOPA_STATE_WALKING_RIGHT)
 		{
 			CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
@@ -199,11 +216,11 @@ void CTailWhip::OnCollisionWithKoopa(LPCOLLISIONEVENT e)
 		if (attackParticle) attackParticle->SetState(ATTACK_PARTICLE_STATE_EMERGING);
 		k->StartShell();
 		k->SetState(KOOPA_STATE_SHELL_STATIC);
-		float knockback_vx = (this->nx > 0) ? 0.1f : -0.1f;
-		float knockback_vy = -0.5f;
+		float knockbackVx = (this->nx > 0) ? 0.1f : -0.1f;
+		float knockbackVy = -0.5f;
 		k->SetIsFlying(true);
 		k->SetIsReversed(true);
-		k->SetSpeed(knockback_vx, knockback_vy);
+		k->SetSpeed(knockbackVx, knockbackVy);
 	}
 }
 
@@ -212,7 +229,10 @@ void CTailWhip::OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e)
 	CWingedGoomba* wg = dynamic_cast<CWingedGoomba*>(e->obj);
 	if (wg)
 	{
-		if (wg->IsDead() == 1) return;
+		if (wg->IsDead() == 1 || wg->IsDefeated() == 1) 
+		{
+			return;
+		}
 		CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
 		player->CalculateScore(wg);
 		if (attackParticle) attackParticle->SetState(ATTACK_PARTICLE_STATE_EMERGING);

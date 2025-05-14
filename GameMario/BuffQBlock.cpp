@@ -16,7 +16,7 @@ CBuffQBlock::CBuffQBlock(int id, float x, float y, int z, int originalChunkId, C
 void CBuffQBlock::Render()
 {
 	int aniId = ID_ANI_QUESTIONBLOCK;
-	if (isHit)
+	if (isHit || state != MUSHROOM_STATE_NOT_HIT)
 	{
 		aniId = ID_ANI_QUESTIONBLOCK_HIT;
 	}
@@ -62,7 +62,6 @@ void CBuffQBlock::GetBoundingBox(float& l, float& t, float& r, float& b)
 
 void CBuffQBlock::SetState(int state)
 {
-	CGameObject::SetState(state);
 	switch (state)
 	{
 	case QUESTIONBLOCK_STATE_NOT_HIT:
@@ -70,7 +69,6 @@ void CBuffQBlock::SetState(int state)
 		break;
 	case QUESTIONBLOCK_STATE_BOUNCE_UP:
 	{
-		isHit = true;
 		LPCHUNK chunk = ((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetChunk(originalChunkId);
 		chunk->SetIsObjectConsumed(this->GetId(), true);
 		y0 = y;
@@ -95,7 +93,9 @@ void CBuffQBlock::SetState(int state)
 			mushroom->SetVisible(1);
 			mushroom->SetState(MUSHROOM_STATE_RISE);
 		}
-		break; // Keep the break for the overall switch case
+		isHit = true;
+		break;
 	}
+	CGameObject::SetState(state);
 }
 

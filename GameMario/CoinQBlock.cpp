@@ -13,7 +13,7 @@ CCoinQBlock::CCoinQBlock(int id, float x, float y, int z, int originalChunkId, C
 void CCoinQBlock::Render()
 {
 	int aniId = ID_ANI_QUESTIONBLOCK;
-	if (isHit)
+	if (isHit || state != QUESTIONBLOCK_STATE_NOT_HIT)
 	{
 		aniId = ID_ANI_QUESTIONBLOCK_HIT;
 	}
@@ -59,7 +59,6 @@ void CCoinQBlock::GetBoundingBox(float& l, float& t, float& r, float& b)
 
 void CCoinQBlock::SetState(int state)
 {
-	CGameObject::SetState(state);
 	switch (state)
 	{
 	case QUESTIONBLOCK_STATE_NOT_HIT:
@@ -67,7 +66,6 @@ void CCoinQBlock::SetState(int state)
 		break;
 	case QUESTIONBLOCK_STATE_BOUNCE_UP:
 	{
-		isHit = true;
 		LPCHUNK chunk = ((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetChunk(originalChunkId);
 		chunk->SetIsObjectConsumed(this->GetId(), true);
 		y0 = y;
@@ -83,7 +81,9 @@ void CCoinQBlock::SetState(int state)
 		break;
 	case QUESTIONBLOCK_STATE_BOUNCE_COMPLETE:
 		vy = 0.0f;
+		isHit = true;
 		break;
 	}
+	CGameObject::SetState(state);
 }
 

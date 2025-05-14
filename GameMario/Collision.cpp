@@ -185,6 +185,21 @@ void CCollision::SweptAABB(float ml, float mt, float mr, float mb,
 		}
 	}
 
+	if (dynamic_cast<CKoopa*>(objSrc) && (dynamic_cast<CBuffQBlock*>(objDest) || dynamic_cast<CCoinQBlock*>(objDest)))
+	{
+		CKoopa* k = dynamic_cast<CKoopa*>(objSrc);
+		bool isAbleToBounce = (k->GetState() == KOOPA_STATE_WALKING_LEFT || k->GetState() == KOOPA_STATE_WALKING_RIGHT || k->GetState() == KOOPA_STATE_SHELL_STATIC);
+		if (isAbleToBounce)
+		{
+			if (ml < sr && mr > sl && mt < sb && mb > st)
+			{
+				t = 0.0f;      // collision at the start of the frame
+				nx = ny = 0.0f;
+				return;
+			}
+		}
+	}
+
 	if (dynamic_cast<CKoopa*>(objSrc) && (dynamic_cast<CGoomba*>(objDest)
 		|| dynamic_cast<CWingedGoomba*>(objDest) || dynamic_cast<CPiranhaPlant*>(objDest)))
 	{
@@ -528,16 +543,16 @@ void CCollision::Process(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* co
 		LPCOLLISIONEVENT e = coEvents[i];
 		if (e->isDeleted) continue;
 		if (CGoomba* g = dynamic_cast<CGoomba*>(e->obj))
-			if (g->GetIsDefeated() == 1)
+			if (g->IsDefeated() == 1)
 				continue;
 		else if (CPiranhaPlant* p = dynamic_cast<CPiranhaPlant*>(e->obj))
-			if (p->GetIsDefeated() == 1)
+			if (p->IsDefeated() == 1)
 				continue;
 		else if (CKoopa* k = dynamic_cast<CKoopa*>(e->obj))
-			if (k->GetIsDefeated() == 1)
+			if (k->IsDefeated() == 1)
 				continue;
 		else if (CWingedGoomba* wg = dynamic_cast<CWingedGoomba*>(e->obj))
-			if (wg->GetIsDefeated() == 1)
+			if (wg->IsDefeated() == 1)
 				continue;
 
 		if ((dynamic_cast<CCoinQBlock*>(e->obj) || dynamic_cast<CBuffQBlock*>(e->obj) || dynamic_cast<CLifeBrick*>(e->obj))
@@ -551,6 +566,15 @@ void CCollision::Process(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* co
 		{
 			objSrc->OnCollisionWith(e); // Koopa can hit WingedGoomba and Goomba
 			continue;
+		}
+		if ((dynamic_cast<CCoinQBlock*>(e->obj) || dynamic_cast<CBuffQBlock*>(e->obj) || dynamic_cast<CLifeBrick*>(e->obj))
+			&& dynamic_cast<CKoopa*>(objSrc))
+		{
+			if (e->obj->GetState() != QUESTIONBLOCK_STATE_NOT_HIT && objSrc->GetState() != KOOPA_STATE_SHELL_DYNAMIC)
+			{
+				objSrc->OnCollisionWith(e); // Koopa can hit consumable block
+				continue;
+			}
 		}
 		if (e->obj->IsBlocking()) continue;  // blocking collisions were handled already, skip them
 

@@ -19,8 +19,7 @@
 #define QUESTIONBLOCK_BOUNCE_OFFSET 16
 #define QUESTIONBLOCK_BOUNCE_SPEED -0.1f
 
-class CLifeBrick :
-    public CQuestionBlock
+class CLifeBrick : public CGameObject
 {
 protected:
 	CLifeMushroom* mushroom;

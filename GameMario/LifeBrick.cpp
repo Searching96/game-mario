@@ -5,7 +5,7 @@
 #include "Chunk.h"
 #include "PlayScene.h"
 
-CLifeBrick::CLifeBrick(int id, float x, float y, int z, int orignalChunkId, CLifeMushroom* mushroom) : CQuestionBlock(id, x, y, z)
+CLifeBrick::CLifeBrick(int id, float x, float y, int z, int orignalChunkId, CLifeMushroom* mushroom) : CGameObject(id, x, y, z)
 {
 	this->originalChunkId = orignalChunkId;
 	this->mushroom = mushroom;

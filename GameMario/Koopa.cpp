@@ -65,6 +65,30 @@ void CKoopa::OnCollisionWith(LPCOLLISIONEVENT e) {
 }
 
 void CKoopa::OnCollisionWithQuestionBlock(LPCOLLISIONEVENT e) {
+	bool isAbleToBounce = (state == KOOPA_STATE_WALKING_LEFT || state == KOOPA_STATE_WALKING_RIGHT || state == KOOPA_STATE_SHELL_STATIC);
+	if (isAbleToBounce)
+	{
+		bool isHit = dynamic_cast<CCoinQBlock*>(e->obj) 
+			? dynamic_cast<CCoinQBlock*>(e->obj)->GetIsHit() 
+			: dynamic_cast<CBuffQBlock*>(e->obj)->GetIsHit();
+		// get isbouncing the same way as get ishit
+		bool isBouncing = dynamic_cast<CCoinQBlock*>(e->obj) 
+			? (dynamic_cast<CCoinQBlock*>(e->obj)->GetState() != QUESTIONBLOCK_STATE_NOT_HIT) 
+			: (dynamic_cast<CBuffQBlock*>(e->obj)->GetState() != QUESTIONBLOCK_STATE_NOT_HIT);
+		if (isBouncing && !isHit)
+		{
+			int preState = state;
+			this->StartShell();
+			this->SetState(KOOPA_STATE_SHELL_STATIC);
+			float knockbackVx = (preState == KOOPA_STATE_WALKING_RIGHT) ? 0.1f : -0.1f; // Bounce left for walking left and shell static
+			float knockbackVy = -0.5f;
+			this->SetIsFlying(true);
+			this->SetIsReversed(true);
+			this->SetSpeed(knockbackVx, knockbackVy);
+		}
+		return;
+	}
+	
 	if (state == KOOPA_STATE_SHELL_DYNAMIC) {
 		if (CCoinQBlock* cqb = dynamic_cast<CCoinQBlock*>(e->obj)) {
 			if (e->nx != 0 && cqb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
@@ -361,21 +385,21 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			LPCOLLISIONEVENT e = coEvents[i];
 			if (CGoomba* g = dynamic_cast<CGoomba*>(e->obj))
 			{
-				if (g->GetIsDefeated() == 1 || g->IsDead() == 1) continue;
+				if (g->IsDefeated() == 1 || g->IsDead() == 1) continue;
 				this->SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY);
 				e->obj->SetState(WINGED_GOOMBA_STATE_DIE_ON_HELD_KOOPA);
 				isKilledOnCollideWithEnemy = 1;
 			}
 			else if (CWingedGoomba* wg = dynamic_cast<CWingedGoomba*>(e->obj))
 			{
-				if (wg->GetIsDefeated() == 1 || wg->IsDead() == 1) continue;
+				if (wg->IsDefeated() == 1 || wg->IsDead() == 1) continue;
 				this->SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY);
 				e->obj->SetState(GOOMBA_STATE_DIE_ON_HELD_KOOPA);
 				isKilledOnCollideWithEnemy = 1;
 			}
 			else if (CPiranhaPlant* pp = dynamic_cast<CPiranhaPlant*>(e->obj))
 			{
-				if (pp->GetIsDefeated() == 1 || pp->GetState() == PIRANHA_PLANT_STATE_DIED) continue;
+				if (pp->IsDefeated() == 1 || pp->GetState() == PIRANHA_PLANT_STATE_DIED) continue;
 				this->SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY);
 				e->obj->SetState(PIRANHA_PLANT_STATE_DIED);
 				isKilledOnCollideWithEnemy = 1;
