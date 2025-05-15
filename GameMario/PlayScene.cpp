@@ -938,16 +938,16 @@ void CPlayScene::DefeatEnemiesOutOfRange()
 					koopa->SetIsDefeated(true);
 				float koopa_x, koopa_y;
 				koopa->GetPosition(koopa_x, koopa_y);
-				vector<LPCHUNK> chunks = GetLoadedChunks();
-				for (LPCHUNK chunk : chunks)
-				{
-					if (chunk->GetID() != koopa->GetOriginalChunkId() && chunk->GetStartX() <= koopa_x && chunk->GetEndX() >= koopa_x)
-					{
-						chunk->RemoveObject(koopa);
-						koopa->Delete();
-						break;
-					}
-				}
+				//vector<LPCHUNK> chunks = GetLoadedChunks();
+				//for (LPCHUNK chunk : chunks)
+				//{
+				//	if (chunk->GetID() != koopa->GetOriginalChunkId() && chunk->GetStartX() <= koopa_x && chunk->GetEndX() >= koopa_x)
+				//	{
+				//		chunk->RemoveObject(koopa);
+				//		koopa->Delete();
+				//		break;
+				//	}
+				//}
 			}
 			else if (CPiranhaPlant* piranha = dynamic_cast<CPiranhaPlant*>(enemy))
 			{
@@ -1007,38 +1007,34 @@ void CPlayScene::RespawnEnemiesInRange()
 				}
 			}
 		}
-		else if (CKoopa* koopa = dynamic_cast<CKoopa*>(enemy))
-		{
+		else if (CKoopa* koopa = dynamic_cast<CKoopa*>(enemy)) {
 			koopa->GetOriginalPosition(eX0, eY0);
 
-			// --- Prevent respawn if a Koopa with the same ID exists in any loaded chunk (except original chunk) ---
-			bool koopaExistsInOtherChunk = false;
-			for (LPCHUNK chunk : loadedChunks)
-			{
-				if (chunk->GetID() == koopa->GetOriginalChunkId()) continue;
+			// Only proceed if position should respawn
+			if (!shouldRespawn(eX0)) continue;
+
+			// Check if any active Koopa with ID 6969 exists in any loaded chunk
+			bool specialKoopaExists = false;
+			for (LPCHUNK chunk : loadedChunks) {
 				const vector<LPGAMEOBJECT>& chunkEnemies = chunk->GetEnemies();
-				for (LPGAMEOBJECT obj : chunkEnemies)
-				{
-					if (CKoopa* otherKoopa = dynamic_cast<CKoopa*>(obj))
-					{
-						if (otherKoopa->IsDefeated())
-							continue;
-						else if (otherKoopa && otherKoopa->GetId() == koopa->GetId() && otherKoopa->IsDefeated() == 0)
-						{
-							koopaExistsInOtherChunk = true;
+				for (LPGAMEOBJECT obj : chunkEnemies) {
+					if (CKoopa* otherKoopa = dynamic_cast<CKoopa*>(obj)) {
+						if (otherKoopa->GetId() == koopa->GetId() && !otherKoopa->IsDefeated()) {
+							specialKoopaExists = true;
 							break;
 						}
 					}
 				}
-				if (koopaExistsInOtherChunk) return;
+				if (specialKoopaExists) break;
 			}
-			if (koopaExistsInOtherChunk) continue;
 
-			if ((koopa->IsDefeated()) && shouldRespawn(eX0))
-			{
+			// Don't respawn if the special Koopa with ID 6969 exists and is active
+			if (specialKoopaExists) continue;
+
+			// If koopa is defeated, respawn it in its original chunk
+			if (koopa->IsDefeated()) {
 				LPCHUNK originalChunk = GetChunk(koopa->GetOriginalChunkId());
-				if (originalChunk)
-				{
+				if (originalChunk) {
 					originalChunk->RemoveObject(koopa);
 					CKoopa* newKoopa = new CKoopa(koopa->GetId(), eX0, eY0, koopa->GetZIndex(), koopa->GetOriginalChunkId());
 					originalChunk->AddObject(newKoopa);
