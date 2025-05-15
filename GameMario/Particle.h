@@ -1,15 +1,20 @@
 #pragma once
 #include "GameObject.h"
 
-#define ID_SPRITE_POINT_100 1120100
-#define ID_SPRITE_POINT_200 1120101
-#define ID_SPRITE_POINT_400 1120102
-#define ID_SPRITE_POINT_800 1120103
-#define ID_SPRITE_POINT_1000 1120110
-#define ID_SPRITE_POINT_2000 1120111
-#define ID_SPRITE_POINT_4000 1120112
-#define ID_SPRITE_POINT_8000 1120113
-#define ID_SPRITE_1_UP 1120120
+#define ID_ANI_POINT_100 1130000
+#define ID_ANI_POINT_200 1130001
+#define ID_ANI_POINT_400 1130002
+#define ID_ANI_POINT_800 1130003
+#define ID_ANI_POINT_1000 1130010
+#define ID_ANI_POINT_2000 1130011
+#define ID_ANI_POINT_4000 1130012
+#define ID_ANI_POINT_8000 1130013
+
+#define ID_ANI_1_UP 1130020
+
+#define ID_ANI_TANOOKI_TRANSITION 1130100
+#define ID_ANI_DEATH_SMOKE 1130200
+#define ID_ANI_HIT_PARTICLE 1130300
 
 #define PARTICLE_BBOX_WIDTH			0
 #define PARTICLE_BBOX_HEIGHT			0
@@ -19,18 +24,22 @@
 #define PARTICLE_STATE_EMERGING_COMPLETE	100
 
 #define PARTICLE_EMERGE_TIME			600
+#define DEATH_SMOKE_EMERGE_TIME			400
+#define TANOOKI_TRANSITION_EMERGE_TIME		300
+#define HIT_PARTICLE_EMERGE_TIME		100
 
 #define DEPENDENT_ID				9999 // taken from PlayScene.cpp
 
 class CParticle :
-    public CGameObject
+	public CGameObject
 {
 protected:
 	int isEmerging = 0;
+	int type; // 0 : point, 1: 1-up, 2: tanooki transition, 3: hit particle, 4: death smoke
 	int point;
 	ULONGLONG emergingStart = -1;
 public:
-	CParticle(int id, float x, float y, int z, int point);
+	CParticle(int id, float x, float y, int z, int type, int point = 0);
 	virtual ~CParticle() {}
 	void Render();
 	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects = nullptr);
@@ -39,6 +48,6 @@ public:
 	int IsBlocking() { return 0; }
 	void SetState(int state);
 	void StartEmerging() { isEmerging = 1; emergingStart = GetTickCount64(); }
-	static void GenerateParticleInChunk(LPGAMEOBJECT obj, int point);
+	static void GenerateParticleInChunk(LPGAMEOBJECT obj, int type, int point = 0);
 };
 

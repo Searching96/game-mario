@@ -15,14 +15,10 @@ void CPiranhaPlant::Render()
 	if (isDefeated == 1)
 		return;
 
-	if (state == PIRANHA_PLANT_STATE_HIDDEN) return;
+	if (state == PIRANHA_PLANT_STATE_HIDDEN || state == PIRANHA_PLANT_STATE_DIED) return;
 	int aniId = ID_ANI_PIRANHA_PLANT_LEFT_MOVE;
 	int direction = GetAiming();
-	if (state == PIRANHA_PLANT_STATE_DIED)
-	{
-		aniId = ID_ANI_PIRANHA_PLANT_DIED;
-	}
-	else if (moveUp || moveDown)
+	if (moveUp || moveDown)
 	{
 		switch (direction)
 		{
@@ -271,6 +267,7 @@ void CPiranhaPlant::SetState(int state)
 		break;
 	case PIRANHA_PLANT_STATE_DIED:
 		StartDeath();
+		CParticle::GenerateParticleInChunk(this, 4);
 		break;
 	}
 }

@@ -3,7 +3,7 @@
 #include "GameObject.h"
 #include "Animation.h"
 #include "Animations.h"
-#include "AttackParticle.h"
+#include "Particle.h"
 
 #define ID_ANI_TAIL_WHIP			20000
 
@@ -20,7 +20,6 @@
 class CTailWhip : public CGameObject
 {
 protected:
-	CAttackParticle* attackParticle;
 	int whippingLeft = 0;
 	int whippingRight = 0;
 	int notWhipping = 1;
@@ -50,7 +49,6 @@ public:
 	//void StartWhippingRight() { whippingRight = 1; whipRightStart = GetTickCount64(); }
 	void OnNoCollision(DWORD dt) {};
 	void OnCollisionWith(LPCOLLISIONEVENT e);
-	CAttackParticle* GetAttackParticle() const { return attackParticle; }
 	bool IsActive() const { return notWhipping == 0; }
 	void UpdatePosition(float marioX, float marioY, int marioNx);
 };

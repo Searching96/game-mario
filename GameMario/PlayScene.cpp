@@ -32,7 +32,6 @@
 #include "Cloud.h"
 #include "Trinket.h"
 #include "SkyPlatform.h"
-#include "AttackParticle.h"
 #include "FallPitch.h"
 
 #include "SampleKeyEventHandler.h"
@@ -891,8 +890,8 @@ void CPlayScene::Unload()
 	// If they are scene-specific asset managers, clearing here is correct.
 	// Based on name "GetInstance", they seem global. Let's assume assets are managed elsewhere
 	// and this scene doesn't own their lifetime beyond loading them.
-	// CAnimations::GetInstance()->Clear(); // POTENTIALLY DANGEROUS if global
-	// CSprites::GetInstance()->Clear();    // POTENTIALLY DANGEROUS if global
+	 CAnimations::GetInstance()->Clear(); // POTENTIALLY DANGEROUS if global
+	 CSprites::GetInstance()->Clear();    // POTENTIALLY DANGEROUS if global
 
 	// Reset player pointer
 	player = nullptr;

@@ -30,7 +30,7 @@ assets\koopa.txt
 assets\questionblock.txt
 assets\mushroom.txt
 assets\superleaf.txt
-assets\attackparticle.txt
+assets\particle.txt
 assets\wingedgoomba.txt
 assets\wing.txt
 

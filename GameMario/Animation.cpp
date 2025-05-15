@@ -17,25 +17,55 @@ void CAnimation::Add(int spriteId, DWORD time)
 
 void CAnimation::Render(float x, float y)
 {
-	ULONGLONG now = GetTickCount64();
-	if (currentFrame == -1)
-	{
-		currentFrame = 0;
-		lastFrameTime = now;
-	}
-	else
-	{
-		DWORD t = frames[currentFrame]->GetTime();
-		bool isPaused = CGame::GetInstance()->IsPaused();
-		if (now - lastFrameTime > t && !isPaused)
-		{
-			currentFrame++;
-			lastFrameTime = now;
-			if (currentFrame == frames.size()) currentFrame = 0;
-		}
+    // Use high-precision timer
+    LARGE_INTEGER currentTime;
+    QueryPerformanceCounter(&currentTime);
 
-	}
+    // Initialize on first render
+    if (currentFrame == -1)
+    {
+        currentFrame = 0;
+        lastFrameTime = currentTime;
+    }
+    else
+    {
+        // Get game state
+        bool isPaused = CGame::GetInstance()->IsPaused();
+        float gameSpeed = CGame::GetInstance()->GetGameSpeed();
 
-	frames[currentFrame]->GetSprite()->Draw(x, y);
+        if (!isPaused && gameSpeed > 0.0f)
+        {
+            // Calculate elapsed time
+            static LARGE_INTEGER frequency;
+            static bool frequencyInitialized = false;
+            if (!frequencyInitialized)
+            {
+                QueryPerformanceFrequency(&frequency);
+                frequencyInitialized = true;
+            }
+
+            double elapsedSeconds = (currentTime.QuadPart - lastFrameTime.QuadPart) / (double)frequency.QuadPart;
+            double frameDurationSeconds = frames[currentFrame]->GetTime() / 1000.0 / gameSpeed; // Convert ms to seconds
+
+            while (elapsedSeconds >= frameDurationSeconds && gameSpeed > 0.0f)
+            {
+                currentFrame++;
+                elapsedSeconds -= frameDurationSeconds;
+                lastFrameTime.QuadPart += (LONGLONG)(frameDurationSeconds * frequency.QuadPart);
+
+                if (currentFrame >= frames.size())
+                    currentFrame = 0;
+
+                // Update frame duration for next frame
+                frameDurationSeconds = frames[currentFrame]->GetTime() / 1000.0 / gameSpeed;
+            }
+        }
+    }
+
+    // Safety check for valid frame
+    if (!frames.empty() && currentFrame >= 0 && currentFrame < frames.size())
+    {
+        frames[currentFrame]->GetSprite()->Draw(x, y);
+    }
 }
 

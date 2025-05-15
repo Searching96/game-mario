@@ -94,7 +94,7 @@ void CCoin::SetState(int state)
 		break;
 	case COIN_STATE_BOUNCE_COMPLETE:
 		CGame::GetInstance()->GetGameState()->AddScore(100);
-		CParticle::GenerateParticleInChunk(this, 100);
+		CParticle::GenerateParticleInChunk(this, 0, 100);
 		CGame::GetInstance()->GetGameState()->AddCoin();
 		this->Delete();
 		break;
