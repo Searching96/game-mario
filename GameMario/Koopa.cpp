@@ -57,6 +57,7 @@ void CKoopa::OnCollisionWith(LPCOLLISIONEVENT e)
 		{
 			this->SetState((vx > 0) ? KOOPA_STATE_WALKING_LEFT : KOOPA_STATE_WALKING_RIGHT);
 		}
+		return;
 	}
 
 	if (dynamic_cast<CCoinQBlock*>(e->obj) || dynamic_cast<CBuffQBlock*>(e->obj))
@@ -332,10 +333,10 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		vx = 0;
 		vy = 0;
 
-		vector<CChunk*> chunk_list = dynamic_cast<CPlayScene*>(CGame::GetInstance()->GetCurrentScene())->GetChunks();
+		vector<CChunk*> chunkList = dynamic_cast<CPlayScene*>(CGame::GetInstance()->GetCurrentScene())->GetChunks();
 
 
-		for (auto chunk : chunk_list)
+		for (auto chunk : chunkList)
 		{
 			if (!chunk->IsLoaded()) continue;
 			for (auto obj : chunk->GetObjects())
