@@ -31,8 +31,6 @@
 
 #define MARIO_JUMP_DEFLECT_SPEED		0.3f
 
-#define MARIO_HALF_RUN_ACCEL_SPEED		(MARIO_MAX_RUNNING_SPEED + MARIO_RUNNING_SPEED) / 2
-
 #define MARIO_STATE_DIE					-20
 #define MARIO_STATE_DIE_ON_FALLING		-10
 #define MARIO_STATE_IDLE				0
@@ -72,8 +70,8 @@
 #define ID_ANI_MARIO_WALKING_RIGHT 100
 #define ID_ANI_MARIO_WALKING_LEFT 110
 
-#define ID_ANI_MARIO_RUNNING_RIGHT 200
-#define ID_ANI_MARIO_RUNNING_LEFT 210
+#define ID_ANI_MARIO_MAX_RUNNING_RIGHT 200
+#define ID_ANI_MARIO_MAX_RUNNING_LEFT 210
 
 #define ID_ANI_MARIO_JUMP_WALK_RIGHT 300
 #define ID_ANI_MARIO_JUMP_WALK_LEFT 310
@@ -87,8 +85,8 @@
 #define ID_ANI_MARIO_BRACE_RIGHT 600
 #define ID_ANI_MARIO_BRACE_LEFT 610
 
-#define ID_ANI_MARIO_HALF_RUN_ACCEL_RIGHT 700
-#define ID_ANI_MARIO_HALF_RUN_ACCEL_LEFT 710
+#define ID_ANI_MARIO_RUNNING_RIGHT 700
+#define ID_ANI_MARIO_RUNNING_LEFT 710
 
 #define ID_ANI_MARIO_POWER_DOWN_RIGHT 900
 #define ID_ANI_MARIO_POWER_DOWN_LEFT 910
@@ -120,8 +118,8 @@
 #define ID_ANI_MARIO_SMALL_WALKING_RIGHT 2100
 #define ID_ANI_MARIO_SMALL_WALKING_LEFT 2110
 
-#define ID_ANI_MARIO_SMALL_RUNNING_RIGHT 2200
-#define ID_ANI_MARIO_SMALL_RUNNING_LEFT 2210
+#define ID_ANI_MARIO_SMALL_MAX_RUNNING_RIGHT 2200
+#define ID_ANI_MARIO_SMALL_MAX_RUNNING_LEFT 2210
 
 #define ID_ANI_MARIO_SMALL_BRACE_RIGHT 2300
 #define ID_ANI_MARIO_SMALL_BRACE_LEFT 2310
@@ -135,8 +133,8 @@
 #define ID_ANI_MARIO_SMALL_POWER_UP_RIGHT 2600
 #define ID_ANI_MARIO_SMALL_POWER_UP_LEFT 2610
 
-#define ID_ANI_MARIO_SMALL_HALF_RUN_ACCEL_RIGHT 2700
-#define ID_ANI_MARIO_SMALL_HALF_RUN_ACCEL_LEFT 2710
+#define ID_ANI_MARIO_SMALL_RUNNING_RIGHT 2700
+#define ID_ANI_MARIO_SMALL_RUNNING_LEFT 2710
 
 #define ID_ANI_MARIO_SMALL_KICK_RIGHT 2800
 #define ID_ANI_MARIO_SMALL_KICK_LEFT 2810
@@ -160,8 +158,8 @@
 #define ID_ANI_MARIO_TAIL_WALKING_RIGHT 6100
 #define ID_ANI_MARIO_TAIL_WALKING_LEFT 6110
 
-#define ID_ANI_MARIO_TAIL_RUNNING_RIGHT 6200
-#define ID_ANI_MARIO_TAIL_RUNNING_LEFT 6210
+#define ID_ANI_MARIO_TAIL_MAX_RUNNING_RIGHT 6200
+#define ID_ANI_MARIO_TAIL_MAX_RUNNING_LEFT 6210
 
 #define ID_ANI_MARIO_TAIL_JUMP_WALK_RIGHT 6300
 #define ID_ANI_MARIO_TAIL_JUMP_WALK_LEFT 6310
@@ -178,8 +176,8 @@
 #define ID_ANI_MARIO_TAIL_MULTIJUMP_RIGHT 6700
 #define ID_ANI_MARIO_TAIL_MULTIJUMP_LEFT 6710
 
-#define ID_ANI_MARIO_TAIL_HALF_RUN_ACCEL_RIGHT 6800
-#define ID_ANI_MARIO_TAIL_HALF_RUN_ACCEL_LEFT 6810
+#define ID_ANI_MARIO_TAIL_RUNNING_RIGHT 6800
+#define ID_ANI_MARIO_TAIL_RUNNING_LEFT 6810
 
 #define ID_ANI_MARIO_TAIL_HOVERING_RIGHT 6900
 #define ID_ANI_MARIO_TAIL_HOVERING_LEFT 6910
@@ -290,7 +288,7 @@ class CMario : public CGameObject
 	int isMoving = 0;
 	int isRunning = 0;
 	int isJumpButtonHeld = 0;
-	int isChangingLevel = 0;
+	bool isChangingLevel = false;
 
 	void OnCollisionWithGoomba(LPCOLLISIONEVENT e);
 	void OnCollisionWithCoin(LPCOLLISIONEVENT e);
@@ -335,10 +333,10 @@ public:
 	void GetBoundingBox(float& left, float& top, float& right, float& bottom);
 
 	void StartUntouchable() { untouchable = 1; untouchableStart = GetTickCount64(); }
-	void StartPowerUp() { powerUp = 1; powerUpStart = GetTickCount64(); isChangingLevel = 1; }
-	void StartTailUp() { tailUp = 1; tailUpStart = GetTickCount64(); isChangingLevel = 1; }
-	void StartPowerDown() { powerDown = 1; powerDownStart = GetTickCount64(); isChangingLevel = 1; }
-	void StartTailDown() { tailDown = 1; tailDownStart = GetTickCount64(); isChangingLevel = 1; }
+	void StartPowerUp() { powerUp = 1; powerUpStart = GetTickCount64(); isChangingLevel = true; }
+	void StartTailUp() { tailUp = 1; tailUpStart = GetTickCount64(); isChangingLevel = true; }
+	void StartPowerDown() { powerDown = 1; powerDownStart = GetTickCount64(); isChangingLevel = true; }
+	void StartTailDown() { tailDown = 1; tailDownStart = GetTickCount64(); isChangingLevel = true; }
 	void StartKick() { isKicking = 1; kickStart = GetTickCount64(); }
 	void StartBraking();
 	void StartHovering() { isHovering = 1; hoveringStart = GetTickCount64(); }

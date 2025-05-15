@@ -654,10 +654,14 @@ void CKoopa::SetState(int state)
 		//ax = 0;
 		break;
 	case KOOPA_STATE_WALKING_LEFT:
+		if (this->state == KOOPA_STATE_SHELL_STATIC && vy != 0)
+			return;
 		isKicked = false;
 		vx = -KOOPA_WALKING_SPEED;
 		break;
 	case KOOPA_STATE_WALKING_RIGHT:
+		if (this->state == KOOPA_STATE_SHELL_STATIC && vy != 0)
+			return;
 		isKicked = false;
 		vx = KOOPA_WALKING_SPEED;
 		break;

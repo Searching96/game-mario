@@ -985,11 +985,12 @@ void CPlayScene::RespawnEnemiesInRange()
 
 		float eX0, eY0;
 
-		auto shouldRespawn = [&](float posX) {
+		auto shouldRespawn = [&](float posX) 
+			{
 			bool left = posX > camStartX - RESPAWN_RANGE_MAX && posX <= camStartX - RESPAWN_RANGE_MIN;
 			bool right = posX >= camEndX + RESPAWN_RANGE_MIN && posX < camEndX + RESPAWN_RANGE_MAX;
 			return left || right;
-			};
+		};
 
 		if (CGoomba* goomba = dynamic_cast<CGoomba*>(enemy))
 		{
@@ -1018,18 +1019,22 @@ void CPlayScene::RespawnEnemiesInRange()
 				const vector<LPGAMEOBJECT>& chunkEnemies = chunk->GetEnemies();
 				for (LPGAMEOBJECT obj : chunkEnemies)
 				{
-					CKoopa* otherKoopa = dynamic_cast<CKoopa*>(obj);
-					if (otherKoopa && otherKoopa->GetId() == koopa->GetId())
+					if (CKoopa* otherKoopa = dynamic_cast<CKoopa*>(obj))
 					{
-						koopaExistsInOtherChunk = true;
-						break;
+						if (otherKoopa->IsDefeated())
+							continue;
+						else if (otherKoopa && otherKoopa->GetId() == koopa->GetId() && otherKoopa->IsDefeated() == 0)
+						{
+							koopaExistsInOtherChunk = true;
+							break;
+						}
 					}
 				}
-				if (koopaExistsInOtherChunk) break;
+				if (koopaExistsInOtherChunk) return;
 			}
 			if (koopaExistsInOtherChunk) continue;
 
-			if (koopa->IsDefeated() && shouldRespawn(eX0))
+			if ((koopa->IsDefeated()) && shouldRespawn(eX0))
 			{
 				LPCHUNK originalChunk = GetChunk(koopa->GetOriginalChunkId());
 				if (originalChunk)
