@@ -1002,6 +1002,10 @@ int CMario::GetAniIdTail()
 		else aniId = ID_ANI_MARIO_TAIL_KICK_LEFT;
 	}
 
+	if (jumpCount > 0)
+		if (nx > 0) aniId = ID_ANI_MARIO_TAIL_MULTIJUMP_RIGHT;
+		else aniId = ID_ANI_MARIO_TAIL_MULTIJUMP_LEFT;
+
 	if (isHoldingKoopa)
 	{
 		if (vx == 0)
@@ -1032,10 +1036,6 @@ int CMario::GetAniIdTail()
 	if (preAniId != ID_ANI_MARIO_TAIL_JUMP_RUN_RIGHT && preAniId != ID_ANI_MARIO_TAIL_JUMP_RUN_LEFT)
 		if (isOnPlatform == 0 && isHovering == 0 && isHoldingKoopa == 0 && isChangingLevel == 0 && jumpCount < 1 && vy > 0)
 			aniId = (nx > 0) ? ID_ANI_MARIO_TAIL_FALLING_RIGHT : ID_ANI_MARIO_TAIL_FALLING_LEFT;
-
-	if (jumpCount > 0)
-		if (nx > 0) aniId = ID_ANI_MARIO_TAIL_MULTIJUMP_RIGHT;
-		else aniId = ID_ANI_MARIO_TAIL_MULTIJUMP_LEFT;
 
 	if (aniId == -1) aniId = ID_ANI_MARIO_TAIL_IDLE_RIGHT;
 
