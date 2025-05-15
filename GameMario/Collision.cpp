@@ -9,6 +9,7 @@
 #include "Koopa.h"
 #include "PiranhaPlant.h"
 #include "LifeBrick.h"
+#include "CoinBrick.h"
 
 #include "debug.h"
 
@@ -513,6 +514,7 @@ void CCollision::Process(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* co
 			}
 		}
 		else
+		{
 			if (colX != nullptr)
 			{
 				x += colX->t * dx + colX->nx * BLOCK_PUSH_FACTOR;
@@ -520,6 +522,7 @@ void CCollision::Process(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* co
 				objSrc->OnCollisionWith(colX);
 			}
 			else
+			{
 				if (colY != nullptr)
 				{
 					x += dx;
@@ -532,6 +535,8 @@ void CCollision::Process(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* co
 					x += dx;
 					y += dy;
 				}
+			}
+		}
 		objSrc->SetPosition(x, y);
 	}
 
@@ -558,13 +563,18 @@ void CCollision::Process(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* co
 		if ((dynamic_cast<CCoinQBlock*>(e->obj) || dynamic_cast<CBuffQBlock*>(e->obj) || dynamic_cast<CLifeBrick*>(e->obj))
 			&& dynamic_cast<CTailWhip*>(objSrc))
 		{
-			objSrc->OnCollisionWith(e); // tail whip can hit consumable block
+			objSrc->OnCollisionWith(e);
+			continue;
+		}
+		if (dynamic_cast<CCoinBrick*>(e->obj) && dynamic_cast<CTailWhip*>(objSrc))
+		{
+			objSrc->OnCollisionWith(e);
 			continue;
 		}
 		if ((dynamic_cast<CWingedGoomba*>(e->obj) || dynamic_cast<CGoomba*>(e->obj))
 			&& dynamic_cast<CKoopa*>(objSrc))
 		{
-			objSrc->OnCollisionWith(e); // Koopa can hit WingedGoomba and Goomba
+			objSrc->OnCollisionWith(e);
 			continue;
 		}
 		if ((dynamic_cast<CCoinQBlock*>(e->obj) || dynamic_cast<CBuffQBlock*>(e->obj) || dynamic_cast<CLifeBrick*>(e->obj))
@@ -572,7 +582,15 @@ void CCollision::Process(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* co
 		{
 			if (e->obj->GetState() != QUESTIONBLOCK_STATE_NOT_HIT && objSrc->GetState() != KOOPA_STATE_SHELL_DYNAMIC)
 			{
-				objSrc->OnCollisionWith(e); // Koopa can hit consumable block
+				objSrc->OnCollisionWith(e);
+				continue;
+			}
+		}
+		if (dynamic_cast<CCoinBrick*>(e->obj) && dynamic_cast<CKoopa*>(objSrc))
+		{
+			if (objSrc->GetState() != KOOPA_STATE_SHELL_DYNAMIC)
+			{
+				objSrc->OnCollisionWith(e);
 				continue;
 			}
 		}

@@ -1,18 +1,6 @@
 #pragma once
 #include "GameObject.h"
 
-#include "Platform.h"
-#include "Box.h"
-#include "BuffQBlock.h"
-#include "CoinQBlock.h"
-#include "Mario.h"
-#include "WingedGoomba.h"
-#include "PlayScene.h"
-#include "PiranhaPlant.h"
-
-#include "debug.h"
-
-
 #define KOOPA_GRAVITY 0.002f
 #define KOOPA_WALKING_SPEED 0.02f
 #define KOOPA_SHELL_SPEED 0.25f
@@ -83,6 +71,7 @@ protected:
 	void OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e);
 	void OnCollisionWithPiranhaPlant(LPCOLLISIONEVENT e);
 	void OnCollisionWithLifeBrick(LPCOLLISIONEVENT e);
+	void OnCollisionWithCoinBrick(LPCOLLISIONEVENT e);
 
 public:
 	CKoopa(int id, float x, float y, int z, int originalChunkId);

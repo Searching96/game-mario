@@ -33,6 +33,7 @@
 #include "Trinket.h"
 #include "SkyPlatform.h"
 #include "FallPitch.h"
+#include "CoinBrick.h"
 
 #include "SampleKeyEventHandler.h"
 
@@ -287,7 +288,7 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 			break;
 		}
 		case OBJECT_TYPE_PLATFORM:
-		case OBJECT_TYPE_SKYPLATFORM:
+		case OBJECT_TYPE_SKY_PLATFORM:
 		{
 			zIndex = ZINDEX_PLATFORMS;
 			if (tokens.size() < 6) throw runtime_error("Insufficient params for PLATFORM/SKYPLATFORM");
@@ -340,6 +341,12 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 			if (targetChunk->GetIsObjectConsumed(obj->GetId()))
 				((CLifeBrick*)obj)->SetIsHit(true);
 			return;
+		}
+		case OBJECT_TYPE_COIN_BRICK:
+		{
+			zIndex = ZINDEX_BLOCKS;
+			obj = new CCoinBrick(id, x, y, zIndex, targetChunk->GetID());
+			break;
 		}
 		case OBJECT_TYPE_BOX:
 		{
@@ -661,44 +668,6 @@ void CPlayScene::UpdateChunks(float cam_x, float cam_width)
 	LoadChunksInRange(cam_x, cam_width);
 	UnloadChunksOutOfRange(cam_x, cam_width);
 }
-
-//void CPlayScene::UpdateObjects(DWORD dt, CMario* mario, vector<LPGAMEOBJECT>& coObjects)
-//{
-//	// 1. Collect potential colliders (excluding player)
-//	coObjects.clear(); // Clear from previous frame
-//	for (LPCHUNK chunk : chunks) {
-//		if (!chunk->IsLoaded()) continue; // Optimization: Skip unloaded chunks
-//		vector<LPGAMEOBJECT>& chunkObjects = chunk->GetObjects();
-//		for (LPGAMEOBJECT obj : chunkObjects) {
-//			if (obj != mario) // Simple exclusion
-//				coObjects.push_back(obj);
-//		}
-//	}
-//
-//	// 2. Update all loaded objects (including player within its chunk iteration)
-//	// Check for time freeze effect
-//	bool isChronoStopped = mario->GetIsPowerUp() || mario->GetIsTailUp() ||
-//		mario->GetIsPowerDown() || mario->GetIsTailDown();
-//
-//	for (LPCHUNK chunk : chunks) {
-//		if (!chunk->IsLoaded()) continue; // Optimization: Skip unloaded chunks
-//		// Important: Iterate over a *copy* if obj->Update might modify the chunk's object list (e.g., spawning items)
-//		// However, since we purge deleted objects later, iterating the original might be okay if adds happen at end.
-//		// Safest is often a copy, but less performant. Sticking with original for now based on existing code.
-//		vector<LPGAMEOBJECT>& chunkObjects = chunk->GetObjects(); // Get reference
-//		for (size_t i = 0; i < chunkObjects.size(); ++i) { // Use index loop if Update might invalidate iterators
-//			LPGAMEOBJECT obj = chunkObjects[i];
-//			if (obj == nullptr) continue; // Skip if already marked for deletion? (Purge handles this later)
-//
-//			// Skip updates if time is stopped (except for Mario himself)
-//			if (isChronoStopped && obj != mario) {
-//				continue;
-//			}
-//
-//			obj->Update(dt, &coObjects); // Pass the collected colliders
-//		}
-//	}
-//}
 
 void CPlayScene::UpdateCamera(CMario* mario, float player_cx, float player_cy, float cam_width, float cam_height) {
 	if (!mario) return; // Safety check

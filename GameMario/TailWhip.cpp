@@ -8,6 +8,7 @@
 #include "CoinQBlock.h"
 #include "PiranhaPlant.h"
 #include "LifeBrick.h"
+#include "CoinBrick.h"
 
 #include "PlayScene.h"
 
@@ -97,6 +98,8 @@ void CTailWhip::OnCollisionWith(LPCOLLISIONEVENT e)
 		OnCollisionWithLifeBrick(e);
 	else if (dynamic_cast<CPiranhaPlant*>(e->obj))
 		OnCollisionWithPiranhaPlant(e);
+	else if (dynamic_cast<CCoinBrick*>(e->obj))
+		OnCollisionWithCoinBrick(e);
 }
 
 void CTailWhip::OnCollisionWithBuffQBlock(LPCOLLISIONEVENT e)
@@ -175,6 +178,15 @@ void CTailWhip::OnCollisionWithPiranhaPlant(LPCOLLISIONEVENT e)
 		player->CalculateScore(pp);
 		CParticle::GenerateParticleInChunk(this, 3);
 		pp->SetState(PIRANHA_PLANT_STATE_DIED);
+	}
+}
+
+void CTailWhip::OnCollisionWithCoinBrick(LPCOLLISIONEVENT e)
+{
+	CCoinBrick* cb = dynamic_cast<CCoinBrick*>(e->obj);
+	if (cb)
+	{
+		cb->SetState(COIN_BRICK_STATE_BREAK);
 	}
 }
 

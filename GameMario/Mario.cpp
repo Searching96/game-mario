@@ -19,6 +19,7 @@
 #include "FallPitch.h"
 #include "Particle.h"
 #include "LifeBrick.h"
+#include "CoinBrick.h"
 
 #include "Collision.h"
 
@@ -366,6 +367,8 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 		OnCollisionWithWingedGoomba(e);
 	else if (dynamic_cast<CFallPitch*>(e->obj))
 		OnCollisionWithFallPitch(e);
+	else if (dynamic_cast<CCoinBrick*>(e->obj))
+		OnCollisionWithCoinBrick(e);
 }
 
 void CMario::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
@@ -478,6 +481,18 @@ void CMario::OnCollisionWithLifeBrick(LPCOLLISIONEVENT e)
 		if (e->ny > 0 && e->nx == 0 && !lb->GetIsHit() && lb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
 		{
 			lb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
+		}
+	}
+}
+
+void CMario::OnCollisionWithCoinBrick(LPCOLLISIONEVENT e)
+{
+	CCoinBrick* cb = dynamic_cast<CCoinBrick*>(e->obj);
+	if (cb)
+	{
+		if (e->ny > 0 && e->nx == 0)
+		{
+			cb->SetState(COIN_BRICK_STATE_BREAK);
 		}
 	}
 }

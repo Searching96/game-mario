@@ -2,6 +2,7 @@
 #include "Mario.h"
 #include "Koopa.h"
 #include "PlayScene.h"
+#include "WingedGoomba.h"
 
 CGoomba::CGoomba(int id, float x, float y, int z, int originalChunkId) : CGameObject(id, x, y, z)
 {

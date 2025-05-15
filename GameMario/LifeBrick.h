@@ -46,6 +46,3 @@ public:
 	void SetIsHit(bool isHit) { this->isHit = isHit; }
 	CLifeMushroom* GetLifeMushroom() { return mushroom; }
 };
-
-
-

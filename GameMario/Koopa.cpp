@@ -1,6 +1,19 @@
 ﻿#include "Koopa.h"
 #include "Particle.h"
 #include "LifeBrick.h"
+#include "CoinBrick.h"
+#include "BuffQBlock.h"
+#include "CoinQBlock.h"
+#include "WingedGoomba.h"
+#include "PiranhaPlant.h"
+#include "Platform.h"
+#include "Box.h"
+#include "Mario.h"
+#include "CoinBrick.h"
+
+#include "PlayScene.h"
+
+#include "debug.h"
 
 CKoopa::CKoopa(int id, float x, float y, int z, int originalChunkId) : CGameObject(id, x, y, z)
 {
@@ -57,7 +70,6 @@ void CKoopa::OnCollisionWith(LPCOLLISIONEVENT e)
 		{
 			this->SetState((vx > 0) ? KOOPA_STATE_WALKING_LEFT : KOOPA_STATE_WALKING_RIGHT);
 		}
-		return;
 	}
 
 	if (dynamic_cast<CCoinQBlock*>(e->obj) || dynamic_cast<CBuffQBlock*>(e->obj))
@@ -70,10 +82,26 @@ void CKoopa::OnCollisionWith(LPCOLLISIONEVENT e)
 		OnCollisionWithWingedGoomba(e);
 	else if (dynamic_cast<CPiranhaPlant*>(e->obj))
 		OnCollisionWithPiranhaPlant(e);
+	else if (dynamic_cast<CCoinBrick*>(e->obj))
+		OnCollisionWithCoinBrick(e);
 }
 
 void CKoopa::OnCollisionWithQuestionBlock(LPCOLLISIONEVENT e)
 {
+	if (e->nx != 0)
+	{
+		if (state == KOOPA_STATE_WALKING_LEFT)
+		{
+			this->SetState(KOOPA_STATE_WALKING_RIGHT);
+			return;
+		}
+		//else if (state == KOOPA_STATE_WALKING_RIGHT)
+		//{
+		//	this->SetState(KOOPA_STATE_WALKING_LEFT);
+		//	return;
+		//}
+	}
+
 	bool isAbleToBounce = (state == KOOPA_STATE_WALKING_LEFT || state == KOOPA_STATE_WALKING_RIGHT || state == KOOPA_STATE_SHELL_STATIC);
 	if (isAbleToBounce)
 	{
@@ -164,6 +192,35 @@ void CKoopa::OnCollisionWithLifeBrick(LPCOLLISIONEVENT e)
 		if (e->nx != 0 && lb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
 		{
 			lb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
+		}
+	}
+}
+
+void CKoopa::OnCollisionWithCoinBrick(LPCOLLISIONEVENT e)
+{
+	CCoinBrick* cb = dynamic_cast<CCoinBrick*>(e->obj);
+	bool isAbleToBounce = (state == KOOPA_STATE_WALKING_LEFT || state == KOOPA_STATE_WALKING_RIGHT || state == KOOPA_STATE_SHELL_STATIC);
+	if (isAbleToBounce)
+	{
+		if (e->obj->GetState() == COIN_BRICK_STATE_BREAK)
+		{
+			int preState = state;
+			this->StartShell();
+			this->SetState(KOOPA_STATE_SHELL_STATIC);
+			float knockbackVx = (preState == KOOPA_STATE_WALKING_RIGHT) ? 0.1f : -0.1f; // Bounce left for walking left and shell static
+			float knockbackVy = -0.5f;
+			this->SetIsFlying(true);
+			this->SetIsReversed(true);
+			this->SetSpeed(knockbackVx, knockbackVy);
+		}
+		return;
+	}
+
+	if (state == KOOPA_STATE_SHELL_DYNAMIC)
+	{
+		if (e->nx != 0)
+		{
+			cb->SetState(COIN_BRICK_STATE_BREAK);
 		}
 	}
 }
