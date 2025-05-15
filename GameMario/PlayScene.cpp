@@ -1010,16 +1010,14 @@ void CPlayScene::RespawnEnemiesInRange()
 		else if (CKoopa* koopa = dynamic_cast<CKoopa*>(enemy)) {
 			koopa->GetOriginalPosition(eX0, eY0);
 
-			// Only proceed if position should respawn
 			if (!shouldRespawn(eX0)) continue;
 
-			// Check if any active Koopa with ID 6969 exists in any loaded chunk
 			bool specialKoopaExists = false;
 			for (LPCHUNK chunk : loadedChunks) {
 				const vector<LPGAMEOBJECT>& chunkEnemies = chunk->GetEnemies();
 				for (LPGAMEOBJECT obj : chunkEnemies) {
 					if (CKoopa* otherKoopa = dynamic_cast<CKoopa*>(obj)) {
-						if (otherKoopa->GetId() == koopa->GetId() && !otherKoopa->IsDefeated()) {
+						if ((otherKoopa->GetId() == koopa->GetId()) && !otherKoopa->IsDefeated()) {
 							specialKoopaExists = true;
 							break;
 						}
@@ -1028,7 +1026,6 @@ void CPlayScene::RespawnEnemiesInRange()
 				if (specialKoopaExists) break;
 			}
 
-			// Don't respawn if the special Koopa with ID 6969 exists and is active
 			if (specialKoopaExists) continue;
 
 			// If koopa is defeated, respawn it in its original chunk
