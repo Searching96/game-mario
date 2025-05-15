@@ -32,14 +32,15 @@ void CBrick::RenderBoundingBox()
 
 void CBrick::Render()
 {
-	CSprites* s = CSprites::GetInstance();
-	int aniId;
+	CAnimations* ani = CAnimations::GetInstance();
+	int aniId = -1;
 	if (type == 0)
-		aniId = ID_SPRITE_BRICK;
+		aniId = ID_ANI_BRICK;
 	else if (type == 1)
-		aniId = ID_SPRITE_STRIPED_BRICK;
+		aniId = ID_ANI_STRIPED_BRICK;
 
-	s->Get(aniId)->Draw(x, y);
+	if (aniId != -1)
+		ani->Get(aniId)->Render(x, y);
 
 	//RenderBoundingBox();
 }

@@ -14,14 +14,12 @@ CLifeBrick::CLifeBrick(int id, float x, float y, int z, int orignalChunkId, CLif
 
 void CLifeBrick::Render()
 {
-	int aniId = ID_SPRITE_BRICK;
+	int aniId = ID_ANI_BRICK;
 	if (isHit)
 	{
 		aniId = ID_ANI_QUESTIONBLOCK_HIT;
-		CAnimations::GetInstance()->Get(aniId)->Render(x, y);
-		return;
 	}
-	CSprites::GetInstance()->Get(aniId)->Draw(x, y);
+	CAnimations::GetInstance()->Get(aniId)->Render(x, y);
 
 	//RenderBoundingBox();
 }
