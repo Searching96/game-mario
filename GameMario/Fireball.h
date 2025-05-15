@@ -18,26 +18,59 @@
 #define FIREBALL_STATE_SHOOT_BOTTOM_LEFT 420
 
 
-#define SQUARE_ROOT_25_29 0.92847669089f
-#define SQUARE_ROOT_4_29 0.37139067635f
+#define INVERSE_SQUARE_ROOT_10 0.31622776601
 
 #define FIREBALL_SPEED 0.1f
 
 #define ID_ANI_FIREBALL_STATIC 140000
 #define ID_ANI_FIREBALL_DYNAMIC 140001
 
+#define DEPENDENT_ID 9999
+
 class CFireball :
 	public CGameObject
 {
-protected:
-	int x0, y0;
-	int isEnabled = 0;
 public:
-	CFireball(int id, float x, float y, int z) : CGameObject(id, x, y, z)
+	CFireball(int id, float x, float y, int z, int direction) : CGameObject(id, x, y, z)
 	{
-		this->x0 = x;
-		this->y0 = y;
-		SetState(FIREBALL_STATE_STATIC);
+		switch (direction)
+		{
+		case 0:
+			SetState(FIREBALL_STATE_SHOOT_BOTTOM_LEFT);
+			//DebugOut(L"[INFO] Shoot left down sharp\n");
+			break;
+		case 1:
+			SetState(FIREBALL_STATE_SHOOT_LOWER_CENTER_LEFT);
+			//DebugOut(L"[INFO] Shoot left down shallow\n");
+			break;
+		case 2:
+			SetState(FIREBALL_STATE_SHOOT_UPPER_CENTER_LEFT);
+			//DebugOut(L"[INFO] Shoot left up shallow\n");
+			break;
+		case 3:
+			SetState(FIREBALL_STATE_SHOOT_TOP_LEFT);
+			//DebugOut(L"[INFO] Shoot left up sharp\n");
+			break;
+		case 4:
+			SetState(FIREBALL_STATE_SHOOT_TOP_RIGHT);
+			//DebugOut(L"[INFO] Shoot right up sharp\n");
+			break;
+		case 5:
+			SetState(FIREBALL_STATE_SHOOT_UPPER_CENTER_RIGHT);
+			//DebugOut(L"[INFO] Shoot right up shallow\n");
+			break;
+		case 6:
+			SetState(FIREBALL_STATE_SHOOT_LOWER_CENTER_RIGHT);
+			//DebugOut(L"[INFO] Shoot right down shallow\n");
+			break;
+		case 7:
+			SetState(FIREBALL_STATE_SHOOT_BOTTOM_RIGHT);
+			//DebugOut(L"[INFO] Shoot right down sharp\n");
+			break;
+		default:
+			SetState(FIREBALL_STATE_STATIC);
+			break;
+		}
 	}
 
 	virtual void GetBoundingBox(float& left, float& top, float& right, float& bottom);
@@ -45,8 +78,8 @@ public:
 	virtual void Render();
 
 	virtual void SetState(int state);
-	virtual int IsCollidable() { return isEnabled; };
 	virtual int IsBlocking() { return 0; }
-	void SetEnable(int enable) { isEnabled = enable; }
+
+	static void Shoot(LPGAMEOBJECT obj, int direction);
 };
 

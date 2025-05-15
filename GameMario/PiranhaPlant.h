@@ -55,8 +55,6 @@ protected:
 
 	int originalChunkId;
 
-	CFireball* fireball = nullptr;
-
 	// 0 bottom left, 1 lower center left, 2 upper center left, 3 top left
 	//4 top right, 5 upper center right, 6 lower center right, 7 bottom right
 
@@ -70,7 +68,7 @@ protected:
 	void OnCollisionWith(LPCOLLISIONEVENT e);
 
 public:
-	CPiranhaPlant(int id, float x, float y, int z, int originalChunkId, CFireball* fireball);
+	CPiranhaPlant(int id, float x, float y, int z, int originalChunkId);
 
 	void Render();
 	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
@@ -95,6 +93,5 @@ public:
 	int IsDefeated() { return isDefeated; }
 	void SetIsDefeated(int isDefeated) { this->isDefeated = isDefeated; }
 	int GetOriginalChunkId() { return originalChunkId; }
-	CFireball* GetFireball() { return fireball; }
 };
 

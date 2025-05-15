@@ -177,7 +177,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	}
 	else if (isOnPlatform) //Not running => Depleting
 	{
-		pMeter -= dt / ((fabs(vx) < MARIO_WALKING_SPEED) ? 2500.0f : 4500.0f);
+		pMeter -= dt / ((fabs(vx) < MARIO_WALKING_SPEED) ? 2500.0f : 3000.0f);
 	}
 
 	if (pMeter == 1 && pMeterMax == -1) //Trigger full pMeter
@@ -238,8 +238,8 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		tailWhip->Update(dt, coObjects);
 	}
 
-	//DebugOutTitle(L"vx=%f, ax=%f, mvx=%f, irn=%d, fx=%f, iop=%d, imv=%d\n",
-	//	vx, ax, maxVx, isRunning, frictionX, isOnPlatform, isMoving);
+	DebugOutTitle(L"vx=%f, ax=%f, mvx=%f, irn=%d, fx=%f, iop=%d, imv=%d\n",
+		vx, ax, maxVx, isRunning, frictionX, isOnPlatform, isMoving);
 
 	// Process collisions
 	isOnPlatform = false;
@@ -250,28 +250,38 @@ void CMario::HandleBraking(DWORD dt)
 {
 	if (isBraking)
 	{
+		DebugOut(L"vx : %f\n", vx);
 		float brakeForce = MARIO_DECELERATION_X;
 		if (vxBeforeBraking > 0)
-			vx = max(0.0f, vx - brakeForce * dt);
-		else
-			vx = min(0.0f, vx + brakeForce * dt);
-
-		if (GetTickCount64() - brakingStart > MARIO_BRAKE_TIME || fabs(vx) < 0.075f)
 		{
-			isBraking = 0;
-			if (vxBeforeBraking > 0)
+			ax = -brakeForce; // Apply deceleration to the left
+			vx += ax * dt;   // Update velocity based on deceleration
+			if (vx <= 0.0f)  // Stop when velocity reaches zero or reverses
 			{
-				nx = -1;
-				vx = -MARIO_WALKING_SPEED * 0.5f;
+				vx = 0.0f;    // Full stop at standstill
+				isBraking = 0;
+				nx = -1;      // Face opposite direction
 				maxVx = -MARIO_MAX_WALKING_SPEED;
-			}
-			else
-			{
-				nx = 1;
-				vx = MARIO_WALKING_SPEED * 0.5f;
-				maxVx = MARIO_MAX_WALKING_SPEED;
+				ax = 0.0f;    // Reset acceleration
 			}
 		}
+		else if (vxBeforeBraking < 0)
+		{
+			ax = brakeForce;  // Apply deceleration to the right
+			vx += ax * dt;   // Update velocity based on deceleration
+			if (vx >= 0.0f)  // Stop when velocity reaches zero or reverses
+			{
+				vx = 0.0f;    // Full stop at standstill
+				isBraking = 0;
+				nx = 1;       // Face opposite direction
+				maxVx = MARIO_MAX_WALKING_SPEED;
+				ax = 0.0f;    // Reset acceleration
+			}
+		}
+	}
+	else
+	{
+		ax = 0.0f; // Reset acceleration when not braking
 	}
 }
 
@@ -322,10 +332,10 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 	{
 		if (e->nx != 0 && e->obj->IsBlocking())
 		{
-			if (vx > MARIO_HALF_RUN_ACCEL_SPEED)
-				vx = MARIO_HALF_RUN_ACCEL_SPEED;
-			else if (vx < -MARIO_HALF_RUN_ACCEL_SPEED)
-				vx = -MARIO_HALF_RUN_ACCEL_SPEED;
+			if (vx > MARIO_WALKING_SPEED)
+				vx = MARIO_WALKING_SPEED;
+			else if (vx < -MARIO_WALKING_SPEED)
+				vx = -MARIO_WALKING_SPEED;
 		}
 	}
 
@@ -1124,7 +1134,7 @@ void CMario::SetState(int state)
 			if (vx < 0)  // Đang đứng im hoặc đang đi sang trái trong không trung
 			{
 				//vx = -MARIO_RUNNING_SPEED / 5;
-				ax = 0.0003f;
+				ax = MARIO_DECELERATION_X;
 			}
 			else
 				ax = MARIO_ACCEL_RUN_X;
@@ -1157,7 +1167,7 @@ void CMario::SetState(int state)
 			if (vx > 0)  // Đang đứng im hoặc đang đi sang phải trong không trung
 			{
 				//vx = MARIO_RUNNING_SPEED / 5;
-				ax = -0.0003f;
+				ax = -MARIO_DECELERATION_X;
 			}
 			else
 				ax = -MARIO_ACCEL_RUN_X;
@@ -1189,7 +1199,7 @@ void CMario::SetState(int state)
 		{
 			if (vx < 0)  // Đang đứng im hoặc đang đi sang trái trong không trung
 			{
-				ax = 0.0003f;
+				ax = MARIO_DECELERATION_X;
 			}
 			else
 				ax = MARIO_ACCEL_WALK_X;
@@ -1220,7 +1230,7 @@ void CMario::SetState(int state)
 		{
 			if (vx > 0)  // Đang đứng im hoặc đang đi sang phải trong không trung
 			{
-				ax = -0.0003f;
+				ax = -MARIO_DECELERATION_X;
 			}
 			else 
 				ax = -MARIO_ACCEL_WALK_X;

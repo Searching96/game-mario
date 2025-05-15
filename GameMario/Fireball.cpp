@@ -32,9 +32,14 @@ void CFireball::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	x += vx * dt;
 	y += vy * dt;
 
-	if (fabs(x - x0) >= FIREBALL_RANGE_WIDTH || fabs(y - y0) >= FIREBALL_RANGE_HEIGHT)
+	float camX, camY;
+	float camWidth = CGame::GetInstance()->GetBackBufferWidth() / 2;
+	float camHeight = CGame::GetInstance()->GetBackBufferHeight() / 2;
+	CGame::GetInstance()->GetCamPos(camX, camY);
+
+	if (fabs(x - camX - camWidth) > camWidth * 1.125f || fabs(y - camY - camHeight) > camHeight * 1.125f)
 	{
-		SetState(FIREBALL_STATE_STATIC);
+		this->Delete();
 		return;
 	}
 
@@ -49,56 +54,60 @@ void CFireball::SetState(int state)
 	case FIREBALL_STATE_STATIC:
 		vx = 0;
 		vy = 0;
-		SetEnable(0);
+		this->Delete();
 		break;
 	case FIREBALL_STATE_SHOOT_TOP_RIGHT:
-		x = x0;
-		y = y0;
 		vx = FIREBALL_SPEED;
 		vy = -FIREBALL_SPEED;
 		break;
 	case FIREBALL_STATE_SHOOT_TOP_LEFT:
-		x = x0;
-		y = y0;
 		vx = -FIREBALL_SPEED;
 		vy = -FIREBALL_SPEED;
 		break;
 	case FIREBALL_STATE_SHOOT_UPPER_CENTER_RIGHT:
-		x = x0;
-		y = y0;
-		vx = FIREBALL_SPEED * 4 / 5;
-		vy = -FIREBALL_SPEED * 1 / 5;
+		vx = FIREBALL_SPEED * 3 * INVERSE_SQUARE_ROOT_10;
+		vy = -FIREBALL_SPEED * INVERSE_SQUARE_ROOT_10;
 		break;
 	case FIREBALL_STATE_SHOOT_UPPER_CENTER_LEFT:
-		x = x0;
-		y = y0;
-		vx = -FIREBALL_SPEED * 4 / 5;
-		vy = -FIREBALL_SPEED * 1 / 5;
+		vx = -FIREBALL_SPEED * 3 * INVERSE_SQUARE_ROOT_10;
+		vy = -FIREBALL_SPEED * INVERSE_SQUARE_ROOT_10;
 		break;
 	case FIREBALL_STATE_SHOOT_LOWER_CENTER_RIGHT:
-		x = x0;
-		y = y0;
-		vx = FIREBALL_SPEED * SQUARE_ROOT_25_29;
-		vy = FIREBALL_SPEED * SQUARE_ROOT_4_29;
+		vx = FIREBALL_SPEED * 3 * INVERSE_SQUARE_ROOT_10;
+		vy = FIREBALL_SPEED * INVERSE_SQUARE_ROOT_10;
 		break;
 	case FIREBALL_STATE_SHOOT_LOWER_CENTER_LEFT:
-		x = x0;
-		y = y0;
-		vx = -FIREBALL_SPEED * SQUARE_ROOT_25_29;
-		vy = FIREBALL_SPEED * SQUARE_ROOT_4_29;
+		vx = -FIREBALL_SPEED * 3 * INVERSE_SQUARE_ROOT_10;
+		vy = FIREBALL_SPEED * INVERSE_SQUARE_ROOT_10;
 		break;
 	case FIREBALL_STATE_SHOOT_BOTTOM_RIGHT:
-		x = x0;
-		y = y0;
 		vx = FIREBALL_SPEED;
 		vy = FIREBALL_SPEED;
 		break;
 	case FIREBALL_STATE_SHOOT_BOTTOM_LEFT:
-		x = x0;
-		y = y0;
 		vx = -FIREBALL_SPEED;
 		vy = FIREBALL_SPEED;
 		break;
 	}
 	CGameObject::SetState(state);
+}
+
+void CFireball::Shoot(LPGAMEOBJECT obj, int direction)
+{
+	if (obj == nullptr) return;
+
+	vector<LPCHUNK> chunks = ((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetLoadedChunks();
+
+	if (chunks.size() == 0) return;
+
+	for (auto chunk : chunks)
+	{
+		if (chunk->IsObjectInChunk(obj))
+		{
+			float obj_x, obj_y;
+			obj->GetPosition(obj_x, obj_y);
+			CFireball* fireball = new CFireball(DEPENDENT_ID, obj_x, obj_y - 8, INT_MAX, direction);
+			chunk->AddObject(fireball);
+		}
+	}
 }
