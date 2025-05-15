@@ -173,7 +173,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 	if (isRunning == 1 && isOnPlatform && abs(vx) >= MARIO_HALF_RUN_ACCEL_SPEED)
 	{
-		pMeter += dt / 1100.0f;
+		pMeter += dt / 1000.0f;
 	}
 	else if (isOnPlatform) //Not running => Depleting
 	{
@@ -238,8 +238,8 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		tailWhip->Update(dt, coObjects);
 	}
 
-	DebugOutTitle(L"vx=%f, ax=%f, mvx=%f, irn=%d, fx=%f, iop=%d, imv=%d\n",
-		vx, ax, maxVx, isRunning, frictionX, isOnPlatform, isMoving);
+	//DebugOutTitle(L"vx=%f, ax=%f, mvx=%f, irn=%d, fx=%f, iop=%d, imv=%d\n",
+	//	vx, ax, maxVx, isRunning, frictionX, isOnPlatform, isMoving);
 
 	// Process collisions
 	isOnPlatform = false;
@@ -250,7 +250,6 @@ void CMario::HandleBraking(DWORD dt)
 {
 	if (isBraking)
 	{
-		DebugOut(L"vx : %f\n", vx);
 		float brakeForce = MARIO_DECELERATION_X;
 		if (vxBeforeBraking > 0)
 		{
@@ -878,7 +877,8 @@ int CMario::GetAniIdBig()
 
 	if (tailUp)
 	{
-		aniId = ID_ANI_MARIO_TAIL_UP;
+		aniId = ID_ANI_MARIO_INVISIBLE;
+		CParticle::GenerateParticleInChunk(this, 2);
 	}
 	if (powerDown)
 	{
@@ -997,7 +997,8 @@ int CMario::GetAniIdTail()
 
 	if (tailDown)
 	{
-		aniId = ID_ANI_MARIO_TAIL_DOWN;
+		aniId = ID_ANI_MARIO_INVISIBLE;
+		CParticle::GenerateParticleInChunk(this, 2);
 	}
 
 	if (isTailWhipping == 1)
@@ -1056,11 +1057,11 @@ int CMario::GetAniIdTail()
 
 void CMario::Render()
 {
-	if (untouchable) 
+	if (untouchable)
 	{
 		ULONGLONG currentTime = GetTickCount64();
 		if (lastRenderTime == (ULONGLONG)-1) lastRenderTime = currentTime;
-		if (currentTime - lastRenderTime > MARIO_UNTOUCHABLE_RENDER_INTERVAL) 
+		if (currentTime - lastRenderTime > MARIO_UNTOUCHABLE_RENDER_INTERVAL)
 		{
 			isRendering = !isRendering;
 			lastRenderTime = currentTime;
@@ -1068,7 +1069,7 @@ void CMario::Render()
 		bool isPaused = CGame::GetInstance()->IsPaused();
 		if (!isRendering && !isPaused) return;
 	}
-	else 
+	else
 	{
 		isRendering = true;
 	}
@@ -1087,7 +1088,7 @@ void CMario::Render()
 
 	animations->Get(aniId)->Render(x, y);
 
-	if (tailWhip != nullptr) 
+	if (tailWhip != nullptr)
 	{
 		tailWhip->Render();
 	}
@@ -1232,7 +1233,7 @@ void CMario::SetState(int state)
 			{
 				ax = -MARIO_DECELERATION_X;
 			}
-			else 
+			else
 				ax = -MARIO_ACCEL_WALK_X;
 		}
 		else
@@ -1498,7 +1499,8 @@ int EnemiesToPoints(int enemies)
 void CMario::CalculateScore(LPGAMEOBJECT obj)
 {
 	if (obj == nullptr || dynamic_cast<CMario*>(obj)) return;
-	int point;
+	int point = 0;
+	int type = 0;
 	if (dynamic_cast<CGoomba*>(obj)
 		|| dynamic_cast<CKoopa*>(obj)
 		|| dynamic_cast<CWingedGoomba*>(obj)
@@ -1508,8 +1510,10 @@ void CMario::CalculateScore(LPGAMEOBJECT obj)
 		point = EnemiesToPoints(consecutiveEnemies);
 	}
 	else if (dynamic_cast<CLifeMushroom*>(obj))
-		point = 0;
+	{
+		type = 1;
+	}
 	else point = 1000;
 	CGame::GetInstance()->GetGameState()->AddScore(point);
-	CParticle::GenerateParticleInChunk(obj, point);
+	CParticle::GenerateParticleInChunk(obj, type, point);
 }

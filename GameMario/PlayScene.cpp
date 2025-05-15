@@ -32,7 +32,6 @@
 #include "Cloud.h"
 #include "Trinket.h"
 #include "SkyPlatform.h"
-#include "AttackParticle.h"
 #include "FallPitch.h"
 
 #include "SampleKeyEventHandler.h"

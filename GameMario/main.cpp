@@ -163,8 +163,6 @@ int Run()
 {
 	MSG msg;
 	int done = 0;
-	ULONGLONG frameStart = GetTickCount64();
-	DWORD tickPerFrame = 1000 / MAX_FRAME_RATE;
 
 	// Initialize high-precision timer
 	LARGE_INTEGER frequency, lastTime, currentTime;
@@ -172,11 +170,12 @@ int Run()
 	QueryPerformanceCounter(&lastTime);
 
 	// Game loop constants
-	const double targetSecondsPerFrame = 1.0 / MAX_FRAME_RATE;
+	const double targetSecondsPerFrame = 1.0 / MAX_FRAME_RATE; // e.g., 1/60 for 60 FPS
 	CGame* game = CGame::GetInstance();
 
 	while (!done)
 	{
+		// Process messages
 		while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
 		{
 			if (msg.message == WM_QUIT)
@@ -188,33 +187,47 @@ int Run()
 			DispatchMessage(&msg);
 		}
 
+		// Get elapsed time
 		QueryPerformanceCounter(&currentTime);
 		double elapsedSeconds = (currentTime.QuadPart - lastTime.QuadPart) / (double)frequency.QuadPart;
 
 		float gameSpeed = game->GetGameSpeed();
 
-		if (gameSpeed == 0 || elapsedSeconds >= targetSecondsPerFrame * gameSpeed)
+		if (gameSpeed == 0.0f)
+		{
+			// Paused: yield briefly to avoid CPU hogging
+			Sleep(1); // or SwitchToThread()
+			continue;
+		}
+
+		// Target frame time adjusted by game speed
+		double adjustedFrameTime = targetSecondsPerFrame / gameSpeed;
+
+		if (elapsedSeconds >= adjustedFrameTime)
 		{
 			lastTime = currentTime;
 
-			DWORD dt = (DWORD)(min(elapsedSeconds, 0.25) * 1000.0);
+			// Cap elapsed time to prevent large steps, then scale by gameSpeed
+			double cappedSeconds = min(elapsedSeconds, 0.25 / gameSpeed);
+			DWORD dt = (DWORD)(cappedSeconds * 1000.0); // dt in milliseconds
 
 			game->ProcessKeyboard();
-			Update(gameSpeed != 0 ? dt : 0);
+			Update(dt);
 			Render();
 			game->SwitchScene();
 		}
 		else
 		{
-			double timeToWait = gameSpeed != 0 ? targetSecondsPerFrame / gameSpeed - elapsedSeconds : 0.1;
+			// Calculate time to wait until next frame
+			double timeToWait = adjustedFrameTime - elapsedSeconds;
 
-			if (timeToWait > 0.002)
+			if (timeToWait > 0.002) // Sleep only for significant durations
 			{
-				Sleep((DWORD)((timeToWait * 1000.0) * 0.9));
+				Sleep((DWORD)(timeToWait * 1000.0 * 0.95)); // 95% to avoid oversleep
 			}
 			else
 			{
-				Sleep(0);
+				SwitchToThread(); // or Sleep(0)
 			}
 		}
 	}
