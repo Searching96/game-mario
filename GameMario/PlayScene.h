@@ -52,6 +52,15 @@ public:
 	void DefeatEnemiesOutOfRange();
 	void RespawnEnemiesInRange();
 
+	void LoadChunkWithX(float x)
+	{
+		for (LPCHUNK chunk : chunks) {
+			if (chunk->GetStartX() <= x && chunk->GetEndX() >= x) {
+				LoadChunkObjects(chunk->GetID(), chunk);
+			}
+		}
+	}
+
 	int GetId() const { return id; }
 	LPGAMEOBJECT GetPlayer() { return player; }
 	LPCHUNK GetChunk(int id) {

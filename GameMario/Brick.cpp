@@ -38,7 +38,8 @@ void CBrick::Render()
 		aniId = ID_ANI_BRICK;
 	else if (type == 1)
 		aniId = ID_ANI_STRIPED_BRICK;
-
+	else if (type == 2)
+		aniId = ID_ANI_HIDDEN_BRICK;
 	if (aniId != -1)
 		ani->Get(aniId)->Render(x, y);
 

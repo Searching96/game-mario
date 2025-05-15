@@ -16,6 +16,7 @@
 #define MARIO_WALKING_SPEED				0.1f
 #define MARIO_RUNNING_SPEED				0.165f
 #define MARIO_INSTANT_BRAKING_SPEED		0.04f
+#define MARIO_DESCEND_SPEED				0.01f
 
 #define MARIO_ACCEL_RUN_X				0.00025f
 #define MARIO_ACCEL_WALK_X				0.00020f
@@ -63,6 +64,8 @@
 #define MARIO_STATE_TAIL_WHIP			1200
 
 #define MARIO_STATE_HOLDING_KOOPA		1300
+
+#define MARIO_STATE_TELEPORTING			1400
 
 #pragma region ANIMATION_ID
 // BIG MARIO
@@ -264,6 +267,13 @@ class CMario : public CGameObject
 	ULONGLONG pMeterMax = -1;
 	int consecutiveEnemies;
 
+	int isTeleporting = 0;
+	int isEnteringPortal = 0;
+	float entranceY;
+	float targetX;
+	float exitY;
+	float yLevel;
+
 	int powerUp = 0;
 	ULONGLONG powerUpStart = -1;
 	int tailUp = 0;
@@ -315,7 +325,6 @@ class CMario : public CGameObject
 	void HandleUntouchable(DWORD dt);
 	void HandleHovering(DWORD dt);
 
-
 public:
 	CMario(int id, float x, float y, int z);
 	virtual ~CMario();
@@ -331,6 +340,7 @@ public:
 	void OnCollisionWith(LPCOLLISIONEVENT e);
 
 	void CalculateScore(LPGAMEOBJECT obj);
+	void Teleport(float entranceY, float targetX, float exitY, float yLevel);
 
 	void GetBoundingBox(float& left, float& top, float& right, float& bottom);
 
@@ -353,6 +363,11 @@ public:
 	int GetIsHovering() const { return isHovering; }
 	int GetIsRunning() const { return isRunning; }
 	int GetIsFlying() { return !isOnPlatform && (jumpCount > 1 || isHovering == 1); }
+
+	int GetIsTeleporting() const { return isTeleporting; }
+	int GetIsEnteringPortal() const { return isEnteringPortal; }
+	int GetYLevel() const { return yLevel; }
+
 	int GetNx() { return nx; }
 	float GetPMeter() const { return pMeter; }
 	//bool MaxPMeter() const { return fabs(vx) == MARIO_MAX_RUNNING_SPEED; }
