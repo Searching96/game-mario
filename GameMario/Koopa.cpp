@@ -167,11 +167,12 @@ void CKoopa::OnCollisionWithQuestionBlock(LPCOLLISIONEVENT e)
 
 void CKoopa::OnCollisionWithLifeBrick(LPCOLLISIONEVENT e)
 {
+	CLifeBrick* lb = dynamic_cast<CLifeBrick*>(e->obj);
 	bool isAbleToBounce = (state == KOOPA_STATE_WALKING_LEFT || state == KOOPA_STATE_WALKING_RIGHT || state == KOOPA_STATE_SHELL_STATIC);
 	if (isAbleToBounce)
 	{
-		bool isHit = dynamic_cast<CLifeBrick*>(e->obj)->GetIsHit();
-		bool isBouncing = dynamic_cast<CLifeBrick*>(e->obj)->GetState() != QUESTIONBLOCK_STATE_NOT_HIT;
+		bool isHit = lb->GetIsHit();
+		bool isBouncing = lb->GetState() != QUESTIONBLOCK_STATE_NOT_HIT;
 		if (isBouncing && !isHit)
 		{
 			int preState = state;
@@ -186,7 +187,6 @@ void CKoopa::OnCollisionWithLifeBrick(LPCOLLISIONEVENT e)
 		return;
 	}
 
-	CLifeBrick* lb = dynamic_cast<CLifeBrick*>(e->obj);
 	if (state == KOOPA_STATE_SHELL_DYNAMIC)
 	{
 		if (e->nx != 0 && lb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)

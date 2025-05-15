@@ -2,6 +2,8 @@
 #include "Mario.h"
 #include "QuestionBlock.h"
 #include "CoinQBlock.h"
+#include "BuffQBlock.h"
+#include "CoinBrick.h"
 
 CMushroom::CMushroom(int id, float x, float y, int z) : CGameObject(id, x, y, z)
 {
@@ -72,11 +74,14 @@ void CMushroom::OnCollisionWith(LPCOLLISIONEVENT e)
 	{
 		vy = vy - vy / 50;
 	}
-	if (dynamic_cast<CCoinQBlock*>(e->obj))
+	if (dynamic_cast<CCoinQBlock*>(e->obj) || dynamic_cast<CBuffQBlock*>(e->obj) || dynamic_cast<CCoinBrick*>(e->obj))
+	{
 		x += 3;
-	//if (dynamic_cast<CCoin*>(e->obj)) return;
+	}
 	if (e->nx != 0)
+	{
 		vx = -vx;
+	}
 }
 
 void CMushroom::GetBoundingBox(float& l, float& t, float& r, float& b)

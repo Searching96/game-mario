@@ -15,7 +15,7 @@ CLifeBrick::CLifeBrick(int id, float x, float y, int z, int orignalChunkId, CLif
 void CLifeBrick::Render()
 {
 	int aniId = ID_ANI_BRICK;
-	if (isHit)
+	if (isHit || state != QUESTIONBLOCK_STATE_NOT_HIT)
 	{
 		aniId = ID_ANI_QUESTIONBLOCK_HIT;
 	}
@@ -68,7 +68,6 @@ void CLifeBrick::SetState(int state)
 		break;
 	case QUESTIONBLOCK_STATE_BOUNCE_UP:
 	{
-		isHit = true;
 		LPCHUNK chunk = ((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetChunk(originalChunkId);
 		chunk->SetIsObjectConsumed(this->GetId(), true);
 		y0 = y;
@@ -85,6 +84,7 @@ void CLifeBrick::SetState(int state)
 		vy = 0.0f;
 		mushroom->SetVisible(1);
 		mushroom->SetState(MUSHROOM_STATE_RISE);
+		isHit = true;
 		break;
 	}
 }
