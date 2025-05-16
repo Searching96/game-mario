@@ -398,10 +398,16 @@ void CMario::Teleport(CPortal* portal)
 	this->targetX = portal->GetTargetX();
 	this->exitY = portal->GetExitY();
 	this->yLevel = portal->GetYLevel();
-	this->entranceY = portalY < exitY ? portalT : portalB;
+	bool isDescending = portalY < exitY;
+	this->entranceY = isDescending ? portalT : portalB;
 	if (marioL < portalL) offsetX = portalL - marioL;
 	if (marioR > portalR) offsetX = marioR - portalR;
-	if (marioB > portalT) offsetY = portalT - marioB + 2;
+	if (isDescending) {
+		if (marioB > portalT) offsetY = portalT - marioB + 2;
+	}
+	else {
+		if (marioT < portalB) offsetY = marioT - portalB - 2;
+	}
 	SetState(MARIO_STATE_TELEPORTING);
 }
 
