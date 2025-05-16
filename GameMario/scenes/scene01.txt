@@ -94,7 +94,7 @@ margin_y	40
 
 # Activator Brick
 1414	110	208	352
-1414	110	224	352
+1415	110	224	352
 
 # Buff QBlock
 32	11	240	304

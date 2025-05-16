@@ -145,7 +145,8 @@ void CTailWhip::OnCollisionWithCoinQBlock(LPCOLLISIONEVENT e)
 void CTailWhip::OnCollisionWithLifeBrick(LPCOLLISIONEVENT e)
 {
 	CLifeBrick* lb = dynamic_cast<CLifeBrick*>(e->obj);
-	if (lb && !lb->IsHit() && lb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT) {
+	if (lb && !lb->IsHit() && lb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT) 
+	{
 		lb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
 	}
 }

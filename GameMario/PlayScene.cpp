@@ -78,6 +78,7 @@ using namespace std;
 #define ZINDEX_DEFAULT              75 // Place somewhere in the middle
 
 #define DEPENDENT_ID				9999	// ID for objects those are not listed in text file and initiate via another object initiation
+#define ACTIVATOR_BASE_ID				10000
 
 #define SPAWN_CAMERA_BUFFER			20.0f
 
@@ -318,10 +319,10 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 		case OBJECT_TYPE_BUFF_QBLOCK:
 		{
 			zIndex = ZINDEX_BLOCKS;
-			int leaf_zIndex = ZINDEX_ITEMS;
-			int mushroom_zIndex = ZINDEX_MUSHROOM;
-			CMushroom* mushroom = new CMushroom(DEPENDENT_ID, x, y, mushroom_zIndex);
-			CSuperLeaf* superleaf = new CSuperLeaf(DEPENDENT_ID, x, y, leaf_zIndex);
+			int superleafZIndex = ZINDEX_ITEMS;
+			int mushroomZIndex = ZINDEX_MUSHROOM;
+			CMushroom* mushroom = new CMushroom(DEPENDENT_ID, x, y, mushroomZIndex);
+			CSuperLeaf* superleaf = new CSuperLeaf(DEPENDENT_ID, x, y, superleafZIndex);
 			obj = new CBuffQBlock(id, x, y, zIndex, targetChunk->GetID(), mushroom, superleaf);
 			targetChunk->AddObject(mushroom);
 			targetChunk->AddObject(superleaf);
@@ -334,8 +335,8 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 		case OBJECT_TYPE_LIFE_BRICK:
 		{
 			zIndex = ZINDEX_BLOCKS;
-			int mushroom_zIndex = ZINDEX_MUSHROOM;
-			CLifeMushroom* mushroom = new CLifeMushroom(DEPENDENT_ID, x, y, mushroom_zIndex);
+			int mushroomZIndex = ZINDEX_MUSHROOM;
+			CLifeMushroom* mushroom = new CLifeMushroom(DEPENDENT_ID, x, y, mushroomZIndex);
 			obj = new CLifeBrick(id, x, y, zIndex, targetChunk->GetID(), mushroom);
 			targetChunk->AddObject(mushroom);
 			targetChunk->AddObject(obj);
@@ -359,12 +360,30 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 		case OBJECT_TYPE_ACTIVATOR_BRICK:
 		{
 			zIndex = ZINDEX_BLOCKS;
-			CActivator* activator = new CActivator(DEPENDENT_ID, x, y - 15, zIndex, targetChunk->GetID());
+			int activatorCount = 0;
+			for (LPGAMEOBJECT obj : targetChunk->GetObjects())
+			{
+				if (dynamic_cast<CActivator*>(obj))
+				{
+					activatorCount++;
+				}
+			}
+			int activatorID = ACTIVATOR_BASE_ID + activatorCount;
+			CActivator* activator = new CActivator(activatorID, x, y - 15, zIndex, targetChunk->GetID());
 			obj = new CActivatorBrick(id, x, y, zIndex, targetChunk->GetID(), activator);
 			targetChunk->AddObject(activator);
-			if (targetChunk->GetIsObjectConsumed(obj->GetId()))
-				((CActivatorBrick*)obj)->SetIsHit(true);
 			targetChunk->AddObject(obj);
+			targetChunk->SetIsObjectConsumed(obj->GetId(), false);
+			targetChunk->SetIsObjectConsumed(activator->GetId(), false);
+			if (targetChunk->GetIsObjectConsumed(obj->GetId()))
+			{
+				((CActivatorBrick*)obj)->SetIsHit(true);
+				activator->SetIsRevealed(true);
+				if (targetChunk->GetIsObjectConsumed(activator->GetId()))
+				{
+					activator->SetState(ACTIVATOR_STATE_ACTIVATED);
+				}
+			}
 			return;
 		}
 		case OBJECT_TYPE_BOX:

@@ -56,6 +56,7 @@ void CActivator::SetState(int state)
 		{
 			isActivated = true;
 			LPCHUNK chunk = ((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetChunk(originalChunkId);
+			chunk->SetIsObjectConsumed(this->GetId(), true);
 			chunk->RevealAllCoinBrick();
 			break;
 		}
