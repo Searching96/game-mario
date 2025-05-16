@@ -61,13 +61,13 @@ using namespace std;
 #define ZINDEX_BACKGROUND_SCENERY   20 // Bushes, Trees (behind pipes)
 #define ZINDEX_PLATFORMS            40 // Ground platforms, Sky Platforms (usually behind pipes/blocks)
 #define ZINDEX_PIRANHA_PLANT		45 // Piranha Plants behind pipes.
-#define ZINDEX_PIPES                50 // Standard Pipes
 #define ZINDEX_MUSHROOM             60 // Mushroom
 #define ZINDEX_HIDDEN_COIN			65 // Q-Block Coins
 #define ZINDEX_BLOCKS               70 // Bricks, Q-Blocks, Boxes
 #define ZINDEX_ITEMS                80 // Coins (when static), Mushrooms, Leaves (after spawning)
 #define ZINDEX_ENEMIES              90 // Goombas, Koopas, Piranhas (usually behind player)
 #define ZINDEX_PLAYER              100 // Mario
+#define ZINDEX_PIPES               105 // Standard Pipes
 #define ZINDEX_PLAYER_EFFECTS      110 // Tail Whip visual (Mario renders this), maybe held Koopa?
 #define ZINDEX_PARTICLES           120 // Attack Particle (rendered by whip/Mario)
 #define ZINDEX_FOREGROUND_EFFECTS  150 // Foreground elements, UI overlays (if part of game objects)
@@ -719,7 +719,8 @@ void CPlayScene::UpdateCamera(CMario* mario, float player_cx, float player_cy, f
 
 	// Determine if Mario is flying with Tail
 	bool is_Racoon_and_MaxPMeter = (mario->GetLevel() == MARIO_LEVEL_TAIL && mario->GetPMeter() == 1.0f);
-	bool isInHiddenMap = mario_y >= mapHeight;
+	int yLevel = mario->GetYLevel();
+	bool isInHiddenMap = mario_y >= mapHeight && yLevel != 0;
 	bool cameraTouchedGround = cam_y >= (mapHeight - visible_world_cam_height);
 
 	// Update lock state

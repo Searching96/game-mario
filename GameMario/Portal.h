@@ -20,6 +20,10 @@ public:
 	virtual void GetBoundingBox(float& l, float& t, float& r, float& b);
 	void RenderBoundingBox(void);
 
+	float GetTargetX() const { return targetX; }
+	float GetExitY() const { return exitY; }
+	float GetYLevel() const { return yLevel; }
+
 	void Teleport(CMario* mario);
 	int IsBlocking() const { return 0; }
 };

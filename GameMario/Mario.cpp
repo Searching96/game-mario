@@ -96,9 +96,9 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		GetBoundingBox(marioL, marioT, marioR, marioB);
 		float currentMarioHeight = marioB - marioT;
 
-		// vy is set by SetState(MARIO_STATE_TELEPORTING)
-		// vy > 0 means Mario is moving DOWN
-		// vy < 0 means Mario is moving UP
+		SetPosition(x + offsetX, y + offsetY);
+		offsetX = 0;
+		offsetY = 0;
 
 		if (vy > 0) // Mario is moving DOWN (exiting from a pipe above, sliding downwards)
 		{
@@ -106,31 +106,23 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			{
 				// Condition: Mario's top edge (marioT) passes the entrance Y-coordinate.
 				// this->entranceY is assumed to be the Y-coordinate of the top of the pipe Mario enters.
-				if (marioT > this->entranceY + 2)
+				if (marioT > this->entranceY + 4)
 				{
-					// Teleport Mario to the start of the exit portal.
-					// Place Mario so his BOTTOM edge (new_marioB) is at this->exitY (top of the exit pipe).
-					// new_y_center = exit_pipe_top_Y + mario_height / 2.0f - mario_height 
-					//              = exit_pipe_top_Y - mario_height / 2.0f
 					LPPLAYSCENE(CGame::GetInstance()->GetCurrentScene())->LoadChunkWithX(targetX);
 					SetPosition(this->targetX, this->exitY - currentMarioHeight / 2.0f);
 					CGame::GetInstance()->SetCamPos(targetX, this->exitY - currentMarioHeight / 2.0f);
 
 					isEnteringPortal = 0; // Switch to exiting phase
-					// vy remains positive, so Mario continues moving downwards out of the exit portal.
 				}
 			}
 			else // Phase 2: Exiting the destination portal (isEnteringPortal == 0)
 			{
-				// Mario was placed with his BOTTOM at this->exitY (top of exit pipe) and is moving down.
+				// Mario was placed with his BOTTOM at this->exitY (bottom of exit pipe) and is moving down.
 				// He is fully out when his TOP edge (marioT) has moved past the exit portal's opening (this->exitY).
-				if (marioT > this->exitY + 2)
+				if (marioT > this->exitY + 4)
 				{
 					isTeleporting = 0;
 					SetState(MARIO_STATE_IDLE);
-					// Optional: Snap Mario's final Y position if needed,
-					// e.g., so his feet are slightly above or on this->exitY
-					// SetPosition(this->x, this->exitY + currentMarioHeight / 2.0f); // To place feet at exitY
 				}
 			}
 		}
@@ -138,29 +130,25 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		{
 			if (isEnteringPortal == 1) // Phase 1: Entering the source portal
 			{
-				// Condition: Mario's bottom edge (marioB) passes (goes above) the entrance Y-coordinate.
+				// Condition: Mario's bottom edge (marioB) passes the entrance Y-coordinate.
 				// this->entranceY is assumed to be the Y-coordinate of the bottom of the pipe Mario enters.
-				if (marioB < this->entranceY - 2)
+				if (marioB < this->entranceY - 4)
 				{
-					// Teleport Mario to the start of the exit portal.
-					// Place Mario so his BOTTOM edge (new_marioB) is at this->exitY (bottom of the exit pipe).
-					// new_y_center = exit_pipe_bottom_Y - mario_height / 2.0f
-					SetPosition(this->targetX, this->exitY - currentMarioHeight / 2.0f);
-					isEnteringPortal = 0; // Switch to exiting phase
-					// vy remains negative, so Mario continues moving upwards out of the exit portal.
+					LPPLAYSCENE(CGame::GetInstance()->GetCurrentScene())->LoadChunkWithX(targetX);
+					SetPosition(this->targetX, this->exitY + currentMarioHeight / 2.0f);
+					CGame::GetInstance()->SetCamPos(targetX, this->exitY + currentMarioHeight / 2.0f);
+
+					isEnteringPortal = 0;
 				}
 			}
 			else // Phase 2: Exiting the destination portal (isEnteringPortal == 0)
 			{
-				// Mario was placed with his BOTTOM at this->exitY (bottom of exit pipe) and is moving up.
-				// He is fully out when his TOP edge (marioT) has moved past (above) the exit portal's opening (this->exitY).
-				if (marioT < this->exitY - currentMarioHeight) // Corrected: marioT should be above (exitY - height)
+				// Mario was placed with his TOP at this->exitY (top of exit pipe) and is moving up.
+				// He is fully out when his BOTTOM edge (marioB) has moved past the exit portal's opening (this->exitY).
+				if (marioB < this->exitY)
 				{
 					isTeleporting = 0;
 					SetState(MARIO_STATE_IDLE);
-					// Optional: Snap Mario's final Y position
-					// e.g., to place his feet exactly at (this->exitY - currentMarioHeight)
-					// SetPosition(this->x, (this->exitY - currentMarioHeight) + currentMarioHeight / 2.0f);
 				}
 			}
 		}
@@ -258,9 +246,9 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 	//Power Meter calculation
 
-	if (isRunning == 1 && isOnPlatform && abs(vx) >= MARIO_HALF_RUN_ACCEL_SPEED)
+	if (isRunning == 1 && isOnPlatform && abs(vx) >= MARIO_MAX_WALKING_SPEED)
 	{
-		pMeter += dt / 1000.0f;
+		pMeter += dt / 1300.0f;
 	}
 	else if (isOnPlatform) //Not running => Depleting
 	{
@@ -399,14 +387,21 @@ void CMario::HandleHovering(DWORD dt)
 	}
 }
 
-void CMario::Teleport(float entranceY, float targetX, float exitY, float yLevel)
+void CMario::Teleport(CPortal* portal)
 {
-	isTeleporting = 1;
-	isEnteringPortal = 1;
-	this->entranceY = entranceY;
-	this->targetX = targetX;
-	this->exitY = exitY;
-	this->yLevel = yLevel;
+	float marioL, marioT, marioR, marioB;
+	GetBoundingBox(marioL, marioT, marioR, marioB);
+	float portalL, portalT, portalR, portalB;
+	portal->GetBoundingBox(portalL, portalT, portalR, portalB);
+	float portalX, portalY;
+	portal->GetPosition(portalX, portalY);
+	this->targetX = portal->GetTargetX();
+	this->exitY = portal->GetExitY();
+	this->yLevel = portal->GetYLevel();
+	this->entranceY = portalY < exitY ? portalT : portalB;
+	if (marioL < portalL) offsetX = portalL - marioL;
+	if (marioR > portalR) offsetX = marioR - portalR;
+	if (marioB > portalT) offsetY = portalT - marioB + 2;
 	SetState(MARIO_STATE_TELEPORTING);
 }
 
@@ -1147,6 +1142,9 @@ int CMario::GetAniIdTail()
 		if (nx > 0) aniId = ID_ANI_MARIO_TAIL_MULTIJUMP_RIGHT;
 		else aniId = ID_ANI_MARIO_TAIL_MULTIJUMP_LEFT;
 
+	if (isTeleporting)
+		aniId = ID_ANI_MARIO_TAIL_ENTERING_PIPE;
+
 	if (aniId == -1) aniId = ID_ANI_MARIO_TAIL_IDLE_RIGHT;
 
 	preAniId = aniId;
@@ -1185,6 +1183,7 @@ void CMario::Render()
 	else if (level == MARIO_LEVEL_TAIL)
 		aniId = GetAniIdTail();
 
+	if (isTeleporting) DebugOut(L"x=%f,y=%f\n", x, y);
 	animations->Get(aniId)->Render(x, y);
 
 	if (tailWhip != nullptr)
@@ -1201,6 +1200,7 @@ void CMario::SetState(int state)
 	// DIE is the end state, cannot be changed! 
 	if (this->state == MARIO_STATE_DIE) return;
 	if (CGame::GetInstance()->IsPaused()) return;
+	if (isTeleporting) return;
 
 	int previousState = this->state;
 
@@ -1219,6 +1219,8 @@ void CMario::SetState(int state)
 		ax = 0;
 		vx = 0;
 		vy = (entranceY < exitY) ? MARIO_DESCEND_SPEED : -MARIO_DESCEND_SPEED;
+		isTeleporting = 1;
+		isEnteringPortal = 1;
 		break;
 
 	case MARIO_STATE_RUNNING_RIGHT:

@@ -3,10 +3,11 @@
 
 #include "Animation.h"
 #include "Animations.h"
-
 #include "TailWhip.h"
 
 #include "debug.h"
+
+class CPortal;
 
 #define MARIO_MAX_WALKING_SPEED			0.10f
 #define MARIO_MAX_RUNNING_SPEED			0.20f
@@ -208,6 +209,8 @@
 #define ID_ANI_MARIO_TAIL_FALLING_RIGHT 7600
 #define ID_ANI_MARIO_TAIL_FALLING_LEFT 7610
 
+#define ID_ANI_MARIO_TAIL_ENTERING_PIPE 7900
+
 #define ID_ANI_MARIO_INVISIBLE 8001
 
 #pragma endregion
@@ -273,6 +276,8 @@ class CMario : public CGameObject
 	float targetX;
 	float exitY;
 	float yLevel;
+	float offsetX = 0;
+	float offsetY = 0;
 
 	int powerUp = 0;
 	ULONGLONG powerUpStart = -1;
@@ -333,14 +338,14 @@ public:
 	void Render();
 	void SetState(int state);
 
-	int IsCollidable() { return (state != MARIO_STATE_DIE); }
+	int IsCollidable() { return (state != MARIO_STATE_DIE && isTeleporting == 0); }
 	int IsBlocking() { return 0; }
 
 	void OnNoCollision(DWORD dt);
 	void OnCollisionWith(LPCOLLISIONEVENT e);
 
 	void CalculateScore(LPGAMEOBJECT obj);
-	void Teleport(float entranceY, float targetX, float exitY, float yLevel);
+	void Teleport(CPortal* portal);
 
 	void GetBoundingBox(float& left, float& top, float& right, float& bottom);
 

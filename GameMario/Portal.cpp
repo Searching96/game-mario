@@ -52,5 +52,5 @@ void CPortal::GetBoundingBox(float& l, float& t, float& r, float& b)
 
 void CPortal::Teleport(CMario* mario)
 {
-	mario->Teleport(y, targetX, exitY, yLevel);
+	mario->Teleport(this);
 }
