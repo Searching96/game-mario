@@ -1,23 +1,29 @@
 #pragma once
 
 #include "GameObject.h"
+#include "Mario.h"
 
 /*
 	Object that triggers scene switching
 */
 class CPortal : public CGameObject
 {
-	int scene_id;	// target scene to switch to 
+	float targetX;
+	float exitY;
+	float yLevel;
 
 	float width;
 	float height;
 public:
-	CPortal(int id, float l, float t, float r, float b, int z, int scene_id);
+	CPortal(int id, float x, float y, float width, float height, int z, float targetX, float exitY, float yLevel);
 	virtual void Render();
 	virtual void GetBoundingBox(float& l, float& t, float& r, float& b);
-
 	void RenderBoundingBox(void);
 
-	int GetSceneId() { return scene_id; }
-	int IsBlocking() { return 0; }
+	float GetTargetX() const { return targetX; }
+	float GetExitY() const { return exitY; }
+	float GetYLevel() const { return yLevel; }
+
+	void Teleport(CMario* mario);
+	int IsBlocking() const { return 0; }
 };

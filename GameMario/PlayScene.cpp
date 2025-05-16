@@ -64,13 +64,13 @@ using namespace std;
 #define ZINDEX_BACKGROUND_SCENERY   20 // Bushes, Trees (behind pipes)
 #define ZINDEX_PLATFORMS            40 // Ground platforms, Sky Platforms (usually behind pipes/blocks)
 #define ZINDEX_PIRANHA_PLANT		45 // Piranha Plants behind pipes.
-#define ZINDEX_PIPES                50 // Standard Pipes
 #define ZINDEX_MUSHROOM             60 // Mushroom
 #define ZINDEX_HIDDEN_COIN			65 // Q-Block Coins
 #define ZINDEX_BLOCKS               70 // Bricks, Q-Blocks, Boxes
 #define ZINDEX_ITEMS                80 // Coins (when static), Mushrooms, Leaves (after spawning)
 #define ZINDEX_ENEMIES              90 // Goombas, Koopas, Piranhas (usually behind player)
 #define ZINDEX_PLAYER              100 // Mario
+#define ZINDEX_PIPES               105 // Standard Pipes
 #define ZINDEX_PLAYER_EFFECTS      110 // Tail Whip visual (Mario renders this), maybe held Koopa?
 #define ZINDEX_PARTICLES           120 // Attack Particle (rendered by whip/Mario)
 #define ZINDEX_FOREGROUND_EFFECTS  150 // Foreground elements, UI overlays (if part of game objects)
@@ -275,8 +275,8 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 			if (tokens.size() < 7) throw runtime_error("Insufficient params for BRICK");
 			float cell_width = stof(tokens[4]);
 			float cell_height = stof(tokens[5]);
-			int sprite_id = stoi(tokens[6]);
-			obj = new CBrick(DEPENDENT_ID, x, y, zIndex, sprite_id);
+			int type = stoi(tokens[6]);
+			obj = new CBrick(DEPENDENT_ID, x, y, zIndex, type);
 			break;
 		}
 		case OBJECT_TYPE_COIN:
@@ -437,10 +437,12 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 		{
 			zIndex = ZINDEX_DEFAULT;
 			if (tokens.size() < 7) throw runtime_error("Insufficient params for PORTAL");
-			float r = stof(tokens[4]);
-			float b = stof(tokens[5]);
-			int scene_id = stoi(tokens[6]);
-			obj = new CPortal(id, x, y, zIndex, r, b, scene_id);
+			float width = stof(tokens[4]);
+			float height = stof(tokens[5]);
+			int targetX = stoi(tokens[6]);
+			int exitY = stoi(tokens[7]);
+			int yLevel = stoi(tokens[8]);
+			obj = new CPortal(id, x - 8, y - 8, width, height, zIndex, targetX - 8, exitY - 8, yLevel);
 			break;
 		}
 		case OBJECT_TYPE_FALL_PITCH:
@@ -451,7 +453,7 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 			}
 			float r = stof(tokens[4]);
 			float b = stof(tokens[5]);
-			obj = new CFallPitch(id, x, y, r, b);
+			obj = new CFallPitch(id, x + 8, y + 8, r + 8, b + 8);
 			break;
 		}
 		default:
@@ -585,6 +587,24 @@ void CPlayScene::UnloadChunksOutOfRange(float cam_x, float cam_width) // **** MO
 	}
 }
 
+void CPlayScene::ResetAllChunkState()
+{
+	for (LPCHUNK chunk : chunks)
+		chunk->ResetChunkState();
+}
+
+void CPlayScene::ResetAllChunkConsumables()
+{
+	for (LPCHUNK chunk : chunks)
+		chunk->ResetChunkConsumableState();
+}
+
+void CPlayScene::ResetAllChunkDeleted()
+{
+	for (LPCHUNK chunk : chunks)
+		chunk->ResetChunkDeletedState();
+}
+
 void CPlayScene::Load()
 {
 	DebugOut(L"[INFO] Start loading scene from: %ls\n", sceneFilePath);
@@ -709,6 +729,7 @@ void CPlayScene::UpdateChunks(float cam_x, float cam_width)
 
 void CPlayScene::UpdateCamera(CMario* mario, float player_cx, float player_cy, float cam_width, float cam_height) {
 	if (!mario) return; // Safety check
+	if (mario->GetIsEnteringPortal()) return; // Don't update camera if entering a portal
 
 	CGame* game = CGame::GetInstance();
 	float cam_x, cam_y;
@@ -723,7 +744,8 @@ void CPlayScene::UpdateCamera(CMario* mario, float player_cx, float player_cy, f
 
 	// Determine if Mario is flying with Tail
 	bool is_Racoon_and_MaxPMeter = (mario->GetLevel() == MARIO_LEVEL_TAIL && mario->GetPMeter() == 1.0f);
-	//bool is_Racoon_and_MaxPMeter = (mario->GetLevel() == MARIO_LEVEL_TAIL && mario->MaxPMeter());
+	int yLevel = mario->GetYLevel();
+	bool isInHiddenMap = mario_y >= mapHeight && yLevel != 0;
 	bool cameraTouchedGround = cam_y >= (mapHeight - visible_world_cam_height);
 
 	// Update lock state
@@ -744,7 +766,11 @@ void CPlayScene::UpdateCamera(CMario* mario, float player_cx, float player_cy, f
 	float targetCamY;
 	if (s_isLockedToGround) {
 		// Lock to ground level
-		targetCamY = (mapHeight > visible_world_cam_height) ? (mapHeight - visible_world_cam_height) : 0.0f;
+		if (!isInHiddenMap) {
+			targetCamY = (mapHeight > visible_world_cam_height) ? (mapHeight - visible_world_cam_height) : 0.0f;
+		}
+		else
+			targetCamY = mario->GetYLevel() - visible_world_cam_height;
 		targetCamY = max(0.0f, targetCamY);
 	}
 	else {
@@ -757,7 +783,7 @@ void CPlayScene::UpdateCamera(CMario* mario, float player_cx, float player_cy, f
 	float maxCamX = (mapWidth > cam_width) ? (mapWidth - cam_width - VIEWPORT_X_OFFSET) : minCamX;
 	maxCamX = max(minCamX, maxCamX);
 	float minCamY = 0.0f;
-	float maxCamY = (mapHeight > visible_world_cam_height) ? (mapHeight - visible_world_cam_height) : minCamY;
+	float maxCamY = isInHiddenMap ? mario->GetYLevel() - visible_world_cam_height : (mapHeight > visible_world_cam_height) ? (mapHeight - visible_world_cam_height) : minCamY;
 	maxCamY = max(minCamY, maxCamY);
 
 	cam_x = max(minCamX, min(targetCamX, maxCamX));
@@ -814,7 +840,7 @@ void CPlayScene::Update(DWORD dt)
 	// --- Update all OTHER game objects within chunks ---
 	bool isChronoStopped = mario->GetIsPowerUp() || mario->GetIsTailUp() 
 		|| mario->GetIsPowerDown() || mario->GetIsTailDown() || (mario->GetState() == MARIO_STATE_DIE_ON_BEING_KILLED)
-		|| (mario->GetState() == MARIO_STATE_DIE_ON_FALLING);
+		|| (mario->GetState() == MARIO_STATE_DIE_ON_FALLING) || mario->GetIsTeleporting());
 
 	for (LPCHUNK chunk : chunks) {
 		if (!chunk->IsLoaded()) continue;
@@ -897,8 +923,8 @@ void CPlayScene::Unload()
 	// If they are scene-specific asset managers, clearing here is correct.
 	// Based on name "GetInstance", they seem global. Let's assume assets are managed elsewhere
 	// and this scene doesn't own their lifetime beyond loading them.
-	 CAnimations::GetInstance()->Clear(); // POTENTIALLY DANGEROUS if global
-	 CSprites::GetInstance()->Clear();    // POTENTIALLY DANGEROUS if global
+	CAnimations::GetInstance()->Clear(); // POTENTIALLY DANGEROUS if global
+	CSprites::GetInstance()->Clear();    // POTENTIALLY DANGEROUS if global
 
 	// Reset player pointer
 	player = nullptr;

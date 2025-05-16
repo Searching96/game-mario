@@ -7,22 +7,21 @@
 void CGameState::Update(DWORD dt) {
 	// get player
 	CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
-	if (player->GetState() == MARIO_STATE_DIE_ON_BEING_KILLED || player->GetState() == MARIO_STATE_DIE_ON_FALLING || player == nullptr)
+	if (player == nullptr || player->GetState() == MARIO_STATE_DIE_ON_BEING_KILLED || player->GetState() == MARIO_STATE_DIE_ON_FALLING || player->GetIsTeleporting() != 0)
 		return;
 
 	// Only decrease time if it's positive to prevent underflow issues
-	if (time > 0) {
-		time -= dt;
-	}
-	if (time <= 0) {
+	if (time > dt) time -= dt;
+	else
+	{
 		time = 0; // Clamp to zero
 		// Ensure player exists before trying to kill them
 		if (current_scene) {
 			CPlayScene* playScene = dynamic_cast<CPlayScene*>(current_scene);
 			if (playScene) {
 				CMario* player = dynamic_cast<CMario*>(playScene->GetPlayer());
-				if (player && player->GetState() != MARIO_STATE_DIE_ON_BEING_KILLED) { // Avoid setting die state multiple times
-					player->SetState(MARIO_STATE_DIE_ON_BEING_KILLED);
+				if (player && player->GetState() != MARIO_STATE_DIE) { // Avoid setting die state multiple times
+					player->SetState(MARIO_STATE_DIE);
 				}
 			}
 		}
@@ -174,7 +173,7 @@ void CGameState::RenderHUD()
 	float card_background_x = main_hud_box_center_x + HUD_WIDTH / 2 + CARD_X_OFFSET + CARD_BACKGROUND_WIDTH / 2;
 	float card_background_y = main_hud_box_center_y;
 	s->Get(ID_SPRITE_CARD_BACKGROUND)->Draw(card_background_x, card_background_y);
-	 
+
 	//float card_start_x = content_x + 208; // Adjust X offset for the first card
 	//float card_y = content_y + 6;       // Adjust Y offset
 	//float card_spacing = 24 + 1;        // Width of card + spacing

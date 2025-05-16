@@ -1,15 +1,19 @@
 #include "Portal.h"
 #include "Game.h"
 #include "Textures.h"
+#include "PlayScene.h"
 
-CPortal::CPortal(int id, float l, float t, float r, float b, int z, int scene_id )
+CPortal::CPortal(int id, float x, float y, float width, float height, int z, float targetX, float exitY, float yLevel)
+
 {
-	this->scene_id = scene_id;
 	this->id = id;
-	x = l; 
-	y = t;
-	width = r - l;
-	height = b - t;
+	this->x = x;
+	this->y = y;
+	this->width = width;
+	this->height = height;
+	this->targetX = targetX;
+	this->exitY = exitY;
+	this->yLevel = yLevel;
 	zIndex = z;
 }
 
@@ -39,10 +43,16 @@ void CPortal::Render()
 	RenderBoundingBox();
 }
 
-void CPortal::GetBoundingBox(float &l, float &t, float &r, float &b)
+void CPortal::GetBoundingBox(float& l, float& t, float& r, float& b)
 {
-	l = x - width/2;
-	t = y - height/2;
-	r = x + width/2;
-	b = y + height/2;
+	l = x - width / 2;
+	t = y - height / 2;
+	r = x + width / 2;
+	b = y + height / 2;
+}
+
+void CPortal::Teleport(CMario* mario)
+{
+	mario->Teleport(this);
+	LPPLAYSCENE(CGame::GetInstance()->GetCurrentScene())->ResetAllChunkConsumables();
 }

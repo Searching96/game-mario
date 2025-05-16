@@ -95,6 +95,81 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		}
 	}
 
+	if (isTeleporting == 1)
+	{
+		float marioL, marioT, marioR, marioB;
+		GetBoundingBox(marioL, marioT, marioR, marioB);
+		float currentMarioHeight = marioB - marioT;
+
+		SetPosition(x + offsetX, y + offsetY);
+		offsetX = 0;
+		offsetY = 0;
+
+		if (vy > 0) // Mario is moving DOWN (exiting from a pipe above, sliding downwards)
+		{
+			if (isEnteringPortal == 1) // Phase 1: Entering the source portal
+			{
+				// Condition: Mario's top edge (marioT) passes the entrance Y-coordinate.
+				// this->entranceY is assumed to be the Y-coordinate of the top of the pipe Mario enters.
+				if (marioT > this->entranceY + 4)
+				{
+					LPPLAYSCENE(CGame::GetInstance()->GetCurrentScene())->LoadChunkWithX(targetX);
+					SetPosition(this->targetX, this->exitY - currentMarioHeight / 2.0f);
+					CGame::GetInstance()->SetCamPos(targetX, this->exitY - currentMarioHeight / 2.0f);
+
+					isEnteringPortal = 0; // Switch to exiting phase
+				}
+			}
+			else // Phase 2: Exiting the destination portal (isEnteringPortal == 0)
+			{
+				// Mario was placed with his BOTTOM at this->exitY (bottom of exit pipe) and is moving down.
+				// He is fully out when his TOP edge (marioT) has moved past the exit portal's opening (this->exitY).
+				if (marioT > this->exitY + 4)
+				{
+					isTeleporting = 0;
+					SetState(MARIO_STATE_IDLE);
+				}
+			}
+		}
+		else if (vy < 0) // Mario is moving UP (exiting from a pipe below, sliding upwards)
+		{
+			if (isEnteringPortal == 1) // Phase 1: Entering the source portal
+			{
+				// Condition: Mario's bottom edge (marioB) passes the entrance Y-coordinate.
+				// this->entranceY is assumed to be the Y-coordinate of the bottom of the pipe Mario enters.
+				if (marioB < this->entranceY - 4)
+				{
+					LPPLAYSCENE(CGame::GetInstance()->GetCurrentScene())->LoadChunkWithX(targetX);
+					SetPosition(this->targetX, this->exitY + currentMarioHeight / 2.0f);
+					CGame::GetInstance()->SetCamPos(targetX, this->exitY + currentMarioHeight / 2.0f);
+
+					isEnteringPortal = 0;
+				}
+			}
+			else // Phase 2: Exiting the destination portal (isEnteringPortal == 0)
+			{
+				// Mario was placed with his TOP at this->exitY (top of exit pipe) and is moving up.
+				// He is fully out when his BOTTOM edge (marioB) has moved past the exit portal's opening (this->exitY).
+				if (marioB < this->exitY)
+				{
+					isTeleporting = 0;
+					SetState(MARIO_STATE_IDLE);
+				}
+			}
+		}
+		else // vy == 0, should ideally not happen
+		{
+			isTeleporting = 0;
+			SetState(MARIO_STATE_IDLE);
+		}
+
+		// Apply Mario's movement into/out of the pipe
+		x += vx * dt;
+		y += vy * dt;
+
+		return; // Skip all other update logic while teleporting.
+	}
+
 	if (powerUp == 1)
 	{
 		if (GetTickCount64() - powerUpStart > MARIO_POWER_UP_TIMEOUT)
@@ -317,6 +392,30 @@ void CMario::HandleHovering(DWORD dt)
 	}
 }
 
+void CMario::Teleport(CPortal* portal)
+{
+	float marioL, marioT, marioR, marioB;
+	GetBoundingBox(marioL, marioT, marioR, marioB);
+	float portalL, portalT, portalR, portalB;
+	portal->GetBoundingBox(portalL, portalT, portalR, portalB);
+	float portalX, portalY;
+	portal->GetPosition(portalX, portalY);
+	this->targetX = portal->GetTargetX();
+	this->exitY = portal->GetExitY();
+	this->yLevel = portal->GetYLevel();
+	bool isDescending = portalY < exitY;
+	this->entranceY = isDescending ? portalT : portalB;
+	if (marioL < portalL) offsetX = portalL - marioL;
+	if (marioR > portalR) offsetX = portalR - marioR - 1;
+	if (isDescending) {
+		if (marioB > portalT) offsetY = portalT - marioB + 2;
+	}
+	else {
+		if (marioT < portalB) offsetY = marioT - portalB - 2;
+	}
+	SetState(MARIO_STATE_TELEPORTING);
+}
+
 void CMario::OnNoCollision(DWORD dt)
 {
 	x += vx * dt;
@@ -326,6 +425,7 @@ void CMario::OnNoCollision(DWORD dt)
 
 void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 {
+	if (isTeleporting) return;
 	if (e->ny != 0 && e->obj->IsBlocking())
 	{
 		vy = 0;
@@ -445,7 +545,7 @@ void CMario::OnCollisionWithCoin(LPCOLLISIONEVENT e)
 void CMario::OnCollisionWithPortal(LPCOLLISIONEVENT e)
 {
 	CPortal* p = (CPortal*)e->obj;
-	CGame::GetInstance()->InitiateSwitchScene(p->GetSceneId());
+	p->Teleport(this);
 }
 
 void CMario::OnCollisionWithCoinQBlock(LPCOLLISIONEVENT e)
@@ -1113,6 +1213,9 @@ int CMario::GetAniIdTail()
 		aniId = (nx > 0) ? ID_ANI_MARIO_TAIL_FALLING_RIGHT : ID_ANI_MARIO_TAIL_FALLING_LEFT;
 	}
 
+	if (isTeleporting)
+		aniId = ID_ANI_MARIO_TAIL_ENTERING_PIPE;
+
 	if (aniId == -1) aniId = ID_ANI_MARIO_TAIL_IDLE_RIGHT;
 
 	preAniId = aniId;
@@ -1167,6 +1270,7 @@ void CMario::SetState(int state)
 	// DIE is the end state, cannot be changed! 
 	if (this->state == MARIO_STATE_DIE_ON_BEING_KILLED || this->state == MARIO_STATE_DIE_ON_FALLING) return;
 	if (CGame::GetInstance()->IsPaused()) return;
+	if (isTeleporting) return;
 
 	int previousState = this->state;
 
@@ -1179,6 +1283,14 @@ void CMario::SetState(int state)
 			if (nx > 0) tailWhip->SetState(TAIL_STATE_WHIPPING_RIGHT);
 			else tailWhip->SetState(TAIL_STATE_WHIPPING_LEFT);
 		}
+		break;
+
+	case MARIO_STATE_TELEPORTING:
+		ax = 0;
+		vx = 0;
+		vy = (entranceY < exitY) ? MARIO_DESCEND_SPEED : -MARIO_DESCEND_SPEED;
+		isTeleporting = 1;
+		isEnteringPortal = 1;
 		break;
 
 	case MARIO_STATE_RUNNING_RIGHT:

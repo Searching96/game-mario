@@ -191,11 +191,24 @@ int Run()
 		QueryPerformanceCounter(&currentTime);
 		double elapsedSeconds = (currentTime.QuadPart - lastTime.QuadPart) / (double)frequency.QuadPart;
 
-		float gameSpeed = game->GetGameSpeed();
+		// Always process keyboard and render, even when paused
+		game->ProcessKeyboard();
+		Render();
 
-		if (gameSpeed == 0.0f)
+		float gameSpeed = game->GetGameSpeed();
+		bool isPaused = game->IsPaused();
+
+		if (isPaused || gameSpeed == 0.0f)
 		{
-			// Paused: yield briefly to avoid CPU hogging
+			// When paused, set dt = 0 and update lastTime to avoid time accumulation
+			lastTime = currentTime;
+			DWORD dt = 0; // No time passes while paused
+
+			// Update with dt = 0 (no movement, animations, etc.)
+			Update(dt);
+			game->SwitchScene();
+
+			// Yield to avoid CPU hogging
 			Sleep(1); // or SwitchToThread()
 			continue;
 		}
@@ -211,9 +224,7 @@ int Run()
 			double cappedSeconds = min(elapsedSeconds, 0.25 / gameSpeed);
 			DWORD dt = (DWORD)(cappedSeconds * 1000.0); // dt in milliseconds
 
-			game->ProcessKeyboard();
 			Update(dt);
-			Render();
 			game->SwitchScene();
 		}
 		else

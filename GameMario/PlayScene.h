@@ -51,6 +51,18 @@ public:
 	virtual void Unload();
 	void DefeatEnemiesOutOfRange();
 	void RespawnEnemiesInRange();
+	void ResetAllChunkState();
+	void ResetAllChunkConsumables();
+	void ResetAllChunkDeleted();
+
+	void LoadChunkWithX(float x)
+	{
+		for (LPCHUNK chunk : chunks) {
+			if (chunk->GetStartX() <= x && chunk->GetEndX() >= x) {
+				LoadChunkObjects(chunk->GetID(), chunk);
+			}
+		}
+	}
 
 	int GetId() const { return id; }
 	LPGAMEOBJECT GetPlayer() { return player; }

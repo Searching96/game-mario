@@ -3,10 +3,11 @@
 
 #include "Animation.h"
 #include "Animations.h"
-
 #include "TailWhip.h"
 
 #include "debug.h"
+
+class CPortal;
 
 #define MARIO_MAX_WALKING_SPEED			0.10f
 #define MARIO_MAX_RUNNING_SPEED			0.20f
@@ -16,6 +17,7 @@
 #define MARIO_WALKING_SPEED				0.1f
 #define MARIO_RUNNING_SPEED				0.165f
 #define MARIO_INSTANT_BRAKING_SPEED		0.04f
+#define MARIO_DESCEND_SPEED				0.01f
 
 #define MARIO_ACCEL_RUN_X				0.00025f
 #define MARIO_ACCEL_WALK_X				0.00020f
@@ -61,6 +63,8 @@
 #define MARIO_STATE_TAIL_WHIP			1200
 
 #define MARIO_STATE_HOLDING_KOOPA		1300
+
+#define MARIO_STATE_TELEPORTING			1400
 
 #pragma region ANIMATION_ID
 // BIG MARIO
@@ -203,6 +207,8 @@
 #define ID_ANI_MARIO_TAIL_FALLING_RIGHT 7600
 #define ID_ANI_MARIO_TAIL_FALLING_LEFT 7610
 
+#define ID_ANI_MARIO_TAIL_ENTERING_PIPE 7900
+
 #define ID_ANI_MARIO_INVISIBLE 8001
 
 #pragma endregion
@@ -264,6 +270,15 @@ class CMario : public CGameObject
 	ULONGLONG pMeterMax = -1;
 	int consecutiveEnemies;
 
+	int isTeleporting = 0;
+	int isEnteringPortal = 0;
+	float entranceY;
+	float targetX;
+	float exitY;
+	float yLevel;
+	float offsetX = 0;
+	float offsetY = 0;
+
 	int powerUp = 0;
 	ULONGLONG powerUpStart = -1;
 	int tailUp = 0;
@@ -318,7 +333,6 @@ class CMario : public CGameObject
 	void HandleUntouchable(DWORD dt);
 	void HandleHovering(DWORD dt);
 
-
 public:
 	CMario(int id, float x, float y, int z);
 	virtual ~CMario();
@@ -327,13 +341,14 @@ public:
 	void Render();
 	void SetState(int state);
 
-	int IsCollidable() { return (state != MARIO_STATE_DIE_ON_BEING_KILLED); }
+	int IsCollidable() { return (state != MARIO_STATE_DIE_ON_BEING_KILLED && state != MARIO_STATE_DIE_ON_FALLING && isTeleporting == 0); }
 	int IsBlocking() { return 0; }
 
 	void OnNoCollision(DWORD dt);
 	void OnCollisionWith(LPCOLLISIONEVENT e);
 
 	void CalculateScore(LPGAMEOBJECT obj);
+	void Teleport(CPortal* portal);
 
 	void GetBoundingBox(float& left, float& top, float& right, float& bottom);
 
@@ -356,6 +371,11 @@ public:
 	int GetIsHovering() const { return isHovering; }
 	int GetIsRunning() const { return isRunning; }
 	int GetIsFlying() { return !isOnPlatform && (jumpCount > 1 || isHovering == 1); }
+
+	int GetIsTeleporting() const { return isTeleporting; }
+	int GetIsEnteringPortal() const { return isEnteringPortal; }
+	int GetYLevel() const { return yLevel; }
+
 	int GetNx() { return nx; }
 	float GetPMeter() const { return pMeter; }
 	//bool MaxPMeter() const { return fabs(vx) == MARIO_MAX_RUNNING_SPEED; }
