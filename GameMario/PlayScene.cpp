@@ -408,7 +408,7 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 			}
 			float r = stof(tokens[4]);
 			float b = stof(tokens[5]);
-			obj = new CFallPitch(id, x, y, r, b);
+			obj = new CFallPitch(id, x + 8, y + 8, r + 8, b + 8);
 			break;
 		}
 		default:
