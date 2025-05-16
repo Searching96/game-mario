@@ -394,26 +394,30 @@ void CMario::HandleHovering(DWORD dt)
 
 void CMario::Teleport(CPortal* portal)
 {
-	float marioL, marioT, marioR, marioB;
-	GetBoundingBox(marioL, marioT, marioR, marioB);
-	float portalL, portalT, portalR, portalB;
-	portal->GetBoundingBox(portalL, portalT, portalR, portalB);
-	float portalX, portalY;
-	portal->GetPosition(portalX, portalY);
-	this->targetX = portal->GetTargetX();
-	this->exitY = portal->GetExitY();
-	this->yLevel = portal->GetYLevel();
-	bool isDescending = portalY < exitY;
-	this->entranceY = isDescending ? portalT : portalB;
-	if (marioL < portalL) offsetX = portalL - marioL;
-	if (marioR > portalR) offsetX = portalR - marioR - 1;
-	if (isDescending) {
-		if (marioB > portalT) offsetY = portalT - marioB + 2;
+	bool isDescending = portal->GetIsDescending();
+	if (isDescending && isSitting || !isDescending && isHoldingUpKey)
+	{
+
+		float marioL, marioT, marioR, marioB;
+		GetBoundingBox(marioL, marioT, marioR, marioB);
+		float portalL, portalT, portalR, portalB;
+		portal->GetBoundingBox(portalL, portalT, portalR, portalB);
+		float portalX, portalY;
+		portal->GetPosition(portalX, portalY);
+		this->targetX = portal->GetTargetX();
+		this->exitY = portal->GetExitY();
+		this->yLevel = portal->GetYLevel();
+		this->entranceY = isDescending ? portalT : portalB;
+		if (marioL < portalL) offsetX = portalL - marioL;
+		if (marioR > portalR) offsetX = portalR - marioR - 1;
+		if (isDescending) {
+			if (marioB > portalT) offsetY = portalT - marioB + 2;
+		}
+		else {
+			if (marioT < portalB) offsetY = marioT - portalB - 2;
+		}
+		SetState(MARIO_STATE_TELEPORTING);
 	}
-	else {
-		if (marioT < portalB) offsetY = marioT - portalB - 2;
-	}
-	SetState(MARIO_STATE_TELEPORTING);
 }
 
 void CMario::OnNoCollision(DWORD dt)
@@ -1286,6 +1290,7 @@ void CMario::SetState(int state)
 		break;
 
 	case MARIO_STATE_TELEPORTING:
+		isSitting = false; //Release sit after entering pipe
 		ax = 0;
 		vx = 0;
 		vy = (entranceY < exitY) ? MARIO_DESCEND_SPEED : -MARIO_DESCEND_SPEED;

@@ -307,6 +307,7 @@ class CMario : public CGameObject
 	bool isRunning = 0;
 	bool isJumpButtonHeld = 0;
 	bool isChangingLevel = false;
+	bool isHoldingUpKey = false;
 
 	void OnCollisionWithGoomba(LPCOLLISIONEVENT e);
 	void OnCollisionWithCoin(LPCOLLISIONEVENT e);
@@ -389,4 +390,5 @@ public:
 	void SetIsRunning(bool isRunning) { this->isRunning = isRunning; }
 	void SetIsHoldingKoopa(bool isHoldingKoopa) { this->isHoldingKoopa = isHoldingKoopa; }
 	void SetIsJumpButtonHeld(bool held) { this->isJumpButtonHeld = held; }
+	void SetIsHoldingUpKey(bool isHoldingUpKey) { this->isHoldingUpKey = isHoldingUpKey; }
 };
