@@ -626,7 +626,8 @@ void CMario::OnCollisionWithCoinBrick(LPCOLLISIONEVENT e)
 		if (cb->IsRevealed())
 		{
 			cb->SetState(COIN_BRICK_STATE_CONSUMED);
-			// tang coin len
+			CGame::GetInstance()->GetGameState()->AddScore(50);
+			CGame::GetInstance()->GetGameState()->AddCoin();
 		}
 		else if (e->ny > 0 && e->nx == 0)
 		{
