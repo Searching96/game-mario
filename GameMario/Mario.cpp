@@ -1178,7 +1178,7 @@ int CMario::GetAniIdTail()
 		else aniId = ID_ANI_MARIO_TAIL_KICK_LEFT;
 	}
 
-	if (jumpCount > 0 && jumpCount < MAX_JUMP_COUNT)
+	if (jumpCount > 0 && (jumpCount < MAX_JUMP_COUNT && pMeter == 1.0f))
 		if (nx > 0) aniId = ID_ANI_MARIO_TAIL_MULTIJUMP_RIGHT;
 		else aniId = ID_ANI_MARIO_TAIL_MULTIJUMP_LEFT;
 
@@ -1440,7 +1440,7 @@ void CMario::SetState(int state)
 		}
 		else if (level == MARIO_LEVEL_TAIL)
 		{
-			if (jumpCount >= MAX_JUMP_COUNT)
+			if (jumpCount >= MAX_JUMP_COUNT || pMeter != 1.0f)
 			{
 				SetState(MARIO_STATE_HOVER);
 				break;
@@ -1451,7 +1451,7 @@ void CMario::SetState(int state)
 				jumpCount++;
 				vy = -MARIO_JUMP_SPEED_Y;
 			}
-			else if (jumpCount >= 1)
+			else if (jumpCount >= 1 && pMeter == 1.0f)
 			{
 				jumpCount++;
 				vy = -MARIO_JUMP_SPEED_Y;
