@@ -9,7 +9,7 @@
 void CSampleKeyHandler::OnKeyDown(int KeyCode)
 {
 	//DebugOut(L"[INFO] KeyDown: %d\n", KeyCode);
-	CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer(); 
+	CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
 
 	float x, y;
 	player->GetPosition(x, y);
@@ -19,8 +19,10 @@ void CSampleKeyHandler::OnKeyDown(int KeyCode)
 	case DIK_DOWN:
 		if (player->IsChangingLevel())
 			return;
-
 		player->SetState(MARIO_STATE_SIT);
+		break;
+	case DIK_UP:
+		player->SetIsHoldingUpKey(true);
 		break;
 	case DIK_S:
 		if (player->GetJumpCount() >= MAX_JUMP_COUNT && player->GetLevel() == MARIO_LEVEL_TAIL)
@@ -62,6 +64,9 @@ void CSampleKeyHandler::OnKeyUp(int KeyCode)
 	case DIK_DOWN:
 		mario->SetState(MARIO_STATE_SIT_RELEASE);
 		break;
+	case DIK_UP:
+		mario->SetIsHoldingUpKey(false);
+		break;
 	case DIK_LEFT:
 		mario->SetState(MARIO_STATE_RELEASE_MOVE);
 		break;
@@ -82,16 +87,12 @@ void CSampleKeyHandler::OnKeyUp(int KeyCode)
 		break;
 	case DIK_R:
 		DebugOut(L"[INFO] Reloading scene...\n");
-		if (CGame::GetInstance()->IsPaused())
-			CGame::GetInstance()->PauseGame();
-		CGame::GetInstance()->GetCurrentScene()->Unload();
-		CGame::GetInstance()->GetCurrentScene()->Load();
-		CGame::GetInstance()->GetGameState()->Reset();
+		CGame::GetInstance()->ReloadScene();
 		break;
 	}
 }
 
-void CSampleKeyHandler::KeyState(BYTE *states)
+void CSampleKeyHandler::KeyState(BYTE* states)
 {
 	LPGAME game = CGame::GetInstance();
 	CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();

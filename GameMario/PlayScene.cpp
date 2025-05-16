@@ -196,7 +196,7 @@ void CPlayScene::_ParseSection_MARIO(string line)
 	float x, y;
 	try {
 		id = stoi(tokens[0]);
-		x = stoi(tokens[1]);
+		x = stof(tokens[1]);
 		y = stof(tokens[2]);
 	}
 	catch (const exception& e) {
@@ -295,8 +295,8 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 		{
 			zIndex = ZINDEX_PLATFORMS;
 			if (tokens.size() < 6) throw runtime_error("Insufficient params for PLATFORM/SKYPLATFORM");
-			float width = stof(tokens[4]);
-			float height = stof(tokens[5]);
+			int width = stoi(tokens[4]);
+			int height = stoi(tokens[5]);
 			if (object_type == OBJECT_TYPE_PLATFORM)
 				obj = new CPlatform(id, x, y, zIndex, width, height);
 			else
@@ -390,8 +390,8 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 		{
 			zIndex = ZINDEX_MUSHROOM - 1;
 			if (tokens.size() < 7) throw runtime_error("Insufficient params for BOX");
-			float width = stof(tokens[4]);
-			float height = stof(tokens[5]);
+			int width = stoi(tokens[4]);
+			int height = stoi(tokens[5]);
 			int color = stoi(tokens[6]);
 			int bottomShadow = (tokens.size() >= 8) ? stoi(tokens[7]) : 0;
 			obj = new CBox(id, x, y, zIndex, width, height, color, bottomShadow);
@@ -421,7 +421,7 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 		{
 			zIndex = (object_type == OBJECT_TYPE_BUSH) ? ZINDEX_BACKGROUND_SCENERY : ZINDEX_BACKGROUND_EFFECTS;
 			if (tokens.size() < 5) throw runtime_error("Insufficient params for BUSH/CLOUD");
-			float width = stof(tokens[4]);
+			int width = stoi(tokens[4]);
 			obj = (object_type == OBJECT_TYPE_BUSH) ? (CGameObject*)new CBush(id, x, y, zIndex, width) : (CGameObject*)new CCloud(id, x, y, zIndex, width);
 			break;
 		}
@@ -439,9 +439,9 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 			if (tokens.size() < 7) throw runtime_error("Insufficient params for PORTAL");
 			float width = stof(tokens[4]);
 			float height = stof(tokens[5]);
-			int targetX = stoi(tokens[6]);
-			int exitY = stoi(tokens[7]);
-			int yLevel = stoi(tokens[8]);
+			float targetX = stof(tokens[6]);
+			float exitY = stof(tokens[7]);
+			float yLevel = stof(tokens[8]);
 			obj = new CPortal(id, x - 8, y - 8, width, height, zIndex, targetX - 8, exitY - 8, yLevel);
 			break;
 		}
@@ -740,12 +740,13 @@ void CPlayScene::UpdateCamera(CMario* mario, float player_cx, float player_cy, f
 
 	// Initialize static state
 	static bool s_isLockedToGround = true;
-	float visible_world_cam_height = cam_height - HUD_BACKGROUND_HEIGHT + VIEWPORT_Y_OFFSET / 2;
+	float visible_world_cam_height = cam_height - HUD_BACKGROUND_HEIGHT + VIEWPORT_Y_OFFSET / 2.0f;
 
 	// Determine if Mario is flying with Tail
 	bool is_Racoon_and_MaxPMeter = (mario->GetLevel() == MARIO_LEVEL_TAIL && mario->GetPMeter() == 1.0f);
-	int yLevel = mario->GetYLevel();
+	float yLevel = mario->GetYLevel();
 	bool isInHiddenMap = mario_y >= mapHeight && yLevel != 0;
+	bool isTeleporting = mario->GetIsTeleporting();
 	bool cameraTouchedGround = cam_y >= (mapHeight - visible_world_cam_height);
 
 	// Update lock state
@@ -764,7 +765,7 @@ void CPlayScene::UpdateCamera(CMario* mario, float player_cx, float player_cy, f
 
 	// Calculate target vertical position
 	float targetCamY;
-	if (s_isLockedToGround) {
+	if (s_isLockedToGround || isTeleporting) {
 		// Lock to ground level
 		if (!isInHiddenMap) {
 			targetCamY = (mapHeight > visible_world_cam_height) ? (mapHeight - visible_world_cam_height) : 0.0f;

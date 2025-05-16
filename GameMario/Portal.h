@@ -23,6 +23,7 @@ public:
 	float GetTargetX() const { return targetX; }
 	float GetExitY() const { return exitY; }
 	float GetYLevel() const { return yLevel; }
+	bool GetIsDescending() const { return y < exitY; }
 
 	void Teleport(CMario* mario);
 	int IsBlocking() const { return 0; }

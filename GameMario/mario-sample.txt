@@ -1,6 +1,6 @@
 [SETTINGS]
 start	1
-width	320
+width	256
 height	240
 
 #id	type	file

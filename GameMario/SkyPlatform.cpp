@@ -9,7 +9,6 @@ int CSkyPlatform::IsDirectionColliable(float nx, float ny)
 void CSkyPlatform::Render()
 {
 	CSprites* s = CSprites::GetInstance();
-	int aniId;
 	if (this->height <= 0 || this->width <= 0) return;
 	for (int i = 0; i < this->height; i++)
 	{

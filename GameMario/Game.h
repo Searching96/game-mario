@@ -29,6 +29,8 @@ class CGame
 
 	int backBufferWidth = 0;					// Backbuffer width & height, will be set during Direct3D initialization
 	int backBufferHeight = 0;
+	int windowWidth = 0;
+	int windowHeight = 0;
 
 	bool isPaused = 0;
 
@@ -91,6 +93,7 @@ public:
 	int IsKeyDown(int KeyCode);
 	void ProcessKeyboard();
 	void SetKeyHandler(LPKEYEVENTHANDLER handler) { keyHandler = handler; }
+	void ResizeWindow();
 
 
 	ID3D10Device* GetDirect3DDevice() { return this->pD3DDevice; }
@@ -122,6 +125,8 @@ public:
 	void Load(LPCWSTR gameFile);
 	void SwitchScene();
 	void InitiateSwitchScene(int scene_id);
+	void ReloadScene();
+	void RestartScene();
 
 	void _ParseSection_TEXTURES(string line);
 

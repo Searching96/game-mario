@@ -7,11 +7,22 @@
 void CGameState::Update(DWORD dt) {
 	// get player
 	CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
-	if (player == nullptr || player->GetState() == MARIO_STATE_DIE_ON_BEING_KILLED || player->GetState() == MARIO_STATE_DIE_ON_FALLING || player->GetIsTeleporting() != 0)
+	if (player == nullptr || player->GetIsTeleporting())
 		return;
 
 	// Only decrease time if it's positive to prevent underflow issues
-	if (time > dt) time -= dt;
+	if (player->GetState() == MARIO_STATE_DIE_ON_BEING_KILLED || player->GetState() == MARIO_STATE_DIE_ON_FALLING)
+	{
+		if (marioDeathStart == -1)
+			marioDeathStart = 0;
+		else marioDeathStart += dt;
+		if (marioDeathStart > MARIO_DEATH_ANI_TIMEOUT)
+		{
+			marioDeathStart = -1; // Reset death timer
+			CGame::GetInstance()->RestartScene();
+		}
+	}
+	else if (time > dt) time -= dt;
 	else
 	{
 		time = 0; // Clamp to zero

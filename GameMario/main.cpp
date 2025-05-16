@@ -116,9 +116,8 @@ HWND CreateGameWindow(HINSTANCE hInstance, int nCmdShow, int ScreenWidth, int Sc
 	AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, FALSE);
 
 	// Calculate the total window width and height
-	int totalWindowWidth = rect.right - rect.left - 1;
-	int totalWindowHeight = rect.bottom - rect.top - 1;
-
+	int totalWindowWidth = rect.right - rect.left;
+	int totalWindowHeight = rect.bottom - rect.top;
 
 	wc.lpfnWndProc = (WNDPROC)WinProc;
 	wc.cbClsExtra = 0;

@@ -227,7 +227,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	if (jumpCount > 0)
 	{
 		// Scale gravity when ascending
-		ay = (vy < 0) ? MARIO_GRAVITY * 0.25f : MARIO_GRAVITY * 0.4;
+		ay = (vy < 0) ? MARIO_GRAVITY * 0.25f : MARIO_GRAVITY * 0.4f;
 
 		// Cap horizontal speed during multi-jump
 		float multiJumpMaxVx = MARIO_MAX_RUNNING_SPEED * 0.9f;
@@ -393,26 +393,30 @@ void CMario::HandleHovering(DWORD dt)
 
 void CMario::Teleport(CPortal* portal)
 {
-	float marioL, marioT, marioR, marioB;
-	GetBoundingBox(marioL, marioT, marioR, marioB);
-	float portalL, portalT, portalR, portalB;
-	portal->GetBoundingBox(portalL, portalT, portalR, portalB);
-	float portalX, portalY;
-	portal->GetPosition(portalX, portalY);
-	this->targetX = portal->GetTargetX();
-	this->exitY = portal->GetExitY();
-	this->yLevel = portal->GetYLevel();
-	bool isDescending = portalY < exitY;
-	this->entranceY = isDescending ? portalT : portalB;
-	if (marioL < portalL) offsetX = portalL - marioL;
-	if (marioR > portalR) offsetX = portalR - marioR - 1;
-	if (isDescending) {
-		if (marioB > portalT) offsetY = portalT - marioB + 2;
+	bool isDescending = portal->GetIsDescending();
+	if (isDescending && isSitting || !isDescending && isHoldingUpKey)
+	{
+
+		float marioL, marioT, marioR, marioB;
+		GetBoundingBox(marioL, marioT, marioR, marioB);
+		float portalL, portalT, portalR, portalB;
+		portal->GetBoundingBox(portalL, portalT, portalR, portalB);
+		float portalX, portalY;
+		portal->GetPosition(portalX, portalY);
+		this->targetX = portal->GetTargetX();
+		this->exitY = portal->GetExitY();
+		this->yLevel = portal->GetYLevel();
+		this->entranceY = isDescending ? portalT : portalB;
+		if (marioL < portalL) offsetX = portalL - marioL;
+		if (marioR > portalR) offsetX = portalR - marioR - 1;
+		if (isDescending) {
+			if (marioB > portalT) offsetY = portalT - marioB + 2;
+		}
+		else {
+			if (marioT < portalB) offsetY = marioT - portalB - 2;
+		}
+		SetState(MARIO_STATE_TELEPORTING);
 	}
-	else {
-		if (marioT < portalB) offsetY = marioT - portalB - 2;
-	}
-	SetState(MARIO_STATE_TELEPORTING);
 }
 
 void CMario::OnNoCollision(DWORD dt)
@@ -1284,6 +1288,7 @@ void CMario::SetState(int state)
 		break;
 
 	case MARIO_STATE_TELEPORTING:
+		isSitting = false; //Release sit after entering pipe
 		ax = 0;
 		vx = 0;
 		vy = (entranceY < exitY) ? MARIO_DESCEND_SPEED : -MARIO_DESCEND_SPEED;
@@ -1542,14 +1547,14 @@ void CMario::SetState(int state)
 		isMoving = 0;
 		if (!isOnPlatform)
 		{
-			frictionX = MARIO_FRICTION_X * 1.75;
+			frictionX = MARIO_FRICTION_X * 1.75f;
 		}
 		else if (fabs(vx) <= MARIO_MAX_WALKING_SPEED)
 		{
-			frictionX = MARIO_FRICTION_X * 3.75;
+			frictionX = MARIO_FRICTION_X * 3.75f;
 		}
 		else
-			frictionX = MARIO_FRICTION_X * 2.5;
+			frictionX = MARIO_FRICTION_X * 2.5f;
 		break;
 	case MARIO_STATE_RELEASE_RUN:
 		isRunning = 0;
@@ -1565,15 +1570,15 @@ void CMario::GetBoundingBox(float& left, float& top, float& right, float& bottom
 	{
 		if (isSitting)
 		{
-			left = x - MARIO_BIG_SITTING_BBOX_WIDTH / 2;
-			top = y - MARIO_BIG_SITTING_BBOX_HEIGHT / 2;
+			left = x - MARIO_BIG_SITTING_BBOX_WIDTH / 2.0f;
+			top = y - MARIO_BIG_SITTING_BBOX_HEIGHT / 2.0f;
 			right = left + MARIO_BIG_SITTING_BBOX_WIDTH - 3;
 			bottom = top + MARIO_BIG_SITTING_BBOX_HEIGHT;
 		}
 		else
 		{
-			left = x - MARIO_BIG_BBOX_WIDTH / 2;
-			top = y - MARIO_BIG_BBOX_HEIGHT / 2;
+			left = x - MARIO_BIG_BBOX_WIDTH / 2.0f;
+			top = y - MARIO_BIG_BBOX_HEIGHT / 2.0f;
 			right = left + MARIO_BIG_BBOX_WIDTH - 3;
 			bottom = top + MARIO_BIG_BBOX_HEIGHT;
 		}
@@ -1582,24 +1587,24 @@ void CMario::GetBoundingBox(float& left, float& top, float& right, float& bottom
 	{
 		if (isSitting)
 		{
-			left = x - MARIO_TAIL_SITTING_BBOX_WIDTH / 2 - 1;
-			top = y - MARIO_TAIL_SITTING_BBOX_HEIGHT / 2;
+			left = x - MARIO_TAIL_SITTING_BBOX_WIDTH / 2.0f - 1;
+			top = y - MARIO_TAIL_SITTING_BBOX_HEIGHT / 2.0f;
 			right = left + MARIO_TAIL_SITTING_BBOX_WIDTH + 1;
 			bottom = top + MARIO_TAIL_SITTING_BBOX_HEIGHT;
 		}
 		else
 		{
-			left = x - MARIO_TAIL_BBOX_WIDTH / 2 - 1;
-			top = y - MARIO_TAIL_BBOX_HEIGHT / 2;
+			left = x - MARIO_TAIL_BBOX_WIDTH / 2.0f - 1;
+			top = y - MARIO_TAIL_BBOX_HEIGHT / 2.0f;
 			right = left + MARIO_TAIL_BBOX_WIDTH + 1;
 			bottom = top + MARIO_TAIL_BBOX_HEIGHT;
 		}
 	}
 	else
 	{
-		left = x - MARIO_SMALL_BBOX_WIDTH / 2;
-		top = y - MARIO_SMALL_BBOX_HEIGHT / 2;
-		right = left + MARIO_SMALL_BBOX_WIDTH - 4;
+		left = x - MARIO_SMALL_BBOX_WIDTH / 2.0f;
+		top = y - MARIO_SMALL_BBOX_HEIGHT / 2.0f;
+		right = left + MARIO_SMALL_BBOX_WIDTH - 4.0f;
 		bottom = top + MARIO_SMALL_BBOX_HEIGHT;
 	}
 }
@@ -1611,7 +1616,7 @@ void CMario::SetLevel(int l)
 	// Adjust position to avoid falling off platform
 	if (this->level == MARIO_LEVEL_SMALL)
 	{
-		y -= (MARIO_BIG_BBOX_HEIGHT - MARIO_SMALL_BBOX_HEIGHT) / 2;
+		y -= (MARIO_BIG_BBOX_HEIGHT - MARIO_SMALL_BBOX_HEIGHT) / 2.0f;
 	}
 }
 

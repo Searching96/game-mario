@@ -448,15 +448,18 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 		vector<CChunk*> chunkList = dynamic_cast<CPlayScene*>(CGame::GetInstance()->GetCurrentScene())->GetChunks();
 
+		LPCHUNK currentChunk = nullptr;
+
 		for (auto chunk : chunkList)
 		{
 			if (!chunk->IsLoaded()) continue;
 			for (auto obj : chunk->GetObjects())
 			{
-				if (obj == this) chunk->RemoveObject(this);
+				if (obj == this) currentChunk = chunk;
 			}
-			if (x < chunk->GetEndX() && x > chunk->GetStartX())
+			if (x < chunk->GetEndX() && x > chunk->GetStartX() && currentChunk != nullptr && chunk != currentChunk)
 			{
+				currentChunk->RemoveObject(this);
 				chunk->AddObject(this);
 				chunk->AddEnemy(this);
 			}
@@ -484,10 +487,10 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	if ((state == KOOPA_STATE_SHELL_STATIC || state == KOOPA_STATE_BEING_HELD)
 		&& !isKicked && (GetTickCount64() - shellStart > KOOPA_SHELL_TIMEOUT))
 	{
-		if (player->IsRunning() == 1 && isHeld == 1)
+		if (player->IsRunning() && isHeld)
 		{
-			isHeld = 0;
-			player->SetIsHoldingKoopa(0);
+			isHeld = false;
+			player->SetIsHoldingKoopa(false);
 
 			if (CheckCollisionWithTerrain(dt, coObjects))
 			{
@@ -520,8 +523,8 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			this->SetState(KOOPA_STATE_SHELL_DYNAMIC);
 			this->SetNx(player->GetNx());
 			this->SetSpeed((nx > 0) ? KOOPA_SHELL_SPEED : -KOOPA_SHELL_SPEED, 0);
-			isHeld = 0;
-			player->SetIsHoldingKoopa(0);
+			isHeld = false;
+			player->SetIsHoldingKoopa(false);
 			player->StartKick();
 
 			if (CheckCollisionWithTerrain(dt, coObjects))
@@ -534,7 +537,7 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 		float mX, mY;
 		player->GetPosition(mX, mY);
-		float mNx = player->GetNx();
+		int mNx = player->GetNx();
 		if (player->GetLevel() == MARIO_LEVEL_TAIL)
 		{
 			if (mNx > 0)
@@ -646,7 +649,7 @@ void CKoopa::SetState(int state)
 		// Adjust y position to account for hitbox difference
 		// In shell: hitbox is centered (height/2 above and below y)
 		// In walking: hitbox extends from bottom up
-		float heightDifference = (KOOPA_TEXTURE_HEIGHT - KOOPA_BBOX_HEIGHT) / 2;
+		float heightDifference = (KOOPA_TEXTURE_HEIGHT - KOOPA_BBOX_HEIGHT) / 2.0f;
 		y -= heightDifference; // Move Koopa up to compensate
 	}
 

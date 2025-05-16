@@ -65,6 +65,7 @@ private:
 	LPSCENE current_scene;
 	int lives;
 	DWORD time; // Remaining time in MILLISECONDS
+	DWORD marioDeathStart;
 	int score;
 	int coins; // Added coins
 	int collected_cards[3]; // Added card storage (0: empty, 1: Mush, 2: Flower, 3: Star)
@@ -75,7 +76,7 @@ private:
 public:
 	// Constructor updated to include coins and cards
 	CGameState(LPSCENE scene, int lives, DWORD time, int score, int coins) :
-		current_scene(scene), lives(lives), time(time), score(score), coins(coins) {
+		current_scene(scene), lives(lives), time(time), score(score), coins(coins), marioDeathStart(-1) {
 		// Initialize cards to empty
 		for (int i = 0; i < 3; ++i) {
 			collected_cards[i] = 0;
@@ -91,6 +92,7 @@ public:
 	int GetScore() { return score; }
 	DWORD GetTime() { return time / 1000; } // Return time in seconds for display
 	void Reset() { time = 300000; lives = 3; score = 0; coins = 0; }
+	void Restart() { time = 300000; lives -= 1; coins = 0; }
 	void AddCoin() { this->coins = min(this->coins + 1, 99); } // Max 99 coins
 	int GetCoins() { return coins; }
 	void AddCard(int card_type); // Logic to add a card

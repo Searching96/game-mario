@@ -52,9 +52,9 @@ protected:
 	ULONGLONG dieStart;
 	ULONGLONG lastTurnAroundTime = -1;
 
-	int isHeld = 0;
-	int isDead = 0;
-	int isDefeated = 0;
+	bool isHeld = 0;
+	bool isDead = 0;
+	bool isDefeated = 0;
 
 	int originalChunkId;
 
@@ -81,15 +81,15 @@ public:
 	CKoopa(int id, float x, float y, int z, int originalChunkId);
 	virtual void SetState(int state);
 	void StartShell();
-	int IsHeld() { return isHeld; }
+	bool IsHeld() { return isHeld; }
 	void SetIsHeld(int beingHeld) { this->isHeld = beingHeld; }
 	void SetIsFlying(bool isFlying) { this->isFlying = isFlying; }
 	void SetIsReversed(bool isReversed) { this->isReversed = isReversed; }
 	void SetNx(int nx) { this->nx = nx; }
 	void GetOriginalPosition(float& x0, float& y0) { x0 = this->x0; y0 = this->y0; }
-	int IsFlying() { return isFlying; }
-	int IsDefeated() { return isDefeated; }
-	int IsDead() { return isDead; }
+	bool IsFlying() { return isFlying; }
+	bool IsDefeated() { return isDefeated; }
+	bool IsDead() { return isDead; }
 	void SetIsDefeated(int isDefeated) { this->isDefeated = isDefeated; }
 	int GetOriginalChunkId() { return originalChunkId; }
 };
