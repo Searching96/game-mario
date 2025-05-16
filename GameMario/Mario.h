@@ -9,12 +9,12 @@
 
 class CPortal;
 
-#define MARIO_MAX_WALKING_SPEED			0.10f
-#define MARIO_MAX_RUNNING_SPEED			0.20f
+#define MARIO_MAX_WALKING_SPEED			0.09f
+#define MARIO_MAX_RUNNING_SPEED			0.185f
 #define MARIO_MAX_FALLING_SPEED			0.25f
 #define MARIO_MAX_JUMP_SPEED			-0.65f
 
-#define MARIO_WALKING_SPEED				0.1f
+#define MARIO_WALKING_SPEED				0.08f
 #define MARIO_RUNNING_SPEED				0.165f
 #define MARIO_INSTANT_BRAKING_SPEED		0.04f
 #define MARIO_DESCEND_SPEED				0.01f
@@ -369,7 +369,7 @@ public:
 	int GetIsPowerDown() const { return powerDown; }
 	int GetIsTailDown() const { return tailDown; }
 	int GetIsHovering() const { return isHovering; }
-	int GetIsRunning() const { return isRunning; }
+	int IsRunning() const { return isRunning; }
 	int GetIsFlying() { return !isOnPlatform && (jumpCount > 1 || isHovering == 1); }
 
 	int GetIsTeleporting() const { return isTeleporting; }

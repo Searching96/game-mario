@@ -76,6 +76,7 @@ protected:
 	void OnCollisionWithCoinBrick(LPCOLLISIONEVENT e);
 	void OnCollisionWithActivatorBrick(LPCOLLISIONEVENT e);
 
+	bool CheckCollisionWithTerrain(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 public:
 	CKoopa(int id, float x, float y, int z, int originalChunkId);
 	virtual void SetState(int state);
@@ -86,6 +87,7 @@ public:
 	void SetIsReversed(bool isReversed) { this->isReversed = isReversed; }
 	void SetNx(int nx) { this->nx = nx; }
 	void GetOriginalPosition(float& x0, float& y0) { x0 = this->x0; y0 = this->y0; }
+	int IsFlying() { return isFlying; }
 	int IsDefeated() { return isDefeated; }
 	int IsDead() { return isDead; }
 	void SetIsDefeated(int isDefeated) { this->isDefeated = isDefeated; }

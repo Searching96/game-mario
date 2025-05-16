@@ -24,8 +24,7 @@
 #include "ActivatorBrick.h"
 
 #include "Collision.h"
-
-#define DEPENDENT_ID				9999 // taken from PlayScene.cpp
+#include "PlayScene.h"
 
 CMario::CMario(int id, float x, float y, int z) : CGameObject(id, x, y, z)
 {
@@ -81,7 +80,7 @@ CMario::~CMario()
 // In CMario::Update method, modify the hover handling
 void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
-	DebugOutTitle(L"hspl: %d", (int)hasReachedPlatformAfterHover);
+	// DebugOutTitle(L"hspl: %d", (int)hasReachedPlatformAfterHover);
 
 	// Track previous jump count to apply consistent jump impulse
 	static int lastJumpCount = 0;
@@ -231,7 +230,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		ay = (vy < 0) ? MARIO_GRAVITY * 0.25f : MARIO_GRAVITY * 0.4;
 
 		// Cap horizontal speed during multi-jump
-		float multiJumpMaxVx = MARIO_MAX_RUNNING_SPEED * 0.75f;
+		float multiJumpMaxVx = MARIO_MAX_RUNNING_SPEED * 0.9f;
 		if (vx > multiJumpMaxVx) vx = multiJumpMaxVx;
 		else if (vx < -multiJumpMaxVx) vx = -multiJumpMaxVx;
 	}
@@ -253,7 +252,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 	if (isRunning == 1 && isOnPlatform && abs(vx) >= MARIO_RUNNING_SPEED)
 	{
-		pMeter += dt / 900.0f;
+		pMeter += dt / 1200.0f;
 	}
 	else if (isOnPlatform) //Not running => Depleting
 	{

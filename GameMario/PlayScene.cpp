@@ -749,11 +749,11 @@ void CPlayScene::UpdateCamera(CMario* mario, float player_cx, float player_cy, f
 	bool cameraTouchedGround = cam_y >= (mapHeight - visible_world_cam_height);
 
 	// Update lock state
+	if (cameraTouchedGround) { // else was there
+		s_isLockedToGround = true; // Lock camera when on ground
+	}
 	if (is_Racoon_and_MaxPMeter) {
 		s_isLockedToGround = false; // Unlock camera when max P meter
-	}
-	else if (cameraTouchedGround) {
-		s_isLockedToGround = true; // Lock camera when on ground
 	}
 
 	// Calculate target horizontal position with margin

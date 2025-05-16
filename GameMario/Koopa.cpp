@@ -411,6 +411,29 @@ bool CKoopa::IsPlatformEdge(float checkDistance, vector<LPGAMEOBJECT>& coObjects
 	return false;
 }
 
+bool CKoopa::CheckCollisionWithTerrain(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
+{
+	// Check for collision with blocking objects
+	vector<LPCOLLISIONEVENT> coEvents;
+
+	coEvents.clear();
+	CCollision::GetInstance()->Scan(this, dt, coObjects, coEvents);
+
+	bool collideWithTerrain = false;
+	for (size_t i = 0; i < coEvents.size(); i++)
+	{
+		LPCOLLISIONEVENT e = coEvents[i];
+		if (e->obj->IsBlocking())
+		{
+			collideWithTerrain = true;
+			break;
+		}
+	}
+
+	for (size_t i = 0; i < coEvents.size(); i++) delete coEvents[i];
+	return collideWithTerrain;
+}
+
 void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
 	//DebugOutTitle(L"isdf: %d\n", (int)isDefeated);
@@ -425,7 +448,6 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 		vector<CChunk*> chunkList = dynamic_cast<CPlayScene*>(CGame::GetInstance()->GetCurrentScene())->GetChunks();
 
-
 		for (auto chunk : chunkList)
 		{
 			if (!chunk->IsLoaded()) continue;
@@ -439,11 +461,6 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				chunk->AddEnemy(this);
 			}
 		}
-	}
-
-	if (state == KOOPA_STATE_SHELL_DYNAMIC)
-	{
-		vx = (nx > 0) ? KOOPA_SHELL_SPEED : -KOOPA_SHELL_SPEED;
 	}
 
 	if ((isDead == 1) && (GetTickCount64() - dieStart > KOOPA_DIE_TIMEOUT))
@@ -467,55 +484,38 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	if ((state == KOOPA_STATE_SHELL_STATIC || state == KOOPA_STATE_BEING_HELD)
 		&& !isKicked && (GetTickCount64() - shellStart > KOOPA_SHELL_TIMEOUT))
 	{
-		if (player->GetIsRunning() == 1 && isHeld == 1)
+		if (player->IsRunning() == 1 && isHeld == 1)
 		{
 			isHeld = 0;
 			player->SetIsHoldingKoopa(0);
 
-			int isKilledOnCollideWithTerrain = 0;
-
-			// Check for collision with blocking objects
-			vector<LPCOLLISIONEVENT> coEvents;
-			vector<LPCOLLISIONEVENT> coEventsResult;
-
-			coEvents.clear();
-			CCollision::GetInstance()->Scan(this, dt, coObjects, coEvents);
-
-			for (int i = 0; i < coEvents.size(); i++)
+			if (CheckCollisionWithTerrain(dt, coObjects))
 			{
-				LPCOLLISIONEVENT e = coEvents[i];
-				if (e->obj->IsBlocking())
-				{
-					this->SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_TERRAIN);
-					isHeld = 0;
-					player->SetIsHoldingKoopa(0);
-					player->StartKick();
-					isKilledOnCollideWithTerrain = 1;
-					break;
-				}
+				this->SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_TERRAIN);
+				player->StartKick();
+				return;
 			}
 
-			for (int i = 0; i < coEvents.size(); i++) delete coEvents[i];
-			if (isKilledOnCollideWithTerrain == 1)
-				return;
-
-			y -= 6; // RED ALLERT
-			this->SetState((player->GetNx() > 0) ? KOOPA_STATE_WALKING_RIGHT : KOOPA_STATE_WALKING_LEFT);
-			//if (player->GetLevel() == MARIO_LEVEL_TAIL)
-			//	player->SetState(MARIO_STATE_TAIL_DOWN);
-			//else if (player->GetLevel() == MARIO_LEVEL_BIG)
-			//	player->SetState(MARIO_STATE_POWER_DOWN);
-			//else if (player->GetLevel() == MARIO_LEVEL_SMALL)
-			//	player->SetState(MARIO_STATE_DIE_ON_BEING_KILLED);
-
+			switch (player->GetLevel())
+			{
+			case MARIO_LEVEL_TAIL:
+				player->SetState(MARIO_STATE_TAIL_DOWN);
+				break;
+			case MARIO_LEVEL_BIG:
+				player->SetState(MARIO_STATE_POWER_DOWN);
+				break;
+			case MARIO_LEVEL_SMALL:
+				player->SetState(MARIO_STATE_DIE_ON_BEING_KILLED);
+				break;
+			}
 		}
-		this->SetPosition(x, y - 2);
-		SetState(KOOPA_STATE_WALKING_LEFT);
+		y -= 6; // RED ALLERT
+		this->SetState((player->GetNx() < 0) ? KOOPA_STATE_WALKING_RIGHT : KOOPA_STATE_WALKING_LEFT);
 	}
 
 	if (isHeld == 1)
 	{
-		if (player->GetIsRunning() == 0)
+		if (player->IsRunning() == 0)
 		{
 			this->SetState(KOOPA_STATE_SHELL_DYNAMIC);
 			this->SetNx(player->GetNx());
@@ -524,27 +524,11 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			player->SetIsHoldingKoopa(0);
 			player->StartKick();
 
-			// Check collision with blocking objects (terrain)
-			vector<LPCOLLISIONEVENT> coEvents;
-			vector<LPCOLLISIONEVENT> coEventsResult;
-
-			coEvents.clear();
-			CCollision::GetInstance()->Scan(this, dt, coObjects, coEvents);
-
-			for (size_t i = 0; i < coEvents.size(); i++)
+			if (CheckCollisionWithTerrain(dt, coObjects))
 			{
-				LPCOLLISIONEVENT e = coEvents[i];
-				if (e->obj->IsBlocking())
-				{
-					SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_TERRAIN);
-					isHeld = 0;
-					player->SetIsHoldingKoopa(0);
-					player->StartKick();
-					break;
-				}
+				SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_TERRAIN);
 			}
 
-			for (size_t i = 0; i < coEvents.size(); i++) delete coEvents[i];
 			return;
 		}
 
@@ -581,7 +565,10 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	vy += ay * dt;
 	vx += ax * dt;
 
-	if (state == KOOPA_STATE_WALKING_LEFT) {
+	if (state == KOOPA_STATE_SHELL_DYNAMIC) {
+		vx = (nx > 0) ? KOOPA_SHELL_SPEED : -KOOPA_SHELL_SPEED;
+	}
+	else if (state == KOOPA_STATE_WALKING_LEFT) {
 		if (IsPlatformEdge(0.1f, *coObjects)) {
 			SetState(KOOPA_STATE_WALKING_RIGHT);
 		}

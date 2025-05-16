@@ -221,7 +221,7 @@ void CTailWhip::OnCollisionWithKoopa(LPCOLLISIONEVENT e)
 		CParticle::GenerateParticleInChunk(this, 3);
 		k->StartShell();
 		k->SetState(KOOPA_STATE_SHELL_STATIC);
-		float knockbackVx = (this->nx > 0) ? 0.1f : -0.1f;
+		float knockbackVx = (this->nx > 0) ? 0.075f : -0.075f;
 		float knockbackVy = -0.5f;
 		k->SetIsFlying(true);
 		k->SetIsReversed(true);
