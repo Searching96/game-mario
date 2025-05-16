@@ -98,11 +98,11 @@ void CKoopa::OnCollisionWithQuestionBlock(LPCOLLISIONEVENT e)
 			this->SetState(KOOPA_STATE_WALKING_RIGHT);
 			return;
 		}
-		//else if (state == KOOPA_STATE_WALKING_RIGHT)
-		//{
-		//	this->SetState(KOOPA_STATE_WALKING_LEFT);
-		//	return;
-		//}
+		else if (state == KOOPA_STATE_WALKING_RIGHT)
+		{
+			this->SetState(KOOPA_STATE_WALKING_LEFT);
+			return;
+		}
 	}
 
 	bool isAbleToBounce = (state == KOOPA_STATE_WALKING_LEFT || state == KOOPA_STATE_WALKING_RIGHT || state == KOOPA_STATE_SHELL_STATIC);
@@ -699,12 +699,18 @@ void CKoopa::SetState(int state)
 		//ax = 0;
 		break;
 	case KOOPA_STATE_WALKING_LEFT:
+		if (GetTickCount64() - lastTurnAroundTime < KOOPA_TURNAROUND_TIMEOUT)
+			return;
+		lastTurnAroundTime = GetTickCount64();
 		if (this->state == KOOPA_STATE_SHELL_STATIC && vy != 0)
 			return;
 		isKicked = false;
 		vx = -KOOPA_WALKING_SPEED;
 		break;
 	case KOOPA_STATE_WALKING_RIGHT:
+		if (GetTickCount64() - lastTurnAroundTime < KOOPA_TURNAROUND_TIMEOUT)
+			return;
+		lastTurnAroundTime = GetTickCount64();
 		if (this->state == KOOPA_STATE_SHELL_STATIC && vy != 0)
 			return;
 		isKicked = false;

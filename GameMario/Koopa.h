@@ -15,6 +15,7 @@
 #define KOOPA_SHELL_TIMEOUT 7000
 #define KOOPA_SHELL_ALERT_TIMEOUT 5000
 #define KOOPA_DIE_TIMEOUT 700
+#define KOOPA_TURNAROUND_TIMEOUT 200
 
 #define KOOPA_STATE_WALKING_LEFT 100
 #define KOOPA_STATE_WALKING_RIGHT 110
@@ -49,6 +50,7 @@ protected:
 
 	ULONGLONG shellStart;
 	ULONGLONG dieStart;
+	ULONGLONG lastTurnAroundTime = -1;
 
 	int isHeld = 0;
 	int isDead = 0;
