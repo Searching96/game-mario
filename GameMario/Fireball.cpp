@@ -2,10 +2,6 @@
 #include "PiranhaPlant.h"
 #include "QuestionBlock.h"
 
-#include "Fireball.h"
-#include "PiranhaPlant.h"
-#include "QuestionBlock.h"
-
 void CFireball::GetBoundingBox(float& l, float& t, float& r, float& b)
 {
 	l = x - FIREBALL_BBOX_WIDTH / 2;
@@ -33,8 +29,8 @@ void CFireball::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	y += vy * dt;
 
 	float camX, camY;
-	float camWidth = CGame::GetInstance()->GetBackBufferWidth() / 2;
-	float camHeight = CGame::GetInstance()->GetBackBufferHeight() / 2;
+	float camWidth = CGame::GetInstance()->GetBackBufferWidth() / 2.0f;
+	float camHeight = CGame::GetInstance()->GetBackBufferHeight() / 2.0f;
 	CGame::GetInstance()->GetCamPos(camX, camY);
 
 	if (fabs(x - camX - camWidth) > camWidth * 1.125f || fabs(y - camY - camHeight) > camHeight * 1.125f)

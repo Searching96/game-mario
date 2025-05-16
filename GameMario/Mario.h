@@ -244,6 +244,7 @@ class CPortal;
 #define MARIO_UNTOUCHABLE_RENDER_INTERVAL			75
 #define MARIO_TAIL_WHIP_TIMEOUT						305
 #define MARIO_PMETER_MAX_TIMEOUT					7000
+#define MARIO_DEATH_ANI_TIMEOUT						400
 
 #define MAX_JUMP_COUNT 10
 #define SPEED_DIVISOR 3.0f
@@ -263,15 +264,15 @@ class CMario : public CGameObject
 	float frictionX;
 	
 	int level;
-	int untouchable;
+	bool untouchable;
 	ULONGLONG untouchableStart;
 	BOOLEAN isOnPlatform;
 	float pMeter = 0.0f;
 	ULONGLONG pMeterMax = -1;
 	int consecutiveEnemies;
 
-	int isTeleporting = 0;
-	int isEnteringPortal = 0;
+	bool isTeleporting = false;
+	bool isEnteringPortal = false;
 	float entranceY;
 	float targetX;
 	float exitY;
@@ -279,32 +280,32 @@ class CMario : public CGameObject
 	float offsetX = 0;
 	float offsetY = 0;
 
-	int powerUp = 0;
+	bool powerUp = 0;
 	ULONGLONG powerUpStart = -1;
-	int tailUp = 0;
+	bool tailUp = 0;
 	ULONGLONG tailUpStart = -1;
-	int powerDown = 0;
+	bool powerDown = 0;
 	ULONGLONG powerDownStart = -1;
-	int tailDown = 0;
+	bool tailDown = 0;
 	ULONGLONG tailDownStart = -1;
-	int isHovering = 0;
+	bool isHovering = 0;
 	ULONGLONG hoveringStart = -1;
-	int isBraking = 0;
+	bool isBraking = 0;
 	float vxBeforeBraking = 0;
 	ULONGLONG brakingStart = -1;
-	int isTailWhipping = 0;
+	bool isTailWhipping = 0;
 	ULONGLONG tailWhipStart = -1;
-	int isKicking = 0;
+	bool isKicking = 0;
 	ULONGLONG kickStart = -1;
 
 	bool isRendering = true;
 	ULONGLONG lastRenderTime = -1;
 
-	int isHoldingKoopa = 0;
+	bool isHoldingKoopa = 0;
 	int jumpCount = 0;
-	int isMoving = 0;
-	int isRunning = 0;
-	int isJumpButtonHeld = 0;
+	bool isMoving = 0;
+	bool isRunning = 0;
+	bool isJumpButtonHeld = 0;
 	bool isChangingLevel = false;
 
 	void OnCollisionWithGoomba(LPCOLLISIONEVENT e);
@@ -364,17 +365,17 @@ public:
 
 	int GetJumpCount() const { return jumpCount; }
 	int GetLevel() const { return level; }
-	int GetIsPowerUp() const { return powerUp; }
-	int GetIsTailUp() const { return tailUp; }
-	int GetIsPowerDown() const { return powerDown; }
-	int GetIsTailDown() const { return tailDown; }
-	int GetIsHovering() const { return isHovering; }
-	int GetIsRunning() const { return isRunning; }
-	int GetIsFlying() { return !isOnPlatform && (jumpCount > 1 || isHovering == 1); }
+	bool GetIsPowerUp() const { return powerUp; }
+	bool GetIsTailUp() const { return tailUp; }
+	bool GetIsPowerDown() const { return powerDown; }
+	bool GetIsTailDown() const { return tailDown; }
+	bool GetIsHovering() const { return isHovering; }
+	bool GetIsRunning() const { return isRunning; }
+	bool GetIsFlying() { return !isOnPlatform && (jumpCount > 1 || isHovering == 1); }
 
-	int GetIsTeleporting() const { return isTeleporting; }
-	int GetIsEnteringPortal() const { return isEnteringPortal; }
-	int GetYLevel() const { return yLevel; }
+	bool GetIsTeleporting() const { return isTeleporting; }
+	bool GetIsEnteringPortal() const { return isEnteringPortal; }
+	float GetYLevel() const { return yLevel; }
 
 	int GetNx() { return nx; }
 	float GetPMeter() const { return pMeter; }
@@ -385,7 +386,7 @@ public:
 	CTailWhip* GetActiveTailWhip();
 
 	void SetLevel(int l);
-	void SetIsRunning(int isRunning) { this->isRunning = isRunning; }
-	void SetIsHoldingKoopa(int isHoldingKoopa) { this->isHoldingKoopa = isHoldingKoopa; }
-	void SetIsJumpButtonHeld(int held) { this->isJumpButtonHeld = held; }
+	void SetIsRunning(bool isRunning) { this->isRunning = isRunning; }
+	void SetIsHoldingKoopa(bool isHoldingKoopa) { this->isHoldingKoopa = isHoldingKoopa; }
+	void SetIsJumpButtonHeld(bool held) { this->isJumpButtonHeld = held; }
 };

@@ -8,6 +8,9 @@
 #include "Animations.h"
 #include "PlayScene.h"
 
+#define SCREEN_WIDTH 256 //Copy from main.cpp
+#define SCREEN_HEIGHT 240 
+
 CGame * CGame::__instance = nullptr;
 
 /*
@@ -430,6 +433,85 @@ void CGame::ProcessKeyboard()
 	}
 }
 
+void CGame::ResizeWindow()
+{
+	if (windowWidth <= 0 || windowHeight <= 0) {
+		windowWidth = SCREEN_WIDTH * 3; // Fallback
+		windowHeight = SCREEN_HEIGHT * 3;
+		DebugOut(L"[INFO] Using fallback window dimensions: %d x %d\n", windowWidth, windowHeight);
+	}
+
+	// Step 1: Resize the window
+	DWORD windowStyle = WS_OVERLAPPEDWINDOW;
+	RECT rect = { 0, 0, windowWidth, windowHeight };
+	AdjustWindowRect(&rect, windowStyle, FALSE);
+	int totalWindowWidth = rect.right - rect.left;
+	int totalWindowHeight = rect.bottom - rect.top;
+
+	RECT currentRect;
+	GetWindowRect(hWnd, &currentRect);
+	int x = currentRect.left; // Preserve position
+	int y = currentRect.top;
+
+	if (!SetWindowPos(hWnd, nullptr, x, y, totalWindowWidth, totalWindowHeight,
+		SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOOWNERZORDER))
+	{
+		DebugOut(L"[ERROR] Failed to resize window to %d x %d\n", windowWidth, windowHeight);
+		return;
+	}
+
+	// Step 2: Update Direct3D backbuffer
+	// Release existing render target and swap chain resources
+	if (pRenderTargetView) {
+		pRenderTargetView->Release();
+		pRenderTargetView = nullptr;
+	}
+
+	// Resize swap chain
+	backBufferWidth = windowWidth;
+	backBufferHeight = windowHeight;
+	HRESULT hr = pSwapChain->ResizeBuffers(1, backBufferWidth, backBufferHeight, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
+	if (FAILED(hr)) {
+		DebugOut(L"[ERROR] Failed to resize swap chain buffers: %d\n", hr);
+		return;
+	}
+
+	// Recreate render target view
+	ID3D10Texture2D* pBackBuffer;
+	hr = pSwapChain->GetBuffer(0, __uuidof(ID3D10Texture2D), (LPVOID*)&pBackBuffer);
+	if (FAILED(hr)) {
+		DebugOut(L"[ERROR] Failed to get back buffer: %d\n", hr);
+		return;
+	}
+
+	hr = pD3DDevice->CreateRenderTargetView(pBackBuffer, nullptr, &pRenderTargetView);
+	pBackBuffer->Release();
+	if (FAILED(hr)) {
+		DebugOut(L"[ERROR] Failed to create render target view: %d\n", hr);
+		return;
+	}
+
+	// Set render target
+	pD3DDevice->OMSetRenderTargets(1, &pRenderTargetView, nullptr);
+
+	// Update viewport
+	D3D10_VIEWPORT viewPort;
+	viewPort.Width = backBufferWidth;
+	viewPort.Height = backBufferHeight;
+	viewPort.MinDepth = 0.0f;
+	viewPort.MaxDepth = 1.0f;
+	viewPort.TopLeftX = 0;
+	viewPort.TopLeftY = 0;
+	pD3DDevice->RSSetViewports(1, &viewPort);
+
+	// Update sprite projection matrix
+	D3DXMATRIX matProjection;
+	D3DXMatrixOrthoOffCenterLH(&matProjection, 0.0f, (float)backBufferWidth, 0.0f, (float)backBufferHeight, 0.1f, 10.0f);
+	spriteObject->SetProjectionTransform(&matProjection);
+
+	DebugOut(L"[INFO] Window resized to %d x %d, backbuffer updated\n", backBufferWidth, backBufferHeight);
+}
+
 #define MAX_GAME_LINE 1024
 
 
@@ -442,10 +524,13 @@ void CGame::ProcessKeyboard()
 void CGame::_ParseSection_SETTINGS(string line)
 {
 	vector<string> tokens = split(line);
-
 	if (tokens.size() < 2) return;
 	if (tokens[0] == "start")
 		next_scene = atoi(tokens[1].c_str());
+	else if (tokens[0] == "width")
+		windowWidth = atoi(tokens[1].c_str());
+	else if (tokens[0] == "height")
+		windowHeight = atoi(tokens[1].c_str());
 	else
 		DebugOut(L"[ERROR] Unknown game setting: %s\n", ToWSTR(tokens[0]).c_str());
 }
@@ -505,6 +590,8 @@ void CGame::Load(LPCWSTR gameFile)
 	f.close();
 
 	DebugOut(L"[INFO] Loading game file : %s has been loaded successfully\n", gameFile);
+
+	ResizeWindow();
 
 	SwitchScene();
 }
@@ -586,4 +673,26 @@ void CGame::PauseGame() {
 	}
 	DebugOut(L"[INFO] Game speed: %f\n", gameSpeed);
 
+}
+
+void CGame::ReloadScene()
+{
+	if (IsPaused())
+		gameSpeed = 1.0f;
+	GetCurrentScene()->Unload();
+	GetCurrentScene()->Load();
+	GetGameState()->Reset();
+}
+
+void CGame::RestartScene()
+{
+	int lives = GetGameState()->GetLives();
+	if (lives > 0)
+	{
+		if (IsPaused())
+			gameSpeed = 1.0f;
+		GetCurrentScene()->Unload();
+		GetCurrentScene()->Load();
+		GetGameState()->Restart();
+	}
 }

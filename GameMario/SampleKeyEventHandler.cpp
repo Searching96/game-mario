@@ -82,11 +82,7 @@ void CSampleKeyHandler::OnKeyUp(int KeyCode)
 		break;
 	case DIK_R:
 		DebugOut(L"[INFO] Reloading scene...\n");
-		if (CGame::GetInstance()->IsPaused())
-			CGame::GetInstance()->PauseGame();
-		CGame::GetInstance()->GetCurrentScene()->Unload();
-		CGame::GetInstance()->GetCurrentScene()->Load();
-		CGame::GetInstance()->GetGameState()->Reset();
+		CGame::GetInstance()->ReloadScene();
 		break;
 	}
 }

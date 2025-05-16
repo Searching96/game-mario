@@ -467,12 +467,12 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	if ((state == KOOPA_STATE_SHELL_STATIC || state == KOOPA_STATE_BEING_HELD)
 		&& !isKicked && (GetTickCount64() - shellStart > KOOPA_SHELL_TIMEOUT))
 	{
-		if (player->GetIsRunning() == 1 && isHeld == 1)
+		if (player->GetIsRunning() && isHeld)
 		{
-			isHeld = 0;
-			player->SetIsHoldingKoopa(0);
+			isHeld = false;
+			player->SetIsHoldingKoopa(false);
 
-			int isKilledOnCollideWithTerrain = 0;
+			bool isKilledOnCollideWithTerrain = false;
 
 			// Check for collision with blocking objects
 			vector<LPCOLLISIONEVENT> coEvents;
@@ -487,16 +487,16 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				if (e->obj->IsBlocking())
 				{
 					this->SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_TERRAIN);
-					isHeld = 0;
-					player->SetIsHoldingKoopa(0);
+					isHeld = true;
+					player->SetIsHoldingKoopa(true);
 					player->StartKick();
-					isKilledOnCollideWithTerrain = 1;
+					isKilledOnCollideWithTerrain = true;
 					break;
 				}
 			}
 
 			for (int i = 0; i < coEvents.size(); i++) delete coEvents[i];
-			if (isKilledOnCollideWithTerrain == 1)
+			if (isKilledOnCollideWithTerrain)
 				return;
 
 			y -= 6; // RED ALLERT
@@ -557,13 +557,13 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			return;
 		}
 
-		if (player->GetIsRunning() == 0)
+		if (player->GetIsRunning())
 		{
 			this->SetState(KOOPA_STATE_SHELL_DYNAMIC);
 			this->SetNx(player->GetNx());
 			this->SetSpeed((nx > 0) ? KOOPA_SHELL_SPEED : -KOOPA_SHELL_SPEED, 0);
-			isHeld = 0;
-			player->SetIsHoldingKoopa(0);
+			isHeld = false;
+			player->SetIsHoldingKoopa(false);
 			player->StartKick();
 
 			// Check collision with blocking objects (terrain)
@@ -592,7 +592,7 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 		float mX, mY;
 		player->GetPosition(mX, mY);
-		float mNx = player->GetNx();
+		int mNx = player->GetNx();
 		if (player->GetLevel() == MARIO_LEVEL_TAIL)
 		{
 			if (mNx > 0)
@@ -705,7 +705,7 @@ void CKoopa::SetState(int state)
 		// Adjust y position to account for hitbox difference
 		// In shell: hitbox is centered (height/2 above and below y)
 		// In walking: hitbox extends from bottom up
-		float heightDifference = (KOOPA_TEXTURE_HEIGHT - KOOPA_BBOX_HEIGHT) / 2;
+		float heightDifference = (KOOPA_TEXTURE_HEIGHT - KOOPA_BBOX_HEIGHT) / 2.0f;
 		y -= heightDifference; // Move Koopa up to compensate
 	}
 
