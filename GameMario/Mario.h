@@ -31,7 +31,7 @@
 
 #define MARIO_JUMP_DEFLECT_SPEED		0.3f
 
-#define MARIO_STATE_DIE					-20
+#define MARIO_STATE_DIE_ON_BEING_KILLED					-20
 #define MARIO_STATE_DIE_ON_FALLING		-10
 #define MARIO_STATE_IDLE				0
 #define MARIO_STATE_WALKING_RIGHT		100
@@ -239,8 +239,8 @@
 #define MARIO_TAIL_WHIP_TIMEOUT						305
 #define MARIO_PMETER_MAX_TIMEOUT					7000
 
-#define MAX_JUMP_COUNT 100
-#define SPEED_DIVISOR 3.0f;
+#define MAX_JUMP_COUNT 10
+#define SPEED_DIVISOR 3.0f
 
 class CMario : public CGameObject
 {
@@ -252,8 +252,10 @@ class CMario : public CGameObject
 	float ax;
 	float ay;
 
-	float frictionX;
+	bool hasReachedPlatformAfterHover = true;
 
+	float frictionX;
+	
 	int level;
 	int untouchable;
 	ULONGLONG untouchableStart;
@@ -325,7 +327,7 @@ public:
 	void Render();
 	void SetState(int state);
 
-	int IsCollidable() { return (state != MARIO_STATE_DIE); }
+	int IsCollidable() { return (state != MARIO_STATE_DIE_ON_BEING_KILLED); }
 	int IsBlocking() { return 0; }
 
 	void OnNoCollision(DWORD dt);
@@ -342,7 +344,7 @@ public:
 	void StartTailDown() { tailDown = 1; tailDownStart = GetTickCount64(); isChangingLevel = true; }
 	void StartKick() { isKicking = 1; kickStart = GetTickCount64(); }
 	void StartBraking();
-	void StartHovering() { isHovering = 1; hoveringStart = GetTickCount64(); }
+	void StartHovering() { isHovering = 1; hoveringStart = GetTickCount64(); hasReachedPlatformAfterHover = false; }
 	void StartTailWhip();
 
 	int GetJumpCount() const { return jumpCount; }

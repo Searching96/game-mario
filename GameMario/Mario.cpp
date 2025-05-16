@@ -81,6 +81,8 @@ CMario::~CMario()
 // In CMario::Update method, modify the hover handling
 void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
+	DebugOutTitle(L"hspl: %d", (int)hasReachedPlatformAfterHover);
+
 	// Track previous jump count to apply consistent jump impulse
 	static int lastJumpCount = 0;
 	int prevJumpCount = lastJumpCount;
@@ -327,7 +329,14 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 	if (e->ny != 0 && e->obj->IsBlocking())
 	{
 		vy = 0;
-		if (e->ny < 0) isOnPlatform = true;
+		if (e->ny < 0)
+		{
+			isOnPlatform = true;
+			if (!hasReachedPlatformAfterHover)
+			{
+				hasReachedPlatformAfterHover = true;
+			}
+		}
 		consecutiveEnemies = 0;
 	}
 	else
@@ -409,7 +418,7 @@ void CMario::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
 				else
 				{
 					DebugOut(L">>> Mario DIE >>> \n");
-					SetState(MARIO_STATE_DIE);
+					SetState(MARIO_STATE_DIE_ON_BEING_KILLED);
 				}
 
 				if (e->nx != 0 && this->isRunning == 1)
@@ -549,7 +558,7 @@ void CMario::OnCollisionWithLifeMushroom(LPCOLLISIONEVENT e)
 
 void CMario::OnCollisionWithFallPitch(LPCOLLISIONEVENT e)
 {
-	this->SetState(MARIO_STATE_DIE);
+	this->SetState(MARIO_STATE_DIE_ON_BEING_KILLED);
 }
 
 void CMario::OnCollisionWithMushroom(LPCOLLISIONEVENT e)
@@ -605,7 +614,7 @@ void CMario::OnCollisionWithPiranhaPlant(LPCOLLISIONEVENT e)
 			else
 			{
 				DebugOut(L">>> Mario DIE >>> \n");
-				SetState(MARIO_STATE_DIE);
+				SetState(MARIO_STATE_DIE_ON_BEING_KILLED);
 			}
 		}
 	}
@@ -631,7 +640,7 @@ void CMario::OnCollisionWithFireball(LPCOLLISIONEVENT e)
 			else
 			{
 				DebugOut(L">>> Mario DIE >>> \n");
-				SetState(MARIO_STATE_DIE);
+				SetState(MARIO_STATE_DIE_ON_BEING_KILLED);
 			}
 		}
 	}
@@ -701,7 +710,7 @@ void CMario::OnCollisionWithKoopa(LPCOLLISIONEVENT e) {
 		else
 		{
 			DebugOut(L">>> Mario DIE >>> \n");
-			SetState(MARIO_STATE_DIE);
+			SetState(MARIO_STATE_DIE_ON_BEING_KILLED);
 		}
 	}
 }
@@ -744,7 +753,7 @@ void CMario::OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e)
 				}
 				else
 				{
-					SetState(MARIO_STATE_DIE);
+					SetState(MARIO_STATE_DIE_ON_BEING_KILLED);
 					DebugOut(L">>> Mario DIE >>> \n");
 				}
 
@@ -1064,7 +1073,7 @@ int CMario::GetAniIdTail()
 		else aniId = ID_ANI_MARIO_TAIL_KICK_LEFT;
 	}
 
-	if (jumpCount > 0)
+	if (jumpCount > 0 && jumpCount < MAX_JUMP_COUNT)
 		if (nx > 0) aniId = ID_ANI_MARIO_TAIL_MULTIJUMP_RIGHT;
 		else aniId = ID_ANI_MARIO_TAIL_MULTIJUMP_LEFT;
 
@@ -1099,6 +1108,11 @@ int CMario::GetAniIdTail()
 		if (isOnPlatform == 0 && isHovering == 0 && isHoldingKoopa == 0 && !isChangingLevel && jumpCount < 1 && vy > 0)
 			aniId = (nx > 0) ? ID_ANI_MARIO_TAIL_FALLING_RIGHT : ID_ANI_MARIO_TAIL_FALLING_LEFT;
 
+	if (!hasReachedPlatformAfterHover && isHovering == 0 && isHoldingKoopa == 0 && !isChangingLevel && vy > 0)
+	{
+		aniId = (nx > 0) ? ID_ANI_MARIO_TAIL_FALLING_RIGHT : ID_ANI_MARIO_TAIL_FALLING_LEFT;
+	}
+
 	if (aniId == -1) aniId = ID_ANI_MARIO_TAIL_IDLE_RIGHT;
 
 	preAniId = aniId;
@@ -1128,7 +1142,7 @@ void CMario::Render()
 	CAnimations* animations = CAnimations::GetInstance();
 	int aniId = -1;
 
-	if (state == MARIO_STATE_DIE)
+	if (state == MARIO_STATE_DIE_ON_BEING_KILLED)
 		aniId = ID_ANI_MARIO_DIE;
 	else if (level == MARIO_LEVEL_BIG)
 		aniId = GetAniIdBig();
@@ -1151,7 +1165,7 @@ void CMario::Render()
 void CMario::SetState(int state)
 {
 	// DIE is the end state, cannot be changed! 
-	if (this->state == MARIO_STATE_DIE) return;
+	if (this->state == MARIO_STATE_DIE_ON_BEING_KILLED || this->state == MARIO_STATE_DIE_ON_FALLING) return;
 	if (CGame::GetInstance()->IsPaused()) return;
 
 	int previousState = this->state;
@@ -1363,7 +1377,7 @@ void CMario::SetState(int state)
 		//vx = 0.0f;
 		break;
 
-	case MARIO_STATE_DIE:
+	case MARIO_STATE_DIE_ON_BEING_KILLED:
 		vy = -MARIO_JUMP_DEFLECT_SPEED;
 		vx = 0;
 		ax = 0;

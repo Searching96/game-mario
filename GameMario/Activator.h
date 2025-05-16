@@ -1,8 +1,8 @@
 #pragma once
 #include "GameObject.h"
 
-#define ID_ANI_ACTIVATOR_UNACTIVATED 1120000
-#define ID_ANI_ACTIVATOR_ACTIVATED 1120100
+#define ID_ANI_ACTIVATOR_UNACTIVATED 1200000
+#define ID_ANI_ACTIVATOR_ACTIVATED 1200100
 
 #define ACTIVATOR_CELL_WIDTH 16
 #define ACTIVATOR_CELL_HEIGHT 16
@@ -26,8 +26,8 @@ public:
 	void Render();
 	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 	void GetBoundingBox(float& l, float& t, float& r, float& b);
-	int IsBlocking() { return (state != ACTIVATOR_STATE_ACTIVATED && isRevealed); }
-	int IsCollidable() { return (state != ACTIVATOR_STATE_ACTIVATED && isRevealed); };
+	int IsBlocking() { return (!isActivated && isRevealed); }
+	int IsCollidable() { return (!isActivated && isRevealed); };
 	void SetState(int state);
 	void SetIsRevealed(bool isRevealed) { this->isRevealed = isRevealed; }
 	bool IsActivated() { return isActivated; }

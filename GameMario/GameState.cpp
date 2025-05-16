@@ -7,22 +7,22 @@
 void CGameState::Update(DWORD dt) {
 	// get player
 	CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
-	if (player->GetState() == MARIO_STATE_DIE || player->GetState() == MARIO_STATE_DIE_ON_FALLING || player == nullptr)
+	if (player->GetState() == MARIO_STATE_DIE_ON_BEING_KILLED || player->GetState() == MARIO_STATE_DIE_ON_FALLING || player == nullptr)
 		return;
 
 	// Only decrease time if it's positive to prevent underflow issues
 	if (time > 0) {
 		time -= dt;
-		if (time <= 0) {
-			time = 0; // Clamp to zero
-			// Ensure player exists before trying to kill them
-			if (current_scene) {
-				CPlayScene* playScene = dynamic_cast<CPlayScene*>(current_scene);
-				if (playScene) {
-					CMario* player = dynamic_cast<CMario*>(playScene->GetPlayer());
-					if (player && player->GetState() != MARIO_STATE_DIE) { // Avoid setting die state multiple times
-						player->SetState(MARIO_STATE_DIE);
-					}
+	}
+	if (time <= 0) {
+		time = 0; // Clamp to zero
+		// Ensure player exists before trying to kill them
+		if (current_scene) {
+			CPlayScene* playScene = dynamic_cast<CPlayScene*>(current_scene);
+			if (playScene) {
+				CMario* player = dynamic_cast<CMario*>(playScene->GetPlayer());
+				if (player && player->GetState() != MARIO_STATE_DIE_ON_BEING_KILLED) { // Avoid setting die state multiple times
+					player->SetState(MARIO_STATE_DIE_ON_BEING_KILLED);
 				}
 			}
 		}

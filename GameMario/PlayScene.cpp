@@ -813,7 +813,7 @@ void CPlayScene::Update(DWORD dt)
 
 	// --- Update all OTHER game objects within chunks ---
 	bool isChronoStopped = mario->GetIsPowerUp() || mario->GetIsTailUp() 
-		|| mario->GetIsPowerDown() || mario->GetIsTailDown() || (mario->GetState() == MARIO_STATE_DIE)
+		|| mario->GetIsPowerDown() || mario->GetIsTailDown() || (mario->GetState() == MARIO_STATE_DIE_ON_BEING_KILLED)
 		|| (mario->GetState() == MARIO_STATE_DIE_ON_FALLING);
 
 	for (LPCHUNK chunk : chunks) {

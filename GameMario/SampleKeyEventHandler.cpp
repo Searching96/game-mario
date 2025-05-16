@@ -44,7 +44,7 @@ void CSampleKeyHandler::OnKeyDown(int KeyCode)
 		player->SetLevel(MARIO_LEVEL_TAIL);
 		break;
 	case DIK_0:
-		player->SetState(MARIO_STATE_DIE);
+		player->SetState(MARIO_STATE_DIE_ON_BEING_KILLED);
 		break;
 	}
 }

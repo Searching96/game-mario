@@ -413,7 +413,7 @@ bool CKoopa::IsPlatformEdge(float checkDistance, vector<LPGAMEOBJECT>& coObjects
 
 void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
-	DebugOutTitle(L"isdf: %d\n", (int)isDefeated);
+	//DebugOutTitle(L"isdf: %d\n", (int)isDefeated);
 
 	if (isDefeated == 1)
 		return;
@@ -506,7 +506,7 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			else if (player->GetLevel() == MARIO_LEVEL_BIG)
 				player->SetState(MARIO_STATE_POWER_DOWN);
 			else if (player->GetLevel() == MARIO_LEVEL_SMALL)
-				player->SetState(MARIO_STATE_DIE);
+				player->SetState(MARIO_STATE_DIE_ON_BEING_KILLED);
 
 		}
 		this->SetPosition(x, y - 2);
