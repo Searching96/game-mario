@@ -11,6 +11,22 @@ void CChunk::Update(DWORD dt, std::vector<LPGAMEOBJECT>* coObjects)
 	}
 }
 
+void CChunk::ResetChunkConsumableState()
+{
+	for (auto& it : isConsumed)
+	{
+		it.second = false;
+	}
+}
+
+void CChunk::ResetChunkDeletedState()
+{
+	for (auto& it : isDeleted)
+	{
+		it.second = false;
+	}
+}
+
 // Clear all objects in the chunk
 void CChunk::Clear()
 {

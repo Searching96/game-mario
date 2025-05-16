@@ -1,6 +1,7 @@
 #include "Portal.h"
 #include "Game.h"
 #include "Textures.h"
+#include "PlayScene.h"
 
 CPortal::CPortal(int id, float x, float y, float width, float height, int z, float targetX, float exitY, float yLevel)
 
@@ -53,4 +54,5 @@ void CPortal::GetBoundingBox(float& l, float& t, float& r, float& b)
 void CPortal::Teleport(CMario* mario)
 {
 	mario->Teleport(this);
+	LPPLAYSCENE(CGame::GetInstance()->GetCurrentScene())->ResetAllChunkConsumables();
 }

@@ -51,6 +51,9 @@ public:
 	virtual void Unload();
 	void DefeatEnemiesOutOfRange();
 	void RespawnEnemiesInRange();
+	void ResetAllChunkState();
+	void ResetAllChunkConsumables();
+	void ResetAllChunkDeleted();
 
 	void LoadChunkWithX(float x)
 	{

@@ -50,6 +50,13 @@ public:
 	float GetEndX() const { return endX; }
 	bool IsLoaded() const { return isLoaded; }
 	void SetLoaded(bool loaded) { isLoaded = loaded; }
+	void ResetChunkState()
+	{
+		ResetChunkConsumableState();
+		ResetChunkDeletedState();
+	}
+	void ResetChunkConsumableState();
+	void ResetChunkDeletedState();
 
 	void SetIsObjectDeleted(int id, int isDel)
 	{

@@ -542,6 +542,24 @@ void CPlayScene::UnloadChunksOutOfRange(float cam_x, float cam_width) // **** MO
 	}
 }
 
+void CPlayScene::ResetAllChunkState()
+{
+	for (LPCHUNK chunk : chunks)
+		chunk->ResetChunkState();
+}
+
+void CPlayScene::ResetAllChunkConsumables()
+{
+	for (LPCHUNK chunk : chunks)
+		chunk->ResetChunkConsumableState();
+}
+
+void CPlayScene::ResetAllChunkDeleted()
+{
+	for (LPCHUNK chunk : chunks)
+		chunk->ResetChunkDeletedState();
+}
+
 void CPlayScene::Load()
 {
 	DebugOut(L"[INFO] Start loading scene from: %ls\n", sceneFilePath);
