@@ -425,7 +425,7 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 		vector<CChunk*> chunkList = dynamic_cast<CPlayScene*>(CGame::GetInstance()->GetCurrentScene())->GetChunks();
 
-		LPCHUNK currentChunk;
+		LPCHUNK currentChunk = nullptr;
 
 		for (auto chunk : chunkList)
 		{
@@ -434,7 +434,7 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			{
 				if (obj == this) currentChunk = chunk;
 			}
-			if (x < chunk->GetEndX() && x > chunk->GetStartX() && chunk != currentChunk)
+			if (x < chunk->GetEndX() && x > chunk->GetStartX() && currentChunk != nullptr && chunk != currentChunk)
 			{
 				currentChunk->RemoveObject(this);
 				chunk->AddObject(this);
