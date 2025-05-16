@@ -146,6 +146,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Activator.cpp" />
     <ClCompile Include="Animation.cpp" />
     <ClCompile Include="Animations.cpp" />
     <ClCompile Include="Box.cpp" />
@@ -191,6 +192,7 @@
     <ClCompile Include="WingedGoomba.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Activator.h" />
     <ClInclude Include="Animation.h" />
     <ClInclude Include="AnimationFrame.h" />
     <ClInclude Include="Animations.h" />

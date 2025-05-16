@@ -34,6 +34,7 @@
 #include "SkyPlatform.h"
 #include "FallPitch.h"
 #include "CoinBrick.h"
+#include "Activator.h"
 
 #include "SampleKeyEventHandler.h"
 
@@ -346,6 +347,12 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 		{
 			zIndex = ZINDEX_BLOCKS;
 			obj = new CCoinBrick(id, x, y, zIndex, targetChunk->GetID());
+			break;
+		}
+		case OBJECT_TYPE_ACTIVATOR:
+		{
+			zIndex = ZINDEX_BLOCKS;
+			obj = new CActivator(id, x, y, zIndex, targetChunk->GetID());
 			break;
 		}
 		case OBJECT_TYPE_BOX:

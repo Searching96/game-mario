@@ -33,6 +33,7 @@ assets\superleaf.txt
 assets\particle.txt
 assets\wingedgoomba.txt
 assets\wing.txt
+assets\activator.txt
 
 [SCENE_SETTINGS]
 start_cam_x	0
@@ -90,6 +91,9 @@ margin_y	40
 29	10	192	352
 30	10	224	304
 31	10	416	320
+
+# Activator
+1212	109	192	336
 
 # Buff QBlock
 32	11	240	304

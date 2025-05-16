@@ -8,7 +8,7 @@
 #define ID_TEX_ENEMY 10
 #define ID_TEX_MISC 20
 
-
+// Dynamic objects
 //#define OBJECT_TYPE_MARIO	0
 #define OBJECT_TYPE_BRICK	1
 #define OBJECT_TYPE_GOOMBA	2
@@ -25,7 +25,7 @@
 #define OBJECT_TYPE_WINGED_GOOMBA 13
 #define OBJECT_TYPE_LIFE_BRICK 14
 
-//Static objects
+// Static objects
 #define OBJECT_TYPE_SKY_PLATFORM 100
 #define OBJECT_TYPE_BOX 101
 #define OBJECT_TYPE_TREE 102
@@ -35,6 +35,7 @@
 #define OBJECT_TYPE_TRINKET 106
 #define OBJECT_TYPE_FALL_PITCH 107
 #define OBJECT_TYPE_COIN_BRICK 108
+#define OBJECT_TYPE_ACTIVATOR 109
 
 #define OBJECT_TYPE_PORTAL 50
 

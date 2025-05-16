@@ -1,36 +1,40 @@
-#include "CoinBrick.h"
+#include "Activator.h"
 #include "Game.h"
 #include "Chunk.h"
 #include "PlayScene.h"
 
-CCoinBrick::CCoinBrick(int id, float x, float y, int z, int orignalChunkId) : CGameObject(id, x, y, z)
+CActivator::CActivator(int id, float x, float y, int z, int orignalChunkId) : CGameObject(id, x, y, z)
 {
 	this->originalChunkId = orignalChunkId;
 }
 
-void CCoinBrick::Render()
+void CActivator::Render()
 {
-	int aniId = ID_ANI_BRICK;
+	int aniId = ID_ANI_ACTIVATOR_UNACTIVATED;
+	if (isActivated)
+	{
+		aniId = ID_ANI_ACTIVATOR_ACTIVATED;
+	}
 	CAnimations::GetInstance()->Get(aniId)->Render(x, y);
 
 	//RenderBoundingBox();
 }
 
-void CCoinBrick::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
+void CActivator::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
 	CGameObject::Update(dt, coObjects);
 	CCollision::GetInstance()->Process(this, dt, coObjects);
 }
 
-void CCoinBrick::GetBoundingBox(float& l, float& t, float& r, float& b)
+void CActivator::GetBoundingBox(float& l, float& t, float& r, float& b)
 {
-	l = x - BRICK_CELL_WIDTH / 2;
-	t = y - BRICK_CELL_HEIGHT / 2;
-	r = l + BRICK_CELL_WIDTH;
-	b = t + BRICK_CELL_HEIGHT;
+	l = x - ACTIVATOR_CELL_WIDTH / 2;
+	t = y - ACTIVATOR_CELL_HEIGHT / 2;
+	r = l + ACTIVATOR_CELL_WIDTH;
+	b = t + ACTIVATOR_CELL_HEIGHT;
 }
 
-void CCoinBrick::SetState(int state)
+void CActivator::SetState(int state)
 {
 	CGameObject::SetState(state);
 	switch (state)
