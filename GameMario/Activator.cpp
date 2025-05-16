@@ -10,6 +10,10 @@ CActivator::CActivator(int id, float x, float y, int z, int orignalChunkId) : CG
 
 void CActivator::Render()
 {
+	if (!isRevealed)
+	{
+		return;
+	}
 	int aniId = ID_ANI_ACTIVATOR_UNACTIVATED;
 	if (isActivated)
 	{
@@ -22,6 +26,10 @@ void CActivator::Render()
 
 void CActivator::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
+	if (!isRevealed)
+	{
+		return;
+	}
 	CGameObject::Update(dt, coObjects);
 	CCollision::GetInstance()->Process(this, dt, coObjects);
 }
@@ -40,13 +48,20 @@ void CActivator::SetState(int state)
 	switch (state)
 	{
 		case ACTIVATOR_STATE_UNACTIVATED:
+		{
 			isActivated = false;
 			break;
+		}
 		case ACTIVATOR_STATE_ACTIVATED:
 		{
 			isActivated = true;
 			LPCHUNK chunk = ((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetChunk(originalChunkId);
 			chunk->RevealAllCoinBrick();
+			break;
+		}
+		case ACTIVATOR_STATE_REVEALED:
+		{
+			isRevealed = true;
 			break;
 		}
 	}

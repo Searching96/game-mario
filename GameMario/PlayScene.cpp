@@ -35,6 +35,7 @@
 #include "FallPitch.h"
 #include "CoinBrick.h"
 #include "Activator.h"
+#include "ActivatorBrick.h"
 
 #include "SampleKeyEventHandler.h"
 
@@ -354,6 +355,17 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 			zIndex = ZINDEX_BLOCKS;
 			obj = new CActivator(id, x, y, zIndex, targetChunk->GetID());
 			break;
+		}
+		case OBJECT_TYPE_ACTIVATOR_BRICK:
+		{
+			zIndex = ZINDEX_BLOCKS;
+			CActivator* activator = new CActivator(DEPENDENT_ID, x, y - 15, zIndex, targetChunk->GetID());
+			obj = new CActivatorBrick(id, x, y, zIndex, targetChunk->GetID(), activator);
+			targetChunk->AddObject(activator);
+			if (targetChunk->GetIsObjectConsumed(obj->GetId()))
+				((CActivatorBrick*)obj)->SetIsHit(true);
+			targetChunk->AddObject(obj);
+			return;
 		}
 		case OBJECT_TYPE_BOX:
 		{

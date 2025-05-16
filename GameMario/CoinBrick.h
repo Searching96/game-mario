@@ -2,9 +2,6 @@
 #include "QuestionBlock.h"
 #include "Brick.h"
 
-#include <vector>
-#include <list>
-
 #define ID_ANI_QUESTIONBLOCK_HIT 1031000
 #define ID_ANI_STATIC_HIDDEN_COIN 1012000
 
@@ -30,6 +27,7 @@ public:
 	void GetBoundingBox(float& l, float& t, float& r, float& b);
 	void SetState(int state);
 	int IsBlocking() { return (state != COIN_BRICK_STATE_REVEALED); }
+	void StartReveal() { isRevealed = true; revealStart = GetTickCount64(); }
 
 	bool IsRevealed() { return isRevealed; }
 };

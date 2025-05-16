@@ -21,6 +21,7 @@
 #include "LifeBrick.h"
 #include "CoinBrick.h"
 #include "Activator.h"
+#include "ActivatorBrick.h"
 
 #include "Collision.h"
 
@@ -372,6 +373,8 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 		OnCollisionWithCoinBrick(e);
 	else if (dynamic_cast<CActivator*>(e->obj))
 		OnCollisionWithActivator(e);
+	else if (dynamic_cast<CActivatorBrick*>(e->obj))
+		OnCollisionWithActivatorBrick(e);
 }
 
 void CMario::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
@@ -441,7 +444,7 @@ void CMario::OnCollisionWithCoinQBlock(LPCOLLISIONEVENT e)
 	CCoinQBlock* cqb = dynamic_cast<CCoinQBlock*>(e->obj);
 	if (cqb)
 	{
-		if (e->ny > 0 && e->nx == 0 && !cqb->GetIsHit() && cqb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
+		if (e->ny > 0 && e->nx == 0 && !cqb->IsHit() && cqb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
 		{
 			cqb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
 		}
@@ -453,7 +456,7 @@ void CMario::OnCollisionWithBuffQBlock(LPCOLLISIONEVENT e)
 	CBuffQBlock* bqb = dynamic_cast<CBuffQBlock*>(e->obj);
 	if (bqb)
 	{
-		if (e->ny > 0 && e->nx == 0 && !bqb->GetIsHit() && bqb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
+		if (e->ny > 0 && e->nx == 0 && !bqb->IsHit() && bqb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
 		{
 			if (level == MARIO_LEVEL_SMALL)
 			{
@@ -481,9 +484,21 @@ void CMario::OnCollisionWithLifeBrick(LPCOLLISIONEVENT e)
 	CLifeBrick* lb = dynamic_cast<CLifeBrick*>(e->obj);
 	if (lb)
 	{
-		if (e->ny > 0 && e->nx == 0 && !lb->GetIsHit() && lb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
+		if (e->ny > 0 && e->nx == 0 && !lb->IsHit() && lb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
 		{
 			lb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
+		}
+	}
+}
+
+void CMario::OnCollisionWithActivatorBrick(LPCOLLISIONEVENT e)
+{
+	CActivatorBrick* ab = dynamic_cast<CActivatorBrick*>(e->obj);
+	if (ab)
+	{
+		if (e->ny > 0 && e->nx == 0 && !ab->IsHit() && ab->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
+		{
+			ab->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
 		}
 	}
 }
@@ -510,7 +525,7 @@ void CMario::OnCollisionWithActivator(LPCOLLISIONEVENT e)
 	CActivator* a = dynamic_cast<CActivator*>(e->obj);
 	if (a)
 	{
-		if (e->ny < 0 && e->nx == 0 && !a->IsActivated())
+		if (e->ny < 0 && e->nx == 0 && a->IsRevealed() && !a->IsActivated())
 		{
 			a->SetState(ACTIVATOR_STATE_ACTIVATED);
 		}

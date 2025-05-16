@@ -9,6 +9,7 @@
 #include "PiranhaPlant.h"
 #include "LifeBrick.h"
 #include "CoinBrick.h"
+#include "ActivatorBrick.h"
 
 #include "PlayScene.h"
 
@@ -100,13 +101,15 @@ void CTailWhip::OnCollisionWith(LPCOLLISIONEVENT e)
 		OnCollisionWithPiranhaPlant(e);
 	else if (dynamic_cast<CCoinBrick*>(e->obj))
 		OnCollisionWithCoinBrick(e);
+	else if (dynamic_cast<CActivatorBrick*>(e->obj))
+		OnCollisionWithActivatorBrick(e);
 }
 
 void CTailWhip::OnCollisionWithBuffQBlock(LPCOLLISIONEVENT e)
 {
 	CBuffQBlock* bqb = dynamic_cast<CBuffQBlock*>(e->obj);
 	CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
-	if (bqb && !bqb->GetIsHit() && bqb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
+	if (bqb && !bqb->IsHit() && bqb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
 	{
 		if (player->GetLevel() == MARIO_LEVEL_SMALL)
 		{
@@ -133,7 +136,7 @@ void CTailWhip::OnCollisionWithBuffQBlock(LPCOLLISIONEVENT e)
 void CTailWhip::OnCollisionWithCoinQBlock(LPCOLLISIONEVENT e) 
 {
 	CCoinQBlock* cqb = dynamic_cast<CCoinQBlock*>(e->obj);
-	if (cqb && !cqb->GetIsHit() && cqb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
+	if (cqb && !cqb->IsHit() && cqb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
 	{
 		cqb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
 	}
@@ -142,8 +145,26 @@ void CTailWhip::OnCollisionWithCoinQBlock(LPCOLLISIONEVENT e)
 void CTailWhip::OnCollisionWithLifeBrick(LPCOLLISIONEVENT e)
 {
 	CLifeBrick* lb = dynamic_cast<CLifeBrick*>(e->obj);
-	if (lb && !lb->GetIsHit()) {
+	if (lb && !lb->IsHit() && lb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT) {
 		lb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
+	}
+}
+
+void CTailWhip::OnCollisionWithActivatorBrick(LPCOLLISIONEVENT e)
+{
+	CActivatorBrick* ab = dynamic_cast<CActivatorBrick*>(e->obj);
+	if (ab && !ab->IsHit() && ab->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
+	{
+		ab->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
+	}
+}
+
+void CTailWhip::OnCollisionWithCoinBrick(LPCOLLISIONEVENT e)
+{
+	CCoinBrick* cb = dynamic_cast<CCoinBrick*>(e->obj);
+	if (cb)
+	{
+		cb->SetState(COIN_BRICK_STATE_BREAK);
 	}
 }
 
@@ -178,15 +199,6 @@ void CTailWhip::OnCollisionWithPiranhaPlant(LPCOLLISIONEVENT e)
 		player->CalculateScore(pp);
 		CParticle::GenerateParticleInChunk(this, 3);
 		pp->SetState(PIRANHA_PLANT_STATE_DIED);
-	}
-}
-
-void CTailWhip::OnCollisionWithCoinBrick(LPCOLLISIONEVENT e)
-{
-	CCoinBrick* cb = dynamic_cast<CCoinBrick*>(e->obj);
-	if (cb)
-	{
-		cb->SetState(COIN_BRICK_STATE_BREAK);
 	}
 }
 

@@ -10,6 +10,7 @@
 #include "PiranhaPlant.h"
 #include "LifeBrick.h"
 #include "CoinBrick.h"
+#include "ActivatorBrick.h"
 
 #include "debug.h"
 
@@ -566,7 +567,7 @@ void CCollision::Process(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* co
 			objSrc->OnCollisionWith(e);
 			continue;
 		}
-		if (dynamic_cast<CCoinBrick*>(e->obj) && dynamic_cast<CTailWhip*>(objSrc))
+		if ((dynamic_cast<CCoinBrick*>(e->obj) || dynamic_cast<CActivatorBrick*>(e->obj)) && dynamic_cast<CTailWhip*>(objSrc))
 		{
 			objSrc->OnCollisionWith(e);
 			continue;
@@ -586,7 +587,7 @@ void CCollision::Process(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* co
 				continue;
 			}
 		}
-		if (dynamic_cast<CCoinBrick*>(e->obj) && dynamic_cast<CKoopa*>(objSrc))
+		if ((dynamic_cast<CCoinBrick*>(e->obj) || dynamic_cast<CActivatorBrick*>(e->obj)) && dynamic_cast<CKoopa*>(objSrc))
 		{
 			if (objSrc->GetState() != KOOPA_STATE_SHELL_DYNAMIC)
 			{

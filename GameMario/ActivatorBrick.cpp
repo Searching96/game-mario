@@ -1,18 +1,16 @@
-#include "LifeBrick.h"
-#include "Mushroom.h"
-#include "SuperLeaf.h"
+#include "ActivatorBrick.h"
 #include "Game.h"
 #include "Chunk.h"
 #include "PlayScene.h"
 
-CLifeBrick::CLifeBrick(int id, float x, float y, int z, int orignalChunkId, CLifeMushroom* mushroom) : CGameObject(id, x, y, z)
+CActivatorBrick::CActivatorBrick(int id, float x, float y, int z, int orignalChunkId, CActivator* activator) : CGameObject(id, x, y, z)
 {
 	this->originalChunkId = orignalChunkId;
-	this->mushroom = mushroom;
-	SetState(QUESTIONBLOCK_STATE_NOT_HIT);
+	this->activator = activator;
+	this->SetState(QUESTIONBLOCK_STATE_NOT_HIT);
 }
 
-void CLifeBrick::Render()
+void CActivatorBrick::Render()
 {
 	int aniId = ID_ANI_BRICK;
 	if (isHit || state != QUESTIONBLOCK_STATE_NOT_HIT)
@@ -24,7 +22,7 @@ void CLifeBrick::Render()
 	//RenderBoundingBox();
 }
 
-void CLifeBrick::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
+void CActivatorBrick::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
 	if (bounceUp)
 	{
@@ -50,15 +48,15 @@ void CLifeBrick::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	CCollision::GetInstance()->Process(this, dt, coObjects);
 }
 
-void CLifeBrick::GetBoundingBox(float& l, float& t, float& r, float& b)
+void CActivatorBrick::GetBoundingBox(float& l, float& t, float& r, float& b)
 {
-	l = x - QUESTIONBLOCK_BBOX_WIDTH / 2;
-	t = y - QUESTIONBLOCK_BBOX_HEIGHT / 2;
-	r = l + QUESTIONBLOCK_BBOX_WIDTH;
-	b = t + QUESTIONBLOCK_BBOX_HEIGHT;
+	l = x - BRICK_CELL_WIDTH / 2;
+	t = y - BRICK_CELL_HEIGHT / 2;
+	r = l + BRICK_CELL_WIDTH;
+	b = t + BRICK_CELL_HEIGHT;
 }
 
-void CLifeBrick::SetState(int state)
+void CActivatorBrick::SetState(int state)
 {
 	CGameObject::SetState(state);
 	switch (state)
@@ -75,6 +73,7 @@ void CLifeBrick::SetState(int state)
 			y0 = y;
 			vy = QUESTIONBLOCK_BOUNCE_SPEED;
 			StartBounceUp();
+			activator->SetIsRevealed(true);
 			break;
 		}
 		case QUESTIONBLOCK_STATE_BOUNCE_DOWN:
@@ -87,8 +86,6 @@ void CLifeBrick::SetState(int state)
 		case QUESTIONBLOCK_STATE_BOUNCE_COMPLETE:
 		{
 			vy = 0.0f;
-			mushroom->SetVisible(1);
-			mushroom->SetState(MUSHROOM_STATE_RISE);
 			isHit = true;
 			break;
 		}

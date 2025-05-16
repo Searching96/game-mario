@@ -4,7 +4,7 @@
 #include <vector>
 #include <list>
 
-#define QUESTIONBLOCK_BBOX_WIDTH  14
+#define QUESTIONBLOCK_BBOX_WIDTH  16
 #define QUESTIONBLOCK_BBOX_HEIGHT 16
 
 #define ID_ANI_QUESTIONBLOCK 1030000
@@ -16,7 +16,6 @@
 #define QUESTIONBLOCK_STATE_BOUNCE_COMPLETE 400
 
 #define QUESTIONBLOCK_BOUNCE_OFFSET 16
-
 #define QUESTIONBLOCK_BOUNCE_SPEED -0.1f
 
 class CQuestionBlock : public CGameObject

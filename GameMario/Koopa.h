@@ -72,6 +72,7 @@ protected:
 	void OnCollisionWithPiranhaPlant(LPCOLLISIONEVENT e);
 	void OnCollisionWithLifeBrick(LPCOLLISIONEVENT e);
 	void OnCollisionWithCoinBrick(LPCOLLISIONEVENT e);
+	void OnCollisionWithActivatorBrick(LPCOLLISIONEVENT e);
 
 public:
 	CKoopa(int id, float x, float y, int z, int originalChunkId);

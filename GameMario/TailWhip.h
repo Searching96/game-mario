@@ -35,6 +35,7 @@ protected:
 	void OnCollisionWithLifeBrick(LPCOLLISIONEVENT e);
 	void OnCollisionWithPiranhaPlant(LPCOLLISIONEVENT e);
 	void OnCollisionWithCoinBrick(LPCOLLISIONEVENT e);
+	void OnCollisionWithActivatorBrick(LPCOLLISIONEVENT e);
 
 public:
 	CTailWhip(int id, float x, float y, int z);

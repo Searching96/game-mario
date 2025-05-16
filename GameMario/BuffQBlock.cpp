@@ -16,7 +16,7 @@ CBuffQBlock::CBuffQBlock(int id, float x, float y, int z, int originalChunkId, C
 void CBuffQBlock::Render()
 {
 	int aniId = ID_ANI_QUESTIONBLOCK;
-	if (isHit || state != MUSHROOM_STATE_NOT_HIT)
+	if (isHit || state != QUESTIONBLOCK_STATE_NOT_HIT)
 	{
 		aniId = ID_ANI_QUESTIONBLOCK_HIT;
 	}

@@ -61,8 +61,7 @@ void CCoinBrick::SetState(int state)
 		}
 		case COIN_BRICK_STATE_REVEALED:
 		{
-			isRevealed = true;
-			revealStart = GetTickCount64();
+			StartReveal();
 			break;
 		}
 		case COIN_BRICK_STATE_CONSUMED:

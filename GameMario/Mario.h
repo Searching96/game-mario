@@ -306,6 +306,7 @@ class CMario : public CGameObject
 	void OnCollisionWithLifeBrick(LPCOLLISIONEVENT e);
 	void OnCollisionWithCoinBrick(LPCOLLISIONEVENT e);
 	void OnCollisionWithActivator(LPCOLLISIONEVENT e);
+	void OnCollisionWithActivatorBrick(LPCOLLISIONEVENT e);
 
 	int GetAniIdBig();
 	int GetAniIdSmall();
