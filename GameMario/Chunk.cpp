@@ -1,6 +1,7 @@
 #include "Chunk.h"
 #include "Mario.h"
 #include "PlayScene.h"
+#include "CoinBrick.h"
 
 void CChunk::Update(DWORD dt, std::vector<LPGAMEOBJECT>* coObjects)
 {
@@ -8,6 +9,72 @@ void CChunk::Update(DWORD dt, std::vector<LPGAMEOBJECT>* coObjects)
 	{
 		if (obj != nullptr)
 			obj->Update(dt, coObjects);
+	}
+}
+
+void CChunk::AddObject(LPGAMEOBJECT obj)
+{
+	if (obj != nullptr)
+		objects.push_back(obj);
+}
+
+void CChunk::AddEnemy(LPGAMEOBJECT obj)
+{
+	if (obj != nullptr)
+		enemies.push_back(obj);
+}
+
+void CChunk::RemoveObject(LPGAMEOBJECT obj)
+{
+	objects.erase(std::remove(objects.begin(), objects.end(), obj), objects.end());
+	// RED ALERT: do i need to erase koopa from enemies too?
+	enemies.erase(std::remove(enemies.begin(), enemies.end(), obj), enemies.end());
+}
+
+void CChunk::SetIsObjectDeleted(int id, int isDel)
+{
+	if (isDel) {
+		isDeleted[id] = true;
+	}
+	else {
+		// Only insert false if id is not already present
+		if (isDeleted.find(id) == isDeleted.end())
+			isDeleted[id] = false;
+	}
+}
+
+void CChunk::SetIsObjectConsumed(int id, int isCon)
+{
+	if (isCon) {
+		isConsumed[id] = true;
+	}
+	else {
+		// Only insert false if id is not already present
+		if (isConsumed.find(id) == isConsumed.end())
+			isConsumed[id] = false;
+	}
+}
+
+bool CChunk::IsObjectInChunk(LPGAMEOBJECT obj)
+{
+	if (obj == nullptr) return false;
+	float objX, objY;
+	obj->GetPosition(objX, objY);
+	return (objX >= startX && objX <= endX);
+}
+
+void CChunk::RevealAllCoinBrick()
+{
+	for (LPGAMEOBJECT obj : objects)
+	{
+		if (obj != nullptr)
+		{
+			CCoinBrick* coinBrick = dynamic_cast<CCoinBrick*>(obj);
+			if (coinBrick != nullptr && !coinBrick->IsRevealed())
+			{
+				coinBrick->SetState(COIN_BRICK_STATE_REVEALED);
+			}
+		}
 	}
 }
 

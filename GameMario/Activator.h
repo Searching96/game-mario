@@ -4,10 +4,11 @@
 #define ID_ANI_ACTIVATOR_UNACTIVATED 1120000
 #define ID_ANI_ACTIVATOR_ACTIVATED 1120100
 
-#define COIN_BRICK_STATE_BREAK 100
-
 #define ACTIVATOR_CELL_WIDTH 16
 #define ACTIVATOR_CELL_HEIGHT 16
+
+#define ACTIVATOR_STATE_UNACTIVATED 0
+#define ACTIVATOR_STATE_ACTIVATED 100
 
 class CActivator : public CGameObject
 {
@@ -21,6 +22,8 @@ public:
 	void Render();
 	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 	void GetBoundingBox(float& l, float& t, float& r, float& b);
+	int IsBlocking() { return (state != ACTIVATOR_STATE_ACTIVATED); }
+	int IsCollidable() { return (state != ACTIVATOR_STATE_ACTIVATED); };
 	void SetState(int state);
 	bool IsActivated() { return isActivated; }
 };

@@ -20,6 +20,7 @@
 #include "Particle.h"
 #include "LifeBrick.h"
 #include "CoinBrick.h"
+#include "Activator.h"
 
 #include "Collision.h"
 
@@ -85,7 +86,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 	if (isTailWhipping == 1)
 	{
-		if (GetTickCount64() - tailWhipStart > MARIO_TAIL_WHIP_TIME)
+		if (GetTickCount64() - tailWhipStart > MARIO_TAIL_WHIP_TIMEOUT)
 		{
 			isTailWhipping = 0;
 		}
@@ -93,7 +94,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 	if (powerUp == 1)
 	{
-		if (GetTickCount64() - powerUpStart > MARIO_POWER_UP_TIME)
+		if (GetTickCount64() - powerUpStart > MARIO_POWER_UP_TIMEOUT)
 		{
 			powerUp = 0;
 			y -= 6; // RED ALERT
@@ -104,7 +105,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	}
 	if (tailUp == 1)
 	{
-		if (GetTickCount64() - tailUpStart > MARIO_TAIL_UP_TIME)
+		if (GetTickCount64() - tailUpStart > MARIO_TAIL_UP_TIMEOUT)
 		{
 			tailUp = 0;
 			SetLevel(MARIO_LEVEL_TAIL);
@@ -114,7 +115,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	}
 	if (powerDown == 1)
 	{
-		if (GetTickCount64() - powerDownStart > MARIO_POWER_DOWN_TIME)
+		if (GetTickCount64() - powerDownStart > MARIO_POWER_DOWN_TIMEOUT)
 		{
 			powerDown = 0;
 			SetLevel(MARIO_LEVEL_SMALL);
@@ -125,7 +126,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	}
 	if (tailDown == 1)
 	{
-		if (GetTickCount64() - tailDownStart > MARIO_TAIL_DOWN_TIME)
+		if (GetTickCount64() - tailDownStart > MARIO_TAIL_DOWN_TIMEOUT)
 		{
 			tailDown = 0;
 			SetLevel(MARIO_LEVEL_BIG);
@@ -136,7 +137,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	}
 	if (isKicking == 1)
 	{
-		if (GetTickCount64() - kickStart > MARIO_KICK_TIME)
+		if (GetTickCount64() - kickStart > MARIO_KICK_TIMEOUT)
 		{
 			isKicking = 0;
 		}
@@ -186,7 +187,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		pMeterMax = GetTickCount64();
 
 	}
-	if (pMeterMax != -1 && GetTickCount64() - pMeterMax > MARIO_PMETER_MAX_TIME)
+	if (pMeterMax != -1 && GetTickCount64() - pMeterMax > MARIO_PMETER_MAX_TIMEOUT)
 	{
 		if (pMeter == 1.0f)
 			pMeter = 0;
@@ -287,7 +288,7 @@ void CMario::HandleBraking(DWORD dt)
 
 void CMario::HandleUntouchable(DWORD dt)
 {
-	if (GetTickCount64() - untouchableStart > MARIO_UNTOUCHABLE_TIME)
+	if (GetTickCount64() - untouchableStart > MARIO_UNTOUCHABLE_TIMEOUT)
 	{
 		untouchableStart = 0;
 		untouchable = 0;
@@ -304,7 +305,7 @@ void CMario::HandleHovering(DWORD dt)
 		{
 			vx = (nx > 0) ? MARIO_MAX_WALKING_SPEED / 2 : -MARIO_MAX_WALKING_SPEED / 2;
 		}
-		if (GetTickCount64() - hoveringStart > MARIO_HOVER_TIME || isOnPlatform)
+		if (GetTickCount64() - hoveringStart > MARIO_HOVER_TIMEOUT || isOnPlatform)
 		{
 			isHovering = 0;
 			ay = MARIO_GRAVITY;
@@ -369,6 +370,8 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 		OnCollisionWithFallPitch(e);
 	else if (dynamic_cast<CCoinBrick*>(e->obj))
 		OnCollisionWithCoinBrick(e);
+	else if (dynamic_cast<CActivator*>(e->obj))
+		OnCollisionWithActivator(e);
 }
 
 void CMario::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
@@ -490,9 +493,26 @@ void CMario::OnCollisionWithCoinBrick(LPCOLLISIONEVENT e)
 	CCoinBrick* cb = dynamic_cast<CCoinBrick*>(e->obj);
 	if (cb)
 	{
-		if (e->ny > 0 && e->nx == 0)
+		if (cb->IsRevealed())
+		{
+			cb->SetState(COIN_BRICK_STATE_CONSUMED);
+			// tang coin len
+		}
+		else if (e->ny > 0 && e->nx == 0)
 		{
 			cb->SetState(COIN_BRICK_STATE_BREAK);
+		}
+	}
+}
+
+void CMario::OnCollisionWithActivator(LPCOLLISIONEVENT e)
+{
+	CActivator* a = dynamic_cast<CActivator*>(e->obj);
+	if (a)
+	{
+		if (e->ny < 0 && e->nx == 0 && !a->IsActivated())
+		{
+			a->SetState(ACTIVATOR_STATE_ACTIVATED);
 		}
 	}
 }

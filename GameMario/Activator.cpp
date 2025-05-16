@@ -39,11 +39,14 @@ void CActivator::SetState(int state)
 	CGameObject::SetState(state);
 	switch (state)
 	{
-		case COIN_BRICK_STATE_BREAK:
+		case ACTIVATOR_STATE_UNACTIVATED:
+			isActivated = false;
+			break;
+		case ACTIVATOR_STATE_ACTIVATED:
 		{
+			isActivated = true;
 			LPCHUNK chunk = ((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetChunk(originalChunkId);
-			chunk->SetIsObjectDeleted(this->GetId(), true);
-			isDeleted = true;
+			chunk->RevealAllCoinBrick();
 			break;
 		}
 	}

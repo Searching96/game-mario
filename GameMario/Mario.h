@@ -227,17 +227,17 @@
 #define MARIO_SMALL_BBOX_WIDTH						13
 #define MARIO_SMALL_BBOX_HEIGHT						12
 
-#define MARIO_UNTOUCHABLE_TIME						2500
-#define MARIO_POWER_UP_TIME							1000
-#define MARIO_POWER_DOWN_TIME						MARIO_POWER_UP_TIME
-#define MARIO_TAIL_UP_TIME							400
-#define MARIO_TAIL_DOWN_TIME						MARIO_TAIL_UP_TIME
-#define MARIO_HOVER_TIME							500
-#define MARIO_BRAKE_TIME							500
-#define MARIO_KICK_TIME								150
+#define MARIO_UNTOUCHABLE_TIMEOUT					2500
+#define MARIO_POWER_UP_TIMEOUT						1000
+#define MARIO_POWER_DOWN_TIMEOUT					MARIO_POWER_UP_TIMEOUT
+#define MARIO_TAIL_UP_TIMEOUT						400
+#define MARIO_TAIL_DOWN_TIMEOUT						MARIO_TAIL_UP_TIMEOUT
+#define MARIO_HOVER_TIMEOUT							500
+#define MARIO_BRAKE_TIMEOUT							500
+#define MARIO_KICK_TIMEOUT							150
 #define MARIO_UNTOUCHABLE_RENDER_INTERVAL			75
-#define MARIO_TAIL_WHIP_TIME						305
-#define MARIO_PMETER_MAX_TIME						7000
+#define MARIO_TAIL_WHIP_TIMEOUT						305
+#define MARIO_PMETER_MAX_TIMEOUT					7000
 
 #define MAX_JUMP_COUNT 10
 #define SPEED_DIVISOR 3.0f;
@@ -305,6 +305,7 @@ class CMario : public CGameObject
 	void OnCollisionWithFallPitch(LPCOLLISIONEVENT e);
 	void OnCollisionWithLifeBrick(LPCOLLISIONEVENT e);
 	void OnCollisionWithCoinBrick(LPCOLLISIONEVENT e);
+	void OnCollisionWithActivator(LPCOLLISIONEVENT e);
 
 	int GetAniIdBig();
 	int GetAniIdSmall();
