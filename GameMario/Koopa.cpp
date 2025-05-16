@@ -425,16 +425,18 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 		vector<CChunk*> chunkList = dynamic_cast<CPlayScene*>(CGame::GetInstance()->GetCurrentScene())->GetChunks();
 
+		LPCHUNK currentChunk;
 
 		for (auto chunk : chunkList)
 		{
 			if (!chunk->IsLoaded()) continue;
 			for (auto obj : chunk->GetObjects())
 			{
-				if (obj == this) chunk->RemoveObject(this);
+				if (obj == this) currentChunk = chunk;
 			}
-			if (x < chunk->GetEndX() && x > chunk->GetStartX())
+			if (x < chunk->GetEndX() && x > chunk->GetStartX() && chunk != currentChunk)
 			{
+				currentChunk->RemoveObject(this);
 				chunk->AddObject(this);
 				chunk->AddEnemy(this);
 			}
