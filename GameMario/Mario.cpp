@@ -1189,7 +1189,6 @@ void CMario::Render()
 	else if (level == MARIO_LEVEL_TAIL)
 		aniId = GetAniIdTail();
 
-	if (isTeleporting) DebugOut(L"x=%f,y=%f\n", x, y);
 	animations->Get(aniId)->Render(x, y);
 
 	if (tailWhip != nullptr)
