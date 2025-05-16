@@ -60,6 +60,13 @@ void CActivator::SetState(int state)
 			chunk->RevealAllCoinBrick();
 			break;
 		}
+		case ACTIVATOR_STATE_ACTIVATED_BY_CHUNK_RELOAD:
+		{
+			isActivated = true;
+			LPCHUNK chunk = ((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetChunk(originalChunkId);
+			chunk->SetIsObjectConsumed(this->GetId(), true);
+			break;
+		}
 		case ACTIVATOR_STATE_REVEALED:
 		{
 			isRevealed = true;

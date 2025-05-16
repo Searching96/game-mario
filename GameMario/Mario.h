@@ -239,7 +239,7 @@
 #define MARIO_TAIL_WHIP_TIMEOUT						305
 #define MARIO_PMETER_MAX_TIMEOUT					7000
 
-#define MAX_JUMP_COUNT 10
+#define MAX_JUMP_COUNT 100
 #define SPEED_DIVISOR 3.0f;
 
 class CMario : public CGameObject

@@ -381,7 +381,7 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 				activator->SetIsRevealed(true);
 				if (targetChunk->GetIsObjectConsumed(activator->GetId()))
 				{
-					activator->SetState(ACTIVATOR_STATE_ACTIVATED);
+					activator->SetState(ACTIVATOR_STATE_ACTIVATED_BY_CHUNK_RELOAD);
 				}
 			}
 			return;
