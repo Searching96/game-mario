@@ -15,7 +15,7 @@ void CPiranhaPlant::Render()
 	if (isDefeated == 1)
 		return;
 
-	if (state == PIRANHA_PLANT_STATE_HIDDEN || state == PIRANHA_PLANT_STATE_DIED) return;
+	if (state == PIRANHA_PLANT_STATE_HIDDEN || state == PIRANHA_PLANT_STATE_DIE) return;
 	int aniId = ID_ANI_PIRANHA_PLANT_LEFT_MOVE;
 	int direction = GetAiming();
 	if (moveUp || moveDown)
@@ -156,14 +156,28 @@ bool CPiranhaPlant::IsMarioOnTop()
 	return (fabs(mario_X - this->x) < PIRANHA_PLANT_BBOX_WIDTH && fabs(mario_Y - this->y) < PIRANHA_PLANT_BBOX_HEIGHT);
 }
 
-void CPiranhaPlant::OnNoCollision(DWORD dt)
-{
-}
+void CPiranhaPlant::OnNoCollision(DWORD dt) {}
 
 void CPiranhaPlant::OnCollisionWith(LPCOLLISIONEVENT e)
 {
-	if (!e->obj->IsBlocking())
+	if (dynamic_cast<CKoopa*>(e->obj))
+		OnCollisionWithKoopa(e);
+}
+
+void CPiranhaPlant::OnCollisionWithKoopa(LPCOLLISIONEVENT e)
+{
+	CKoopa* k = dynamic_cast<CKoopa*>(e->obj);
+	if (k->IsHeld() == 0)
+	{
 		return;
+	}
+
+	CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+	player->SetIsHoldingKoopa(0);
+	k->SetIsHeld(0);
+
+	k->SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY);
+	this->SetState(PIRANHA_PLANT_STATE_DIE);
 }
 
 void CPiranhaPlant::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
@@ -171,7 +185,7 @@ void CPiranhaPlant::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	if (isDefeated == 1)
 		return;
 
-	if (state == PIRANHA_PLANT_STATE_DIED)
+	if (state == PIRANHA_PLANT_STATE_DIE)
 	{
 		if (GetTickCount64() - deathStart > PIRANHA_PLANT_DIE_TIMEOUT)
 		{
@@ -265,7 +279,7 @@ void CPiranhaPlant::SetState(int state)
 		vy = 0.0f;
 		hoverStart = GetTickCount64();
 		break;
-	case PIRANHA_PLANT_STATE_DIED:
+	case PIRANHA_PLANT_STATE_DIE:
 		StartDeath();
 		CParticle::GenerateParticleInChunk(this, 4);
 		break;

@@ -489,7 +489,7 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 void CMario::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
 {
 	CGoomba* g = dynamic_cast<CGoomba*>(e->obj);
-	if (g->IsDead() == 1) return;
+	if (g->IsDead() == 1 || g->IsDefeated() == 1) return;
 
 	// jump on top >> kill Goomba and deflect a bit 
 	if (e->ny < 0)
@@ -697,9 +697,12 @@ void CMario::OnCollisionWithSuperLeaf(LPCOLLISIONEVENT e)
 void CMario::OnCollisionWithPiranhaPlant(LPCOLLISIONEVENT e)
 {
 	CPiranhaPlant* pp = dynamic_cast<CPiranhaPlant*>(e->obj);
+	if (pp->GetState() == PIRANHA_PLANT_STATE_HIDDEN || pp->GetState() == PIRANHA_PLANT_STATE_DIE || pp->IsDefeated() == 1)
+		return;
+
 	if (untouchable == 0)
 	{
-		if (pp->GetState() != PIRANHA_PLANT_STATE_HIDDEN && pp->GetState() != PIRANHA_PLANT_STATE_DIED)
+		if (pp->GetState() != PIRANHA_PLANT_STATE_HIDDEN && pp->GetState() != PIRANHA_PLANT_STATE_DIE)
 		{
 			if (level == MARIO_LEVEL_TAIL)
 			{
@@ -750,7 +753,7 @@ void CMario::OnCollisionWithKoopa(LPCOLLISIONEVENT e) {
 	// Early exit if Mario is invulnerable
 
 	CKoopa* k = dynamic_cast<CKoopa*>(e->obj);
-	if (k->IsDefeated() == 1)
+	if (k->IsDead() == 1 || k->IsDefeated() == 1)
 		return;
 
 	// Jumped on top
@@ -770,9 +773,6 @@ void CMario::OnCollisionWithKoopa(LPCOLLISIONEVENT e) {
 		}
 	}
 
-	//if (e->ny > 0) { //Shell fell on mario
-	//	return; //Processed in Koopa.cpp
-	//}
 	if (k->GetState() == KOOPA_STATE_SHELL_STATIC) {
 		// Kick the shell
 		if (isRunning == 0)
@@ -818,9 +818,8 @@ void CMario::OnCollisionWithKoopa(LPCOLLISIONEVENT e) {
 void CMario::OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e)
 {
 	CWingedGoomba* wg = dynamic_cast<CWingedGoomba*>(e->obj);
-	if (wg->IsDead() == 1) return;
+	if (wg->IsDead() == 1 || wg->IsDefeated() == 1) return;
 
-	// jump on top >> kill Goomba and deflect a bit 
 	if (e->ny < 0)
 	{
 		CalculateScore(wg);
@@ -837,7 +836,7 @@ void CMario::OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e)
 			vy = -MARIO_JUMP_DEFLECT_SPEED;
 		}
 	}
-	else // hit by Goomba
+	else // Hit by Goomba
 	{
 		if (untouchable == 0)
 		{

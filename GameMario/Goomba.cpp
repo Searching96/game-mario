@@ -69,6 +69,24 @@ void CGoomba::OnCollisionWith(LPCOLLISIONEVENT e)
 			}
 		} while (false);
 	}
+	else if (dynamic_cast<CKoopa*>(e->obj))
+		OnCollisionWithKoopa(e);
+}
+
+void CGoomba::OnCollisionWithKoopa(LPCOLLISIONEVENT e)
+{
+	CKoopa* k = dynamic_cast<CKoopa*>(e->obj);
+	if (k->IsHeld() == 0)
+	{
+		return;
+	}
+
+	CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+	player->SetIsHoldingKoopa(0);
+	k->SetIsHeld(0);
+
+	k->SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY);
+	this->SetState(GOOMBA_STATE_DIE_ON_HELD_KOOPA);
 }
 
 void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)

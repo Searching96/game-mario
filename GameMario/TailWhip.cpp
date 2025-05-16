@@ -191,7 +191,7 @@ void CTailWhip::OnCollisionWithPiranhaPlant(LPCOLLISIONEVENT e)
 	if (pp)
 	{
 		if (pp->GetState() == PIRANHA_PLANT_STATE_HIDDEN 
-			|| pp->GetState() == PIRANHA_PLANT_STATE_DIED
+			|| pp->GetState() == PIRANHA_PLANT_STATE_DIE
 			|| pp->IsDefeated() == 1) 
 		{
 			return;
@@ -199,7 +199,7 @@ void CTailWhip::OnCollisionWithPiranhaPlant(LPCOLLISIONEVENT e)
 		CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
 		player->CalculateScore(pp);
 		CParticle::GenerateParticleInChunk(this, 3);
-		pp->SetState(PIRANHA_PLANT_STATE_DIED);
+		pp->SetState(PIRANHA_PLANT_STATE_DIE);
 	}
 }
 
@@ -208,8 +208,10 @@ void CTailWhip::OnCollisionWithKoopa(LPCOLLISIONEVENT e)
 	CKoopa* k = dynamic_cast<CKoopa*>(e->obj);
 	if (k)
 	{
-		if (k->IsDefeated() == 1)
+		if (k->IsDead() || k->IsDefeated() == 1)
+		{
 			return;
+		}
 
 		if (k->GetState() == KOOPA_STATE_WALKING_LEFT || k->GetState() == KOOPA_STATE_WALKING_RIGHT)
 		{

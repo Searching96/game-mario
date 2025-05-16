@@ -216,6 +216,20 @@ void CCollision::SweptAABB(float ml, float mt, float mr, float mb,
 		}
 	}
 
+	if ((dynamic_cast<CGoomba*>(objSrc) || dynamic_cast<CWingedGoomba*>(objSrc) 
+		|| dynamic_cast<CPiranhaPlant*>(objSrc)) && dynamic_cast<CKoopa*>(objDest))
+	{
+		if (dynamic_cast<CKoopa*>(objDest)->IsHeld() == 1)
+		{
+			if (ml < sr && mr > sl && mt < sb && mb > st)
+			{
+				t = 0.0f;      // collision at the start of the frame
+				nx = ny = 0.0f;
+				return;
+			}
+		}
+	}
+
 	if (dynamic_cast<CKoopa*>(objSrc) && (dynamic_cast<CGoomba*>(objDest)
 		|| dynamic_cast<CWingedGoomba*>(objDest) || dynamic_cast<CPiranhaPlant*>(objDest)))
 	{
@@ -548,18 +562,6 @@ void CCollision::Process(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* co
 	{
 		LPCOLLISIONEVENT e = coEvents[i];
 		if (e->isDeleted) continue;
-		if (CGoomba* g = dynamic_cast<CGoomba*>(e->obj))
-			if (g->IsDefeated() == 1)
-				continue;
-		else if (CPiranhaPlant* p = dynamic_cast<CPiranhaPlant*>(e->obj))
-			if (p->IsDefeated() == 1)
-				continue;
-		else if (CKoopa* k = dynamic_cast<CKoopa*>(e->obj))
-			if (k->IsDefeated() == 1)
-				continue;
-		else if (CWingedGoomba* wg = dynamic_cast<CWingedGoomba*>(e->obj))
-			if (wg->IsDefeated() == 1)
-				continue;
 
 		if ((dynamic_cast<CCoinQBlock*>(e->obj) || dynamic_cast<CBuffQBlock*>(e->obj) || dynamic_cast<CLifeBrick*>(e->obj))
 			&& dynamic_cast<CTailWhip*>(objSrc))
@@ -568,12 +570,6 @@ void CCollision::Process(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* co
 			continue;
 		}
 		if ((dynamic_cast<CCoinBrick*>(e->obj) || dynamic_cast<CActivatorBrick*>(e->obj)) && dynamic_cast<CTailWhip*>(objSrc))
-		{
-			objSrc->OnCollisionWith(e);
-			continue;
-		}
-		if ((dynamic_cast<CWingedGoomba*>(e->obj) || dynamic_cast<CGoomba*>(e->obj))
-			&& dynamic_cast<CKoopa*>(objSrc))
 		{
 			objSrc->OnCollisionWith(e);
 			continue;

@@ -23,7 +23,7 @@
 #define PIRANHA_PLANT_STATE_ASCEND 200
 #define PIRANHA_PLANT_STATE_HOVER 300
 #define PIRANHA_PLANT_STATE_DESCEND 400
-#define PIRANHA_PLANT_STATE_DIED 500
+#define PIRANHA_PLANT_STATE_DIE 500
 
 #define PIRANHA_PLANT_MOVE_SPEED -0.1f
 
@@ -64,6 +64,7 @@ protected:
 
 	void OnNoCollision(DWORD dt);
 	void OnCollisionWith(LPCOLLISIONEVENT e);
+	void OnCollisionWithKoopa(LPCOLLISIONEVENT e);
 
 public:
 	CPiranhaPlant(int id, float x, float y, int z, int originalChunkId);
@@ -74,7 +75,7 @@ public:
 	void SetState(int state);
 
 	int IsBlocking() { return 0; }
-	int IsCollidable() { return 1; }
+	int IsCollidable() { return (state != PIRANHA_PLANT_STATE_DIE && isDefeated == 0); }
 	void StartDeath()
 	{
 		deathStart = GetTickCount64();

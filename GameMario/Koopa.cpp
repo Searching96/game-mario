@@ -307,9 +307,9 @@ void CKoopa::OnCollisionWithPiranhaPlant(LPCOLLISIONEVENT e)
 	CPiranhaPlant* pp = dynamic_cast<CPiranhaPlant*>(e->obj);
 	if (this->state == KOOPA_STATE_SHELL_DYNAMIC)
 	{
-		if (pp->GetState() != PIRANHA_PLANT_STATE_DIED)
+		if (pp->GetState() != PIRANHA_PLANT_STATE_DIE)
 		{
-			pp->SetState(PIRANHA_PLANT_STATE_DIED);
+			pp->SetState(PIRANHA_PLANT_STATE_DIE);
 		}
 	}
 }
@@ -454,14 +454,14 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		return;
 	}
 
-	CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
-
 	if (isFlying && vy == 0)
 	{
 		vx = 0;
 		isFlying = false;
 		return;
 	}
+
+	CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
 
 	// Get out of shell
 	if ((state == KOOPA_STATE_SHELL_STATIC || state == KOOPA_STATE_BEING_HELD)
@@ -501,12 +501,12 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 			y -= 6; // RED ALLERT
 			this->SetState((player->GetNx() > 0) ? KOOPA_STATE_WALKING_RIGHT : KOOPA_STATE_WALKING_LEFT);
-			if (player->GetLevel() == MARIO_LEVEL_TAIL)
-				player->SetState(MARIO_STATE_TAIL_DOWN);
-			else if (player->GetLevel() == MARIO_LEVEL_BIG)
-				player->SetState(MARIO_STATE_POWER_DOWN);
-			else if (player->GetLevel() == MARIO_LEVEL_SMALL)
-				player->SetState(MARIO_STATE_DIE_ON_BEING_KILLED);
+			//if (player->GetLevel() == MARIO_LEVEL_TAIL)
+			//	player->SetState(MARIO_STATE_TAIL_DOWN);
+			//else if (player->GetLevel() == MARIO_LEVEL_BIG)
+			//	player->SetState(MARIO_STATE_POWER_DOWN);
+			//else if (player->GetLevel() == MARIO_LEVEL_SMALL)
+			//	player->SetState(MARIO_STATE_DIE_ON_BEING_KILLED);
 
 		}
 		this->SetPosition(x, y - 2);
@@ -515,48 +515,6 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 	if (isHeld == 1)
 	{
-		// Check overlap with enemies
-		vector<LPCOLLISIONEVENT> coEvents;
-		coEvents.clear();
-		CCollision::GetInstance()->Scan(this, dt, coObjects, coEvents);
-
-		int isKilledOnCollideWithEnemy = 0;
-		for (size_t i = 0; i < coEvents.size(); i++)
-		{
-			LPCOLLISIONEVENT e = coEvents[i];
-			if (CGoomba* g = dynamic_cast<CGoomba*>(e->obj))
-			{
-				if (g->IsDefeated() == 1 || g->IsDead() == 1) continue;
-				this->SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY);
-				e->obj->SetState(WINGED_GOOMBA_STATE_DIE_ON_HELD_KOOPA);
-				isKilledOnCollideWithEnemy = 1;
-			}
-			else if (CWingedGoomba* wg = dynamic_cast<CWingedGoomba*>(e->obj))
-			{
-				if (wg->IsDefeated() == 1 || wg->IsDead() == 1) continue;
-				this->SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY);
-				e->obj->SetState(GOOMBA_STATE_DIE_ON_HELD_KOOPA);
-				isKilledOnCollideWithEnemy = 1;
-			}
-			else if (CPiranhaPlant* pp = dynamic_cast<CPiranhaPlant*>(e->obj))
-			{
-				if (pp->IsDefeated() == 1 || pp->GetState() == PIRANHA_PLANT_STATE_DIED) continue;
-				this->SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY);
-				e->obj->SetState(PIRANHA_PLANT_STATE_DIED);
-				isKilledOnCollideWithEnemy = 1;
-			}
-		}
-
-		for (size_t i = 0; i < coEvents.size(); i++) delete coEvents[i];
-		if (isKilledOnCollideWithEnemy == 1)
-		{
-			player->SetIsHoldingKoopa(0);
-			isHeld = 0;
-			vy += ay * dt;
-			y += vy * dt;
-			return;
-		}
-
 		if (player->GetIsRunning() == 0)
 		{
 			this->SetState(KOOPA_STATE_SHELL_DYNAMIC);
@@ -635,10 +593,6 @@ void CKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	}
 
 	//DebugOut(L"[INFO] Koopa: vx=%f, ax=%f, vy=%f, ay=%f\n", vx, ax, vy, ay);
-	//float l, t, r, b;
-	//GetBoundingBox(l, t, r, b);
-	//DebugOut(L"[INFO] Bounding box: left=%f, top=%f, right=%f, bottom=%f\n", l, t, r, b);
-	//DebugOut(L"[INFO] Koopa: x=%f, y=%f\n", x, y);
 
 	CGameObject::Update(dt, coObjects);
 	CCollision::GetInstance()->Process(this, dt, coObjects);

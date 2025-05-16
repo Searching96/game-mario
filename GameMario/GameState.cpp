@@ -20,8 +20,8 @@ void CGameState::Update(DWORD dt) {
 			CPlayScene* playScene = dynamic_cast<CPlayScene*>(current_scene);
 			if (playScene) {
 				CMario* player = dynamic_cast<CMario*>(playScene->GetPlayer());
-				if (player && player->GetState() != MARIO_STATE_DIE) { // Avoid setting die state multiple times
-					player->SetState(MARIO_STATE_DIE);
+				if (player && player->GetState() != MARIO_STATE_DIE_ON_BEING_KILLED) { // Avoid setting die state multiple times
+					player->SetState(MARIO_STATE_DIE_ON_BEING_KILLED);
 				}
 			}
 		}

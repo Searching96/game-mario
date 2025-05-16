@@ -61,7 +61,7 @@ protected:
 	virtual void Render();
 	bool IsPlatformEdge(float checkDistance, vector<LPGAMEOBJECT>& possibleGrounds);
 
-	virtual int IsCollidable() { return (isDead == 0); };
+	virtual int IsCollidable() { return (isDead == 0 && isDefeated == 0); };
 	virtual int IsBlocking() { return 0; }
 	virtual void OnNoCollision(DWORD dt);
 
@@ -85,6 +85,7 @@ public:
 	void SetNx(int nx) { this->nx = nx; }
 	void GetOriginalPosition(float& x0, float& y0) { x0 = this->x0; y0 = this->y0; }
 	int IsDefeated() { return isDefeated; }
+	int IsDead() { return isDead; }
 	void SetIsDefeated(int isDefeated) { this->isDefeated = isDefeated; }
 	int GetOriginalChunkId() { return originalChunkId; }
 };

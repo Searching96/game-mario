@@ -65,11 +65,12 @@ protected:
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 	virtual void Render();
 
-	virtual int IsCollidable() { return (isDead == 0); }
+	virtual int IsCollidable() { return (isDead == 0 && isDefeated == 0); }
 	virtual int IsBlocking() { return 0; }
 
 	virtual void OnNoCollision(DWORD dt);
 	virtual void OnCollisionWith(LPCOLLISIONEVENT e);
+	virtual void OnCollisionWithKoopa(LPCOLLISIONEVENT e);
 
 public:
 	CWingedGoomba(int id, float x, float y, int z, int originalChunkId);
