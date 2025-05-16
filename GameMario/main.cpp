@@ -263,7 +263,16 @@ int WINAPI WinMain(
 	//IMPORTANT: this is the only place where a hardcoded file name is allowed ! 
 	game->Load(L"mario-sample.txt");
 
-	SetWindowPos(hWnd, 0, 0, 0, SCREEN_WIDTH * 3, SCREEN_HEIGHT * 3, SWP_NOMOVE | SWP_NOOWNERZORDER | SWP_NOZORDER);
+	RECT screenRect;
+	GetWindowRect(GetDesktopWindow(), &screenRect);
+
+	int windowWidth = SCREEN_WIDTH * 3;
+	int windowHeight = SCREEN_HEIGHT * 3;
+
+	int posX = (screenRect.right - windowWidth) / 2;
+	int posY = (screenRect.bottom - windowHeight) / 2;
+
+	SetWindowPos(hWnd, 0, posX, posY, windowWidth, windowHeight, SWP_NOZORDER | SWP_NOOWNERZORDER);
 
 	Run();
 
