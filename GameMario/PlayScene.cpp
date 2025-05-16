@@ -64,13 +64,13 @@ using namespace std;
 #define ZINDEX_BACKGROUND_SCENERY   20 // Bushes, Trees (behind pipes)
 #define ZINDEX_PLATFORMS            40 // Ground platforms, Sky Platforms (usually behind pipes/blocks)
 #define ZINDEX_PIRANHA_PLANT		45 // Piranha Plants behind pipes.
+#define ZINDEX_PIPES                50 // Standard Pipes
 #define ZINDEX_MUSHROOM             60 // Mushroom
 #define ZINDEX_HIDDEN_COIN			65 // Q-Block Coins
 #define ZINDEX_BLOCKS               70 // Bricks, Q-Blocks, Boxes
 #define ZINDEX_ITEMS                80 // Coins (when static), Mushrooms, Leaves (after spawning)
 #define ZINDEX_ENEMIES              90 // Goombas, Koopas, Piranhas (usually behind player)
 #define ZINDEX_PLAYER              100 // Mario
-#define ZINDEX_PIPES               105 // Standard Pipes
 #define ZINDEX_PLAYER_EFFECTS      110 // Tail Whip visual (Mario renders this), maybe held Koopa?
 #define ZINDEX_PARTICLES           120 // Attack Particle (rendered by whip/Mario)
 #define ZINDEX_FOREGROUND_EFFECTS  150 // Foreground elements, UI overlays (if part of game objects)
@@ -78,7 +78,7 @@ using namespace std;
 #define ZINDEX_DEFAULT              75 // Place somewhere in the middle
 
 #define DEPENDENT_ID				9999	// ID for objects those are not listed in text file and initiate via another object initiation
-#define ACTIVATOR_BASE_ID				10000
+#define ACTIVATOR_BASE_ID			10000
 
 #define SPAWN_CAMERA_BUFFER			20.0f
 
@@ -394,6 +394,8 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 			int height = stoi(tokens[5]);
 			int color = stoi(tokens[6]);
 			int bottomShadow = (tokens.size() >= 8) ? stoi(tokens[7]) : 0;
+			if (color == 5)
+				zIndex = 0;
 			obj = new CBox(id, x, y, zIndex, width, height, color, bottomShadow);
 			break;
 		}
@@ -839,8 +841,8 @@ void CPlayScene::Update(DWORD dt)
 	player->Update(dt, &coObjects);
 
 	// --- Update all OTHER game objects within chunks ---
-	bool isChronoStopped = mario->GetIsPowerUp() || mario->GetIsTailUp() 
-		|| mario->GetIsPowerDown() || mario->GetIsTailDown() || (mario->GetState() == MARIO_STATE_DIE_ON_BEING_KILLED)
+	bool isChronoStopped = mario->IsPowerUp() || mario->IsTailUp() 
+		|| mario->IsPowerDown() || mario->IsTailDown() || (mario->GetState() == MARIO_STATE_DIE_ON_BEING_KILLED)
 		|| (mario->GetState() == MARIO_STATE_DIE_ON_FALLING) || mario->GetIsTeleporting();
 
 	for (LPCHUNK chunk : chunks) {

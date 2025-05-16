@@ -127,6 +127,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				{
 					isTeleporting = 0;
 					SetState(MARIO_STATE_IDLE);
+					zIndex = 100;
 				}
 			}
 		}
@@ -153,6 +154,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				{
 					isTeleporting = 0;
 					SetState(MARIO_STATE_IDLE);
+					zIndex = 100;
 				}
 			}
 		}
@@ -254,12 +256,12 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	{
 		pMeter += dt / 1200.0f;
 	}
-	else if (isOnPlatform) //Not running => Depleting
+	else if (isOnPlatform && pMeterMax == -1) //Not running => Depleting
 	{
-		pMeter -= dt / ((fabs(vx) < MARIO_WALKING_SPEED) ? 2500.0f : 3000.0f);
+		pMeter -= dt / ((fabs(vx) < MARIO_WALKING_SPEED) ? 2500.0f : 3200.0f);
 	}
 
-	if (pMeter == 1 && pMeterMax == -1) //Trigger full pMeter
+	if (pMeter == 1 && pMeterMax == -1 && jumpCount > 0) //Trigger full pMeter
 	{
 		pMeterMax = GetTickCount64();
 
@@ -415,6 +417,7 @@ void CMario::Teleport(CPortal* portal)
 		else {
 			if (marioT < portalB) offsetY = marioT - portalB - 2;
 		}
+		zIndex = 50 - 1;
 		SetState(MARIO_STATE_TELEPORTING);
 	}
 }

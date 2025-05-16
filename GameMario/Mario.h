@@ -366,13 +366,14 @@ public:
 
 	int GetJumpCount() const { return jumpCount; }
 	int GetLevel() const { return level; }
-	bool GetIsPowerUp() const { return powerUp; }
-	bool GetIsTailUp() const { return tailUp; }
-	bool GetIsPowerDown() const { return powerDown; }
-	bool GetIsTailDown() const { return tailDown; }
-	bool GetIsHovering() const { return isHovering; }
-	bool GetIsRunning() const { return isRunning; }
-	bool GetIsFlying() { return !isOnPlatform && (jumpCount > 1 || isHovering == 1); }
+
+	bool IsPowerUp() const { return powerUp; }
+	bool IsTailUp() const { return tailUp; }
+	bool IsPowerDown() const { return powerDown; }
+	bool IsTailDown() const { return tailDown; }
+	bool IsHovering() const { return isHovering; }
+	bool IsFlying() { return !isOnPlatform && (jumpCount > 1 || isHovering == 1); }
+	bool IsRunning() const { return isRunning; }
 
 	bool GetIsTeleporting() const { return isTeleporting; }
 	bool GetIsEnteringPortal() const { return isEnteringPortal; }
