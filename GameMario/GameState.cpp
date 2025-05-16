@@ -12,18 +12,17 @@ void CGameState::Update(DWORD dt) {
 		return;
 
 	// Only decrease time if it's positive to prevent underflow issues
-	if (time > 0) {
-		time -= dt;
-		if (time <= 0) {
-			time = 0; // Clamp to zero
-			// Ensure player exists before trying to kill them
-			if (current_scene) {
-				CPlayScene* playScene = dynamic_cast<CPlayScene*>(current_scene);
-				if (playScene) {
-					CMario* player = dynamic_cast<CMario*>(playScene->GetPlayer());
-					if (player && player->GetState() != MARIO_STATE_DIE) { // Avoid setting die state multiple times
-						player->SetState(MARIO_STATE_DIE);
-					}
+	if (time > dt) time -= dt;
+	else
+	{
+		time = 0; // Clamp to zero
+		// Ensure player exists before trying to kill them
+		if (current_scene) {
+			CPlayScene* playScene = dynamic_cast<CPlayScene*>(current_scene);
+			if (playScene) {
+				CMario* player = dynamic_cast<CMario*>(playScene->GetPlayer());
+				if (player && player->GetState() != MARIO_STATE_DIE) { // Avoid setting die state multiple times
+					player->SetState(MARIO_STATE_DIE);
 				}
 			}
 		}
