@@ -252,13 +252,13 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 	//Power Meter calculation
 
-	if (isRunning == 1 && isOnPlatform && abs(vx) >= MARIO_RUNNING_SPEED)
+	if (isRunning == 1 && isOnPlatform && abs(vx) >= (MARIO_MAX_WALKING_SPEED + MARIO_RUNNING_SPEED)/2)
 	{
 		pMeter += dt / 1200.0f;
 	}
 	else if (isOnPlatform && pMeterMax == -1) //Not running => Depleting
 	{
-		pMeter -= dt / ((fabs(vx) < MARIO_WALKING_SPEED) ? 2500.0f : 3200.0f);
+		pMeter -= dt / 3000.0f;
 	}
 
 	if (pMeter == 1 && pMeterMax == -1 && jumpCount > 0) //Trigger full pMeter
