@@ -1497,7 +1497,7 @@ void CMario::SetState(int state)
 		break;
 
 	case MARIO_STATE_DIE_ON_BEING_KILLED:
-		vy = -MARIO_JUMP_DEFLECT_SPEED;
+		vy = -MARIO_DIE_BOUNCING_SPEED;
 		vx = 0;
 		ax = 0;
 		break;
