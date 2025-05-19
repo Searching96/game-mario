@@ -7,7 +7,7 @@
 
 #define ID_ANI_TAIL_WHIP			20000
 
-#define TAIL_WHIP_BBOX_WIDTH		20
+#define TAIL_WHIP_BBOX_WIDTH		16
 #define TAIL_WHIP_BBOX_HEIGHT		8
 
 #define TAIL_STATE_WHIPPING_LEFT	100
@@ -36,6 +36,7 @@ protected:
 	void OnCollisionWithPiranhaPlant(LPCOLLISIONEVENT e);
 	void OnCollisionWithCoinBrick(LPCOLLISIONEVENT e);
 	void OnCollisionWithActivatorBrick(LPCOLLISIONEVENT e);
+	void OnCollisionWithWingedKoopa(LPCOLLISIONEVENT e);
 
 public:
 	CTailWhip(int id, float x, float y, int z);

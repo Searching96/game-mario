@@ -5,6 +5,8 @@
 #define WINGED_KOOPA_WALKING_SPEED 0.02f  
 #define WINGED_KOOPA_SHELL_SPEED 0.25f  
 #define WINGED_KOOPA_SHELL_DEFLECT_SPEED 0.25f  
+#define WINGED_KOOPA_BOUNCING_SPEED_Y -0.4f
+#define WINGED_KOOPA_BOUNCING_SPEED_X 0.08f
 
 #define WINGED_KOOPA_TEXTURE_WIDTH 16  
 #define WINGED_KOOPA_TEXTURE_HEIGHT 26  
@@ -26,7 +28,7 @@
 #define WINGED_KOOPA_STATE_DIE_ON_COLLIDE_WITH_TERRAIN 510  
 
 #define ID_ANI_WINGED_KOOPA_MOVING_LEFT 180010  
-#define ID_ANI_WINGED_KOOPA_WALKING_RIGHT 180020  
+#define ID_ANI_WINGED_KOOPA_MOVING_RIGHT 180020  
 #define ID_ANI_WINGED_KOOPA_SHELL_STATIC_1 180100  
 #define ID_ANI_WINGED_KOOPA_SHELL_STATIC_2 180101  
 #define ID_ANI_WINGED_KOOPA_SHELL_DYNAMIC 180200  
@@ -48,16 +50,17 @@ protected:
 	bool isFlying = false; 
 	bool isWinged;
 
-	ULONGLONG shellStart;  
-	ULONGLONG dieStart;  
+	ULONGLONG shellStart = -1;  
+	ULONGLONG dieStart = -1;  
 	ULONGLONG lastTurnAroundTime = -1;  
+	ULONGLONG flapStart = -1;
 
 	bool isHeld = 0;  
 	bool isDead = 0;  
 	bool isDefeated = 0;  
 
 	int originalChunkId;
-	int initialNx;
+	int wingState = 0; // 0: flap, 1: fold
 
 	virtual void GetBoundingBox(float& left, float& top, float& right, float& bottom);  
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);  
@@ -74,7 +77,8 @@ protected:
 	void OnCollisionWithPiranhaPlant(LPCOLLISIONEVENT e);  
 	void OnCollisionWithLifeBrick(LPCOLLISIONEVENT e);  
 	void OnCollisionWithCoinBrick(LPCOLLISIONEVENT e);  
-	void OnCollisionWithActivatorBrick(LPCOLLISIONEVENT e);  
+	void OnCollisionWithActivatorBrick(LPCOLLISIONEVENT e);
+	void OnCollisionWithWingedKoopa(LPCOLLISIONEVENT e);
 
 	bool CheckCollisionWithTerrain(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 
@@ -90,7 +94,10 @@ public:
 	void GetOriginalPosition(float& x0, float& y0) { x0 = this->x0; y0 = this->y0; }  
 	bool IsFlying() { return isFlying; }  
 	bool IsDefeated() { return isDefeated; }  
-	bool IsDead() { return isDead; }  
-	void SetIsDefeated(int isDefeated) { this->isDefeated = isDefeated; }  
-	int GetOriginalChunkId() { return originalChunkId; }  
+	bool IsDead() { return isDead; }
+	bool IsWinged() { return isWinged; }
+	void SetIsDefeated(bool isDefeated) { this->isDefeated = isDefeated; }  
+	void SetIsWinged(bool isWinged) { this->isWinged = isWinged; }
+	int GetOriginalChunkId() { return originalChunkId; }
+	int GetNx() { return nx; }
 };

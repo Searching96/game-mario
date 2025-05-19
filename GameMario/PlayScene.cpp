@@ -36,6 +36,7 @@
 #include "CoinBrick.h"
 #include "Activator.h"
 #include "ActivatorBrick.h"
+#include "WingedKoopa.h"
 
 #include "SampleKeyEventHandler.h"
 
@@ -243,224 +244,240 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 	CGameObject* obj = nullptr;
 	int zIndex = ZINDEX_DEFAULT;
 
-	try {
+	try 
+	{
 		switch (object_type)
 		{
-		case OBJECT_TYPE_GOOMBA:
-			zIndex = ZINDEX_ENEMIES;
-			obj = new CGoomba(id, x, y, zIndex, targetChunk->GetID());
-			targetChunk->AddEnemy(obj);
-			break;
-		case OBJECT_TYPE_KOOPA:
-			zIndex = ZINDEX_ENEMIES;
-			obj = new CKoopa(id, x, y, zIndex, targetChunk->GetID());
-			targetChunk->AddEnemy(obj);
-			break;
-		case OBJECT_TYPE_PIRANHA_PLANT:
-		{
-			zIndex = ZINDEX_PIRANHA_PLANT;
-			obj = new CPiranhaPlant(id, x, y, zIndex, targetChunk->GetID());
-			targetChunk->AddObject(obj);
-			targetChunk->AddEnemy(obj);
-			return;
-		}
-		case OBJECT_TYPE_WINGED_GOOMBA:
-			zIndex = ZINDEX_ENEMIES;
-			obj = new CWingedGoomba(id, x, y, zIndex, targetChunk->GetID());
-			targetChunk->AddEnemy(obj);
-			break;
-		case OBJECT_TYPE_BRICK:
-		{
-			zIndex = ZINDEX_BLOCKS;
-			if (tokens.size() < 7) throw runtime_error("Insufficient params for BRICK");
-			float cell_width = stof(tokens[4]);
-			float cell_height = stof(tokens[5]);
-			int type = stoi(tokens[6]);
-			obj = new CBrick(DEPENDENT_ID, x, y, zIndex, type);
-			break;
-		}
-		case OBJECT_TYPE_COIN:
-		{
-			zIndex = ZINDEX_ITEMS;
-			if (tokens.size() < 5) throw runtime_error("Insufficient params for COIN");
-			int type = stoi(tokens[4]);
-			obj = new CCoin(id, x, y, zIndex, targetChunk->GetID(), type);
-			targetChunk->SetIsObjectConsumed(obj->GetId(), false);
-			if (targetChunk->GetIsObjectConsumed(obj->GetId()))
+			case OBJECT_TYPE_GOOMBA:
+			{
+				zIndex = ZINDEX_ENEMIES;
+				obj = new CGoomba(id, x, y, zIndex, targetChunk->GetID());
+				targetChunk->AddEnemy(obj);
+				break;
+			}
+			case OBJECT_TYPE_KOOPA:
+			{
+				zIndex = ZINDEX_ENEMIES;
+				obj = new CKoopa(id, x, y, zIndex, targetChunk->GetID());
+				targetChunk->AddEnemy(obj);
+				break;
+			}
+			case OBJECT_TYPE_PIRANHA_PLANT:
+			{
+				zIndex = ZINDEX_PIRANHA_PLANT;
+				obj = new CPiranhaPlant(id, x, y, zIndex, targetChunk->GetID());
+				targetChunk->AddObject(obj);
+				targetChunk->AddEnemy(obj);
 				return;
-			break;
-		}
-		case OBJECT_TYPE_PLATFORM:
-		case OBJECT_TYPE_SKY_PLATFORM:
-		{
-			zIndex = ZINDEX_PLATFORMS;
-			if (tokens.size() < 6) throw runtime_error("Insufficient params for PLATFORM/SKYPLATFORM");
-			int width = stoi(tokens[4]);
-			int height = stoi(tokens[5]);
-			if (object_type == OBJECT_TYPE_PLATFORM)
-				obj = new CPlatform(id, x, y, zIndex, width, height);
-			else
-				obj = new CSkyPlatform(id, x, y, zIndex, width, height);
-			break;
-		}
-		case OBJECT_TYPE_COIN_QBLOCK:
-		{
-			zIndex = ZINDEX_BLOCKS;
-			int coin_zIndex = ZINDEX_HIDDEN_COIN;
-			CCoin* coin = new CCoin(DEPENDENT_ID, x, y, coin_zIndex, targetChunk->GetID(), 1);
-			obj = new CCoinQBlock(id, x, y, zIndex, targetChunk->GetID(), coin);
-			targetChunk->AddObject(coin);
-			targetChunk->AddObject(obj);
-			targetChunk->SetIsObjectConsumed(obj->GetId(), false);
-			if (targetChunk->GetIsObjectConsumed(obj->GetId()))
-				((CCoinQBlock*)obj)->SetIsHit(true);
-			return;
-		}
-		case OBJECT_TYPE_BUFF_QBLOCK:
-		{
-			zIndex = ZINDEX_BLOCKS;
-			int superleafZIndex = ZINDEX_ITEMS;
-			int mushroomZIndex = ZINDEX_MUSHROOM;
-			CMushroom* mushroom = new CMushroom(DEPENDENT_ID, x, y, mushroomZIndex);
-			CSuperLeaf* superleaf = new CSuperLeaf(DEPENDENT_ID, x, y, superleafZIndex);
-			obj = new CBuffQBlock(id, x, y, zIndex, targetChunk->GetID(), mushroom, superleaf);
-			targetChunk->AddObject(mushroom);
-			targetChunk->AddObject(superleaf);
-			targetChunk->AddObject(obj);
-			targetChunk->SetIsObjectConsumed(obj->GetId(), false);
-			if (targetChunk->GetIsObjectConsumed(obj->GetId()))
-				((CBuffQBlock*)obj)->SetIsHit(true);
-			return;
-		}
-		case OBJECT_TYPE_LIFE_BRICK:
-		{
-			zIndex = ZINDEX_BLOCKS;
-			int mushroomZIndex = ZINDEX_MUSHROOM;
-			CLifeMushroom* mushroom = new CLifeMushroom(DEPENDENT_ID, x, y, mushroomZIndex);
-			obj = new CLifeBrick(id, x, y, zIndex, targetChunk->GetID(), mushroom);
-			targetChunk->AddObject(mushroom);
-			targetChunk->AddObject(obj);
-			targetChunk->SetIsObjectConsumed(obj->GetId(), false);
-			if (targetChunk->GetIsObjectConsumed(obj->GetId()))
-				((CLifeBrick*)obj)->SetIsHit(true);
-			return;
-		}
-		case OBJECT_TYPE_COIN_BRICK:
-		{
-			zIndex = ZINDEX_BLOCKS;
-			obj = new CCoinBrick(id, x, y, zIndex, targetChunk->GetID());
-			break;
-		}
-		case OBJECT_TYPE_ACTIVATOR:
-		{
-			zIndex = ZINDEX_BLOCKS;
-			obj = new CActivator(id, x, y, zIndex, targetChunk->GetID());
-			break;
-		}
-		case OBJECT_TYPE_ACTIVATOR_BRICK:
-		{
-			zIndex = ZINDEX_BLOCKS;
-			int activatorCount = 0;
-			for (LPGAMEOBJECT obj : targetChunk->GetObjects())
-			{
-				if (dynamic_cast<CActivator*>(obj))
-				{
-					activatorCount++;
-				}
 			}
-			int activatorID = ACTIVATOR_BASE_ID + activatorCount;
-			CActivator* activator = new CActivator(activatorID, x, y - 15, zIndex, targetChunk->GetID());
-			obj = new CActivatorBrick(id, x, y, zIndex, targetChunk->GetID(), activator);
-			targetChunk->AddObject(activator);
-			targetChunk->AddObject(obj);
-			targetChunk->SetIsObjectConsumed(obj->GetId(), false);
-			targetChunk->SetIsObjectConsumed(activator->GetId(), false);
-			if (targetChunk->GetIsObjectConsumed(obj->GetId()))
+			case OBJECT_TYPE_WINGED_GOOMBA:
 			{
-				((CActivatorBrick*)obj)->SetIsHit(true);
-				activator->SetIsRevealed(true);
-				if (targetChunk->GetIsObjectConsumed(activator->GetId()))
-				{
-					activator->SetState(ACTIVATOR_STATE_ACTIVATED_BY_CHUNK_RELOAD);
-				}
+				zIndex = ZINDEX_ENEMIES;
+				obj = new CWingedGoomba(id, x, y, zIndex, targetChunk->GetID());
+				targetChunk->AddEnemy(obj);
+				break;
 			}
-			return;
-		}
-		case OBJECT_TYPE_BOX:
-		{
-			zIndex = ZINDEX_MUSHROOM - 1;
-			if (tokens.size() < 7) throw runtime_error("Insufficient params for BOX");
-			int width = stoi(tokens[4]);
-			int height = stoi(tokens[5]);
-			int color = stoi(tokens[6]);
-			int bottomShadow = (tokens.size() >= 8) ? stoi(tokens[7]) : 0;
-			if (color == 5)
-				zIndex = 0;
-			obj = new CBox(id, x, y, zIndex, width, height, color, bottomShadow);
-			break;
-		}
-		case OBJECT_TYPE_TREE:
-		case OBJECT_TYPE_PIPE:
-		{
-			zIndex = (object_type == OBJECT_TYPE_TREE) ? ZINDEX_BACKGROUND_SCENERY : ZINDEX_PIPES;
-			if (tokens.size() < 11) throw runtime_error("Insufficient params for TREE/PIPE");
-			float cell_width = stof(tokens[4]);
-			float cell_height = stof(tokens[5]);
-			int height = stoi(tokens[6]);
-			int sprite_top_left = stoi(tokens[7]);
-			int sprite_top_right = stoi(tokens[8]);
-			int sprite_bottom_left = stoi(tokens[9]);
-			int sprite_bottom_right = stoi(tokens[10]);
+			case OBJECT_TYPE_WINGED_KOOPA:
+			{
+				zIndex = ZINDEX_ENEMIES;
+				int nx = (stoi(tokens[4]) > 0) ? 1 : -1;
+				bool isWinged = (stoi(tokens[5]) == 1);
+				obj = new CWingedKoopa(id, x, y, zIndex, targetChunk->GetID(), nx, isWinged);
+				targetChunk->AddEnemy(obj);
+				break;
+			}
+			case OBJECT_TYPE_BRICK:
+			{
+				zIndex = ZINDEX_BLOCKS;
+				if (tokens.size() < 7) throw runtime_error("Insufficient params for BRICK");
+				float cell_width = stof(tokens[4]);
+				float cell_height = stof(tokens[5]);
+				int type = stoi(tokens[6]);
+				obj = new CBrick(DEPENDENT_ID, x, y, zIndex, type);
+				break;
+			}
+			case OBJECT_TYPE_COIN:
+			{
+				zIndex = ZINDEX_ITEMS;
+				if (tokens.size() < 5) throw runtime_error("Insufficient params for COIN");
+				int type = stoi(tokens[4]);
+				obj = new CCoin(id, x, y, zIndex, targetChunk->GetID(), type);
+				targetChunk->SetIsObjectConsumed(obj->GetId(), false);
+				if (targetChunk->GetIsObjectConsumed(obj->GetId()))
+					return;
+				break;
+			}
+			case OBJECT_TYPE_PLATFORM:
+			case OBJECT_TYPE_SKY_PLATFORM:
+			{
+				zIndex = ZINDEX_PLATFORMS;
+				if (tokens.size() < 6) throw runtime_error("Insufficient params for PLATFORM/SKYPLATFORM");
+				int width = stoi(tokens[4]);
+				int height = stoi(tokens[5]);
+				if (object_type == OBJECT_TYPE_PLATFORM)
+					obj = new CPlatform(id, x, y, zIndex, width, height);
+				else
+					obj = new CSkyPlatform(id, x, y, zIndex, width, height);
+				break;
+			}
+			case OBJECT_TYPE_COIN_QBLOCK:
+			{
+				zIndex = ZINDEX_BLOCKS;
+				int coin_zIndex = ZINDEX_HIDDEN_COIN;
+				CCoin* coin = new CCoin(DEPENDENT_ID, x, y, coin_zIndex, targetChunk->GetID(), 1);
+				obj = new CCoinQBlock(id, x, y, zIndex, targetChunk->GetID(), coin);
+				targetChunk->AddObject(coin);
+				targetChunk->AddObject(obj);
+				targetChunk->SetIsObjectConsumed(obj->GetId(), false);
+				if (targetChunk->GetIsObjectConsumed(obj->GetId()))
+					((CCoinQBlock*)obj)->SetIsHit(true);
+				return;
+			}
+			case OBJECT_TYPE_BUFF_QBLOCK:
+			{
+				zIndex = ZINDEX_BLOCKS;
+				int superleafZIndex = ZINDEX_ITEMS;
+				int mushroomZIndex = ZINDEX_MUSHROOM;
+				CMushroom* mushroom = new CMushroom(DEPENDENT_ID, x, y, mushroomZIndex);
+				CSuperLeaf* superleaf = new CSuperLeaf(DEPENDENT_ID, x, y, superleafZIndex);
+				obj = new CBuffQBlock(id, x, y, zIndex, targetChunk->GetID(), mushroom, superleaf);
+				targetChunk->AddObject(mushroom);
+				targetChunk->AddObject(superleaf);
+				targetChunk->AddObject(obj);
+				targetChunk->SetIsObjectConsumed(obj->GetId(), false);
+				if (targetChunk->GetIsObjectConsumed(obj->GetId()))
+					((CBuffQBlock*)obj)->SetIsHit(true);
+				return;
+			}
+			case OBJECT_TYPE_LIFE_BRICK:
+			{
+				zIndex = ZINDEX_BLOCKS;
+				int mushroomZIndex = ZINDEX_MUSHROOM;
+				CLifeMushroom* mushroom = new CLifeMushroom(DEPENDENT_ID, x, y, mushroomZIndex);
+				obj = new CLifeBrick(id, x, y, zIndex, targetChunk->GetID(), mushroom);
+				targetChunk->AddObject(mushroom);
+				targetChunk->AddObject(obj);
+				targetChunk->SetIsObjectConsumed(obj->GetId(), false);
+				if (targetChunk->GetIsObjectConsumed(obj->GetId()))
+					((CLifeBrick*)obj)->SetIsHit(true);
+				return;
+			}
+			case OBJECT_TYPE_COIN_BRICK:
+			{
+				zIndex = ZINDEX_BLOCKS;
+				obj = new CCoinBrick(id, x, y, zIndex, targetChunk->GetID());
+				break;
+			}
+			case OBJECT_TYPE_ACTIVATOR:
+			{
+				zIndex = ZINDEX_BLOCKS;
+				obj = new CActivator(id, x, y, zIndex, targetChunk->GetID());
+				break;
+			}
+			case OBJECT_TYPE_ACTIVATOR_BRICK:
+			{
+				zIndex = ZINDEX_BLOCKS;
+				int activatorCount = 0;
+				for (LPGAMEOBJECT obj : targetChunk->GetObjects())
+				{
+					if (dynamic_cast<CActivator*>(obj))
+					{
+						activatorCount++;
+					}
+				}
+				int activatorID = ACTIVATOR_BASE_ID + activatorCount;
+				CActivator* activator = new CActivator(activatorID, x, y - 15, zIndex, targetChunk->GetID());
+				obj = new CActivatorBrick(id, x, y, zIndex, targetChunk->GetID(), activator);
+				targetChunk->AddObject(activator);
+				targetChunk->AddObject(obj);
+				targetChunk->SetIsObjectConsumed(obj->GetId(), false);
+				targetChunk->SetIsObjectConsumed(activator->GetId(), false);
+				if (targetChunk->GetIsObjectConsumed(obj->GetId()))
+				{
+					((CActivatorBrick*)obj)->SetIsHit(true);
+					activator->SetIsRevealed(true);
+					if (targetChunk->GetIsObjectConsumed(activator->GetId()))
+					{
+						activator->SetState(ACTIVATOR_STATE_ACTIVATED_BY_CHUNK_RELOAD);
+					}
+				}
+				return;
+			}
+			case OBJECT_TYPE_BOX:
+			{
+				zIndex = ZINDEX_MUSHROOM - 1;
+				if (tokens.size() < 7) throw runtime_error("Insufficient params for BOX");
+				int width = stoi(tokens[4]);
+				int height = stoi(tokens[5]);
+				int color = stoi(tokens[6]);
+				int bottomShadow = (tokens.size() >= 8) ? stoi(tokens[7]) : 0;
+				if (color == 5)
+					zIndex = 0;
+				obj = new CBox(id, x, y, zIndex, width, height, color, bottomShadow);
+				break;
+			}
+			case OBJECT_TYPE_TREE:
+			case OBJECT_TYPE_PIPE:
+			{
+				zIndex = (object_type == OBJECT_TYPE_TREE) ? ZINDEX_BACKGROUND_SCENERY : ZINDEX_PIPES;
+				if (tokens.size() < 11) throw runtime_error("Insufficient params for TREE/PIPE");
+				float cell_width = stof(tokens[4]);
+				float cell_height = stof(tokens[5]);
+				int height = stoi(tokens[6]);
+				int sprite_top_left = stoi(tokens[7]);
+				int sprite_top_right = stoi(tokens[8]);
+				int sprite_bottom_left = stoi(tokens[9]);
+				int sprite_bottom_right = stoi(tokens[10]);
 
-			if (object_type == OBJECT_TYPE_TREE)
-				obj = new CTree(id, x, y, zIndex, cell_width, cell_height, height, sprite_top_left, sprite_top_right, sprite_bottom_left, sprite_bottom_right);
-			else
-				obj = new CPipe(id, x, y, zIndex, cell_width, cell_height, height, sprite_top_left, sprite_top_right, sprite_bottom_left, sprite_bottom_right);
-			break;
-		}
-		case OBJECT_TYPE_BUSH:
-		case OBJECT_TYPE_CLOUD:
-		{
-			zIndex = (object_type == OBJECT_TYPE_BUSH) ? ZINDEX_BACKGROUND_SCENERY : ZINDEX_BACKGROUND_EFFECTS;
-			if (tokens.size() < 5) throw runtime_error("Insufficient params for BUSH/CLOUD");
-			int width = stoi(tokens[4]);
-			obj = (object_type == OBJECT_TYPE_BUSH) ? (CGameObject*)new CBush(id, x, y, zIndex, width) : (CGameObject*)new CCloud(id, x, y, zIndex, width);
-			break;
-		}
-		case OBJECT_TYPE_TRINKET:
-		{
-			zIndex = ZINDEX_BACKGROUND_SCENERY;
-			if (tokens.size() < 5) throw runtime_error("Insufficient params for TRINKET");
-			int type = stoi(tokens[4]);
-			obj = new CTrinket(id, x, y, zIndex, type);
-			break;
-		}
-		case OBJECT_TYPE_PORTAL:
-		{
-			zIndex = ZINDEX_DEFAULT;
-			if (tokens.size() < 7) throw runtime_error("Insufficient params for PORTAL");
-			float width = stof(tokens[4]);
-			float height = stof(tokens[5]);
-			float targetX = stof(tokens[6]);
-			float exitY = stof(tokens[7]);
-			float yLevel = stof(tokens[8]);
-			obj = new CPortal(id, x - 8, y - 8, width, height, zIndex, targetX - 8, exitY - 8, yLevel);
-			break;
-		}
-		case OBJECT_TYPE_FALL_PITCH:
-		{
-			if (tokens.size() < 6) {
-				DebugOut(L"[WARN] Skipping FALL_PITCH - Insufficient params in chunk %d: %hs\n", targetChunk->GetID(), line.c_str());
-				return;
+				if (object_type == OBJECT_TYPE_TREE)
+					obj = new CTree(id, x, y, zIndex, cell_width, cell_height, height, sprite_top_left, sprite_top_right, sprite_bottom_left, sprite_bottom_right);
+				else
+					obj = new CPipe(id, x, y, zIndex, cell_width, cell_height, height, sprite_top_left, sprite_top_right, sprite_bottom_left, sprite_bottom_right);
+				break;
 			}
-			float r = stof(tokens[4]);
-			float b = stof(tokens[5]);
-			obj = new CFallPitch(id, x + 8, y + 8, r + 8, b + 8);
-			break;
-		}
-		default:
-			DebugOut(L"[WARN] Unhandled object type %d in chunk %d for line: %hs\n", object_type, targetChunk->GetID(), line.c_str());
-			return;
+			case OBJECT_TYPE_BUSH:
+			case OBJECT_TYPE_CLOUD:
+			{
+				zIndex = (object_type == OBJECT_TYPE_BUSH) ? ZINDEX_BACKGROUND_SCENERY : ZINDEX_BACKGROUND_EFFECTS;
+				if (tokens.size() < 5) throw runtime_error("Insufficient params for BUSH/CLOUD");
+				int width = stoi(tokens[4]);
+				obj = (object_type == OBJECT_TYPE_BUSH) ? (CGameObject*)new CBush(id, x, y, zIndex, width) : (CGameObject*)new CCloud(id, x, y, zIndex, width);
+				break;
+			}
+			case OBJECT_TYPE_TRINKET:
+			{
+				zIndex = ZINDEX_BACKGROUND_SCENERY;
+				if (tokens.size() < 5) throw runtime_error("Insufficient params for TRINKET");
+				int type = stoi(tokens[4]);
+				obj = new CTrinket(id, x, y, zIndex, type);
+				break;
+			}
+			case OBJECT_TYPE_PORTAL:
+			{
+				zIndex = ZINDEX_DEFAULT;
+				if (tokens.size() < 7) throw runtime_error("Insufficient params for PORTAL");
+				float width = stof(tokens[4]);
+				float height = stof(tokens[5]);
+				float targetX = stof(tokens[6]);
+				float exitY = stof(tokens[7]);
+				float yLevel = stof(tokens[8]);
+				obj = new CPortal(id, x - 8, y - 8, width, height, zIndex, targetX - 8, exitY - 8, yLevel);
+				break;
+			}
+			case OBJECT_TYPE_FALL_PITCH:
+			{
+				if (tokens.size() < 6) {
+					DebugOut(L"[WARN] Skipping FALL_PITCH - Insufficient params in chunk %d: %hs\n", targetChunk->GetID(), line.c_str());
+					return;
+				}
+				float r = stof(tokens[4]);
+				float b = stof(tokens[5]);
+				obj = new CFallPitch(id, x + 8, y + 8, r + 8, b + 8);
+				break;
+			}
+			default:
+				DebugOut(L"[WARN] Unhandled object type %d in chunk %d for line: %hs\n", object_type, targetChunk->GetID(), line.c_str());
+				return;
 		}
 
 		if (obj != nullptr) {
@@ -477,9 +494,11 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 			targetChunk->AddObject(obj);
 		}
 	}
-	catch (const exception& e) {
+	catch (const exception& e) 
+	{
 		DebugOut(L"[ERROR] Failed processing object line: %hs in chunk %d. Exception: %hs\n", line.c_str(), targetChunk->GetID(), e.what());
-		if (obj) {
+		if (obj) 
+		{
 			DebugOut(L"[WARN] Object of type %d might have leaked memory due to parsing error.\n", object_type);
 		}
 	}

@@ -70,7 +70,8 @@ protected:
 
 	virtual void OnNoCollision(DWORD dt);
 	virtual void OnCollisionWith(LPCOLLISIONEVENT e);
-	virtual void OnCollisionWithKoopa(LPCOLLISIONEVENT e);
+	void OnCollisionWithKoopa(LPCOLLISIONEVENT e);
+	void OnCollisionWithWingedKoopa(LPCOLLISIONEVENT e);
 
 public:
 	CWingedGoomba(int id, float x, float y, int z, int originalChunkId);
@@ -81,8 +82,8 @@ public:
 	void SetIsWinged(int isWinged) { this->isWinged = isWinged; }
 	int IsWinged() { return isWinged; }
 	int IsDead() { return isDead; }
-	void GetOriginalPosition(float& x0, float& y0) { x0 = this->x0; y0 = this->y0; }
 	int IsDefeated() { return isDefeated; }
+	void GetOriginalPosition(float& x0, float& y0) { x0 = this->x0; y0 = this->y0; }
 	void SetIsDefeated(int isDefeated) { this->isDefeated = isDefeated; }
 	int GetOriginalChunkId() { return originalChunkId; }
 };

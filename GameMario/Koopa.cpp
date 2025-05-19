@@ -307,7 +307,7 @@ void CKoopa::OnCollisionWithPiranhaPlant(LPCOLLISIONEVENT e)
 	CPiranhaPlant* pp = dynamic_cast<CPiranhaPlant*>(e->obj);
 	if (this->state == KOOPA_STATE_SHELL_DYNAMIC)
 	{
-		if (pp->GetState() != PIRANHA_PLANT_STATE_DIE)
+		if (pp->GetState() != PIRANHA_PLANT_STATE_DIE && pp->GetState() != PIRANHA_PLANT_STATE_HIDDEN)
 		{
 			pp->SetState(PIRANHA_PLANT_STATE_DIE);
 		}
@@ -628,7 +628,7 @@ void CKoopa::Render()
 	}
 	else if (state == KOOPA_STATE_WALKING_LEFT)
 		aniId = ID_ANI_KOOPA_WALKING_LEFT;
-	else aniId = ID_ANI_WINGED_KOOPA_MOVING_RIGHT;
+	else aniId = ID_ANI_KOOPA_WALKING_RIGHT;
 
 	if (state == KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY || state == KOOPA_STATE_DIE_ON_COLLIDE_WITH_TERRAIN)
 	{

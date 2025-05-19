@@ -16,17 +16,17 @@
 
 #include "debug.h"
 
-CWingedKoopa::CWingedKoopa(int id, float x, float y, int z, int originalChunkId, int initialNx, bool isWinged) : CGameObject(id, x, y, z)
+CWingedKoopa::CWingedKoopa(int id, float x, float y, int z, int originalChunkId, int nx, bool isWinged) : CGameObject(id, x, y, z)
 {
 	this->originalChunkId = originalChunkId;
 	this->ax = 0;
 	this->ay = WINGED_KOOPA_GRAVITY;
-	this->initialNx = initialNx;
+	this->nx = nx;
 	this->isWinged = isWinged;
 	x0 = x;
 	y0 = y;
 	shellStart = -1;
-	if (initialNx > 0)
+	if (nx > 0)
 		SetState(WINGED_KOOPA_STATE_MOVING_RIGHT);
 	else
 		SetState(WINGED_KOOPA_STATE_MOVING_LEFT);
@@ -63,7 +63,7 @@ void CWingedKoopa::OnCollisionWith(LPCOLLISIONEVENT e)
 	if (e->ny < 0)
 	{
 		if (isWinged)
-			vy = -0.2f;
+			vy = WINGED_KOOPA_BOUNCING_SPEED_Y;
 		else
 			vy = 0;
 	}
@@ -269,6 +269,9 @@ void CWingedKoopa::OnCollisionWithActivatorBrick(LPCOLLISIONEVENT e)
 void CWingedKoopa::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
 {
 	CGoomba* g = dynamic_cast<CGoomba*>(e->obj);
+	if (g->IsDead() || g->IsDefeated())
+		return;
+
 	if (this->state == WINGED_KOOPA_STATE_SHELL_DYNAMIC)
 	{
 		if (g->IsDead() == 0)
@@ -315,7 +318,7 @@ void CWingedKoopa::OnCollisionWithPiranhaPlant(LPCOLLISIONEVENT e)
 	CPiranhaPlant* pp = dynamic_cast<CPiranhaPlant*>(e->obj);
 	if (this->state == WINGED_KOOPA_STATE_SHELL_DYNAMIC)
 	{
-		if (pp->GetState() != PIRANHA_PLANT_STATE_DIE)
+		if (pp->GetState() != PIRANHA_PLANT_STATE_DIE && pp->GetState() != PIRANHA_PLANT_STATE_HIDDEN)
 		{
 			pp->SetState(PIRANHA_PLANT_STATE_DIE);
 		}
@@ -347,10 +350,18 @@ bool CWingedKoopa::CheckCollisionWithTerrain(DWORD dt, vector<LPGAMEOBJECT>* coO
 
 void CWingedKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
-	//DebugOutTitle(L"isdf: %d\n", (int)isDefeated);
+	DebugOutTitle(L"vx:%f vy:%f if:%d\n", vx, vy, (int)isFlying);
 
 	if (isDefeated == 1)
 		return;
+
+	if (isWinged == 1) {
+		int flapInterval = 500;
+		if (GetTickCount64() - flapStart > flapInterval) {
+			flapStart = GetTickCount64();
+			wingState = 1 - wingState;
+		}
+	}
 
 	if (isHeld == 1)
 	{
@@ -482,6 +493,12 @@ void CWingedKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	if (state == WINGED_KOOPA_STATE_SHELL_DYNAMIC) {
 		vx = (nx > 0) ? WINGED_KOOPA_SHELL_SPEED : -WINGED_KOOPA_SHELL_SPEED;
 	}
+	else if (state == WINGED_KOOPA_STATE_MOVING_RIGHT) {
+		vx = (isWinged ? WINGED_KOOPA_BOUNCING_SPEED_X : WINGED_KOOPA_WALKING_SPEED);
+	}
+	else if (state == WINGED_KOOPA_STATE_MOVING_LEFT) {
+		vx = (isWinged ? -WINGED_KOOPA_BOUNCING_SPEED_X : - WINGED_KOOPA_WALKING_SPEED);
+	}
 
 	CGameObject::Update(dt, coObjects);
 	CCollision::GetInstance()->Process(this, dt, coObjects);
@@ -535,6 +552,24 @@ void CWingedKoopa::Render()
 
 	CAnimations::GetInstance()->Get(aniId)->Render(x, y);
 	//RenderBoundingBox();
+
+	if (isWinged == 1)
+	{
+		if (wingState == 0)
+		{
+			if (nx > 0) 
+				CAnimations::GetInstance()->Get(ID_ANI_WING_FLAP_LEFT)->Render(x - WINGED_KOOPA_BBOX_WIDTH / 2 + 1, y - GOOMBA_BBOX_HEIGHT / 2);
+			else
+				CAnimations::GetInstance()->Get(ID_ANI_WING_FLAP_RIGHT)->Render(x + WINGED_KOOPA_BBOX_WIDTH / 2, y - GOOMBA_BBOX_HEIGHT / 2);
+		}
+		else
+		{
+			if (nx > 0)
+				CAnimations::GetInstance()->Get(ID_ANI_WING_CLOSE_LEFT)->Render(x - WINGED_KOOPA_BBOX_WIDTH / 2 + 1, y - GOOMBA_BBOX_HEIGHT / 2 + 2);
+			else
+				CAnimations::GetInstance()->Get(ID_ANI_WING_CLOSE_RIGHT)->Render(x + WINGED_KOOPA_BBOX_WIDTH / 2, y - GOOMBA_BBOX_HEIGHT / 2 + 2);
+		}
+	}
 }
 void CWingedKoopa::SetState(int state)
 {
@@ -542,7 +577,7 @@ void CWingedKoopa::SetState(int state)
 
 	// If transitioning from shell to walking state
 	if ((this->state == WINGED_KOOPA_STATE_SHELL_STATIC || this->state == WINGED_KOOPA_STATE_SHELL_DYNAMIC) &&
-		(state == ID_ANI_WINGED_KOOPA_MOVING_LEFT || state == ID_ANI_WINGED_KOOPA_MOVING_RIGHT))
+		(state == WINGED_KOOPA_STATE_MOVING_LEFT || state == WINGED_KOOPA_STATE_MOVING_RIGHT))
 	{
 		// Adjust y position to account for hitbox difference
 		// In shell: hitbox is centered (height/2 above and below y)
@@ -586,23 +621,25 @@ void CWingedKoopa::SetState(int state)
 		//vy = 0;
 		//ax = 0;
 		break;
-	case ID_ANI_WINGED_KOOPA_MOVING_LEFT:
+	case WINGED_KOOPA_STATE_MOVING_LEFT:
 		if (GetTickCount64() - lastTurnAroundTime < WINGED_KOOPA_TURNAROUND_TIMEOUT)
 			return;
 		lastTurnAroundTime = GetTickCount64();
 		if (this->state == WINGED_KOOPA_STATE_SHELL_STATIC && vy != 0)
 			return;
 		isKicked = false;
-		vx = -WINGED_KOOPA_WALKING_SPEED;
+		vx = (isWinged ? -WINGED_KOOPA_BOUNCING_SPEED_X : - WINGED_KOOPA_WALKING_SPEED);
+		nx = -1;
 		break;
-	case ID_ANI_WINGED_KOOPA_MOVING_RIGHT:
+	case WINGED_KOOPA_STATE_MOVING_RIGHT:
 		if (GetTickCount64() - lastTurnAroundTime < WINGED_KOOPA_TURNAROUND_TIMEOUT)
 			return;
 		lastTurnAroundTime = GetTickCount64();
 		if (this->state == WINGED_KOOPA_STATE_SHELL_STATIC && vy != 0)
 			return;
 		isKicked = false;
-		vx = WINGED_KOOPA_WALKING_SPEED;
+		vx = (isWinged ? WINGED_KOOPA_BOUNCING_SPEED_X : WINGED_KOOPA_WALKING_SPEED);
+		nx = 1;
 		break;
 	case WINGED_KOOPA_STATE_BEING_HELD:
 		isHeld = 1;

@@ -1,6 +1,8 @@
 #include "WingedGoomba.h"
 #include "Mario.h"
 #include "Koopa.h"
+#include "WingedKoopa.h"
+
 #include "PlayScene.h"
 
 #include "debug.h"
@@ -111,6 +113,8 @@ void CWingedGoomba::OnCollisionWith(LPCOLLISIONEVENT e)
 	}
 	else if (dynamic_cast<CKoopa*>(e->obj))
 		OnCollisionWithKoopa(e);
+	else if (dynamic_cast<CWingedKoopa*>(e->obj))
+		OnCollisionWithWingedKoopa(e);
 }
 
 void CWingedGoomba::OnCollisionWithKoopa(LPCOLLISIONEVENT e)
@@ -126,6 +130,22 @@ void CWingedGoomba::OnCollisionWithKoopa(LPCOLLISIONEVENT e)
 	k->SetIsHeld(0);
 
 	k->SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY);
+	this->SetState(WINGED_GOOMBA_STATE_DIE_ON_HELD_KOOPA);
+}
+
+void CWingedGoomba::OnCollisionWithWingedKoopa(LPCOLLISIONEVENT e)
+{
+	CWingedKoopa* wk = dynamic_cast<CWingedKoopa*>(e->obj);
+	if (wk->IsHeld() == 0)
+	{
+		return;
+	}
+
+	CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+	player->SetIsHoldingKoopa(0);
+	wk->SetIsHeld(0);
+
+	wk->SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY);
 	this->SetState(WINGED_GOOMBA_STATE_DIE_ON_HELD_KOOPA);
 }
 

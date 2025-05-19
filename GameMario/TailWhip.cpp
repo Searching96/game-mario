@@ -10,6 +10,7 @@
 #include "LifeBrick.h"
 #include "CoinBrick.h"
 #include "ActivatorBrick.h"
+#include "WingedKoopa.h"
 
 #include "PlayScene.h"
 
@@ -46,7 +47,7 @@ void CTailWhip::Render()
 	//// Don't render if not whipping
 	//if (notWhipping == 1) return;
 
-	//RenderBoundingBox(); // Debug only
+	RenderBoundingBox(); // Debug only
 }
 
 void CTailWhip::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
@@ -103,6 +104,8 @@ void CTailWhip::OnCollisionWith(LPCOLLISIONEVENT e)
 		OnCollisionWithCoinBrick(e);
 	else if (dynamic_cast<CActivatorBrick*>(e->obj))
 		OnCollisionWithActivatorBrick(e);
+	else if (dynamic_cast<CWingedKoopa*>(e->obj))
+		OnCollisionWithWingedKoopa(e);
 }
 
 void CTailWhip::OnCollisionWithBuffQBlock(LPCOLLISIONEVENT e)
@@ -208,7 +211,7 @@ void CTailWhip::OnCollisionWithKoopa(LPCOLLISIONEVENT e)
 	CKoopa* k = dynamic_cast<CKoopa*>(e->obj);
 	if (k)
 	{
-		if (k->IsDead() || k->IsDefeated() == 1)
+		if (k->IsDead() || k->IsDefeated())
 		{
 			return;
 		}
@@ -226,6 +229,34 @@ void CTailWhip::OnCollisionWithKoopa(LPCOLLISIONEVENT e)
 		k->SetIsFlying(true);
 		k->SetIsReversed(true);
 		k->SetSpeed(knockbackVx, knockbackVy);
+	}
+}
+
+
+void CTailWhip::OnCollisionWithWingedKoopa(LPCOLLISIONEVENT e)
+{
+	CWingedKoopa* wk = dynamic_cast<CWingedKoopa*>(e->obj);
+	if (wk)
+	{
+		if (wk->IsDead() || wk->IsDefeated())
+		{
+			return;
+		}
+
+		if (wk->GetState() == KOOPA_STATE_WALKING_LEFT || wk->GetState() == KOOPA_STATE_WALKING_RIGHT)
+		{
+			CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+			player->CalculateScore(wk);
+		}
+		CParticle::GenerateParticleInChunk(this, 3);
+		wk->SetIsWinged(0);
+		wk->StartShell();
+		wk->SetState(KOOPA_STATE_SHELL_STATIC);
+		float knockbackVx = (this->nx > 0) ? 0.075f : -0.075f;
+		float knockbackVy = -0.5f;
+		wk->SetIsFlying(true);
+		wk->SetIsReversed(true);
+		wk->SetSpeed(knockbackVx, knockbackVy);
 	}
 }
 

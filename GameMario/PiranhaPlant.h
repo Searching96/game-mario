@@ -66,6 +66,7 @@ protected:
 	void OnCollisionWith(LPCOLLISIONEVENT e);
 	void OnCollisionWithKoopa(LPCOLLISIONEVENT e);
 
+
 public:
 	CPiranhaPlant(int id, float x, float y, int z, int originalChunkId);
 

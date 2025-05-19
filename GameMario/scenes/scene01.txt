@@ -34,6 +34,7 @@ assets\particle.txt
 assets\wingedgoomba.txt
 assets\wing.txt
 assets\activator.txt
+assets\wingedkoopa.txt
 
 [SCENE_SETTINGS]
 start_cam_x	0
@@ -123,7 +124,9 @@ margin_y	40
 37	103	352	368	16	16	3	1090110	1090120	1090210	1090220
 
 # Koopa
-6969	12	576	352
+10001	12	576	352
+# Winged Koopa
+10003	15	200	352	-1	1
 
 [CHUNK	2	624	1152]
 # Platform
@@ -297,7 +300,7 @@ margin_y	40
 21	110	2032	368
 
 # Koopa
-6969	12	2096	360
+10002	12	2096	360
 
 # Box
 22	101	2176	272	3	9	2

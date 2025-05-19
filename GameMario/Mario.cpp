@@ -22,6 +22,7 @@
 #include "CoinBrick.h"
 #include "Activator.h"
 #include "ActivatorBrick.h"
+#include "WingedKoopa.h"
 
 #include "Collision.h"
 #include "PlayScene.h"
@@ -490,6 +491,8 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 		OnCollisionWithActivator(e);
 	else if (dynamic_cast<CActivatorBrick*>(e->obj))
 		OnCollisionWithActivatorBrick(e);
+	else if (dynamic_cast<CWingedKoopa*>(e->obj))
+		OnCollisionWithWingedKoopa(e);
 }
 
 void CMario::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
@@ -757,10 +760,8 @@ void CMario::OnCollisionWithFireball(LPCOLLISIONEVENT e)
 }
 
 void CMario::OnCollisionWithKoopa(LPCOLLISIONEVENT e) {
-	// Early exit if Mario is invulnerable
-
 	CKoopa* k = dynamic_cast<CKoopa*>(e->obj);
-	if (k->IsDead() == 1 || k->IsDefeated() == 1)
+	if (k->IsDead() || k->IsDefeated())
 		return;
 
 	// Jumped on top
@@ -800,9 +801,9 @@ void CMario::OnCollisionWithKoopa(LPCOLLISIONEVENT e) {
 		return;
 	}
 	// Side collision with walking or moving shell
-	if (k->GetState() == KOOPA_STATE_WALKING_LEFT ||
-		k->GetState() == KOOPA_STATE_WALKING_RIGHT ||
-		k->GetState() == KOOPA_STATE_SHELL_DYNAMIC) {
+	if (k->GetState() == KOOPA_STATE_WALKING_LEFT 
+		|| k->GetState() == KOOPA_STATE_WALKING_RIGHT 
+		|| k->GetState() == KOOPA_STATE_SHELL_DYNAMIC) {
 		if (untouchable) return;
 		if (level == MARIO_LEVEL_TAIL)
 		{
@@ -819,6 +820,76 @@ void CMario::OnCollisionWithKoopa(LPCOLLISIONEVENT e) {
 			DebugOut(L">>> Mario DIE >>> \n");
 			SetState(MARIO_STATE_DIE_ON_BEING_KILLED);
 		}
+	}
+}
+
+
+void CMario::OnCollisionWithWingedKoopa(LPCOLLISIONEVENT e)
+{
+	CWingedKoopa* wk = dynamic_cast<CWingedKoopa*>(e->obj);
+	if (wk->IsDead() || wk->IsDefeated())
+		return;
+
+	// Jumped on top
+	if (e->ny < 0) {
+		if (wk->IsHeld() == 0) CalculateScore(wk);
+		if (wk->GetState() == WINGED_KOOPA_STATE_MOVING_LEFT ||
+			wk->GetState() == WINGED_KOOPA_STATE_MOVING_RIGHT) {
+			if (wk->IsWinged() == 1)
+				wk->SetIsWinged(0);
+			else
+				wk->StartShell();
+			vy = -MARIO_JUMP_DEFLECT_SPEED;
+			return;
+		}
+		if (wk->GetState() == WINGED_KOOPA_STATE_SHELL_DYNAMIC) {
+			wk->SetState(WINGED_KOOPA_STATE_SHELL_STATIC);
+			wk->StartShell();
+			vy = -MARIO_JUMP_DEFLECT_SPEED;
+			return;
+		}
+	}
+
+	if (wk->GetState() == WINGED_KOOPA_STATE_SHELL_STATIC) {
+		// Kick the shell
+		if (isRunning == 0)
+		{
+			wk->SetSpeed(0, 0);
+			StartKick();
+			wk->SetState(WINGED_KOOPA_STATE_SHELL_DYNAMIC);
+			wk->SetSpeed((nx > 0) ? WINGED_KOOPA_SHELL_SPEED : -WINGED_KOOPA_SHELL_SPEED, 0);
+			wk->SetNx(nx);
+			return;
+		}
+		else
+		{
+			wk->SetState(WINGED_KOOPA_STATE_BEING_HELD);
+			wk->SetSpeed(0, 0);
+			this->SetIsHoldingKoopa(1);
+		}
+		return;
+	}
+	// Side collision with walking or moving shell
+	if (wk->GetState() == WINGED_KOOPA_STATE_MOVING_LEFT 
+		|| wk->GetState() == WINGED_KOOPA_STATE_MOVING_RIGHT 
+		|| wk->GetState() == WINGED_KOOPA_STATE_SHELL_DYNAMIC) {
+		if (untouchable) return;
+		if (level == MARIO_LEVEL_TAIL)
+		{
+			SetState(MARIO_STATE_TAIL_DOWN);
+			StartUntouchable();
+		}
+		else if (level > MARIO_LEVEL_SMALL)
+		{
+			SetState(MARIO_STATE_POWER_DOWN);
+			StartUntouchable();
+		}
+		else
+		{
+			DebugOut(L">>> Mario DIE >>> \n");
+			SetState(MARIO_STATE_DIE_ON_BEING_KILLED);
+		}
+		wk->SetState(((wk->GetNx() > 0) && (state != WINGED_KOOPA_STATE_SHELL_DYNAMIC)) ? WINGED_KOOPA_STATE_MOVING_LEFT : WINGED_KOOPA_STATE_MOVING_RIGHT);
 	}
 }
 
@@ -1688,7 +1759,8 @@ void CMario::CalculateScore(LPGAMEOBJECT obj)
 	if (dynamic_cast<CGoomba*>(obj)
 		|| dynamic_cast<CKoopa*>(obj)
 		|| dynamic_cast<CWingedGoomba*>(obj)
-		|| dynamic_cast<CPiranhaPlant*>(obj))
+		|| dynamic_cast<CPiranhaPlant*>(obj)
+		|| dynamic_cast<CWingedKoopa*>(obj))
 	{
 		consecutiveEnemies += 1;
 		point = EnemiesToPoints(consecutiveEnemies);

@@ -26,7 +26,7 @@
 #define KOOPA_STATE_DIE_ON_COLLIDE_WITH_TERRAIN 510
 
 #define ID_ANI_KOOPA_WALKING_LEFT 150010
-#define ID_ANI_WINGED_KOOPA_MOVING_RIGHT 150020
+#define ID_ANI_KOOPA_WALKING_RIGHT 150020
 #define ID_ANI_KOOPA_SHELL_STATIC_1 150100
 #define ID_ANI_KOOPA_SHELL_STATIC_2 150101
 #define ID_ANI_KOOPA_SHELL_DYNAMIC 150200
@@ -47,8 +47,8 @@ protected:
 	bool isKicked = false;
 	bool isFlying = false;
 
-	ULONGLONG shellStart;
-	ULONGLONG dieStart;
+	ULONGLONG shellStart = -1;
+	ULONGLONG dieStart = -1;
 	ULONGLONG lastTurnAroundTime = -1;
 
 	bool isHeld = 0;
