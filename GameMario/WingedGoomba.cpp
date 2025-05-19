@@ -201,9 +201,8 @@ void CWingedGoomba::Render()
 		aniId = ID_ANI_WINGED_GOOMBA_DIE_ON_TAIL_WHIP;
 	}
 
-
-
 	CAnimations::GetInstance()->Get(aniId)->Render(x, y);
+	
 	if (isWinged == 1)
 	{
 		if (wingState == 0)

@@ -191,6 +191,7 @@
     <ClCompile Include="Trinket.cpp" />
     <ClCompile Include="Utils.cpp" />
     <ClCompile Include="WingedGoomba.cpp" />
+    <ClCompile Include="WingedKoopa.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Activator.h" />
@@ -243,6 +244,7 @@
     <ClInclude Include="Trinket.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="WingedGoomba.h" />
+    <ClInclude Include="WingedKoopa.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GameMario.rc" />

@@ -26,7 +26,7 @@
 #define KOOPA_STATE_DIE_ON_COLLIDE_WITH_TERRAIN 510
 
 #define ID_ANI_KOOPA_WALKING_LEFT 150010
-#define ID_ANI_KOOPA_WALKING_RIGHT 150020
+#define ID_ANI_WINGED_KOOPA_MOVING_RIGHT 150020
 #define ID_ANI_KOOPA_SHELL_STATIC_1 150100
 #define ID_ANI_KOOPA_SHELL_STATIC_2 150101
 #define ID_ANI_KOOPA_SHELL_DYNAMIC 150200
@@ -34,8 +34,7 @@
 #define ID_ANI_KOOPA_SHELL_STATIC_REVERSE_2 150301
 #define ID_ANI_KOOPA_SHELL_DYNAMIC_REVERSE 150400
 
-class CKoopa :
-    public CGameObject
+class CKoopa : public CGameObject
 {
 protected:
 	float ax;
@@ -77,6 +76,7 @@ protected:
 	void OnCollisionWithActivatorBrick(LPCOLLISIONEVENT e);
 
 	bool CheckCollisionWithTerrain(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
+
 public:
 	CKoopa(int id, float x, float y, int z, int originalChunkId);
 	virtual void SetState(int state);
