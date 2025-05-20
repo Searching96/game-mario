@@ -22,7 +22,7 @@ void CGame::Init(HWND hWnd, HINSTANCE hInstance)
 {
 	this->hWnd = hWnd;
 	this->hInstance = hInstance;
-	this->gameState = new CGameState(nullptr, 3, 300000, 0, 0);
+	this->gameState = new CGameState(nullptr, 3, 301000, 0, 0);
 
 	// retrieve client area width & height so that we can create backbuffer height & width accordingly 
 	RECT r;
@@ -677,8 +677,11 @@ void CGame::PauseGame() {
 
 void CGame::ReloadScene()
 {
-	if (IsPaused())
+	if (IsPaused() || gameSpeed == 0.0f)
+	{
 		gameSpeed = 1.0f;
+		isPaused = false;
+	}
 	GetCurrentScene()->Unload();
 	GetCurrentScene()->Load();
 	GetGameState()->Reset();

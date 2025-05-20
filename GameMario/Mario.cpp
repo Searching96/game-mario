@@ -1518,7 +1518,8 @@ void CMario::SetState(int state)
 		break;
 
 	case MARIO_STATE_POWER_DOWN:
-		y += 6; // RED ALERT
+		if (!isSitting) y += 6; // RED ALERT
+		else y += 1; // RED ALERT
 		//vx = 0;
 		StartPowerDown();
 		break;
