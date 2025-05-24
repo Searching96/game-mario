@@ -63,6 +63,8 @@
 #define SPRITE_ID_BLACK_BOTTOM_CENTER       1065320
 #define SPRITE_ID_BLACK_BOTTOM_RIGHT        1065330
 
+////----------------  BOX -------------------
+
 //---------------- ENDING BACKGROUND -------------------
 #define SPRITE_ID_ENDING_BORDER			    1060001
 #define SPRITE_ID_ENDING_BACKGROUND		    1060002

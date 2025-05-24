@@ -349,15 +349,21 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 			break;
 		}
 		case OBJECT_TYPE_PLATFORM:
+		{
+			zIndex = ZINDEX_PLATFORMS;
+			if (tokens.size() < 7) throw runtime_error("Insufficient params for PLATFORM/SKYPLATFORM");
+			int width = stoi(tokens[4]);
+			int height = stoi(tokens[5]);
+			int type = stoi(tokens[6]);
+				obj = new CPlatform(id, x, y, zIndex, width, height, type);
+			break;
+		}
 		case OBJECT_TYPE_SKY_PLATFORM:
 		{
 			zIndex = ZINDEX_PLATFORMS;
-			if (tokens.size() < 6) throw runtime_error("Insufficient params for PLATFORM/SKYPLATFORM");
+			if (tokens.size() < 6) throw runtime_error("Insufficient params for SKYPLATFORM");
 			int width = stoi(tokens[4]);
 			int height = stoi(tokens[5]);
-			if (object_type == OBJECT_TYPE_PLATFORM)
-				obj = new CPlatform(id, x, y, zIndex, width, height);
-			else
 				obj = new CSkyPlatform(id, x, y, zIndex, width, height);
 			break;
 		}

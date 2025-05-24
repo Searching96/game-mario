@@ -41,25 +41,52 @@ void CPlatform::Render()
 		{
 			float xx = x + j * PLATFORM_CELL_WIDTH;
 			float yy = y + i * PLATFORM_CELL_HEIGHT;
-			if (i == 0)
-			{
-				if (j == 0)
-					s->Get(ID_SPRITE_PLATFORM_TOP_LEFT)->Draw(xx, yy);
-				else if (j == this->width - 1)
-					s->Get(ID_SPRITE_PLATFORM_TOP_RIGHT)->Draw(xx, yy);
-				else
-					s->Get(ID_SPRITE_PLATFORM_TOP_CENTER)->Draw(xx, yy);
-			}
-			else
-			{
-				if (j == 0)
-					s->Get(ID_SPRITE_PLATFORM_BOTTOM_LEFT)->Draw(xx, yy);
-				else if (j == this->width - 1)
-					s->Get(ID_SPRITE_PLATFORM_BOTTOM_RIGHT)->Draw(xx, yy);
-				else
-					s->Get(ID_SPRITE_PLATFORM_BOTTOM_CENTER)->Draw(xx, yy);
-			}
 
+			// Check platform type before drawing
+			switch (this->type)
+			{
+			case 1:
+				if (i == 0)
+				{
+					if (j == 0)
+						s->Get(ID_SPRITE_HILL_TOP_LEFT)->Draw(xx, yy);
+					else if (j == this->width - 1)
+						s->Get(ID_SPRITE_HILL_TOP_RIGHT)->Draw(xx, yy);
+					else
+						s->Get(ID_SPRITE_HILL_TOP_CENTER)->Draw(xx, yy);
+				}
+				else
+				{
+					if (j == 0)
+						s->Get(ID_SPRITE_HILL_BOTTOM_LEFT)->Draw(xx, yy);
+					else if (j == this->width - 1)
+						s->Get(ID_SPRITE_HILL_BOTTOM_RIGHT)->Draw(xx, yy);
+					else
+						s->Get(ID_SPRITE_HILL_BOTTOM_CENTER)->Draw(xx, yy);
+				}
+				break;
+			case 0:
+			default:
+				if (i == 0)
+				{
+					if (j == 0)
+						s->Get(ID_SPRITE_PLATFORM_TOP_LEFT)->Draw(xx, yy);
+					else if (j == this->width - 1)
+						s->Get(ID_SPRITE_PLATFORM_TOP_RIGHT)->Draw(xx, yy);
+					else
+						s->Get(ID_SPRITE_PLATFORM_TOP_CENTER)->Draw(xx, yy);
+				}
+				else
+				{
+					if (j == 0)
+						s->Get(ID_SPRITE_PLATFORM_BOTTOM_LEFT)->Draw(xx, yy);
+					else if (j == this->width - 1)
+						s->Get(ID_SPRITE_PLATFORM_BOTTOM_RIGHT)->Draw(xx, yy);
+					else
+						s->Get(ID_SPRITE_PLATFORM_BOTTOM_CENTER)->Draw(xx, yy);
+				}
+				break;
+			}
 		}
 	}
 
