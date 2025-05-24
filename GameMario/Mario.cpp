@@ -1444,18 +1444,18 @@ void CMario::SetState(int state)
 		}
 		else if (level == MARIO_LEVEL_TAIL)
 		{
-			if (jumpCount >= MAX_JUMP_COUNT || pMeter != 1.0f)
+			if ((jumpCount >= MAX_JUMP_COUNT || pMeter != 1.0f) && !isSkywalking)
 			{
 				SetState(MARIO_STATE_HOVER);
 				break;
 			}
 
-			if (fabs(vx) == MARIO_MAX_RUNNING_SPEED && pMeter == 1.0f)
+			if ((fabs(vx) == MARIO_MAX_RUNNING_SPEED && pMeter == 1.0f) || isSkywalking)
 			{
 				jumpCount++;
 				vy = -MARIO_JUMP_SPEED_Y;
 			}
-			else if (jumpCount >= 1 && pMeter == 1.0f)
+			else if ((jumpCount >= 1 && pMeter == 1.0f) || isSkywalking)
 			{
 				jumpCount++;
 				vy = -MARIO_JUMP_SPEED_Y;

@@ -310,6 +310,7 @@ class CMario : public CGameObject
 	bool isJumpButtonHeld = 0;
 	bool isChangingLevel = false;
 	bool isHoldingUpKey = false;
+	bool isSkywalking = false;
 
 	void OnCollisionWithGoomba(LPCOLLISIONEVENT e);
 	void OnCollisionWithCoin(LPCOLLISIONEVENT e);
@@ -381,6 +382,7 @@ public:
 	bool GetIsEnteringPortal() const { return isEnteringPortal; }
 	float GetYLevel() const { return yLevel; }
 
+	void ToggleSkywalk() { isSkywalking = !isSkywalking; }
 	int GetNx() { return nx; }
 	float GetPMeter() const { return pMeter; }
 	//bool MaxPMeter() const { return fabs(vx) == MARIO_MAX_RUNNING_SPEED; }
