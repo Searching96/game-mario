@@ -159,6 +159,64 @@ void CPlayScene::_ParseSection_ANIMATIONS(string line)
 	}
 }
 
+void CPlayScene::ReloadAssets()
+{
+	DebugOut(L"[INFO] Start reloading assets from: %ls\n", sceneFilePath);
+	ifstream f(sceneFilePath); // Use wstring path
+	if (!f.is_open()) {
+		DebugOut(L"[ERROR] Failed to open scene file: %ls\n", sceneFilePath);
+		return;
+	}
+
+	// Only reset assets and scene settings - preserve other data
+	startCamX = 0.0f; startCamY = 0.0f; mapWidth = 0.0f; mapHeight = 0.0f;
+	cameraMode = 0.0f; marginY = 0.0f;
+	// Keep existing: player, chunks, currentParsingChunk
+
+	int section = SCENE_SECTION_UNKNOWN;
+	string line;
+	int lineNum = 0;
+
+	while (getline(f, line))
+	{
+		lineNum++;
+		// Trim whitespace (optional but good practice)
+		//line = trim(line); // Assumes 'trim' exists in Utils.h
+
+		if (line.empty() || line[0] == '#') continue;
+
+		if (line == "[SCENE_SETTINGS]") { section = SCENE_SECTION_SETTINGS; continue; }
+		if (line == "[ASSETS]") { section = SCENE_SECTION_ASSETS; continue; }
+
+		// Skip chunk sections - don't reload chunks/objects
+		if (line.rfind("[CHUNK", 0) == 0) {
+			section = SCENE_SECTION_UNKNOWN;
+			continue;
+		}
+		if (line == "[MARIO]") {
+			section = SCENE_SECTION_UNKNOWN;
+			continue;
+		}
+
+		// If it's another section type, skip it
+		if (line[0] == '[') {
+			section = SCENE_SECTION_UNKNOWN;
+			continue;
+		}
+
+		// Process line based on current section - only assets and settings
+		switch (section)
+		{
+		case SCENE_SECTION_ASSETS:   _ParseSection_ASSETS(line); break;
+		case SCENE_SECTION_SETTINGS: _ParseSection_SETTINGS(line); break;
+			// Skip all other sections (MARIO, CHUNK_OBJECT, etc.)
+		}
+	}
+	// f closes automatically
+
+	DebugOut(L"[INFO] Asset reloading complete for %ls\n", sceneFilePath);
+}
+
 void CPlayScene::_ParseSection_SETTINGS(string line)
 {
 	vector<string> tokens = split(line);
@@ -419,12 +477,20 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 			break;
 		}
 		case OBJECT_TYPE_BUSH:
+		{
+			zIndex = ZINDEX_BACKGROUND_SCENERY;
+			if (tokens.size() < 5) throw runtime_error("Insufficient params for BUSH");
+			int width = stoi(tokens[4]);
+			obj = new CBush(id, x, y, zIndex, width);
+			break;
+		}
 		case OBJECT_TYPE_CLOUD:
 		{
-			zIndex = (object_type == OBJECT_TYPE_BUSH) ? ZINDEX_BACKGROUND_SCENERY : ZINDEX_BACKGROUND_EFFECTS;
-			if (tokens.size() < 5) throw runtime_error("Insufficient params for BUSH/CLOUD");
+			zIndex = ZINDEX_BACKGROUND_EFFECTS;
+			if (tokens.size() < 6) throw runtime_error("Insufficient params for BUSH/CLOUD");
 			int width = stoi(tokens[4]);
-			obj = (object_type == OBJECT_TYPE_BUSH) ? (CGameObject*)new CBush(id, x, y, zIndex, width) : (CGameObject*)new CCloud(id, x, y, zIndex, width);
+			int type = stoi(tokens[5]);
+			obj = new CCloud(id, x, y, zIndex, width, type);
 			break;
 		}
 		case OBJECT_TYPE_TRINKET:
@@ -438,7 +504,7 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 		case OBJECT_TYPE_PORTAL:
 		{
 			zIndex = ZINDEX_DEFAULT;
-			if (tokens.size() < 10) throw runtime_error("Insufficient params for PORTAL");
+			if (tokens.size() < 11) throw runtime_error("Insufficient params for PORTAL");
 			float width = stof(tokens[4]);
 			float height = stof(tokens[5]);
 			float targetX = stof(tokens[6]);
@@ -466,16 +532,6 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 		}
 
 		if (obj != nullptr) {
-			size_t zIndexTokenPos = 11;
-			if (tokens.size() > zIndexTokenPos) {
-				try {
-					zIndex = stoi(tokens[zIndexTokenPos]);
-				}
-				catch (const exception& e) {
-					DebugOut(L"[WARN] Failed to parse Z-Index for object type %d: %hs. Using default %d.\n", object_type, e.what(), zIndex);
-				}
-			}
-			obj->SetZIndex(zIndex);
 			targetChunk->AddObject(obj);
 		}
 	}

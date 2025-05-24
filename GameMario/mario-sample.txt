@@ -18,4 +18,6 @@ height	240
 2	textures\hud.png
 11	textures\enemies-new.png
 20	textures\misc.png
+21	textures\misc-new.png
 30	textures\tiles.png
+31	textures\tiles-new.png

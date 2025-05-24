@@ -49,6 +49,7 @@ public:
 	virtual void Update(DWORD dt);
 	virtual void Render();
 	virtual void Unload();
+	void ReloadAssets();
 	void DefeatEnemiesOutOfRange();
 	void RespawnEnemiesInRange();
 	void ResetAllChunkState();
