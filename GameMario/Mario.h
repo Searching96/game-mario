@@ -274,6 +274,7 @@ class CMario : public CGameObject
 
 	bool isTeleporting = false;
 	bool isEnteringPortal = false;
+	int exitDirection = 0; // 0 for down, 1 for up
 	float entranceY;
 	float targetX;
 	float exitY;

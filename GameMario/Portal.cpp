@@ -3,7 +3,7 @@
 #include "Textures.h"
 #include "PlayScene.h"
 
-CPortal::CPortal(int id, float x, float y, float width, float height, int z, float targetX, float exitY, float yLevel)
+CPortal::CPortal(int id, float x, float y, float width, float height, int z, float targetX, float exitY, int enterDirection, int exitDirection, float yLevel)
 
 {
 	this->id = id;
@@ -13,6 +13,8 @@ CPortal::CPortal(int id, float x, float y, float width, float height, int z, flo
 	this->height = height;
 	this->targetX = targetX;
 	this->exitY = exitY;
+	this->enterDirection = enterDirection;
+	this->exitDirection = exitDirection;
 	this->yLevel = yLevel;
 	zIndex = z;
 }

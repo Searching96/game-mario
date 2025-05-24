@@ -171,7 +171,7 @@ void CPlayScene::_ParseSection_SETTINGS(string line)
 		else if (key == "start_cam_y") startCamY = value;
 		else if (key == "map_width") mapWidth = value;
 		else if (key == "map_height") mapHeight = value;
-		else if (key == "margin_x") marginX = value; // Keep if might be used later
+		else if (key == "cam_mode") cameraMode = value;
 		else if (key == "margin_y") marginY = value; // Keep if might be used later
 		else DebugOut(L"[WARN] Unknown setting key: %hs\n", key.c_str());
 
@@ -438,13 +438,15 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 		case OBJECT_TYPE_PORTAL:
 		{
 			zIndex = ZINDEX_DEFAULT;
-			if (tokens.size() < 7) throw runtime_error("Insufficient params for PORTAL");
+			if (tokens.size() < 10) throw runtime_error("Insufficient params for PORTAL");
 			float width = stof(tokens[4]);
 			float height = stof(tokens[5]);
 			float targetX = stof(tokens[6]);
 			float exitY = stof(tokens[7]);
-			float yLevel = stof(tokens[8]);
-			obj = new CPortal(id, x - 8, y - 8, width, height, zIndex, targetX - 8, exitY - 8, yLevel);
+			int enterDirection = stoi(tokens[8]);
+			int exitDirection = stoi(tokens[9]);
+			float yLevel = stof(tokens[10]);
+			obj = new CPortal(id, x - 8, y - 8, width, height, zIndex, targetX - 8, exitY - 8, enterDirection, exitDirection, yLevel);
 			break;
 		}
 		case OBJECT_TYPE_FALL_PITCH:
@@ -618,7 +620,7 @@ void CPlayScene::Load()
 
 	// Reset or default values
 	startCamX = 0.0f; startCamY = 0.0f; mapWidth = 0.0f; mapHeight = 0.0f;
-	marginX = 0.0f; marginY = 0.0f;
+	cameraMode = 0.0f; marginY = 0.0f;
 	// current_cam_base_y removed
 	player = nullptr; // Ensure player is null before loading
 	chunks.clear(); // Clear existing chunks if reloading scene
@@ -841,7 +843,7 @@ void CPlayScene::Update(DWORD dt)
 	player->Update(dt, &coObjects);
 
 	// --- Update all OTHER game objects within chunks ---
-	bool isChronoStopped = mario->IsPowerUp() || mario->IsTailUp() 
+	bool isChronoStopped = mario->IsPowerUp() || mario->IsTailUp()
 		|| mario->IsPowerDown() || mario->IsTailDown() || (mario->GetState() == MARIO_STATE_DIE_ON_BEING_KILLED)
 		|| (mario->GetState() == MARIO_STATE_DIE_ON_FALLING) || mario->GetIsTeleporting();
 
@@ -1021,12 +1023,12 @@ void CPlayScene::RespawnEnemiesInRange()
 
 		float eX0, eY0;
 
-		auto shouldRespawn = [&](float posX) 
+		auto shouldRespawn = [&](float posX)
 			{
-			bool left = posX > camStartX - RESPAWN_RANGE_MAX && posX <= camStartX - RESPAWN_RANGE_MIN;
-			bool right = posX >= camEndX + RESPAWN_RANGE_MIN && posX < camEndX + RESPAWN_RANGE_MAX;
-			return left || right;
-		};
+				bool left = posX > camStartX - RESPAWN_RANGE_MAX && posX <= camStartX - RESPAWN_RANGE_MIN;
+				bool right = posX >= camEndX + RESPAWN_RANGE_MIN && posX < camEndX + RESPAWN_RANGE_MAX;
+				return left || right;
+			};
 
 		if (CGoomba* goomba = dynamic_cast<CGoomba*>(enemy))
 		{

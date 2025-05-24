@@ -117,6 +117,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 					CGame::GetInstance()->SetCamPos(targetX, this->exitY - currentMarioHeight / 2.0f);
 
 					isEnteringPortal = 0; // Switch to exiting phase
+					if (exitDirection == 1) vy = -vy; // Reverse vertical speed if exiting upwards
 				}
 			}
 			else // Phase 2: Exiting the destination portal (isEnteringPortal == 0)
@@ -144,6 +145,8 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 					CGame::GetInstance()->SetCamPos(targetX, this->exitY + currentMarioHeight / 2.0f);
 
 					isEnteringPortal = 0;
+					if (exitDirection == 0) vy = -vy; // Reverse vertical speed if exiting downwards
+
 				}
 			}
 			else // Phase 2: Exiting the destination portal (isEnteringPortal == 0)
@@ -252,7 +255,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 	//Power Meter calculation
 
-	if (isRunning == 1 && isOnPlatform && abs(vx) >= (MARIO_MAX_WALKING_SPEED + MARIO_RUNNING_SPEED)/2)
+	if (isRunning == 1 && isOnPlatform && abs(vx) >= (MARIO_MAX_WALKING_SPEED + MARIO_RUNNING_SPEED) / 2)
 	{
 		pMeter += dt / 1200.0f;
 	}
@@ -395,31 +398,30 @@ void CMario::HandleHovering(DWORD dt)
 
 void CMario::Teleport(CPortal* portal)
 {
-	bool isDescending = portal->GetIsDescending();
-	if (isDescending && isSitting || !isDescending && isHoldingUpKey)
-	{
+	float marioL, marioT, marioR, marioB;
+	GetBoundingBox(marioL, marioT, marioR, marioB);
+	float portalL, portalT, portalR, portalB;
+	portal->GetBoundingBox(portalL, portalT, portalR, portalB);
+	float portalX, portalY;
+	portal->GetPosition(portalX, portalY);
 
-		float marioL, marioT, marioR, marioB;
-		GetBoundingBox(marioL, marioT, marioR, marioB);
-		float portalL, portalT, portalR, portalB;
-		portal->GetBoundingBox(portalL, portalT, portalR, portalB);
-		float portalX, portalY;
-		portal->GetPosition(portalX, portalY);
-		this->targetX = portal->GetTargetX();
-		this->exitY = portal->GetExitY();
-		this->yLevel = portal->GetYLevel();
-		this->entranceY = isDescending ? portalT : portalB;
-		if (marioL < portalL) offsetX = portalL - marioL;
-		if (marioR > portalR) offsetX = portalR - marioR - 1;
-		if (isDescending) {
-			if (marioB > portalT) offsetY = portalT - marioB + 2;
-		}
-		else {
-			if (marioT < portalB) offsetY = marioT - portalB - 2;
-		}
-		zIndex = 50 - 1;
-		SetState(MARIO_STATE_TELEPORTING);
+	this->targetX = portal->GetTargetX();
+	this->exitY = portal->GetExitY();
+	this->yLevel = portal->GetYLevel();
+	this->exitDirection = portal->GetExitDirection();
+	bool isDescending = portal->GetEnterDirection() == 0;
+	this->entranceY = isDescending ? portalT : portalB;
+
+	if (marioL < portalL) offsetX = portalL - marioL;
+	if (marioR > portalR) offsetX = portalR - marioR - 1;
+	if (isDescending) {
+		if (marioB > portalT) offsetY = portalT - marioB + 2;
 	}
+	else {
+		if (marioT < portalB) offsetY = marioT - portalB - 2;
+	}
+	zIndex = 50 - 1; // Temporary adjust mario's zIndex to be lower than portal.
+	SetState(MARIO_STATE_TELEPORTING);
 }
 
 void CMario::OnNoCollision(DWORD dt)
@@ -551,7 +553,8 @@ void CMario::OnCollisionWithCoin(LPCOLLISIONEVENT e)
 void CMario::OnCollisionWithPortal(LPCOLLISIONEVENT e)
 {
 	CPortal* p = (CPortal*)e->obj;
-	p->Teleport(this);
+	if ((e->ny < 0 && p->GetEnterDirection() == 0 && isSitting) || (e->ny > 0 && p->GetEnterDirection() == 1 && isHoldingUpKey))
+		p->Teleport(this);
 }
 
 void CMario::OnCollisionWithCoinQBlock(LPCOLLISIONEVENT e)
