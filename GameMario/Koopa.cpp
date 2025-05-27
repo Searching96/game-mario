@@ -302,6 +302,17 @@ void CKoopa::OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e)
 	}
 }
 
+
+void CKoopa::OnCollisionWithKoopa(LPCOLLISIONEVENT e)
+{
+
+}
+
+void CKoopa::OnCollisionWithWingedKoopa(LPCOLLISIONEVENT e)
+{
+
+}
+
 void CKoopa::OnCollisionWithPiranhaPlant(LPCOLLISIONEVENT e)
 {
 	CPiranhaPlant* pp = dynamic_cast<CPiranhaPlant*>(e->obj);

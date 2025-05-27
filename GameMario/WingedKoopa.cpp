@@ -279,7 +279,7 @@ void CWingedKoopa::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
 			g->SetState(GOOMBA_STATE_DIE_ON_TAIL_WHIP);
 		}
 	}
-	else if (this->state != WINGED_KOOPA_STATE_SHELL_DYNAMIC)
+	else if (this->state != WINGED_KOOPA_STATE_SHELL_STATIC)
 	{
 		if (e->nx != 0)
 		{
@@ -301,7 +301,7 @@ void CWingedKoopa::OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e)
 			wg->SetState(WINGED_GOOMBA_STATE_DIE_ON_TAIL_WHIP);
 		}
 	}
-	else if (this->state != WINGED_KOOPA_STATE_SHELL_DYNAMIC)
+	else if (this->state != WINGED_KOOPA_STATE_SHELL_STATIC)
 	{
 		if (e->nx != 0 && wg->IsWinged() == 0)
 		{
@@ -311,6 +311,12 @@ void CWingedKoopa::OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e)
 			wg->SetSpeed(-eVx, eVy);
 		}
 	}
+}
+
+
+void CWingedKoopa::OnCollisionWithWingedKoopa(LPCOLLISIONEVENT e)
+{
+
 }
 
 void CWingedKoopa::OnCollisionWithPiranhaPlant(LPCOLLISIONEVENT e)

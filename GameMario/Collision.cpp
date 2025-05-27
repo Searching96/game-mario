@@ -147,33 +147,48 @@ void CCollision::SweptAABB(float ml, float mt, float mr, float mb,
 	t = -1.0f;			// no collision
 	nx = ny = 0.0f;
 
+	// Mario collide with Mushroom
 	if (dynamic_cast<CMario*>(objSrc) && dynamic_cast<CMushroom*>(objDest))
 	{
 		if (ml < sr && mr > sl && mt < sb && mb > st) {
-			t = 0.0f;      // collision at the start of the frame
+			t = 0.0f;
 			nx = ny = 0.0f;
 			return;
 		}
 	}
 
+	// Tail Whip collide with everything thing
 	if (dynamic_cast<CTailWhip*>(objSrc)) {
 		if (ml < sr && mr > sl && mt < sb && mb > st) {
-			t = 0.0f;      // collision at the start of the frame
+			t = 0.0f;
 			nx = ny = 0.0f;
 			return;
 		}
 	}
 
+	// Koopa collide with terrain
 	if (dynamic_cast<CKoopa*>(objSrc) && objDest->IsBlocking() == 1)
 	{
 		if (ml < sr && mr > sl && mt < sb && mb > st)
 		{
-			t = 0.0f;      // collision at the start of the frame
+			t = 0.0f;
 			nx = ny = 0.0f;
 			return;
 		}
 	}
 
+	// Winged Koopa collide with terrain
+	if (dynamic_cast<CWingedKoopa*>(objSrc) && objDest->IsBlocking() == 1)
+	{
+		if (ml < sr && mr > sl && mt < sb && mb > st)
+		{
+			t = 0.0f;
+			nx = ny = 0.0f;
+			return;
+		}
+	}
+
+	// Dynamic koopa collision with other enemies
 	if (dynamic_cast<CKoopa*>(objSrc) 
 		&& (dynamic_cast<CGoomba*>(objDest) || dynamic_cast<CWingedGoomba*>(objDest) 
 			|| dynamic_cast<CPiranhaPlant*>(objDest) || dynamic_cast<CKoopa*>(objDest) 
@@ -183,13 +198,31 @@ void CCollision::SweptAABB(float ml, float mt, float mr, float mb,
 		{
 			if (ml < sr && mr > sl && mt < sb && mb > st)
 			{
-				t = 0.0f;      // collision at the start of the frame
+				t = 0.0f;
 				nx = ny = 0.0f;
 				return;
 			}
 		}
 	}
 
+	// Dynamic winged koopa collide with other enemies
+	if (dynamic_cast<CWingedKoopa*>(objSrc)
+		&& (dynamic_cast<CGoomba*>(objDest) || dynamic_cast<CWingedGoomba*>(objDest)
+			|| dynamic_cast<CPiranhaPlant*>(objDest) || dynamic_cast<CKoopa*>(objDest)
+			|| dynamic_cast<CWingedKoopa*>(objDest)))
+	{
+		if (objSrc->GetState() == WINGED_KOOPA_STATE_SHELL_DYNAMIC)
+		{
+			if (ml < sr && mr > sl && mt < sb && mb > st)
+			{
+				t = 0.0f;
+				nx = ny = 0.0f;
+				return;
+			}
+		}
+	}
+
+	// Koopa collide with bouncing blocks
 	if (dynamic_cast<CKoopa*>(objSrc) && (dynamic_cast<CBuffQBlock*>(objDest) || dynamic_cast<CCoinQBlock*>(objDest) || dynamic_cast<CLifeBrick*>(objDest)))
 	{
 		CKoopa* k = dynamic_cast<CKoopa*>(objSrc);
@@ -198,29 +231,33 @@ void CCollision::SweptAABB(float ml, float mt, float mr, float mb,
 		{
 			if (ml < sr && mr > sl && mt < sb && mb > st)
 			{
-				t = 0.0f;      // collision at the start of the frame
+				t = 0.0f;
 				nx = ny = 0.0f;
 				return;
 			}
 		}
 	}
 
-	if (dynamic_cast<CKoopa*>(objSrc) && (dynamic_cast<CGoomba*>(objDest)
-		|| dynamic_cast<CWingedGoomba*>(objDest) || dynamic_cast<CPiranhaPlant*>(objDest)))
+	// Winged Koopa collide with bouncing blocks
+	if (dynamic_cast<CWingedKoopa*>(objSrc) && (dynamic_cast<CBuffQBlock*>(objDest) || dynamic_cast<CCoinQBlock*>(objDest) || dynamic_cast<CLifeBrick*>(objDest)))
 	{
-		if (dynamic_cast<CKoopa*>(objSrc)->IsHeld() == 1)
+		CWingedKoopa* k = dynamic_cast<CWingedKoopa*>(objSrc);
+		bool isAbleToBounce = (k->GetState() == WINGED_KOOPA_STATE_MOVING_LEFT || k->GetState() == WINGED_KOOPA_STATE_MOVING_RIGHT || k->GetState() == WINGED_KOOPA_STATE_SHELL_STATIC);
+		if (isAbleToBounce)
 		{
 			if (ml < sr && mr > sl && mt < sb && mb > st)
 			{
-				t = 0.0f;      // collision at the start of the frame
+				t = 0.0f;
 				nx = ny = 0.0f;
 				return;
 			}
 		}
 	}
 
+	// Other enemies collide with held Koopa
 	if ((dynamic_cast<CGoomba*>(objSrc) || dynamic_cast<CWingedGoomba*>(objSrc) 
-		|| dynamic_cast<CPiranhaPlant*>(objSrc)) && dynamic_cast<CKoopa*>(objDest))
+			|| dynamic_cast<CPiranhaPlant*>(objSrc)) 
+		&& dynamic_cast<CKoopa*>(objDest))
 	{
 		if (dynamic_cast<CKoopa*>(objDest)->IsHeld() == 1)
 		{
@@ -233,10 +270,12 @@ void CCollision::SweptAABB(float ml, float mt, float mr, float mb,
 		}
 	}
 
-	if (dynamic_cast<CKoopa*>(objSrc) && (dynamic_cast<CGoomba*>(objDest)
-		|| dynamic_cast<CWingedGoomba*>(objDest) || dynamic_cast<CPiranhaPlant*>(objDest)))
+	// Other enemies collide with held Winged Koopa
+	if ((dynamic_cast<CGoomba*>(objSrc) || dynamic_cast<CWingedGoomba*>(objSrc)
+			|| dynamic_cast<CPiranhaPlant*>(objSrc))
+		&& dynamic_cast<CWingedKoopa*>(objDest))
 	{
-		if (dynamic_cast<CKoopa*>(objSrc)->GetState() == KOOPA_STATE_SHELL_DYNAMIC)
+		if (dynamic_cast<CWingedKoopa*>(objDest)->IsHeld() == 1)
 		{
 			if (ml < sr && mr > sl && mt < sb && mb > st)
 			{
@@ -566,19 +605,22 @@ void CCollision::Process(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* co
 		LPCOLLISIONEVENT e = coEvents[i];
 		if (e->isDeleted) continue;
 
+		// Tail Whip collide with comsumable block 1
 		if ((dynamic_cast<CCoinQBlock*>(e->obj) || dynamic_cast<CBuffQBlock*>(e->obj) || dynamic_cast<CLifeBrick*>(e->obj))
 			&& dynamic_cast<CTailWhip*>(objSrc))
 		{
 			objSrc->OnCollisionWith(e);
 			continue;
 		}
+		// Tail Whip collide with comsumable block 2
 		if ((dynamic_cast<CCoinBrick*>(e->obj) || dynamic_cast<CActivatorBrick*>(e->obj)) && dynamic_cast<CTailWhip*>(objSrc))
 		{
 			objSrc->OnCollisionWith(e);
 			continue;
 		}
+		// Koopa or Winged Koopa collide with consumable block 1
 		if ((dynamic_cast<CCoinQBlock*>(e->obj) || dynamic_cast<CBuffQBlock*>(e->obj) || dynamic_cast<CLifeBrick*>(e->obj))
-			&& dynamic_cast<CKoopa*>(objSrc))
+			&& (dynamic_cast<CKoopa*>(objSrc) || dynamic_cast<CWingedKoopa*>(objSrc)))
 		{
 			if (e->obj->GetState() != QUESTIONBLOCK_STATE_NOT_HIT && objSrc->GetState() != KOOPA_STATE_SHELL_DYNAMIC)
 			{
@@ -586,7 +628,9 @@ void CCollision::Process(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* co
 				continue;
 			}
 		}
-		if ((dynamic_cast<CCoinBrick*>(e->obj) || dynamic_cast<CActivatorBrick*>(e->obj)) && dynamic_cast<CKoopa*>(objSrc))
+		// Koopa or Winged Koopa collide with consumable block 2
+		if ((dynamic_cast<CCoinBrick*>(e->obj) || dynamic_cast<CActivatorBrick*>(e->obj))
+			&& (dynamic_cast<CKoopa*>(objSrc) || dynamic_cast<CWingedKoopa*>(objSrc)))
 		{
 			if (objSrc->GetState() != KOOPA_STATE_SHELL_DYNAMIC)
 			{

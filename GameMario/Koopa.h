@@ -74,6 +74,8 @@ protected:
 	void OnCollisionWithLifeBrick(LPCOLLISIONEVENT e);
 	void OnCollisionWithCoinBrick(LPCOLLISIONEVENT e);
 	void OnCollisionWithActivatorBrick(LPCOLLISIONEVENT e);
+	void OnCollisionWithKoopa(LPCOLLISIONEVENT e);
+	void OnCollisionWithWingedKoopa(LPCOLLISIONEVENT e);
 
 	bool CheckCollisionWithTerrain(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 

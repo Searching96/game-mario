@@ -889,7 +889,8 @@ void CMario::OnCollisionWithWingedKoopa(LPCOLLISIONEVENT e)
 			DebugOut(L">>> Mario DIE >>> \n");
 			SetState(MARIO_STATE_DIE_ON_BEING_KILLED);
 		}
-		wk->SetState(((wk->GetNx() > 0) && (state != WINGED_KOOPA_STATE_SHELL_DYNAMIC)) ? WINGED_KOOPA_STATE_MOVING_LEFT : WINGED_KOOPA_STATE_MOVING_RIGHT);
+		if (wk->GetState() != WINGED_KOOPA_STATE_SHELL_DYNAMIC)
+			wk->SetState((wk->GetNx() > 0) ? WINGED_KOOPA_STATE_MOVING_LEFT : WINGED_KOOPA_STATE_MOVING_RIGHT);
 	}
 }
 

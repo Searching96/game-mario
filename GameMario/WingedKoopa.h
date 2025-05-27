@@ -75,7 +75,7 @@ protected:
 	void OnCollisionWithGoomba(LPCOLLISIONEVENT e);  
 	void OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e);  
 	void OnCollisionWithPiranhaPlant(LPCOLLISIONEVENT e);  
-	void OnCollisionWithLifeBrick(LPCOLLISIONEVENT e);  
+	void OnCollisionWithLifeBrick(LPCOLLISIONEVENT e);
 	void OnCollisionWithCoinBrick(LPCOLLISIONEVENT e);  
 	void OnCollisionWithActivatorBrick(LPCOLLISIONEVENT e);
 	void OnCollisionWithWingedKoopa(LPCOLLISIONEVENT e);
