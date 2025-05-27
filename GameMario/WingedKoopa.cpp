@@ -95,6 +95,10 @@ void CWingedKoopa::OnCollisionWith(LPCOLLISIONEVENT e)
 		OnCollisionWithCoinBrick(e);
 	else if (dynamic_cast<CActivatorBrick*>(e->obj))
 		OnCollisionWithActivatorBrick(e);
+	else if (dynamic_cast<CWingedKoopa*>(e->obj))
+		OnCollisionWithWingedKoopa(e);
+	else if (dynamic_cast<CKoopa*>(e->obj))
+		OnCollisionWithKoopa(e);
 }
 
 void CWingedKoopa::OnCollisionWithQuestionBlock(LPCOLLISIONEVENT e)
@@ -313,10 +317,76 @@ void CWingedKoopa::OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e)
 	}
 }
 
+void CWingedKoopa::OnCollisionWithKoopa(LPCOLLISIONEVENT e)
+{
+	if (this == e->obj)
+		return;
+	CKoopa* k = dynamic_cast<CKoopa*>(e->obj);
+	if (k->IsHeld())
+	{
+		CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+		player->SetIsHoldingKoopa(0);
+		k->SetIsHeld(0);
+
+		k->SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY);
+		this->SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_HELD_KOOPA);
+
+		return;
+	}
+	if (this->state == KOOPA_STATE_SHELL_DYNAMIC && k->GetState() != KOOPA_STATE_SHELL_DYNAMIC)
+	{
+		if (k->IsDead() == 0)
+		{
+			k->SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_DYNAMIC_KOOPA);
+		}
+		return;
+	}
+	if ((this->state == KOOPA_STATE_WALKING_LEFT || this->state == KOOPA_STATE_WALKING_RIGHT)
+		&& (k->GetState() == KOOPA_STATE_WALKING_LEFT || k->GetState() == KOOPA_STATE_WALKING_RIGHT))
+	{
+		if (e->nx != 0)
+		{
+			this->SetState((vx > 0) ? KOOPA_STATE_WALKING_LEFT : KOOPA_STATE_WALKING_RIGHT);
+			k->SetState((k->GetNx() > 0) ? KOOPA_STATE_WALKING_LEFT : KOOPA_STATE_WALKING_RIGHT);
+		}
+		return;
+	}
+}
 
 void CWingedKoopa::OnCollisionWithWingedKoopa(LPCOLLISIONEVENT e)
 {
+	if (this == e->obj)
+		return;
+	CWingedKoopa* wk = dynamic_cast<CWingedKoopa*>(e->obj);
+	if (wk->IsHeld())
+	{
+		CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+		player->SetIsHoldingKoopa(0);
+		wk->SetIsHeld(0);
 
+		wk->SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY);
+		this->SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_HELD_KOOPA);
+
+		return;
+	}
+	if (this->state == KOOPA_STATE_SHELL_DYNAMIC && wk->GetState() != KOOPA_STATE_SHELL_DYNAMIC)
+	{
+		if (!wk->IsDead())
+		{
+			wk->SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_DYNAMIC_KOOPA);
+		}
+		return;
+	}
+	if ((this->state == KOOPA_STATE_WALKING_LEFT || this->state == KOOPA_STATE_WALKING_RIGHT)
+		&& (wk->GetState() == KOOPA_STATE_WALKING_LEFT || wk->GetState() == KOOPA_STATE_WALKING_RIGHT))
+	{
+		if (e->nx != 0)
+		{
+			this->SetState((vx > 0) ? KOOPA_STATE_WALKING_LEFT : KOOPA_STATE_WALKING_RIGHT);
+			wk->SetState((wk->GetNx() > 0) ? KOOPA_STATE_WALKING_LEFT : KOOPA_STATE_WALKING_RIGHT);
+		}
+		return;
+	}
 }
 
 void CWingedKoopa::OnCollisionWithPiranhaPlant(LPCOLLISIONEVENT e)
@@ -551,7 +621,7 @@ void CWingedKoopa::Render()
 		aniId = ID_ANI_WINGED_KOOPA_MOVING_LEFT;
 	else aniId = ID_ANI_WINGED_KOOPA_MOVING_RIGHT;
 
-	if (state == WINGED_KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY || state == WINGED_KOOPA_STATE_DIE_ON_COLLIDE_WITH_TERRAIN)
+	if (isDead)
 	{
 		aniId = ID_ANI_WINGED_KOOPA_SHELL_STATIC_REVERSE_1;
 	}
@@ -559,7 +629,7 @@ void CWingedKoopa::Render()
 	CAnimations::GetInstance()->Get(aniId)->Render(x, y);
 	//RenderBoundingBox();
 
-	if (isWinged == 1)
+	if (isWinged && !isDead)
 	{
 		if (wingState == 0)
 		{
@@ -614,6 +684,18 @@ void CWingedKoopa::SetState(int state)
 		vx = 0;
 		vy = -0.4f;
 		ax = 0;
+		ay = WINGED_KOOPA_GRAVITY;
+		isDead = 1;
+		break;
+	case KOOPA_STATE_DIE_ON_COLLIDE_WITH_DYNAMIC_KOOPA:
+		dieStart = GetTickCount64();
+		vy = -0.5f;
+		ay = WINGED_KOOPA_GRAVITY;
+		isDead = 1;
+		break;
+	case KOOPA_STATE_DIE_ON_COLLIDE_WITH_HELD_KOOPA:
+		dieStart = GetTickCount64();
+		vy = -0.35f;
 		ay = WINGED_KOOPA_GRAVITY;
 		isDead = 1;
 		break;
