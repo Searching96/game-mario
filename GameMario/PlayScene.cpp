@@ -991,8 +991,8 @@ void CPlayScene::DefeatEnemiesOutOfRange()
 			{
 				if (!koopa->IsDefeated())
 					koopa->SetIsDefeated(true);
-				float koopa_x, koopa_y;
-				koopa->GetPosition(koopa_x, koopa_y);
+				//float koopa_x, koopa_y;
+				//koopa->GetPosition(koopa_x, koopa_y);
 				//vector<LPCHUNK> chunks = GetLoadedChunks();
 				//for (LPCHUNK chunk : chunks)
 				//{
@@ -1004,10 +1004,15 @@ void CPlayScene::DefeatEnemiesOutOfRange()
 				//	}
 				//}
 			}
-			else if (CPiranhaPlant* piranha = dynamic_cast<CPiranhaPlant*>(enemy))
+			else if (CWingedKoopa* wingedKoopa = dynamic_cast<CWingedKoopa*>(enemy))
 			{
-				if (!piranha->IsDefeated())
-					piranha->SetIsDefeated(true);
+				if (!wingedKoopa->IsDefeated())
+					wingedKoopa->SetIsDefeated(true);
+			}
+			else if (CPiranhaPlant* piranhaPlant = dynamic_cast<CPiranhaPlant*>(enemy))
+			{
+				if (!piranhaPlant->IsDefeated())
+					piranhaPlant->SetIsDefeated(true);
 			}
 			else if (CWingedGoomba* wingedGoomba = dynamic_cast<CWingedGoomba*>(enemy))
 			{
@@ -1094,16 +1099,50 @@ void CPlayScene::RespawnEnemiesInRange()
 				}
 			}
 		}
-		else if (CPiranhaPlant* piranha = dynamic_cast<CPiranhaPlant*>(enemy))
+		else if (CWingedKoopa* wingedKoopa = dynamic_cast<CWingedKoopa*>(enemy))
 		{
-			piranha->GetOriginalPosition(eX0, eY0);
-			if (piranha->IsDefeated() && shouldRespawn(eX0))
+			wingedKoopa->GetOriginalPosition(eX0, eY0);
+
+			if (!shouldRespawn(eX0)) continue;
+
+			bool specialWingedKoopaExists = false;
+			for (LPCHUNK chunk : loadedChunks) {
+				const vector<LPGAMEOBJECT>& chunkEnemies = chunk->GetEnemies();
+				for (LPGAMEOBJECT obj : chunkEnemies) {
+					if (CWingedKoopa* otherWingedKoopa = dynamic_cast<CWingedKoopa*>(obj)) {
+						if ((otherWingedKoopa->GetId() == wingedKoopa->GetId()) && !otherWingedKoopa->IsDefeated()) {
+							specialWingedKoopaExists = true;
+							break;
+						}
+					}
+				}
+				if (specialWingedKoopaExists) break;
+			}
+
+			if (specialWingedKoopaExists) continue;
+
+			// If koopa is defeated, respawn it in its original chunk
+			if (wingedKoopa->IsDefeated()) {
+				LPCHUNK originalChunk = GetChunk(wingedKoopa->GetOriginalChunkId());
+				if (originalChunk) {
+					originalChunk->RemoveObject(wingedKoopa);
+					CWingedKoopa* newWingedKoopa = new CWingedKoopa(wingedKoopa->GetId(), eX0, eY0, wingedKoopa->GetZIndex(), 
+						wingedKoopa->GetOriginalChunkId(), wingedKoopa->GetNx(), wingedKoopa->IsWinged());
+					originalChunk->AddObject(newWingedKoopa);
+					originalChunk->AddEnemy(newWingedKoopa);
+				}
+			}
+		}
+		else if (CPiranhaPlant* piranhaPlant = dynamic_cast<CPiranhaPlant*>(enemy))
+		{
+			piranhaPlant->GetOriginalPosition(eX0, eY0);
+			if (piranhaPlant->IsDefeated() && shouldRespawn(eX0))
 			{
-				LPCHUNK originalChunk = GetChunk(piranha->GetOriginalChunkId());
+				LPCHUNK originalChunk = GetChunk(piranhaPlant->GetOriginalChunkId());
 				if (originalChunk)
 				{
-					originalChunk->RemoveObject(piranha);
-					CPiranhaPlant* newPiranha = new CPiranhaPlant(piranha->GetId(), eX0, eY0, piranha->GetZIndex(), piranha->GetOriginalChunkId());
+					originalChunk->RemoveObject(piranhaPlant);
+					CPiranhaPlant* newPiranha = new CPiranhaPlant(piranhaPlant->GetId(), eX0, eY0, piranhaPlant->GetZIndex(), piranhaPlant->GetOriginalChunkId());
 					originalChunk->AddObject(newPiranha);
 					originalChunk->AddEnemy(newPiranha);
 				}

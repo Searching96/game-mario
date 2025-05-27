@@ -86,7 +86,7 @@ protected:
 	bool CheckCollisionWithTerrain(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 
 public:  
-	CWingedKoopa(int id, float x, float y, int z, int originalChunkId, int initialNx, bool isWinged);  
+	CWingedKoopa(int id, float x, float y, int z, int originalChunkId, int nx, bool isWinged);  
 	virtual void SetState(int state);  
 	void StartShell();  
 	bool IsHeld() { return isHeld; }  
