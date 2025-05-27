@@ -24,6 +24,8 @@
 #define KOOPA_STATE_BEING_HELD 400
 #define KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY 500
 #define KOOPA_STATE_DIE_ON_COLLIDE_WITH_TERRAIN 510
+#define KOOPA_STATE_DIE_ON_COLLIDE_WITH_DYNAMIC_KOOPA 520
+#define KOOPA_STATE_DIE_ON_COLLIDE_WITH_HELD_KOOPA 530
 
 #define ID_ANI_KOOPA_WALKING_LEFT 150010
 #define ID_ANI_KOOPA_WALKING_RIGHT 150020
@@ -94,5 +96,6 @@ public:
 	bool IsDead() { return isDead; }
 	void SetIsDefeated(int isDefeated) { this->isDefeated = isDefeated; }
 	int GetOriginalChunkId() { return originalChunkId; }
+	int GetNx() { return nx; }
 };
 

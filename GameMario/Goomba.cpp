@@ -79,7 +79,7 @@ void CGoomba::OnCollisionWith(LPCOLLISIONEVENT e)
 void CGoomba::OnCollisionWithKoopa(LPCOLLISIONEVENT e)
 {
 	CKoopa* k = dynamic_cast<CKoopa*>(e->obj);
-	if (k->IsHeld() == 0)
+	if (!k->IsHeld())
 	{
 		return;
 	}
@@ -158,9 +158,8 @@ void CGoomba::SetState(int state)
 	switch (state)
 	{
 	case GOOMBA_STATE_DIE_ON_STOMP:
-		// get current chunk
 		dieStart = GetTickCount64();
-		y += (GOOMBA_BBOX_HEIGHT - GOOMBA_BBOX_HEIGHT_DIE)/2 - 3;
+		y += (GOOMBA_BBOX_HEIGHT - GOOMBA_BBOX_HEIGHT_DIE) /2 - 3;
 		vx = 0;
 		vy = 0;
 		ay = 0;

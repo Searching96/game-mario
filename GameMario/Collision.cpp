@@ -263,7 +263,21 @@ void CCollision::SweptAABB(float ml, float mt, float mr, float mb,
 		{
 			if (ml < sr && mr > sl && mt < sb && mb > st)
 			{
-				t = 0.0f;      // collision at the start of the frame
+				t = 0.0f;
+				nx = ny = 0.0f;
+				return;
+			}
+		}
+	}
+
+	// Another koopa collide with held Koopa
+	if (dynamic_cast<CKoopa*>(objSrc) && dynamic_cast<CKoopa*>(objDest) && (objSrc != objDest))
+	{
+		if (dynamic_cast<CKoopa*>(objDest)->IsHeld() == 1)
+		{
+			if (ml < sr && mr > sl && mt < sb && mb > st)
+			{
+				t = 0.0f;
 				nx = ny = 0.0f;
 				return;
 			}
@@ -274,6 +288,20 @@ void CCollision::SweptAABB(float ml, float mt, float mr, float mb,
 	if ((dynamic_cast<CGoomba*>(objSrc) || dynamic_cast<CWingedGoomba*>(objSrc)
 			|| dynamic_cast<CPiranhaPlant*>(objSrc))
 		&& dynamic_cast<CWingedKoopa*>(objDest))
+	{
+		if (dynamic_cast<CWingedKoopa*>(objDest)->IsHeld() == 1)
+		{
+			if (ml < sr && mr > sl && mt < sb && mb > st)
+			{
+				t = 0.0f;      // collision at the start of the frame
+				nx = ny = 0.0f;
+				return;
+			}
+		}
+	}
+
+	// Another winged koopa collide with held Winged Koopa
+	if (dynamic_cast<CWingedKoopa*>(objSrc) && dynamic_cast<CWingedKoopa*>(objDest) && (objSrc != objDest))
 	{
 		if (dynamic_cast<CWingedKoopa*>(objDest)->IsHeld() == 1)
 		{

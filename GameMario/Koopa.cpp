@@ -87,6 +87,8 @@ void CKoopa::OnCollisionWith(LPCOLLISIONEVENT e)
 		OnCollisionWithCoinBrick(e);
 	else if (dynamic_cast<CActivatorBrick*>(e->obj))
 		OnCollisionWithActivatorBrick(e);
+	else if (dynamic_cast<CKoopa*>(e->obj))
+		OnCollisionWithKoopa(e);
 }
 
 void CKoopa::OnCollisionWithQuestionBlock(LPCOLLISIONEVENT e)
@@ -305,7 +307,38 @@ void CKoopa::OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e)
 
 void CKoopa::OnCollisionWithKoopa(LPCOLLISIONEVENT e)
 {
+	if (this == e->obj)
+		return;
+	CKoopa* k = dynamic_cast<CKoopa*>(e->obj);
+	if (k->IsHeld())
+	{
+		CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+		player->SetIsHoldingKoopa(0);
+		k->SetIsHeld(0);
 
+		k->SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY);
+		this->SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_HELD_KOOPA);
+
+		return;
+	}
+	if (this->state == KOOPA_STATE_SHELL_DYNAMIC && k->GetState() != KOOPA_STATE_SHELL_DYNAMIC)
+	{
+		if (k->IsDead() == 0)
+		{
+			k->SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_DYNAMIC_KOOPA);
+		}
+		return;
+	}
+	if ((this->state == KOOPA_STATE_WALKING_LEFT || this->state == KOOPA_STATE_WALKING_RIGHT)
+		&& (k->GetState() == KOOPA_STATE_WALKING_LEFT || k->GetState() == KOOPA_STATE_WALKING_RIGHT))
+	{
+		if (e->nx != 0)
+		{
+			this->SetState((vx > 0) ? KOOPA_STATE_WALKING_LEFT : KOOPA_STATE_WALKING_RIGHT);
+			k->SetState((k->GetNx() > 0) ? KOOPA_STATE_WALKING_LEFT : KOOPA_STATE_WALKING_RIGHT);
+		}
+		return;
+	}
 }
 
 void CKoopa::OnCollisionWithWingedKoopa(LPCOLLISIONEVENT e)
@@ -641,7 +674,7 @@ void CKoopa::Render()
 		aniId = ID_ANI_KOOPA_WALKING_LEFT;
 	else aniId = ID_ANI_KOOPA_WALKING_RIGHT;
 
-	if (state == KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY || state == KOOPA_STATE_DIE_ON_COLLIDE_WITH_TERRAIN)
+	if (isDead)
 	{
 		aniId = ID_ANI_KOOPA_SHELL_STATIC_REVERSE_1;
 	}
@@ -689,6 +722,18 @@ void CKoopa::SetState(int state)
 		ay = KOOPA_GRAVITY;
 		isDead = 1;
 		break;
+	case KOOPA_STATE_DIE_ON_COLLIDE_WITH_DYNAMIC_KOOPA:
+		dieStart = GetTickCount64();
+		vy = -0.5f;
+		ay = KOOPA_GRAVITY;
+		isDead = 1;
+		break;
+	case KOOPA_STATE_DIE_ON_COLLIDE_WITH_HELD_KOOPA:
+		dieStart = GetTickCount64();
+		vy = -0.35f;
+		ay = KOOPA_GRAVITY;
+		isDead = 1;
+		break;
 	case KOOPA_STATE_SHELL_STATIC:
 		vx = 0;
 		vy = 0;
@@ -707,6 +752,7 @@ void CKoopa::SetState(int state)
 			return;
 		isKicked = false;
 		vx = -KOOPA_WALKING_SPEED;
+		nx = -1;
 		break;
 	case KOOPA_STATE_WALKING_RIGHT:
 		if (GetTickCount64() - lastTurnAroundTime < KOOPA_TURNAROUND_TIMEOUT)
@@ -716,6 +762,7 @@ void CKoopa::SetState(int state)
 			return;
 		isKicked = false;
 		vx = KOOPA_WALKING_SPEED;
+		nx = 1;
 		break;
 	case KOOPA_STATE_BEING_HELD:
 		isHeld = 1;
