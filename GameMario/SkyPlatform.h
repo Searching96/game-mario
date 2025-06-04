@@ -8,9 +8,8 @@ class CSkyPlatform :
 {
 public:
 	CSkyPlatform(int id, float x, float y, int z, int width, int height)
-		: CPlatform(id, x, y, z, width, height)
+		: CPlatform(id, x, y, z, width, height, 0)
 	{
-
 	};
 	void Render();
 	int IsBlocking() { return 1; }

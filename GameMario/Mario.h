@@ -32,6 +32,7 @@ class CPortal;
 #define MARIO_GRAVITY					0.00225f
 
 #define MARIO_JUMP_DEFLECT_SPEED		0.3f
+#define MARIO_DIE_BOUNCING_SPEED		0.5f
 
 #define MARIO_STATE_DIE_ON_BEING_KILLED	-20
 #define MARIO_STATE_DIE_ON_FALLING		-10
@@ -244,7 +245,7 @@ class CPortal;
 #define MARIO_UNTOUCHABLE_RENDER_INTERVAL			75
 #define MARIO_TAIL_WHIP_TIMEOUT						305
 #define MARIO_PMETER_MAX_TIMEOUT					4000
-#define MARIO_DEATH_ANI_TIMEOUT						400
+#define MARIO_DEATH_ANI_TIMEOUT						1500
 
 #define MAX_JUMP_COUNT 10000
 #define SPEED_DIVISOR 3.0f
@@ -273,6 +274,7 @@ class CMario : public CGameObject
 
 	bool isTeleporting = false;
 	bool isEnteringPortal = false;
+	int exitDirection = 0; // 0 for down, 1 for up
 	float entranceY;
 	float targetX;
 	float exitY;
@@ -308,6 +310,7 @@ class CMario : public CGameObject
 	bool isJumpButtonHeld = 0;
 	bool isChangingLevel = false;
 	bool isHoldingUpKey = false;
+	bool isSkywalking = false;
 
 	void OnCollisionWithGoomba(LPCOLLISIONEVENT e);
 	void OnCollisionWithCoin(LPCOLLISIONEVENT e);
@@ -380,6 +383,7 @@ public:
 	bool GetIsEnteringPortal() const { return isEnteringPortal; }
 	float GetYLevel() const { return yLevel; }
 
+	void ToggleSkywalk() { isSkywalking = !isSkywalking; }
 	int GetNx() { return nx; }
 	float GetPMeter() const { return pMeter; }
 	//bool MaxPMeter() const { return fabs(vx) == MARIO_MAX_RUNNING_SPEED; }

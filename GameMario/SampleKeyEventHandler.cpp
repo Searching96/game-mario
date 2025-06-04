@@ -89,7 +89,15 @@ void CSampleKeyHandler::OnKeyUp(int KeyCode)
 		DebugOut(L"[INFO] Reloading scene...\n");
 		CGame::GetInstance()->ReloadScene();
 		break;
+	case DIK_T:
+		DebugOut(L"[INFO] Reloading assets...\n");
+		CGame::GetInstance()->ReloadAssets();
+		break;
+	case DIK_Y:
+		DebugOut(L"[INFO] Toggling sky walking mode...\n");
+		mario->ToggleSkywalk();
 	}
+
 }
 
 void CSampleKeyHandler::KeyState(BYTE* states)

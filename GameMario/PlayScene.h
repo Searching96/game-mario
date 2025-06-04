@@ -23,7 +23,7 @@ protected:
 	float startCamY = 0.0f;
 	float mapWidth = 0.0f;
 	float mapHeight = 0.0f;
-	float marginX = 0.0f;
+	int cameraMode = 0; // 0: locked to ground, 1: steady scrolling
 	float marginY = 0.0f;
 
 	void _ParseSection_SPRITES(string line);
@@ -49,6 +49,7 @@ public:
 	virtual void Update(DWORD dt);
 	virtual void Render();
 	virtual void Unload();
+	void ReloadAssets();
 	void DefeatEnemiesOutOfRange();
 	void RespawnEnemiesInRange();
 	void ResetAllChunkState();

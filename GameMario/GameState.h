@@ -12,7 +12,8 @@
 #define HUD_BACKGROUND_HEIGHT 51 // Estimated height for the black bar
 #define HUD_MAIN_BOX_X_OFFSET 12  // Relative X offset of the main box inside the black bar
 #define HUD_MAIN_BOX_Y_OFFSET 3  // Relative Y offset of the main box inside the black bar
-#define CARD_BACKGROUND_WIDTH 72 // Width of a card slot
+#define CARD_BACKGROUND_WIDTH 72 // Width of a card background
+#define CARD_WIDTH	24			 // Width of a single card
 #define CARD_X_OFFSET 10 // X offset from HUD main box right edge
 
 #define HUD_ELEMENT_Y_ROW1 11  // Y offset for first row elements from top of main box
@@ -45,10 +46,9 @@
 
 // Card Icons
 #define ID_SPRITE_CARD_BACKGROUND 1120050
-//#define ID_SPRITE_CARD_SLOT_EMPTY 1120030 // Empty card slot
-//#define ID_SPRITE_CARD_MUSHROOM 1120031   // Mushroom card
-//#define ID_SPRITE_CARD_FLOWER 1120032     // Flower card
-//#define ID_SPRITE_CARD_STAR 1120033       // Star card
+#define ID_SPRITE_CARD_MUSHROOM 1120051   // Mushroom card
+#define ID_SPRITE_CARD_FLOWER 1120052     // Flower card
+#define ID_SPRITE_CARD_STAR 1120053       // Star card
 
 //Pause
 #define ID_SPRITE_PAUSE	1120060
@@ -91,8 +91,8 @@ public:
 	void AddScore(int score) { this->score += score; }
 	int GetScore() { return score; }
 	DWORD GetTime() { return time / 1000; } // Return time in seconds for display
-	void Reset() { time = 300000; lives = 3; score = 0; coins = 0; }
-	void Restart() { time = 300000; lives -= 1; coins = 0; }
+	void Reset() { time = 301000; lives = 3; score = 0; coins = 0; }
+	void Restart() { time = 301000; lives -= 1; coins = 0; }
 	void AddCoin() { this->coins = min(this->coins + 1, 99); } // Max 99 coins
 	int GetCoins() { return coins; }
 	void AddCard(int card_type); // Logic to add a card

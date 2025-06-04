@@ -180,29 +180,28 @@ void CGameState::RenderHUD()
 
 	//// --- Draw Item Card Slots ---
 	//// Positioned to the right of the main HUD box
-	//Draw Card background
 	float card_background_x = main_hud_box_center_x + HUD_WIDTH / 2 + CARD_X_OFFSET + CARD_BACKGROUND_WIDTH / 2;
 	float card_background_y = main_hud_box_center_y;
 	s->Get(ID_SPRITE_CARD_BACKGROUND)->Draw(card_background_x, card_background_y);
 
-	//float card_start_x = content_x + 208; // Adjust X offset for the first card
-	//float card_y = content_y + 6;       // Adjust Y offset
-	//float card_spacing = 24 + 1;        // Width of card + spacing
+	float card_start_x = main_hud_box_center_x + HUD_WIDTH / 2 + CARD_X_OFFSET + CARD_WIDTH / 2; // Adjust X offset for the first card
+	float card_y = main_hud_box_center_y; // Adjust Y offset
+	float card_spacing = CARD_WIDTH;        // Width of card + spacing
 
-	//int* cards = GetCards();
-	//for (int i = 0; i < 3; ++i) {
-	//	float card_x = card_start_x + i * card_spacing;
-	//	int card_sprite_id = ID_SPRITE_CARD_SLOT_EMPTY; // Default to empty
+	int* cards = GetCards();
+	for (int i = 0; i < 3; ++i) {
+		float card_x = card_start_x + i * card_spacing;
+		int card_sprite_id = -1; // Default to empty
 
-	//	switch (cards[i]) {
-	//	case 1: card_sprite_id = ID_SPRITE_CARD_MUSHROOM; break;
-	//	case 2: card_sprite_id = ID_SPRITE_CARD_FLOWER; break;
-	//	case 3: card_sprite_id = ID_SPRITE_CARD_STAR; break;
-	//	}
+		switch (cards[i]) {
+		case 1: card_sprite_id = ID_SPRITE_CARD_MUSHROOM; break;
+		case 2: card_sprite_id = ID_SPRITE_CARD_FLOWER; break;
+		case 3: card_sprite_id = ID_SPRITE_CARD_STAR; break;
+		}
 
-	//	if (s->Get(card_sprite_id)) // Check if sprite exists
-	//		s->Get(card_sprite_id)->Draw(card_x, card_y);
-	//}
+		if (card_sprite_id != -1 && s->Get(card_sprite_id)) // Check if sprite exists
+			s->Get(card_sprite_id)->Draw(card_x, card_y);
+	}
 
 	if (game->GetGameSpeed() == 0) //Is Pausing game
 	{

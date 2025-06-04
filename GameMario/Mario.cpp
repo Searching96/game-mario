@@ -118,6 +118,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 					CGame::GetInstance()->SetCamPos(targetX, this->exitY - currentMarioHeight / 2.0f);
 
 					isEnteringPortal = 0; // Switch to exiting phase
+					if (exitDirection == 1) vy = -vy; // Reverse vertical speed if exiting upwards
 				}
 			}
 			else // Phase 2: Exiting the destination portal (isEnteringPortal == 0)
@@ -145,6 +146,8 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 					CGame::GetInstance()->SetCamPos(targetX, this->exitY + currentMarioHeight / 2.0f);
 
 					isEnteringPortal = 0;
+					if (exitDirection == 0) vy = -vy; // Reverse vertical speed if exiting downwards
+
 				}
 			}
 			else // Phase 2: Exiting the destination portal (isEnteringPortal == 0)
@@ -253,13 +256,13 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 	//Power Meter calculation
 
-	if (isRunning == 1 && isOnPlatform && abs(vx) >= MARIO_RUNNING_SPEED)
+	if (isRunning == 1 && isOnPlatform && abs(vx) >= (MARIO_MAX_WALKING_SPEED + MARIO_RUNNING_SPEED) / 2)
 	{
 		pMeter += dt / 1200.0f;
 	}
 	else if (isOnPlatform && pMeterMax == -1) //Not running => Depleting
 	{
-		pMeter -= dt / ((fabs(vx) < MARIO_WALKING_SPEED) ? 2500.0f : 3200.0f);
+		pMeter -= dt / 3000.0f;
 	}
 
 	if (pMeter == 1 && pMeterMax == -1 && jumpCount > 0) //Trigger full pMeter
@@ -396,31 +399,30 @@ void CMario::HandleHovering(DWORD dt)
 
 void CMario::Teleport(CPortal* portal)
 {
-	bool isDescending = portal->GetIsDescending();
-	if (isDescending && isSitting || !isDescending && isHoldingUpKey)
-	{
+	float marioL, marioT, marioR, marioB;
+	GetBoundingBox(marioL, marioT, marioR, marioB);
+	float portalL, portalT, portalR, portalB;
+	portal->GetBoundingBox(portalL, portalT, portalR, portalB);
+	float portalX, portalY;
+	portal->GetPosition(portalX, portalY);
 
-		float marioL, marioT, marioR, marioB;
-		GetBoundingBox(marioL, marioT, marioR, marioB);
-		float portalL, portalT, portalR, portalB;
-		portal->GetBoundingBox(portalL, portalT, portalR, portalB);
-		float portalX, portalY;
-		portal->GetPosition(portalX, portalY);
-		this->targetX = portal->GetTargetX();
-		this->exitY = portal->GetExitY();
-		this->yLevel = portal->GetYLevel();
-		this->entranceY = isDescending ? portalT : portalB;
-		if (marioL < portalL) offsetX = portalL - marioL;
-		if (marioR > portalR) offsetX = portalR - marioR - 1;
-		if (isDescending) {
-			if (marioB > portalT) offsetY = portalT - marioB + 2;
-		}
-		else {
-			if (marioT < portalB) offsetY = marioT - portalB - 2;
-		}
-		zIndex = 50 - 1;
-		SetState(MARIO_STATE_TELEPORTING);
+	this->targetX = portal->GetTargetX();
+	this->exitY = portal->GetExitY();
+	this->yLevel = portal->GetYLevel();
+	this->exitDirection = portal->GetExitDirection();
+	bool isDescending = portal->GetEnterDirection() == 0;
+	this->entranceY = isDescending ? portalT : portalB;
+
+	if (marioL < portalL) offsetX = portalL - marioL;
+	if (marioR > portalR) offsetX = portalR - marioR - 1;
+	if (isDescending) {
+		if (marioB > portalT) offsetY = portalT - marioB + 2;
 	}
+	else {
+		if (marioT < portalB) offsetY = marioT - portalB - 2;
+	}
+	zIndex = 50 - 1; // Temporary adjust mario's zIndex to be lower than portal.
+	SetState(MARIO_STATE_TELEPORTING);
 }
 
 void CMario::OnNoCollision(DWORD dt)
@@ -554,7 +556,8 @@ void CMario::OnCollisionWithCoin(LPCOLLISIONEVENT e)
 void CMario::OnCollisionWithPortal(LPCOLLISIONEVENT e)
 {
 	CPortal* p = (CPortal*)e->obj;
-	p->Teleport(this);
+	if ((e->ny < 0 && p->GetEnterDirection() == 0 && isSitting) || (e->ny > 0 && p->GetEnterDirection() == 1 && isHoldingUpKey))
+		p->Teleport(this);
 }
 
 void CMario::OnCollisionWithCoinQBlock(LPCOLLISIONEVENT e)
@@ -1513,18 +1516,18 @@ void CMario::SetState(int state)
 		}
 		else if (level == MARIO_LEVEL_TAIL)
 		{
-			if (jumpCount >= MAX_JUMP_COUNT || pMeter != 1.0f)
+			if ((jumpCount >= MAX_JUMP_COUNT || pMeter != 1.0f) && !isSkywalking)
 			{
 				SetState(MARIO_STATE_HOVER);
 				break;
 			}
 
-			if (fabs(vx) == MARIO_MAX_RUNNING_SPEED && pMeter == 1.0f)
+			if ((fabs(vx) == MARIO_MAX_RUNNING_SPEED && pMeter == 1.0f) || isSkywalking)
 			{
 				jumpCount++;
 				vy = -MARIO_JUMP_SPEED_Y;
 			}
-			else if (jumpCount >= 1 && pMeter == 1.0f)
+			else if ((jumpCount >= 1 && pMeter == 1.0f) || isSkywalking)
 			{
 				jumpCount++;
 				vy = -MARIO_JUMP_SPEED_Y;
@@ -1569,7 +1572,7 @@ void CMario::SetState(int state)
 		break;
 
 	case MARIO_STATE_DIE_ON_BEING_KILLED:
-		vy = -MARIO_JUMP_DEFLECT_SPEED;
+		vy = -MARIO_DIE_BOUNCING_SPEED;
 		vx = 0;
 		ax = 0;
 		break;
@@ -1590,7 +1593,8 @@ void CMario::SetState(int state)
 		break;
 
 	case MARIO_STATE_POWER_DOWN:
-		y += 6; // RED ALERT
+		if (!isSitting) y += 6; // RED ALERT
+		else y += 1; // RED ALERT
 		//vx = 0;
 		StartPowerDown();
 		break;

@@ -9,6 +9,20 @@
 #define ID_SPRITE_PLATFORM_BOTTOM_CENTER 1070220
 #define ID_SPRITE_PLATFORM_BOTTOM_RIGHT 1070230
 
+#define ID_SPRITE_STRIPED_TOP_LEFT 1071110
+#define ID_SPRITE_STRIPED_TOP_CENTER 1071120
+#define ID_SPRITE_STRIPED_TOP_RIGHT 1071130
+#define ID_SPRITE_STRIPED_BOTTOM_LEFT 1071210
+#define ID_SPRITE_STRIPED_BOTTOM_CENTER 1071220
+#define ID_SPRITE_STRIPED_BOTTOM_RIGHT 1071230
+
+#define ID_SPRITE_HILL_TOP_LEFT 1072110
+#define ID_SPRITE_HILL_TOP_CENTER 1072120
+#define ID_SPRITE_HILL_TOP_RIGHT 1072130
+#define ID_SPRITE_HILL_BOTTOM_LEFT 1072210
+#define ID_SPRITE_HILL_BOTTOM_CENTER 1072220
+#define ID_SPRITE_HILL_BOTTOM_RIGHT 1072230
+
 #define PLATFORM_CELL_WIDTH 16
 #define PLATFORM_CELL_HEIGHT 16
 
@@ -20,12 +34,14 @@ class CPlatform : public CGameObject
 protected:
 	int width;				// Unit: cell 
 	int height;				// Unit: cell
+	int type	; // 0: normal, 1: striped, 2: hill
 
 public:
-	CPlatform(int id, float x, float y, int z, int width, int height) : CGameObject(id, x, y, z)
+	CPlatform(int id, float x, float y, int z, int width, int height, int type) : CGameObject(id, x, y, z)
 	{
 		this->height = height;
 		this->width = width;
+		this->type = type;
 	}
 
 	void Render();

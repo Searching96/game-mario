@@ -56,6 +56,8 @@ class CGame
 
 	ID3D10SamplerState* pPointSamplerState;
 
+	LPCWSTR gameFilePath = nullptr; // Path to the game file
+
 	unordered_map<int, LPSCENE> scenes;
 	int current_scene = -1;
 	int next_scene = -1;
@@ -127,6 +129,7 @@ public:
 	void InitiateSwitchScene(int scene_id);
 	void ReloadScene();
 	void RestartScene();
+	void ReloadAssets();
 
 	void _ParseSection_TEXTURES(string line);
 

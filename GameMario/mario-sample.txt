@@ -16,6 +16,9 @@ height	240
 -100	textures\bbox.png
 1	textures\mario-new.png
 2	textures\hud.png
+10	textures\enemies.png
 11	textures\enemies-new.png
 20	textures\misc.png
+21	textures\misc-new.png
 30	textures\tiles.png
+31	textures\tiles-new.png

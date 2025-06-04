@@ -29,10 +29,20 @@
 
 #define ID_ANI_PIRANHA_PLANT_LEFT_MOVE 130000
 #define ID_ANI_PIRANHA_PLANT_RIGHT_MOVE 130010
+#define ID_ANI_PIRANHA_PLANT_UPRIGHT 130020
 #define ID_ANI_PIRANHA_PLANT_TOP_LEFT_SHOOT 130110
 #define ID_ANI_PIRANHA_PLANT_BOTTOM_LEFT_SHOOT 130210
 #define ID_ANI_PIRANHA_PLANT_TOP_RIGHT_SHOOT 130120
 #define ID_ANI_PIRANHA_PLANT_BOTTOM_RIGHT_SHOOT 130220
+
+
+#define ID_ANI_GREEN_PLANT_LEFT_MOVE 131000
+#define ID_ANI_GREEN_PLANT_RIGHT_MOVE 131010
+#define ID_ANI_GREEN_PLANT_UPRIGHT 131020
+#define ID_ANI_GREEN_PLANT_TOP_LEFT_SHOOT 131110
+#define ID_ANI_GREEN_PLANT_BOTTOM_LEFT_SHOOT 131210
+#define ID_ANI_GREEN_PLANT_TOP_RIGHT_SHOOT 131120
+#define ID_ANI_GREEN_PLANT_BOTTOM_RIGHT_SHOOT 131220
 
 class CPiranhaPlant : public CGameObject
 {
@@ -43,6 +53,7 @@ protected:
 	ULONGLONG hoverStart = -1;
 	ULONGLONG moveDownStart = -1;
 	ULONGLONG lastMove = -1;
+	int type; // 0: red, 1: green, 2: green no shoot
 	float y00 = -1.0f;
 	bool hasShot = false;
 
@@ -68,7 +79,7 @@ protected:
 
 
 public:
-	CPiranhaPlant(int id, float x, float y, int z, int originalChunkId);
+	CPiranhaPlant(int id, float x, float y, int z, int type, int originalChunkId);
 
 	void Render();
 	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
@@ -89,6 +100,8 @@ public:
 		moveDown = 1;
 		moveDownStart = GetTickCount64();
 	}
+
+	int GetType() {return type;}
 	void GetOriginalPosition(float& x0, float& y0) { x0 = this->x0; y0 = this->y0; }
 	int IsDefeated() { return isDefeated; }
 	void SetIsDefeated(int isDefeated) { this->isDefeated = isDefeated; }
