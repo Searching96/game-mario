@@ -35,6 +35,8 @@ assets\wingedgoomba.txt
 assets\wing.txt
 assets\activator.txt
 assets\wingedkoopa.txt
+assets\boomerang.txt
+assets\boomerangturtle.txt
 
 [SCENE_SETTINGS]
 start_cam_x	0
@@ -117,20 +119,23 @@ margin_y	40
 #34	2	528	400
 
 # Piranha
-35	9	360	376
+#35	9	360	376
 
 # Pipe
 36	103	-20	0	16	16	27	1064300	1064300	1064300	1064300
 37	103	352	368	16	16	3	1090110	1090120	1090210	1090220
 
 # Koopa
-10001	12	576	352
-10011	15	170	352	-1	1
-10012	12	200	352
-10013	15	230	352	-1	0
+#10001	12	576	352
+#10011	15	170	352	-1	1
+#10012	12	200	352
+#10013	15	230	352	-1	0
 
 # Winged Koopa
-10003	15	200	352	-1	1
+#10003	15	200	352	-1	1
+
+# Boomerang
+9696	16	150	370
 
 [CHUNK	2	624	1152]
 # Platform

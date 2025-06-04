@@ -43,13 +43,13 @@ protected:
 	ULONGLONG hoverStart = -1;
 	ULONGLONG moveDownStart = -1;
 	ULONGLONG lastMove = -1;
-	float y00 = -1;
+	float y00 = -1.0f;
 	bool hasShot = false;
 
 	float x0;
 	float y0;
 
-	int isDefeated = 0;
+	bool isDefeated = false;
 
 	int originalChunkId;
 
@@ -76,7 +76,7 @@ public:
 	void SetState(int state);
 
 	int IsBlocking() { return 0; }
-	int IsCollidable() { return (state != PIRANHA_PLANT_STATE_DIE && isDefeated == 0); }
+	int IsCollidable() { return (state != PIRANHA_PLANT_STATE_DIE && !isDefeated); }
 	void StartDeath()
 	{
 		deathStart = GetTickCount64();

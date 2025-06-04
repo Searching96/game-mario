@@ -37,6 +37,7 @@
 #include "Activator.h"
 #include "ActivatorBrick.h"
 #include "WingedKoopa.h"
+#include "Boomerang.h"
 
 #include "SampleKeyEventHandler.h"
 
@@ -283,6 +284,13 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 				int nx = (stoi(tokens[4]) > 0) ? 1 : -1;
 				bool isWinged = (stoi(tokens[5]) == 1);
 				obj = new CWingedKoopa(id, x, y, zIndex, targetChunk->GetID(), nx, isWinged);
+				targetChunk->AddEnemy(obj);
+				break;
+			}
+			case OBJECT_TYPE_BOOMERANG:
+			{
+				zIndex = ZINDEX_ENEMIES;
+				obj = new CBoomerang(id, x, y, zIndex, targetChunk->GetID());
 				targetChunk->AddEnemy(obj);
 				break;
 			}

@@ -34,8 +34,8 @@ protected:
 	ULONGLONG dieOnStompStart = -1;
 	ULONGLONG dieOnWhipStart = -1;
 
-	int isDead = 0;
-	int isDefeated = 0;
+	bool isDead = false;
+	bool isDefeated = false;
 
 	int originalChunkId;
 
@@ -43,7 +43,7 @@ protected:
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects);
 	virtual void Render();
 
-	virtual int IsCollidable() { return (isDead == 0 && isDefeated == 0); }
+	virtual int IsCollidable() { return (!isDead && !isDefeated); }
 	virtual int IsBlocking() { return 0; }
 
 	virtual void OnNoCollision(DWORD dt);

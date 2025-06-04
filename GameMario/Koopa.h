@@ -53,9 +53,9 @@ protected:
 	ULONGLONG dieStart = -1;
 	ULONGLONG lastTurnAroundTime = -1;
 
-	bool isHeld = 0;
-	bool isDead = 0;
-	bool isDefeated = 0;
+	bool isHeld = false;
+	bool isDead = false;
+	bool isDefeated = false;
 
 	int originalChunkId;
 
@@ -64,7 +64,7 @@ protected:
 	virtual void Render();
 	bool IsPlatformEdge(float checkDistance, vector<LPGAMEOBJECT>& possibleGrounds);
 
-	virtual int IsCollidable() { return (isDead == 0 && isDefeated == 0); };
+	virtual int IsCollidable() { return (!isDead && !isDefeated); };
 	virtual int IsBlocking() { return 0; }
 	virtual void OnNoCollision(DWORD dt);
 
