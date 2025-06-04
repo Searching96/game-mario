@@ -49,6 +49,26 @@ void CPlatform::Render()
 				if (i == 0)
 				{
 					if (j == 0)
+						s->Get(ID_SPRITE_STRIPED_TOP_LEFT)->Draw(xx, yy);
+					else if (j == this->width - 1)
+						s->Get(ID_SPRITE_STRIPED_TOP_RIGHT)->Draw(xx, yy);
+					else
+						s->Get(ID_SPRITE_STRIPED_TOP_CENTER)->Draw(xx, yy);
+				}
+				else
+				{
+					if (j == 0)
+						s->Get(ID_SPRITE_STRIPED_BOTTOM_LEFT)->Draw(xx, yy);
+					else if (j == this->width - 1)
+						s->Get(ID_SPRITE_STRIPED_BOTTOM_RIGHT)->Draw(xx, yy);
+					else
+						s->Get(ID_SPRITE_STRIPED_BOTTOM_CENTER)->Draw(xx, yy);
+				}
+				break;
+			case 2:
+				if (i == 0)
+				{
+					if (j == 0)
 						s->Get(ID_SPRITE_HILL_TOP_LEFT)->Draw(xx, yy);
 					else if (j == this->width - 1)
 						s->Get(ID_SPRITE_HILL_TOP_RIGHT)->Draw(xx, yy);

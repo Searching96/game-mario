@@ -1,10 +1,11 @@
 #include "PiranhaPlant.h"
 
-CPiranhaPlant::CPiranhaPlant(int id, float x, float y, int z, int originalChunkId) : CGameObject(id, x, y, z)
+CPiranhaPlant::CPiranhaPlant(int id, float x, float y, int z, int type, int originalChunkId) : CGameObject(id, x, y, z)
 {
 	this->originalChunkId = originalChunkId;
 	this->x = x;
 	this->y = y;
+	this->type = type;
 	x0 = x;
 	y0 = y;
 	SetState(PIRANHA_PLANT_STATE_ASCEND);
@@ -18,7 +19,11 @@ void CPiranhaPlant::Render()
 	if (state == PIRANHA_PLANT_STATE_HIDDEN || state == PIRANHA_PLANT_STATE_DIE) return;
 	int aniId = ID_ANI_PIRANHA_PLANT_LEFT_MOVE;
 	int direction = GetAiming();
-	if (moveUp || moveDown)
+	if (type == 2)
+	{ 
+		aniId = ID_ANI_GREEN_PLANT_UPRIGHT;
+	}
+	else if (moveUp || moveDown)
 	{
 		switch (direction)
 		{
@@ -26,13 +31,13 @@ void CPiranhaPlant::Render()
 		case 1:
 		case 2:
 		case 3:
-			aniId = ID_ANI_PIRANHA_PLANT_LEFT_MOVE;
+			aniId = type == 0 ? ID_ANI_PIRANHA_PLANT_LEFT_MOVE : ID_ANI_GREEN_PLANT_LEFT_MOVE;
 			break;
 		case 4:
 		case 5:
 		case 6:
 		case 7:
-			aniId = ID_ANI_PIRANHA_PLANT_RIGHT_MOVE;
+			aniId = type == 0 ? ID_ANI_PIRANHA_PLANT_RIGHT_MOVE : ID_ANI_GREEN_PLANT_RIGHT_MOVE;
 			break;
 		}
 	}
@@ -42,19 +47,19 @@ void CPiranhaPlant::Render()
 		{
 		case 0:
 		case 1:
-			aniId = ID_ANI_PIRANHA_PLANT_BOTTOM_LEFT_SHOOT;
+			aniId = type == 0 ? ID_ANI_PIRANHA_PLANT_BOTTOM_LEFT_SHOOT : ID_ANI_GREEN_PLANT_BOTTOM_LEFT_SHOOT;
 			break;
 		case 2:
 		case 3:
-			aniId = ID_ANI_PIRANHA_PLANT_TOP_LEFT_SHOOT;
+			aniId = type == 0 ? ID_ANI_PIRANHA_PLANT_TOP_LEFT_SHOOT : ID_ANI_GREEN_PLANT_TOP_LEFT_SHOOT;
 			break;
 		case 4:
 		case 5:
-			aniId = ID_ANI_PIRANHA_PLANT_TOP_RIGHT_SHOOT;
+			aniId = type == 0 ? ID_ANI_PIRANHA_PLANT_TOP_RIGHT_SHOOT : ID_ANI_GREEN_PLANT_TOP_RIGHT_SHOOT;
 			break;
 		case 6:
 		case 7:
-			aniId = ID_ANI_PIRANHA_PLANT_BOTTOM_RIGHT_SHOOT;
+			aniId = type == 0 ? ID_ANI_PIRANHA_PLANT_BOTTOM_RIGHT_SHOOT : ID_ANI_GREEN_PLANT_BOTTOM_RIGHT_SHOOT;
 			break;
 		}
 	}
@@ -198,7 +203,7 @@ void CPiranhaPlant::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 	if (state == PIRANHA_PLANT_STATE_HOVER)
 	{
-		if (!hasShot && GetTickCount64() - hoverStart > PIRANHA_PLANT_SHOOT_TIMEOUT)
+		if (!hasShot && type != 2 && GetTickCount64() - hoverStart > PIRANHA_PLANT_SHOOT_TIMEOUT)
 		{
 			//Shoot
 			if (IsMarioInRange())

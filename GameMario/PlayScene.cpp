@@ -316,8 +316,9 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 			break;
 		case OBJECT_TYPE_PIRANHA_PLANT:
 		{
-			zIndex = ZINDEX_PIRANHA_PLANT;
-			obj = new CPiranhaPlant(id, x, y, zIndex, targetChunk->GetID());
+			int type = stoi(tokens[4]); // Piranha plant type
+			zIndex = type == 0 ? ZINDEX_PIRANHA_PLANT : ZINDEX_PLATFORMS - 1;
+			obj = new CPiranhaPlant(id, x, y, zIndex, type, targetChunk->GetID());
 			targetChunk->AddObject(obj);
 			targetChunk->AddEnemy(obj);
 			return;
@@ -1148,7 +1149,7 @@ void CPlayScene::RespawnEnemiesInRange()
 				if (originalChunk)
 				{
 					originalChunk->RemoveObject(piranha);
-					CPiranhaPlant* newPiranha = new CPiranhaPlant(piranha->GetId(), eX0, eY0, piranha->GetZIndex(), piranha->GetOriginalChunkId());
+					CPiranhaPlant* newPiranha = new CPiranhaPlant(piranha->GetId(), eX0, eY0, piranha->GetZIndex(), piranha->GetType(), piranha->GetOriginalChunkId());
 					originalChunk->AddObject(newPiranha);
 					originalChunk->AddEnemy(newPiranha);
 				}
