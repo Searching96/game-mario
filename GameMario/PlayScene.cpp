@@ -58,6 +58,7 @@ using namespace std;
 #define HORIZONTAL_MARGIN 12.0f   // 12px margin on each side of center (middle 24px is free zone)
 #define VIEWPORT_X_OFFSET 8.0f
 #define VIEWPORT_Y_OFFSET 14.0f
+#define CAMERA_STEADY_SPEED_X 0.03f // Steady camera speed for horizontal movement
 
 // --- Suggested Z-Index Hierarchy ---
 #define ZINDEX_BACKGROUND_EFFECTS   10 // Clouds, distant background elements
@@ -933,7 +934,13 @@ void CPlayScene::Update(DWORD dt)
 	// --- Update Camera ---
 	float player_cx, player_cy;
 	mario->GetPosition(player_cx, player_cy);
-	UpdateCamera(mario, player_cx, player_cy, cam_width, cam_height);
+	if (cameraMode == 0) {
+		UpdateCamera(mario, player_cx, player_cy, cam_width, cam_height);
+	}
+	else if (cameraMode == 1) {
+		float cam_x = current_cam_x + dt * CAMERA_STEADY_SPEED_X;
+		game->SetCamPos(cam_x, startCamY);
+	}
 
 	DefeatEnemiesOutOfRange();
 	RespawnEnemiesInRange();
