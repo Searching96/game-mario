@@ -24,7 +24,8 @@ protected:
 	float mapWidth = 0.0f;
 	float mapHeight = 0.0f;
 	int cameraMode = 0; // 0: locked to ground, 1: steady scrolling
-	float marginY = 0.0f;
+	float scrollCamXStart = 0.0f;
+	float scrollCamXEnd = 0.0f;
 
 	void _ParseSection_SPRITES(string line);
 	void _ParseSection_ANIMATIONS(string line);
@@ -39,7 +40,7 @@ protected:
 	void UnloadChunksOutOfRange(float cam_x, float cam_width);
 
 	void UpdateChunks(float cam_x, float cam_width);
-	void UpdateCamera(CMario* mario, float player_cx, float player_cy, float cam_width, float cam_height);
+	void UpdateCamera(CMario* mario, float cam_width, float cam_height);
 	//void UpdateObjects(DWORD dt, CMario* mario, vector<LPGAMEOBJECT>& coObjects);
 
 public:
