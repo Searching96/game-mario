@@ -175,7 +175,7 @@ void CPlayScene::ReloadAssets()
 
 	// Only reset assets and scene settings - preserve other data
 	startCamX = 0.0f; startCamY = 0.0f; mapWidth = 0.0f; mapHeight = 0.0f;
-	cameraMode = 0.0f; marginY = 0.0f;
+	cameraMode = 0.0f; scrollCamXStart = 0.0f;
 	// Keep existing: player, chunks, currentParsingChunk
 
 	int section = SCENE_SECTION_UNKNOWN;
@@ -235,7 +235,8 @@ void CPlayScene::_ParseSection_SETTINGS(string line)
 		else if (key == "map_width") mapWidth = value;
 		else if (key == "map_height") mapHeight = value;
 		else if (key == "cam_mode") cameraMode = value;
-		else if (key == "margin_y") marginY = value; // Keep if might be used later
+		else if (key == "scroll_cam_x_start") scrollCamXStart = value;
+		else if (key == "scroll_cam_x_end") scrollCamXEnd = value;
 		else DebugOut(L"[WARN] Unknown setting key: %hs\n", key.c_str());
 
 	}
@@ -306,7 +307,7 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 	CGameObject* obj = nullptr;
 	int zIndex = ZINDEX_DEFAULT;
 
-	try 
+	try
 	{
 		switch (object_type)
 		{
@@ -588,15 +589,15 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 		}
 		}
 
-		if (obj != nullptr) 
+		if (obj != nullptr)
 		{
 			targetChunk->AddObject(obj);
 		}
 	}
-	catch (const exception& e) 
+	catch (const exception& e)
 	{
 		DebugOut(L"[ERROR] Failed processing object line: %hs in chunk %d. Exception: %hs\n", line.c_str(), targetChunk->GetID(), e.what());
-		if (obj) 
+		if (obj)
 		{
 			DebugOut(L"[WARN] Object of type %d might have leaked memory due to parsing error.\n", object_type);
 		}
@@ -736,7 +737,7 @@ void CPlayScene::Load()
 
 	// Reset or default values
 	startCamX = 0.0f; startCamY = 0.0f; mapWidth = 0.0f; mapHeight = 0.0f;
-	cameraMode = 0.0f; marginY = 0.0f;
+	cameraMode = 0.0f; scrollCamXStart = 0.0f;
 	// current_cam_base_y removed
 	player = nullptr; // Ensure player is null before loading
 	chunks.clear(); // Clear existing chunks if reloading scene
@@ -847,7 +848,7 @@ void CPlayScene::UpdateChunks(float cam_x, float cam_width)
 	UnloadChunksOutOfRange(cam_x, cam_width);
 }
 
-void CPlayScene::UpdateCamera(CMario* mario, float player_cx, float player_cy, float cam_width, float cam_height) {
+void CPlayScene::UpdateCamera(CMario* mario, float cam_width, float cam_height) {
 	if (!mario) return; // Safety check
 	if (mario->GetIsEnteringPortal()) return; // Don't update camera if entering a portal
 
@@ -984,13 +985,18 @@ void CPlayScene::Update(DWORD dt)
 	}
 
 	// --- Update Camera ---
-	float player_cx, player_cy;
-	mario->GetPosition(player_cx, player_cy);
-	if (cameraMode == 0) {
-		UpdateCamera(mario, player_cx, player_cy, cam_width, cam_height);
+	float mario_x, mario_y;
+	mario->GetPosition(mario_x, mario_y);
+
+	bool isInScrollZone = cameraMode == 1 && (mario_x >= scrollCamXStart && mario_x <= scrollCamXEnd);
+
+	if (!isInScrollZone) {
+		UpdateCamera(mario, cam_width, cam_height);
 	}
-	else if (cameraMode == 1) {
+	else {
 		float cam_x = current_cam_x + dt * CAMERA_STEADY_SPEED_X;
+		if (cam_x + cam_width > scrollCamXEnd)
+			cam_x = scrollCamXEnd - cam_width;
 		game->SetCamPos(cam_x, startCamY);
 	}
 
@@ -1231,7 +1237,7 @@ void CPlayScene::RespawnEnemiesInRange()
 				LPCHUNK originalChunk = GetChunk(wingedKoopa->GetOriginalChunkId());
 				if (originalChunk) {
 					originalChunk->RemoveObject(wingedKoopa);
-					CWingedKoopa* newWingedKoopa = new CWingedKoopa(wingedKoopa->GetId(), eX0, eY0, wingedKoopa->GetZIndex(), 
+					CWingedKoopa* newWingedKoopa = new CWingedKoopa(wingedKoopa->GetId(), eX0, eY0, wingedKoopa->GetZIndex(),
 						wingedKoopa->GetOriginalChunkId(), wingedKoopa->GetNx(), wingedKoopa->IsWinged());
 					originalChunk->AddObject(newWingedKoopa);
 					originalChunk->AddEnemy(newWingedKoopa);

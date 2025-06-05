@@ -1,8 +1,14 @@
 #include "Particle.h"
 #include "PlayScene.h"
 
+#define BRICK_PARTICLE_GRAVITY 0.001f
+#define BRICK_PARTICLE_BOUNCE_VX 0.075f
+#define BRICK_PARTICLE_BOUNCE_VY 0.3f
+
+
 CParticle::CParticle(int id, float x, float y, int z, int type, int point) : CGameObject(id, x, y, z) {
 	vy = type <= 1 ? PARTICLE_FLOATING_VELOCITY : 0;
+	ay = type == 5 ? BRICK_PARTICLE_GRAVITY : 0;
 	SetState(PARTICLE_STATE_EMERGING);
 	this->type = type;
 	this->point = point;
@@ -60,6 +66,9 @@ void CParticle::Render()
 	case 4: // Death smoke particle
 		aniId = ID_ANI_DEATH_SMOKE;
 		break;
+	case 5: // Brick particle
+		aniId = ID_ANI_BRICK_PARTICLE;
+		break;
 	}
 
 	if (aniId != -1)
@@ -70,13 +79,12 @@ void CParticle::Render()
 
 void CParticle::Update(DWORD dt, vector<LPGAMEOBJECT>* /*coObjects*/) // Ignore coObjects
 {
+	vy += ay * dt;
+	x += vx * dt;
 	y += vy * dt;
 	if (state == PARTICLE_STATE_EMERGING) {
 		int emergeTime = 0;
 		switch (type) {
-		case 0: // Point particle
-			emergeTime = PARTICLE_EMERGE_TIME;
-			break;
 		case 1: // 1-Up particle
 			emergeTime = PARTICLE_EMERGE_TIME;
 			break;
@@ -88,6 +96,13 @@ void CParticle::Update(DWORD dt, vector<LPGAMEOBJECT>* /*coObjects*/) // Ignore 
 			break;
 		case 4: // Death smoke particle
 			emergeTime = DEATH_SMOKE_EMERGE_TIME;
+			break;
+		case 5: // Brick particle
+			emergeTime = BRICK_PARTICLE_EMERGE_TIME;
+			break;
+		case 0: // Point particle
+		default:
+			emergeTime = PARTICLE_EMERGE_TIME;
 			break;
 		}
 		if (GetTickCount64() - emergingStart > emergeTime) {
@@ -135,8 +150,23 @@ void CParticle::GenerateParticleInChunk(LPGAMEOBJECT obj, int type, int point) {
 		{
 			float obj_x, obj_y;
 			obj->GetPosition(obj_x, obj_y);
-			CParticle* particle = new CParticle(DEPENDENT_ID, obj_x, obj_y, INT_MAX, type, point);
-			chunk->AddObject(particle);
+			if (type != 5) {
+				chunk->AddObject(new CParticle(DEPENDENT_ID, obj_x, obj_y, INT_MAX, type, point));
+			}
+			else {
+				CParticle* particle1 = new CParticle(DEPENDENT_ID, obj_x - 8, obj_y - 8, INT_MAX, type, point);
+				particle1->SetSpeed(-BRICK_PARTICLE_BOUNCE_VX, -BRICK_PARTICLE_BOUNCE_VY * 1.5);
+				chunk->AddObject(particle1);
+				CParticle* particle2 = new CParticle(DEPENDENT_ID, obj_x + 8, obj_y - 8, INT_MAX, type, point);
+				particle2->SetSpeed(BRICK_PARTICLE_BOUNCE_VX, -BRICK_PARTICLE_BOUNCE_VY * 1.5);
+				chunk->AddObject(particle2);
+				CParticle* particle3 = new CParticle(DEPENDENT_ID, obj_x - 8, obj_y + 8, INT_MAX, type, point);
+				particle3->SetSpeed(-BRICK_PARTICLE_BOUNCE_VX, -BRICK_PARTICLE_BOUNCE_VY);
+				chunk->AddObject(particle3);
+				CParticle* particle4 = new CParticle(DEPENDENT_ID, obj_x + 8, obj_y + 8, INT_MAX, type, point);
+				particle4->SetSpeed(BRICK_PARTICLE_BOUNCE_VX, -BRICK_PARTICLE_BOUNCE_VY);
+				chunk->AddObject(particle4);
+			}
 		}
 	}
 }
