@@ -113,12 +113,6 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	if (isDefeated)
 		return;
 
-	CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
-	float mX, mY;
-	player->GetPosition(mX, mY);
-	if (fabs(x - mX) >= 300)
-		return;
-
 	vy += ay * dt;
 	vx += ax * dt;
 
