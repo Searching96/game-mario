@@ -28,7 +28,7 @@ start_cam_x	0
 start_cam_y	236
 map_width	2576
 map_height	432
-cam_mode	0
+cam_mode	1
 scroll_cam_x_start	0
 scroll_cam_x_end	2048
 
