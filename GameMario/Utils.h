@@ -10,7 +10,6 @@
 #include <stdlib.h>
 #include <vector>
 
-
 using namespace std;
 
 vector<string> split(string line, string delimeter = "\t");

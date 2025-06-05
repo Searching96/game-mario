@@ -169,6 +169,7 @@
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GameState.cpp" />
     <ClCompile Include="Goomba.cpp" />
+    <ClCompile Include="HiddenCoinBrick.cpp" />
     <ClCompile Include="Koopa.cpp" />
     <ClCompile Include="LifeBrick.cpp" />
     <ClCompile Include="LifeMushroom.cpp" />
@@ -221,6 +222,7 @@
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="Goomba.h" />
     <ClInclude Include="GameState.h" />
+    <ClInclude Include="HiddenCoinBrick.h" />
     <ClInclude Include="KeyEventHandler.h" />
     <ClInclude Include="Koopa.h" />
     <ClInclude Include="LifeBrick.h" />

@@ -24,6 +24,8 @@
 #include "ActivatorBrick.h"
 #include "WingedKoopa.h"
 #include "FlyingKoopa.h"
+#include "HiddenCoinBrick.h"
+#include "Boomerang.h"
 
 #include "Collision.h"
 #include "PlayScene.h"
@@ -498,6 +500,10 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 		OnCollisionWithWingedKoopa(e);
 	else if (dynamic_cast<CFlyingKoopa*>(e->obj))
 		OnCollisionWithFlyingKoopa(e);
+	else if (dynamic_cast<CHiddenCoinBrick*>(e->obj))
+		OnCollisionWithHiddenCoinBrick(e);
+	else if (dynamic_cast<CBoomerang*>(e->obj))
+		OnCollisionWithBoomerang(e);
 }
 
 void CMario::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
@@ -572,6 +578,36 @@ void CMario::OnCollisionWithCoinQBlock(LPCOLLISIONEVENT e)
 		{
 			cqb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
 		}
+	}
+}
+
+void CMario::OnCollisionWithHiddenCoinBrick(LPCOLLISIONEVENT e)
+{
+	CHiddenCoinBrick* hcb = dynamic_cast<CHiddenCoinBrick*>(e->obj);
+	if (hcb)
+	{
+		if (e->ny > 0 && e->nx == 0 && !hcb->IsHit() && hcb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
+		{
+			hcb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
+		}
+	}
+}
+
+void CMario::OnCollisionWithBoomerang(LPCOLLISIONEVENT e)
+{
+	if (untouchable) return;
+
+	switch (level)
+	{
+	case MARIO_LEVEL_TAIL:
+		SetState(MARIO_STATE_TAIL_DOWN);
+		break;
+	case MARIO_LEVEL_BIG:
+		SetState(MARIO_STATE_POWER_DOWN);
+		break;
+	case MARIO_LEVEL_SMALL:
+		SetState(MARIO_STATE_DIE_ON_BEING_KILLED);
+		break;
 	}
 }
 

@@ -99,12 +99,15 @@ cam_mode	0
 30	10	224	304
 31	10	416	320
 
+# Hidden Coin Brick
+0	19	160	352
+
 # Activator Brick
 #1414	110	208	352
 #1415	110	224	352
 
 # Flying Koopa
-0	18	100	246
+#0	18	100	246
 
 # Buff QBlock
 32	11	240	304

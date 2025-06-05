@@ -39,6 +39,7 @@
 #include "WingedKoopa.h"
 #include "Boomerang.h"
 #include "FlyingKoopa.h"
+#include "HiddenCoinBrick.h"
 
 #include "SampleKeyEventHandler.h"
 
@@ -389,6 +390,23 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 				CCoin* coin = new CCoin(DEPENDENT_ID, x, y, coin_zIndex, targetChunk->GetID(), 1);
 				obj = new CCoinQBlock(id, x, y, zIndex, targetChunk->GetID(), coin);
 				targetChunk->AddObject(coin);
+				targetChunk->AddObject(obj);
+				targetChunk->SetIsObjectConsumed(obj->GetId(), false);
+				if (targetChunk->GetIsObjectConsumed(obj->GetId()))
+					((CCoinQBlock*)obj)->SetIsHit(true);
+				return;
+			}
+			case OBJECT_TYPE_HIDDEN_COIN_BRICK:
+			{
+				zIndex = ZINDEX_BLOCKS;
+				int coin_zIndex = ZINDEX_HIDDEN_COIN;
+				vector<CCoin*> coinList;
+				for (int i = 0; i < HIDDEN_COIN_BRICK_NUM_COINS; i++)
+				{
+					coinList.push_back(new CCoin(DEPENDENT_ID, x, y, coin_zIndex, targetChunk->GetID(), 1));
+					targetChunk->AddObject(coinList[i]);
+				}
+				obj = new CHiddenCoinBrick(id, x, y, zIndex, targetChunk->GetID(), coinList);
 				targetChunk->AddObject(obj);
 				targetChunk->SetIsObjectConsumed(obj->GetId(), false);
 				if (targetChunk->GetIsObjectConsumed(obj->GetId()))
