@@ -38,10 +38,12 @@ void CBoomerang::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 	if (isSwingingUp)
 		ay += BOOMERANG_ACCEL_DECREMENT_Y;
+	else if (isSwingingDown)
+		ay -= BOOMERANG_ACCEL_DECREMENT_Y;
 	else if (isHoming)
 		ay = 0;
 	
-	if (isSwingingDown)
+	if (isSwingingDown && y >= y00 - 32)
 		ax -= BOOMERANG_ACCEL_DECREMENT_X;
 	else
 		ax = 0;
@@ -57,9 +59,9 @@ void CBoomerang::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		isSwingingUp = false;
 		SetState(BOOMERANG_STATE_SWINGING_DOWN);
 	}
-	if ((isSwingingDown) && (y >= y00))
+	if ((isSwingingDown) && (y >= y00 + 12))
 	{
-		y = y00;
+		y = y00 + 12;
 		isSwingingDown = false;
 		SetState(BOOMERANG_STATE_HOMING);
 	}

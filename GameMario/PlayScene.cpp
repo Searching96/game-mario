@@ -38,6 +38,7 @@
 #include "ActivatorBrick.h"
 #include "WingedKoopa.h"
 #include "Boomerang.h"
+#include "FlyingKoopa.h"
 
 #include "SampleKeyEventHandler.h"
 
@@ -328,10 +329,19 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 				return;
 			}
 			case OBJECT_TYPE_WINGED_GOOMBA:
+			{
 				zIndex = ZINDEX_ENEMIES;
 				obj = new CWingedGoomba(id, x, y, zIndex, targetChunk->GetID());
 				targetChunk->AddEnemy(obj);
 				break;
+			}
+			case OBJECT_TYPE_FLYING_KOOPA:
+			{
+				zIndex = ZINDEX_ENEMIES;
+				obj = new CFlyingKoopa(id, x, y, zIndex, targetChunk->GetID());
+				targetChunk->AddEnemy(obj);
+				break;
+			}
 			case OBJECT_TYPE_BRICK:
 			{
 				zIndex = ZINDEX_BLOCKS;

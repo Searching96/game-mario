@@ -23,6 +23,7 @@
 #include "Activator.h"
 #include "ActivatorBrick.h"
 #include "WingedKoopa.h"
+#include "FlyingKoopa.h"
 
 #include "Collision.h"
 #include "PlayScene.h"
@@ -495,6 +496,8 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 		OnCollisionWithActivatorBrick(e);
 	else if (dynamic_cast<CWingedKoopa*>(e->obj))
 		OnCollisionWithWingedKoopa(e);
+	else if (dynamic_cast<CFlyingKoopa*>(e->obj))
+		OnCollisionWithFlyingKoopa(e);
 }
 
 void CMario::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
@@ -893,7 +896,36 @@ void CMario::OnCollisionWithWingedKoopa(LPCOLLISIONEVENT e)
 			SetState(MARIO_STATE_DIE_ON_BEING_KILLED);
 		}
 		if (wk->GetState() != WINGED_KOOPA_STATE_SHELL_DYNAMIC)
+		{
 			wk->SetState((wk->GetNx() > 0) ? WINGED_KOOPA_STATE_MOVING_LEFT : WINGED_KOOPA_STATE_MOVING_RIGHT);
+		}
+	}
+}
+
+void CMario::OnCollisionWithFlyingKoopa(LPCOLLISIONEVENT e)
+{
+	CFlyingKoopa* fk = dynamic_cast<CFlyingKoopa*>(e->obj);
+	if (fk->IsDead() || fk->IsDefeated())
+		return;
+
+	if (e->ny < 0) {
+		if (fk->IsHeld() == 0) CalculateScore(fk);
+		if (fk->GetState() == FLYING_KOOPA_STATE_FLYING_DOWN ||
+			fk->GetState() == FLYING_KOOPA_STATE_FLYING_UP) 
+		{
+			if (fk->IsWinged() == 1)
+				fk->SetIsWinged(0);
+			fk->StartShell();
+			vy = -MARIO_JUMP_DEFLECT_SPEED;
+			return;
+		}
+		if (fk->GetState() == WINGED_KOOPA_STATE_SHELL_DYNAMIC) 
+		{
+			fk->SetState(WINGED_KOOPA_STATE_SHELL_STATIC);
+			fk->StartShell();
+			vy = -MARIO_JUMP_DEFLECT_SPEED;
+			return;
+		}
 	}
 }
 
@@ -1771,7 +1803,8 @@ void CMario::CalculateScore(LPGAMEOBJECT obj)
 		|| dynamic_cast<CKoopa*>(obj)
 		|| dynamic_cast<CWingedGoomba*>(obj)
 		|| dynamic_cast<CPiranhaPlant*>(obj)
-		|| dynamic_cast<CWingedKoopa*>(obj))
+		|| dynamic_cast<CWingedKoopa*>(obj)
+		|| dynamic_cast<CFlyingKoopa*>(obj))
 	{
 		consecutiveEnemies += 1;
 		point = EnemiesToPoints(consecutiveEnemies);
