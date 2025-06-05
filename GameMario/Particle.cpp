@@ -2,8 +2,8 @@
 #include "PlayScene.h"
 
 #define BRICK_PARTICLE_GRAVITY 0.001f
-#define BRICK_PARTICLE_BOUNCE_VX 0.075f
-#define BRICK_PARTICLE_BOUNCE_VY 0.3f
+#define BRICK_PARTICLE_BOUNCE_VX 0.07f
+#define BRICK_PARTICLE_BOUNCE_VY 0.27f
 
 
 CParticle::CParticle(int id, float x, float y, int z, int type, int point) : CGameObject(id, x, y, z) {
