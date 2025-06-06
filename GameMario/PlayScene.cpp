@@ -1035,20 +1035,20 @@ void CPlayScene::UpdateCamera(CMario* mario, float cam_width, float cam_height) 
 	float mario_screen_x = mario_x - cam_x;  // Mario's X position on screen
 	float mario_screen_y = mario_y - cam_y;  // Mario's Y position on screen
 
-	// Define camera window boundaries in screen space
-	float windowLeft = cam_width / 2 - CAMERA_WINDOW_HORIZONTAL_ZONE / 2;
-	float windowRight = cam_width / 2 + CAMERA_WINDOW_HORIZONTAL_ZONE / 2;
+	//// Define camera window boundaries in screen space
+	//float windowLeft = cam_width / 2 - CAMERA_WINDOW_HORIZONTAL_ZONE / 2;
+	//float windowRight = cam_width / 2 + CAMERA_WINDOW_HORIZONTAL_ZONE / 2;
 
-	// Calculate target horizontal position using window push
-	float targetCamX = cam_x; // Default: don't move
-	if (mario_screen_x < windowLeft) {
-		// Mario is too far left on screen - move camera left
-		targetCamX = mario_x - windowLeft;
-	}
-	else if (mario_screen_x > windowRight) {
-		// Mario is too far right on screen - move camera right
-		targetCamX = mario_x - windowRight;
-	}
+	//// Calculate target horizontal position using window push
+	float targetCamX = mario_x - cam_width/2; // Default: don't move
+	//if (mario_screen_x < windowLeft) {
+	//	// Mario is too far left on screen - move camera left
+	//	targetCamX = mario_x - windowLeft;
+	//}
+	//else if (mario_screen_x > windowRight) {
+	//	// Mario is too far right on screen - move camera right
+	//	targetCamX = mario_x - windowRight;
+	//}
 
 	// Calculate target vertical position - RESPECT GROUND LOCK
 	float targetCamY;
@@ -1081,9 +1081,9 @@ void CPlayScene::UpdateCamera(CMario* mario, float cam_width, float cam_height) 
 	}
 
 	// Apply minimum movement threshold
-	if (abs(targetCamX - cam_x) < MIN_CAMERA_MOVEMENT) {
-		targetCamX = cam_x;
-	}
+	//if (abs(targetCamX - cam_x) < MIN_CAMERA_MOVEMENT) {
+	//	targetCamX = cam_x;
+	//}
 	if (abs(targetCamY - cam_y) < MIN_CAMERA_MOVEMENT) {
 		targetCamY = cam_y;
 	}
@@ -1103,17 +1103,17 @@ void CPlayScene::UpdateCamera(CMario* mario, float cam_width, float cam_height) 
 	// Apply smooth camera movement with different speeds for locked vs unlocked
 	if (s_isLockedToGround || isTeleporting) {
 		// Instant movement when ground locked (maintains original behavior)
-		cam_x += (targetCamX - cam_x) * CAMERA_SMOOTH_FACTOR;
+		//cam_x += (targetCamX - cam_x) * CAMERA_SMOOTH_FACTOR;
 		cam_y = targetCamY;  // Instant vertical positioning when locked
 	}
 	else {
 		// Smooth movement when unlocked (flying)
-		cam_x += (targetCamX - cam_x) * CAMERA_SMOOTH_FACTOR;
+		//cam_x += (targetCamX - cam_x) * CAMERA_SMOOTH_FACTOR;
 		cam_y += (targetCamY - cam_y) * CAMERA_SMOOTH_FACTOR;
 	}
 
 	// Set final camera position
-	game->SetCamPos(cam_x, cam_y);
+	game->SetCamPos(targetCamX, cam_y);
 	// Debug output
 	//DebugOut(L"Cam pos: %f, %f\n", cam_x, cam_y);
 }
