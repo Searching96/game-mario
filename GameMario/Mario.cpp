@@ -1668,7 +1668,7 @@ void CMario::SetState(int state)
 			return;
 		}
 		if (isSitting) break;
-		if (isOnPlatform)
+		if (isOnPlatform || isOnFallingPlatform)
 		{
 			if (pMeter == 1.0f)
 				vy = -MARIO_JUMP_RUN_SPEED_Y;

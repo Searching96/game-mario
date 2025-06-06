@@ -4,7 +4,7 @@
 #include "Debug.h"
 
 #define FALLING_PLATFORM_GRAVITY 0.0003f
-#define FALLING_PLATFORM_VX 0.06f
+#define FALLING_PLATFORM_VX 0.03f
 
 CFallingPlatform::CFallingPlatform(int id, float x, float y, int z, int originalChunkId, int width) : CGameObject(id, x, y, z)
 {
