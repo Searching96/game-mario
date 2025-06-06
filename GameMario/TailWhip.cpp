@@ -11,6 +11,7 @@
 #include "CoinBrick.h"
 #include "ActivatorBrick.h"
 #include "WingedKoopa.h"
+#include "BoomerangTurtle.h"
 
 #include "PlayScene.h"
 
@@ -106,6 +107,8 @@ void CTailWhip::OnCollisionWith(LPCOLLISIONEVENT e)
 		OnCollisionWithActivatorBrick(e);
 	else if (dynamic_cast<CWingedKoopa*>(e->obj))
 		OnCollisionWithWingedKoopa(e);
+	else if (dynamic_cast<CBoomerangTurtle*>(e->obj))
+		OnCollisionWithBooomerangTurtle(e);
 }
 
 void CTailWhip::OnCollisionWithBuffQBlock(LPCOLLISIONEVENT e)
@@ -258,6 +261,18 @@ void CTailWhip::OnCollisionWithWingedKoopa(LPCOLLISIONEVENT e)
 		wk->SetIsFlying(true);
 		wk->SetIsReversed(true);
 		wk->SetSpeed(knockbackVx, knockbackVy);
+	}
+}
+
+void CTailWhip::OnCollisionWithBooomerangTurtle(LPCOLLISIONEVENT e)
+{
+	CBoomerangTurtle* bt = dynamic_cast<CBoomerangTurtle*>(e->obj);
+	if (bt)
+	{
+		if (bt->IsDead() == 1 || bt->IsDefeated() == 1) return;
+
+		bt->SetState((nx > 0) ? BOOMERANG_TURTLE_STATE_DIE_RIGHT : BOOMERANG_TURTLE_STATE_DIE_LEFT);
+		vy = -MARIO_JUMP_DEFLECT_SPEED;
 	}
 }
 

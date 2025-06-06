@@ -26,6 +26,7 @@
 #include "FlyingKoopa.h"
 #include "HiddenCoinBrick.h"
 #include "Boomerang.h"
+#include "BoomerangTurtle.h"
 
 #include "Collision.h"
 #include "PlayScene.h"
@@ -504,6 +505,8 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 		OnCollisionWithHiddenCoinBrick(e);
 	else if (dynamic_cast<CBoomerang*>(e->obj))
 		OnCollisionWithBoomerang(e);
+	else if (dynamic_cast<CBoomerangTurtle*>(e->obj))
+		OnCollisionWithBoomerangTurtle(e);
 }
 
 void CMario::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
@@ -537,7 +540,6 @@ void CMario::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
 				}
 				else
 				{
-					DebugOut(L">>> Mario DIE >>> \n");
 					SetState(MARIO_STATE_DIE_ON_BEING_KILLED);
 				}
 
@@ -613,6 +615,37 @@ void CMario::OnCollisionWithBoomerang(LPCOLLISIONEVENT e)
 		case MARIO_LEVEL_SMALL:
 			SetState(MARIO_STATE_DIE_ON_BEING_KILLED);
 			break;
+		}
+	}
+}
+
+void CMario::OnCollisionWithBoomerangTurtle(LPCOLLISIONEVENT e)
+{
+	CBoomerangTurtle* bt = dynamic_cast<CBoomerangTurtle*>(e->obj);
+	if (bt->IsDead() == 1 || bt->IsDefeated() == 1) return;
+
+	if (e->ny < 0)
+	{
+		bt->SetState((nx > 0) ? BOOMERANG_TURTLE_STATE_DIE_RIGHT : BOOMERANG_TURTLE_STATE_DIE_LEFT);
+		vy = -MARIO_JUMP_DEFLECT_SPEED;
+		CalculateScore(bt);
+	}
+	else
+	{
+		if (untouchable == 0)
+		{
+			if (level == MARIO_LEVEL_BIG)
+			{
+				SetState(MARIO_STATE_POWER_DOWN);
+			}
+			else if (level == MARIO_LEVEL_TAIL)
+			{
+				SetState(MARIO_STATE_TAIL_DOWN);
+			}
+			else
+			{
+				SetState(MARIO_STATE_DIE_ON_BEING_KILLED);
+			}
 		}
 	}
 }

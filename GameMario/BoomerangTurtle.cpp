@@ -89,29 +89,33 @@ void CBoomerangTurtle::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		return;
 	}
 
-	if (walkAfterThrowsStart > walkBetweenThrowsStart)
+	// Prepare boomerang
+	if (!isDead)
 	{
-		if ((GetTickCount64() - walkAfterThrowsStart > BOOMERANG_TURTLE_WALKING_TIMEOUT_2) && !isPreparing)
+		if (walkAfterThrowsStart > walkBetweenThrowsStart)
 		{
-			for (int i = 0; i < boomerangList.size(); i++)
+			if ((GetTickCount64() - walkAfterThrowsStart > BOOMERANG_TURTLE_WALKING_TIMEOUT_2) && !isPreparing)
 			{
-				boomerangList[i]->SetIsVisible(false);
-				boomerangList[i]->SetState(BOOMERANG_STATE_IDLING);
+				for (int i = 0; i < boomerangList.size(); i++)
+				{
+					boomerangList[i]->SetIsVisible(false);
+					boomerangList[i]->SetState(BOOMERANG_STATE_IDLING);
+				}
+				prepareStart = GetTickCount64();
+				isPreparing = true;
+				boomerangIndex = 0;
+				boomerangList[boomerangIndex]->SetIsVisible(true);
 			}
-			prepareStart = GetTickCount64();
-			isPreparing = true;
-			boomerangIndex = 0;
-			boomerangList[boomerangIndex]->SetIsVisible(true);
 		}
-	}
-	else if (walkAfterThrowsStart < walkBetweenThrowsStart)
-	{
-		if ((GetTickCount64() - walkBetweenThrowsStart > BOOMERANG_TURTLE_WALKING_TIMEOUT_1) && !isPreparing)
+		else if (walkAfterThrowsStart < walkBetweenThrowsStart)
 		{
-			prepareStart = GetTickCount64();
-			isPreparing = true;
-			boomerangIndex = 1;
-			boomerangList[boomerangIndex]->SetIsVisible(true);
+			if ((GetTickCount64() - walkBetweenThrowsStart > BOOMERANG_TURTLE_WALKING_TIMEOUT_1) && !isPreparing)
+			{
+				prepareStart = GetTickCount64();
+				isPreparing = true;
+				boomerangIndex = 1;
+				boomerangList[boomerangIndex]->SetIsVisible(true);
+			}
 		}
 	}
 
@@ -200,14 +204,15 @@ void CBoomerangTurtle::SetState(int state)
 	{
 	case BOOMERANG_TURTLE_STATE_DIE_RIGHT:
 		dieStart = GetTickCount64();
-		vy = -0.5f;
+		vx = 0.0f;
+		vy = -0.2f;
 		ay = BOOMERANG_TURTLE_GRAVITY;
 		isDead = 1;
 		break;
 	case BOOMERANG_TURTLE_STATE_DIE_LEFT:
 		dieStart = GetTickCount64();
-		vx = 0.5f;
-		vy = -0.5f;
+		vx = 0.0f;
+		vy = -0.2f;
 		ay = BOOMERANG_TURTLE_GRAVITY;
 		isDead = 1;
 		break;
