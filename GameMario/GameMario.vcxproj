@@ -152,10 +152,13 @@
     <ClCompile Include="Animations.cpp" />
     <ClCompile Include="Boomerang.cpp" />
     <ClCompile Include="BoomerangTurtle.cpp" />
+    <ClCompile Include="Border.cpp" />
     <ClCompile Include="Box.cpp" />
     <ClCompile Include="Brick.cpp" />
+    <ClCompile Include="BuffRoulette.cpp" />
     <ClCompile Include="Chunk.cpp" />
     <ClCompile Include="CoinBrick.cpp" />
+    <ClCompile Include="FallingPlatform.cpp" />
     <ClCompile Include="FallPitch.cpp" />
     <ClCompile Include="Fireball.cpp" />
     <ClCompile Include="Bush.cpp" />
@@ -208,8 +211,11 @@
     <ClInclude Include="BoomerangTurtle.h" />
     <ClInclude Include="Box.h" />
     <ClInclude Include="Brick.h" />
+    <ClInclude Include="Border.h" />
+    <ClInclude Include="BuffRoulette.h" />
     <ClInclude Include="Chunk.h" />
     <ClInclude Include="CoinBrick.h" />
+    <ClInclude Include="FallingPlatform.h" />
     <ClInclude Include="FallPitch.h" />
     <ClInclude Include="Fireball.h" />
     <ClInclude Include="Bush.h" />

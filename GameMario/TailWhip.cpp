@@ -177,7 +177,7 @@ void CTailWhip::OnCollisionWithCoinBrick(LPCOLLISIONEVENT e)
 		if (cb->IsRevealed()) return;
 
 		cb->SetState(COIN_BRICK_STATE_BREAK);
-		CParticle::GenerateParticleInChunk(cb, 5);
+		
 	}
 }
 
@@ -192,7 +192,7 @@ void CTailWhip::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
 		}
 		CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
 		player->CalculateScore(g);
-		CParticle::GenerateParticleInChunk(g, 3);
+		CParticle::GenerateParticleInChunk(this, 3);
 		g->SetState(GOOMBA_STATE_DIE_ON_TAIL_WHIP);
 	}
 }
@@ -210,7 +210,7 @@ void CTailWhip::OnCollisionWithPiranhaPlant(LPCOLLISIONEVENT e)
 		}
 		CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
 		player->CalculateScore(pp);
-		CParticle::GenerateParticleInChunk(pp, 3);
+		CParticle::GenerateParticleInChunk(this, 3);
 		pp->SetState(PIRANHA_PLANT_STATE_DIE);
 	}
 }
@@ -230,7 +230,7 @@ void CTailWhip::OnCollisionWithKoopa(LPCOLLISIONEVENT e)
 			CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
 			player->CalculateScore(k);
 		}
-		CParticle::GenerateParticleInChunk(k, 3);
+		CParticle::GenerateParticleInChunk(this, 3);
 		k->StartShell();
 		k->SetState(KOOPA_STATE_SHELL_STATIC);
 		float knockbackVx = (this->nx > 0) ? 0.075f : -0.075f;
@@ -257,7 +257,7 @@ void CTailWhip::OnCollisionWithWingedKoopa(LPCOLLISIONEVENT e)
 			CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
 			player->CalculateScore(wk);
 		}
-		CParticle::GenerateParticleInChunk(wk, 3);
+		CParticle::GenerateParticleInChunk(this, 3);
 		wk->SetIsWinged(0);
 		wk->StartShell();
 		wk->SetState(KOOPA_STATE_SHELL_STATIC);
@@ -305,7 +305,7 @@ void CTailWhip::OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e)
 		}
 		CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
 		player->CalculateScore(wg);
-		CParticle::GenerateParticleInChunk(wg, 3);
+		CParticle::GenerateParticleInChunk(this, 3);
 		wg->SetState(WINGED_GOOMBA_STATE_DIE_ON_TAIL_WHIP);
 	}
 }

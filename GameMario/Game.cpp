@@ -613,6 +613,14 @@ void CGame::SwitchScene()
 {
 	if (next_scene < 0 || next_scene == current_scene) return;
 
+	LPPLAYSCENE currentScene = (LPPLAYSCENE)GetCurrentScene();
+
+	if (currentScene && currentScene->GetIsSwitchingScene()) return;
+
+	LPGAMEOBJECT mario = nullptr;
+	if (currentScene != nullptr)
+		mario = currentScene->GetPlayer();
+
 	DebugOut(L"[INFO] Switching to scene %d\n", next_scene);
 
 	if (scenes[current_scene] != nullptr)
@@ -624,8 +632,11 @@ void CGame::SwitchScene()
 	current_scene = next_scene;
 	LPSCENE s = scenes[next_scene];
 	gameState->SetScene(s);
+	gameState->ResetTimer();
 	this->SetKeyHandler(s->GetKeyEventHandler());
 	s->Load();
+	if (mario != nullptr)
+		LPPLAYSCENE(s)->SetPlayer(mario);
 }
 
 void CGame::InitiateSwitchScene(int scene_id)

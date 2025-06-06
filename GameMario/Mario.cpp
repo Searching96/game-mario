@@ -30,6 +30,8 @@
 
 #include "Collision.h"
 #include "PlayScene.h"
+#include "FallingPlatform.h"
+#include "BuffRoulette.h"
 
 CMario::CMario(int id, float x, float y, int z) : CGameObject(id, x, y, z)
 {
@@ -87,6 +89,14 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
 	// DebugOutTitle(L"hspl: %d", (int)hasReachedPlatformAfterHover);
 
+	if (isOnPlatform && isSwitchingScene) {
+		vx = MARIO_WALKING_SPEED;
+		vy = 0;
+		ay = 0;
+		x += vx * dt;
+		return;
+	}
+
 	// Track previous jump count to apply consistent jump impulse
 	static int lastJumpCount = 0;
 	int prevJumpCount = lastJumpCount;
@@ -99,15 +109,17 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		}
 	}
 
+	SetPosition(x + offsetX, y + offsetY);
+	offsetX = 0;
+	offsetY = 0;
+
 	if (isTeleporting == 1)
 	{
 		float marioL, marioT, marioR, marioB;
 		GetBoundingBox(marioL, marioT, marioR, marioB);
 		float currentMarioHeight = marioB - marioT;
 
-		SetPosition(x + offsetX, y + offsetY);
-		offsetX = 0;
-		offsetY = 0;
+
 
 		if (vy > 0) // Mario is moving DOWN (exiting from a pipe above, sliding downwards)
 		{
@@ -327,8 +339,8 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		tailWhip->Update(dt, coObjects);
 	}
 
-	//DebugOutTitle(L"vx=%f, ax=%f, mvx=%f, irn=%d, fx=%f, iop=%d, imv=%d\n",
-	//	vx, ax, maxVx, isRunning, frictionX, isOnPlatform, isMoving);
+	DebugOutTitle(L"vx=%f, ax=%f, mvx=%f, irn=%d, fx=%f, iop=%d, sc=%d, state=%d\n",
+		vx, ax, maxVx, isRunning, frictionX, isOnPlatform, isSwitchingScene, state);
 
 	// Process collisions
 	isOnPlatform = false;
@@ -438,7 +450,7 @@ void CMario::OnNoCollision(DWORD dt)
 
 void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 {
-	if (isTeleporting) return;
+	if (isTeleporting || (isSwitchingScene && isOnPlatform)) return;
 	if (e->ny != 0 && e->obj->IsBlocking())
 	{
 		vy = 0;
@@ -449,6 +461,8 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 			{
 				hasReachedPlatformAfterHover = true;
 			}
+			if (!dynamic_cast<CFallingPlatform*>(e->obj))
+				isOnFallingPlatform = false;
 		}
 		consecutiveEnemies = 0;
 	}
@@ -507,6 +521,24 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 		OnCollisionWithBoomerang(e);
 	else if (dynamic_cast<CBoomerangTurtle*>(e->obj))
 		OnCollisionWithBoomerangTurtle(e);
+	else if (dynamic_cast<CFallingPlatform*>(e->obj))
+		OnCollisionWithFallingPlatform(e);
+	else if (dynamic_cast<CBorder*>(e->obj))
+		OnCollisionWithBorder(e);
+	else if (dynamic_cast<CBuffRoulette*>(e->obj))
+		OnCollisionWithBuffRoulette(e);
+}
+
+void CMario::OnCollisionWithBorder(LPCOLLISIONEVENT e)
+{
+	offsetX = e->nx > 0 ? 0.5f : -0.5f;
+}
+
+void CMario::OnCollisionWithBuffRoulette(LPCOLLISIONEVENT e)
+{
+	CBuffRoulette* br = dynamic_cast<CBuffRoulette*>(e->obj);
+	if (br->GetState() != BUFF_STATE_USED)
+		br->SetState(BUFF_STATE_USED);
 }
 
 void CMario::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
@@ -882,8 +914,8 @@ void CMario::OnCollisionWithKoopa(LPCOLLISIONEVENT e) {
 		return;
 	}
 	// Side collision with walking or moving shell
-	if (k->GetState() == KOOPA_STATE_WALKING_LEFT 
-		|| k->GetState() == KOOPA_STATE_WALKING_RIGHT 
+	if (k->GetState() == KOOPA_STATE_WALKING_LEFT
+		|| k->GetState() == KOOPA_STATE_WALKING_RIGHT
 		|| k->GetState() == KOOPA_STATE_SHELL_DYNAMIC) {
 		if (untouchable) return;
 		if (level == MARIO_LEVEL_TAIL)
@@ -951,8 +983,8 @@ void CMario::OnCollisionWithWingedKoopa(LPCOLLISIONEVENT e)
 		return;
 	}
 	// Side collision with walking or moving shell
-	if (wk->GetState() == WINGED_KOOPA_STATE_MOVING_LEFT 
-		|| wk->GetState() == WINGED_KOOPA_STATE_MOVING_RIGHT 
+	if (wk->GetState() == WINGED_KOOPA_STATE_MOVING_LEFT
+		|| wk->GetState() == WINGED_KOOPA_STATE_MOVING_RIGHT
 		|| wk->GetState() == WINGED_KOOPA_STATE_SHELL_DYNAMIC) {
 		if (untouchable) return;
 		if (level == MARIO_LEVEL_TAIL)
@@ -986,7 +1018,7 @@ void CMario::OnCollisionWithFlyingKoopa(LPCOLLISIONEVENT e)
 	if (e->ny < 0) {
 		if (fk->IsHeld() == 0) CalculateScore(fk);
 		if (fk->GetState() == FLYING_KOOPA_STATE_FLYING_DOWN ||
-			fk->GetState() == FLYING_KOOPA_STATE_FLYING_UP) 
+			fk->GetState() == FLYING_KOOPA_STATE_FLYING_UP)
 		{
 			if (fk->IsWinged() == 1)
 				fk->SetIsWinged(0);
@@ -994,7 +1026,7 @@ void CMario::OnCollisionWithFlyingKoopa(LPCOLLISIONEVENT e)
 			vy = -MARIO_JUMP_DEFLECT_SPEED;
 			return;
 		}
-		if (fk->GetState() == WINGED_KOOPA_STATE_SHELL_DYNAMIC) 
+		if (fk->GetState() == WINGED_KOOPA_STATE_SHELL_DYNAMIC)
 		{
 			fk->SetState(WINGED_KOOPA_STATE_SHELL_STATIC);
 			fk->StartShell();
@@ -1056,13 +1088,24 @@ void CMario::OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e)
 	}
 }
 
+void CMario::OnCollisionWithFallingPlatform(LPCOLLISIONEVENT e)
+{
+	CFallingPlatform* fp = dynamic_cast<CFallingPlatform*>(e->obj);
+	if (e->ny < 0)
+	{
+		if (fp->GetState() != FALLING_PLATFORM_STATE_ACTIVE)
+			fp->SetState(FALLING_PLATFORM_STATE_ACTIVE);
+		isOnFallingPlatform = true;
+	}
+}
+
 //
 // Get animation ID for small Mario
 //
 int CMario::GetAniIdSmall()
 {
 	int aniId = -1;
-	if (!isOnPlatform)
+	if (!isOnPlatform && !isOnFallingPlatform)
 	{
 		if (pMeter == 1.0f)
 		{
@@ -1166,7 +1209,7 @@ int CMario::GetAniIdBig()
 {
 	static int preAniId = -1;
 	int aniId = -1;
-	if (!isOnPlatform)
+	if (!isOnPlatform && !isOnFallingPlatform)
 	{
 		if (pMeter == 1.0f)
 		{
@@ -1262,7 +1305,7 @@ int CMario::GetAniIdBig()
 	}
 
 	if (preAniId != ID_ANI_MARIO_JUMP_RUN_RIGHT && preAniId != ID_ANI_MARIO_JUMP_RUN_LEFT)
-		if (isOnPlatform == 0 && isHoldingKoopa == 0 && !isChangingLevel && vy > 0)
+		if (isOnPlatform == 0 && isHoldingKoopa == 0 && !isChangingLevel && vy > 0 && !isOnFallingPlatform)
 			aniId = (nx > 0) ? ID_ANI_MARIO_FALLING_RIGHT : ID_ANI_MARIO_FALLING_LEFT;
 
 	if (aniId == -1) aniId = ID_ANI_MARIO_IDLE_RIGHT;
@@ -1279,7 +1322,7 @@ int CMario::GetAniIdTail()
 {
 	static int preAniId = -1;
 	int aniId = -1;
-	if (!isOnPlatform)
+	if (!isOnPlatform && !isOnFallingPlatform)
 	{
 		if (pMeter == 1.0f)
 		{
@@ -1393,10 +1436,10 @@ int CMario::GetAniIdTail()
 	}
 
 	if (preAniId != ID_ANI_MARIO_TAIL_JUMP_RUN_RIGHT && preAniId != ID_ANI_MARIO_TAIL_JUMP_RUN_LEFT)
-		if (isOnPlatform == 0 && isHovering == 0 && isHoldingKoopa == 0 && !isChangingLevel && jumpCount < 1 && vy > 0)
+		if (isOnPlatform == 0 && isHovering == 0 && isHoldingKoopa == 0 && !isChangingLevel && jumpCount < 1 && vy > 0 && !isOnFallingPlatform)
 			aniId = (nx > 0) ? ID_ANI_MARIO_TAIL_FALLING_RIGHT : ID_ANI_MARIO_TAIL_FALLING_LEFT;
 
-	if (!hasReachedPlatformAfterHover && isHovering == 0 && isHoldingKoopa == 0 && !isChangingLevel && vy > 0)
+	if (!hasReachedPlatformAfterHover && isHovering == 0 && isHoldingKoopa == 0 && !isChangingLevel && vy > 0 && !isOnFallingPlatform)
 	{
 		aniId = (nx > 0) ? ID_ANI_MARIO_TAIL_FALLING_RIGHT : ID_ANI_MARIO_TAIL_FALLING_LEFT;
 	}
@@ -1458,7 +1501,7 @@ void CMario::SetState(int state)
 	// DIE is the end state, cannot be changed! 
 	if (this->state == MARIO_STATE_DIE_ON_BEING_KILLED || this->state == MARIO_STATE_DIE_ON_FALLING) return;
 	if (CGame::GetInstance()->IsPaused()) return;
-	if (isTeleporting) return;
+	if (isTeleporting || isSwitchingScene) return;
 
 	int previousState = this->state;
 
@@ -1651,6 +1694,7 @@ void CMario::SetState(int state)
 				SetState(MARIO_STATE_HOVER);
 			}
 		}
+		isOnFallingPlatform = false;
 		break;
 
 	case MARIO_STATE_RELEASE_JUMP:
@@ -1751,6 +1795,9 @@ void CMario::SetState(int state)
 		break;
 	case MARIO_STATE_RELEASE_RUN:
 		isRunning = 0;
+		break;
+	case MARIO_STATE_SWITCH_SCENE:
+		isSwitchingScene = true;
 		break;
 	}
 

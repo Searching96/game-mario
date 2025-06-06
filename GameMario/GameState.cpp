@@ -7,7 +7,7 @@
 void CGameState::Update(DWORD dt) {
 	// get player
 	CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
-	if (player == nullptr || player->GetIsTeleporting())
+	if (player == nullptr || player->GetIsTeleporting() || player->GetIsSwitchingScene())
 		return;
 
 	// Only decrease time if it's positive to prevent underflow issues

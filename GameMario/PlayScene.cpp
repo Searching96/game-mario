@@ -41,10 +41,18 @@
 #include "FlyingKoopa.h"
 #include "HiddenCoinBrick.h"
 #include "BoomerangTurtle.h"
+#include "FallingPlatform.h"
+#include "BuffRoulette.h"
 
 #include "SampleKeyEventHandler.h"
 
 using namespace std;
+
+
+#define CAMERA_WINDOW_HORIZONTAL_ZONE 16.0f
+#define CAMERA_WINDOW_TOP_MARGIN 60.0f
+#define MIN_CAMERA_MOVEMENT 0.00001f           
+#define CAMERA_SMOOTH_FACTOR 0.2f 
 
 // --- Constants ---
 #define SCENE_SECTION_UNKNOWN -1
@@ -52,6 +60,7 @@ using namespace std;
 #define SCENE_SECTION_SETTINGS 2
 #define SCENE_SECTION_MARIO	3
 #define SCENE_SECTION_CHUNK_OBJECT 4
+#define SCENE_SECTION_BORDER	5
 
 #define ASSETS_SECTION_UNKNOWN -1
 #define ASSETS_SECTION_SPRITES 1
@@ -61,6 +70,7 @@ using namespace std;
 
 // Camera specific constants
 #define HORIZONTAL_MARGIN 12.0f   // 12px margin on each side of center (middle 24px is free zone)
+#define VERTICAL_MARGIN		16.0f
 #define VIEWPORT_X_OFFSET 8.0f
 #define VIEWPORT_Y_OFFSET 14.0f
 #define CAMERA_STEADY_SPEED_X 0.03f // Steady camera speed for horizontal movement
@@ -203,6 +213,10 @@ void CPlayScene::ReloadAssets()
 			section = SCENE_SECTION_UNKNOWN;
 			continue;
 		}
+		if (line == "[BORDER]") {
+			section = SCENE_SECTION_UNKNOWN;
+			continue;
+		}
 
 		// If it's another section type, skip it
 		if (line[0] == '[') {
@@ -272,6 +286,33 @@ void CPlayScene::_ParseSection_MARIO(string line)
 	return;
 }
 
+void CPlayScene::_ParseSection_BORDER(string line)
+{
+	vector<string> tokens = split(line);
+	if (tokens.size() < 5) { // Need id, x, y, width, height
+		DebugOut(L"[WARN] Invalid Border line format: %hs\n", line.c_str());
+		return;
+	}
+
+	int id;
+	float x, y, width, height;
+	try {
+		id = stoi(tokens[0]);
+		x = stof(tokens[1]);
+		y = stof(tokens[2]);
+		width = stof(tokens[3]);
+		height = stof(tokens[4]);
+	}
+	catch (const exception& e) {
+		DebugOut(L"[ERROR] Failed to parse basic Border data (id,x,y,width,height) for line: %hs. Exception: %hs\n", line.c_str(), e.what());
+		return;
+	}
+	borders.push_back(new CBorder(id, x, y, width, height));
+	DebugOut(L"[INFO] Border created : (%d, %f, %f, %f, %f)\n", id, x, y, width, height);
+	return;
+}
+
+
 void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 {
 	if (targetChunk == nullptr) {
@@ -312,6 +353,22 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 	{
 		switch (object_type)
 		{
+		case OBJECT_TYPE_BUFF_ROULETTE:
+		{
+			if (tokens.size() < 4) throw runtime_error("Insufficient params for BRICK");
+			zIndex = ZINDEX_ITEMS;
+			int next_scene = stoi(tokens[4]);
+			obj = new CBuffRoulette(id, x, y, INT_MAX, next_scene);
+			break;
+		}
+		case OBJECT_TYPE_FALLING_PLATFORM:
+		{
+			zIndex = ZINDEX_PLATFORMS;
+			int width = stoi(tokens[4]);
+			obj = new CFallingPlatform(id, x, y, zIndex, targetChunk->GetID(), width);
+			targetChunk->AddEnemy(obj);  // Already present
+			break;
+		}
 		case OBJECT_TYPE_GOOMBA:
 		{
 			zIndex = ZINDEX_ENEMIES;
@@ -335,7 +392,6 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 			int type = stoi(tokens[4]); // Piranha plant type
 			zIndex = type == 0 ? ZINDEX_PIRANHA_PLANT : ZINDEX_PLATFORMS - 1;
 			obj = new CPiranhaPlant(id, x, y, zIndex, type, targetChunk->GetID());
-			targetChunk->AddObject(obj);
 			targetChunk->AddEnemy(obj);
 			return;
 		}
@@ -383,7 +439,7 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 			int width = stoi(tokens[4]);
 			int height = stoi(tokens[5]);
 			int type = stoi(tokens[6]);
-				obj = new CPlatform(id, x, y, zIndex, width, height, type);
+			obj = new CPlatform(id, x, y, zIndex, width, height, type);
 			break;
 		}
 		case OBJECT_TYPE_SKY_PLATFORM:
@@ -392,7 +448,7 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 			if (tokens.size() < 6) throw runtime_error("Insufficient params for SKYPLATFORM");
 			int width = stoi(tokens[4]);
 			int height = stoi(tokens[5]);
-				obj = new CSkyPlatform(id, x, y, zIndex, width, height);
+			obj = new CSkyPlatform(id, x, y, zIndex, width, height);
 			break;
 		}
 		case OBJECT_TYPE_COIN_QBLOCK:
@@ -503,7 +559,7 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 			int height = stoi(tokens[5]);
 			int color = stoi(tokens[6]);
 			int bottomShadow = (tokens.size() >= 8) ? stoi(tokens[7]) : 0;
-			if (color == 5)
+			if (color == 6)
 				zIndex = 0;
 			obj = new CBox(id, x, y, zIndex, width, height, color, bottomShadow);
 			break;
@@ -765,7 +821,7 @@ void CPlayScene::Load()
 
 	// Reset or default values
 	startCamX = 0.0f; startCamY = 0.0f; mapWidth = 0.0f; mapHeight = 0.0f;
-	cameraMode = 0.0f; scrollCamXStart = 0.0f;
+	cameraMode = 0.0f; scrollCamXStart = 0.0f; switchingScene = false;
 	// current_cam_base_y removed
 	player = nullptr; // Ensure player is null before loading
 	chunks.clear(); // Clear existing chunks if reloading scene
@@ -827,6 +883,7 @@ void CPlayScene::Load()
 			continue; // Move to next line after processing chunk header
 		}
 		if (line == "[MARIO]") { section = SCENE_SECTION_MARIO; continue; }
+		if (line == "[BORDER]") { section = SCENE_SECTION_BORDER; continue; }
 		// If it's another section type, reset currentParsingChunk
 		if (line[0] == '[') {
 			section = SCENE_SECTION_UNKNOWN;
@@ -841,6 +898,7 @@ void CPlayScene::Load()
 		case SCENE_SECTION_ASSETS:   _ParseSection_ASSETS(line); break;
 		case SCENE_SECTION_SETTINGS: _ParseSection_SETTINGS(line); break;
 		case SCENE_SECTION_MARIO: _ParseSection_MARIO(line); break;
+		case SCENE_SECTION_BORDER: _ParseSection_BORDER(line); break;
 		case SCENE_SECTION_CHUNK_OBJECT:
 			// Objects are loaded later via LoadChunkObjects, skip here
 			// We only parse the chunk headers during this initial pass.
@@ -880,6 +938,30 @@ void CPlayScene::UpdateCamera(CMario* mario, float cam_width, float cam_height) 
 	if (!mario) return; // Safety check
 	if (mario->GetIsEnteringPortal()) return; // Don't update camera if entering a portal
 
+	if (switchingScene)
+	{
+		float visible_world_cam_height = cam_height - HUD_BACKGROUND_HEIGHT + VIEWPORT_Y_OFFSET / 2.0f;
+
+		// Clamp camera to map boundaries
+		float mario_x, mario_y;
+		mario->GetPosition(mario_x, mario_y);
+
+		float minCamX = -VIEWPORT_X_OFFSET;
+		float maxCamX = (mapWidth > cam_width) ? (mapWidth - cam_width - VIEWPORT_X_OFFSET) : minCamX;
+		maxCamX = max(minCamX, maxCamX);
+		float minCamY = 0.0f;
+		float maxCamY = mapHeight > visible_world_cam_height ? (mapHeight - visible_world_cam_height) : minCamY;
+		maxCamY = max(minCamY, maxCamY);
+
+		float targetCamX = mario_x - (cam_width / 2.0f);
+		float targetCamY = mario_y - (cam_height / 2.0f);
+
+		float cam_x = max(minCamX, min(targetCamX, maxCamX));
+		float cam_y = max(minCamY, min(targetCamY, maxCamY));
+		CGame::GetInstance()->SetCamPos(cam_x, cam_y);
+		return;
+	}
+
 	CGame* game = CGame::GetInstance();
 	float cam_x, cam_y;
 	game->GetCamPos(cam_x, cam_y); // Current camera position
@@ -906,26 +988,104 @@ void CPlayScene::UpdateCamera(CMario* mario, float cam_width, float cam_height) 
 		s_isLockedToGround = false; // Unlock camera when max P meter
 	}
 
-	// Calculate target horizontal position with margin
-	float desiredCamX = mario_x - (cam_width / 2.0f);
-	float minCamXDeadZone = cam_x - HORIZONTAL_MARGIN;
-	float maxCamXDeadZone = cam_x + HORIZONTAL_MARGIN;
-	float targetCamX = max(minCamXDeadZone, min(desiredCamX, maxCamXDeadZone));
+	//// Calculate target horizontal position with margin
+	//float desiredCamX = mario_x - (cam_width / 2.0f);
+	//float minCamXDeadZone = cam_x - HORIZONTAL_MARGIN;
+	//float maxCamXDeadZone = cam_x + HORIZONTAL_MARGIN;
+	//float targetCamX = max(minCamXDeadZone, min(desiredCamX, maxCamXDeadZone));
+	//DebugOut(L"dc = %f, min = %f, max = %f, target = %f, cam = %f\n", desiredCamX, minCamXDeadZone, maxCamXDeadZone, targetCamX, cam_x);
 
-	// Calculate target vertical position
+	//// Calculate target vertical position
+	//float targetCamY;
+	//if (s_isLockedToGround || isTeleporting) {
+	//	// Lock to ground level
+	//	if (!isInHiddenMap) {
+	//		targetCamY = (mapHeight > visible_world_cam_height) ? (mapHeight - visible_world_cam_height) : 0.0f;
+	//	}
+	//	else
+	//		targetCamY = mario->GetYLevel() - visible_world_cam_height;
+	//	targetCamY = max(0.0f, targetCamY);
+	//}
+	//else {
+	//	// Calculate target horizontal position with margin
+	//	float desiredCamY = mario_y - (cam_height / 2.0f);
+	//	float minCamYDeadZone = cam_y - HORIZONTAL_MARGIN;
+	//	float maxCamYDeadZone = cam_y + HORIZONTAL_MARGIN;
+	//	targetCamY = max(minCamYDeadZone, min(desiredCamY, maxCamYDeadZone));
+	//	DebugOut(L"dc = %f, min = %f, max = %f, target = %f, cam = %f\n", desiredCamY, minCamYDeadZone, maxCamYDeadZone, targetCamY, cam_y);
+	//}
+
+	//// Clamp camera to map boundaries
+	//float minCamX = -VIEWPORT_X_OFFSET;
+	//float maxCamX = (mapWidth > cam_width) ? (mapWidth - cam_width - VIEWPORT_X_OFFSET) : minCamX;
+	//maxCamX = max(minCamX, maxCamX);
+	//float minCamY = 0.0f;
+	//float maxCamY = isInHiddenMap ? mario->GetYLevel() - visible_world_cam_height : (mapHeight > visible_world_cam_height) ? (mapHeight - visible_world_cam_height) : minCamY;
+	//maxCamY = max(minCamY, maxCamY);
+
+	//cam_x = max(minCamX, min(targetCamX, maxCamX));
+	//cam_y = max(minCamY, min(targetCamY, maxCamY));
+
+	//// Set final camera position
+	//game->SetCamPos(cam_x, cam_y);
+	// 
+	// Calculate camera window boundaries for horizontal (always active)
+
+	// Calculate Mario's position on screen (relative to viewport)
+	float mario_screen_x = mario_x - cam_x;  // Mario's X position on screen
+	float mario_screen_y = mario_y - cam_y;  // Mario's Y position on screen
+
+	// Define camera window boundaries in screen space
+	float windowLeft = cam_width / 2 - CAMERA_WINDOW_HORIZONTAL_ZONE / 2;
+	float windowRight = cam_width / 2 + CAMERA_WINDOW_HORIZONTAL_ZONE / 2;
+
+	// Calculate target horizontal position using window push
+	float targetCamX = cam_x; // Default: don't move
+	if (mario_screen_x < windowLeft) {
+		// Mario is too far left on screen - move camera left
+		targetCamX = mario_x - windowLeft;
+	}
+	else if (mario_screen_x > windowRight) {
+		// Mario is too far right on screen - move camera right
+		targetCamX = mario_x - windowRight;
+	}
+
+	// Calculate target vertical position - RESPECT GROUND LOCK
 	float targetCamY;
 	if (s_isLockedToGround || isTeleporting) {
-		// Lock to ground level
+		// GROUND LOCK ACTIVE - Use existing ground lock logic
 		if (!isInHiddenMap) {
-			targetCamY = (mapHeight > visible_world_cam_height) ? (mapHeight - visible_world_cam_height) : 0.0f;
+			targetCamY = (mapHeight > visible_world_cam_height) ?
+				(mapHeight - visible_world_cam_height) : 0.0f;
 		}
-		else
+		else {
 			targetCamY = mario->GetYLevel() - visible_world_cam_height;
+		}
 		targetCamY = max(0.0f, targetCamY);
 	}
 	else {
-		// Center on Mario vertically when unlocked
-		targetCamY = mario_y - (cam_height / 2.0f);
+		// GROUND LOCK INACTIVE - Apply camera window for vertical movement
+		float windowTop = CAMERA_WINDOW_TOP_MARGIN;
+		float windowBottom = cam_height / 2;  // Center of screen
+
+		targetCamY = cam_y; // Default: don't move
+
+		if (mario_screen_y < windowTop) {
+			// Mario is too high on screen - move camera up
+			targetCamY = mario_y - windowTop;
+		}
+		else if (mario_screen_y > windowBottom) {
+			// Mario is too low on screen - move camera down
+			targetCamY = mario_y - windowBottom;
+		}
+	}
+
+	// Apply minimum movement threshold
+	if (abs(targetCamX - cam_x) < MIN_CAMERA_MOVEMENT) {
+		targetCamX = cam_x;
+	}
+	if (abs(targetCamY - cam_y) < MIN_CAMERA_MOVEMENT) {
+		targetCamY = cam_y;
 	}
 
 	// Clamp camera to map boundaries
@@ -933,15 +1093,27 @@ void CPlayScene::UpdateCamera(CMario* mario, float cam_width, float cam_height) 
 	float maxCamX = (mapWidth > cam_width) ? (mapWidth - cam_width - VIEWPORT_X_OFFSET) : minCamX;
 	maxCamX = max(minCamX, maxCamX);
 	float minCamY = 0.0f;
-	float maxCamY = isInHiddenMap ? mario->GetYLevel() - visible_world_cam_height : (mapHeight > visible_world_cam_height) ? (mapHeight - visible_world_cam_height) : minCamY;
+	float maxCamY = isInHiddenMap ? mario->GetYLevel() - visible_world_cam_height :
+		(mapHeight > visible_world_cam_height) ? (mapHeight - visible_world_cam_height) : minCamY;
 	maxCamY = max(minCamY, maxCamY);
 
-	cam_x = max(minCamX, min(targetCamX, maxCamX));
-	cam_y = max(minCamY, min(targetCamY, maxCamY));
+	targetCamX = max(minCamX, min(targetCamX, maxCamX));
+	targetCamY = max(minCamY, min(targetCamY, maxCamY));
+
+	// Apply smooth camera movement with different speeds for locked vs unlocked
+	if (s_isLockedToGround || isTeleporting) {
+		// Instant movement when ground locked (maintains original behavior)
+		cam_x += (targetCamX - cam_x) * CAMERA_SMOOTH_FACTOR;
+		cam_y = targetCamY;  // Instant vertical positioning when locked
+	}
+	else {
+		// Smooth movement when unlocked (flying)
+		cam_x += (targetCamX - cam_x) * CAMERA_SMOOTH_FACTOR;
+		cam_y += (targetCamY - cam_y) * CAMERA_SMOOTH_FACTOR;
+	}
 
 	// Set final camera position
 	game->SetCamPos(cam_x, cam_y);
-
 	// Debug output
 	//DebugOut(L"Cam pos: %f, %f\n", cam_x, cam_y);
 }
@@ -983,6 +1155,12 @@ void CPlayScene::Update(DWORD dt)
 		coObjects.push_back(activeWhip);
 	}
 
+	// 3. Add map borders to the list
+	for (auto border : borders)
+	{
+		coObjects.push_back(border);
+	}
+
 	// --- Update Player ---
 	// Pass the comprehensive list (including the whip if active)
 	player->Update(dt, &coObjects);
@@ -1009,7 +1187,13 @@ void CPlayScene::Update(DWORD dt)
 
 			// Pass the comprehensive list
 			obj->Update(dt, &coObjects);
+
 		}
+	}
+
+	for (auto border : borders)
+	{
+		border->Update(dt, &coObjects);
 	}
 
 	// --- Update Camera ---
@@ -1022,7 +1206,13 @@ void CPlayScene::Update(DWORD dt)
 		UpdateCamera(mario, cam_width, cam_height);
 	}
 	else {
-		float cam_x = current_cam_x + dt * CAMERA_STEADY_SPEED_X;
+		float cam_x_increase = dt * CAMERA_STEADY_SPEED_X;
+		float cam_x = current_cam_x + cam_x_increase;
+		for (auto border : borders)
+		{
+			if (border->GetId() != 9999) continue;
+			border->SetSpeed(CAMERA_STEADY_SPEED_X, 0);
+		}
 		if (cam_x + cam_width > scrollCamXEnd)
 			cam_x = scrollCamXEnd - cam_width;
 		game->SetCamPos(cam_x, startCamY);
@@ -1030,6 +1220,16 @@ void CPlayScene::Update(DWORD dt)
 
 	DefeatEnemiesOutOfRange();
 	RespawnEnemiesInRange();
+
+	if (switchingScene)
+	{
+		float x, y;
+		player->GetPosition(x, y);
+		if (x > mapWidth) {
+			((CMario*)player)->SetIsSwitchingScene(false);
+			switchingScene = false;
+		}
+	}
 
 	// --- Clean up ---
 	PurgeDeletedObjects(); // Handle objects marked for deletion
@@ -1056,6 +1256,12 @@ void CPlayScene::Render()
 		renderList.push_back(player);
 	}
 
+	if (borders.size() != 0)
+	{
+		for (auto border : borders)
+			renderList.push_back(border);
+	}
+
 	stable_sort(renderList.begin(), renderList.end(),
 		[](LPGAMEOBJECT a, LPGAMEOBJECT b) {
 			return a->GetZIndex() < b->GetZIndex();
@@ -1077,6 +1283,7 @@ void CPlayScene::Unload()
 		}
 	}
 	chunks.clear(); // Clear the vector of pointers
+	borders.clear();
 
 	// Clear Assets (Important!) - Should be done *carefully* if assets are shared between scenes
 	// Assuming CAnimations/CSprites are scene-specific or managed elsewhere appropriately.
@@ -1088,7 +1295,7 @@ void CPlayScene::Unload()
 	CSprites::GetInstance()->Clear();    // POTENTIALLY DANGEROUS if global
 
 	// Reset player pointer
-	player = nullptr;
+	//player = nullptr;
 
 	DebugOut(L"[INFO] Scene %d unloaded.\n", id);
 }
@@ -1157,6 +1364,11 @@ void CPlayScene::DefeatEnemiesOutOfRange()
 			{
 				if (!wingedGoomba->IsDefeated())
 					wingedGoomba->SetIsDefeated(true);
+			}
+			else if (CFallingPlatform* fallingPlatform = dynamic_cast<CFallingPlatform*>(enemy))
+			{
+				if (!fallingPlatform->IsDefeated())
+					fallingPlatform->SetIsDefeated(true);
 			}
 		}
 	}
@@ -1310,7 +1522,31 @@ void CPlayScene::RespawnEnemiesInRange()
 				}
 			}
 		}
+		else if (CFallingPlatform* fallingPlatform = dynamic_cast<CFallingPlatform*>(enemy))
+		{
+			fallingPlatform->GetOriginalPosition(eX0, eY0);
+			if (fallingPlatform->IsDefeated() && shouldRespawn(eX0))
+			{
+				LPCHUNK originalChunk = GetChunk(fallingPlatform->GetOriginalChunkId());
+				if (originalChunk)
+				{
+					originalChunk->RemoveObject(fallingPlatform);
+					CFallingPlatform* newFallingPlatform = new CFallingPlatform(fallingPlatform->GetId(), eX0, eY0, fallingPlatform->GetZIndex(), fallingPlatform->GetOriginalChunkId(), fallingPlatform->GetWidth());
+					originalChunk->AddObject(newFallingPlatform);
+					originalChunk->AddEnemy(newFallingPlatform);
+				}
+			}
+		}
 	}
+}
+
+void CPlayScene::TeleportToMapEnd()
+{
+	CGame* game = CGame::GetInstance();
+	float cam_width = (float)game->GetBackBufferWidth();
+	float cam_height = (float)game->GetBackBufferHeight();
+	player->SetPosition(mapWidth - cam_width / 2, mapHeight - cam_height / 6);
+	game->SetCamPos(mapWidth - cam_width, mapHeight - cam_height);
 }
 
 // Keep IsGameObjectDeleted as is, used by PurgeDeletedObjects
