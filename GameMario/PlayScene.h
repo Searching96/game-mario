@@ -29,11 +29,14 @@ protected:
 	float scrollCamXStart = 0.0f;
 	float scrollCamXEnd = 0.0f;
 
+	bool switchingScene = false;
+
 	void _ParseSection_SPRITES(string line);
 	void _ParseSection_ANIMATIONS(string line);
 	void _ParseSection_ASSETS(string line);
 	void _ParseSection_SETTINGS(string line);
 	void _ParseSection_MARIO(string line);
+	void _ParseSection_BORDER(string line);
 	void _ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk);
 
 	void LoadAssets(LPCWSTR assetFile);
@@ -69,7 +72,25 @@ public:
 	}
 
 	int GetId() const { return id; }
+
+	bool GetIsSwitchingScene() const { return switchingScene; }
+
 	LPGAMEOBJECT GetPlayer() { return player; }
+
+	void InitializeSwitchSceneSequence()
+	{
+		switchingScene = true;
+		player->SetState(MARIO_STATE_SWITCH_SCENE);
+	}
+
+	void SetPlayer(LPGAMEOBJECT player) {
+		float x, y;
+		this->player->GetPosition(x, y);
+		player->SetPosition(x, y);
+		player->SetSpeed(0, 0);
+		this->player = player;
+	}
+
 	LPCHUNK GetChunk(int id) {
 		for (LPCHUNK chunk : chunks) {
 			if (chunk->GetID() == id) return chunk;
@@ -91,6 +112,8 @@ public:
 		}
 		return loadedChunks;
 	}
+
+	void TeleportToMapEnd();
 
 	void PurgeDeletedObjects();
 

@@ -55,7 +55,9 @@ void CSampleKeyHandler::OnKeyUp(int KeyCode)
 {
 	//DebugOut(L"[INFO] KeyUp: %d\n", KeyCode);
 
+
 	CMario* mario = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+
 	switch (KeyCode)
 	{
 	case DIK_S:
@@ -96,8 +98,17 @@ void CSampleKeyHandler::OnKeyUp(int KeyCode)
 	case DIK_Y:
 		DebugOut(L"[INFO] Toggling sky walking mode...\n");
 		mario->ToggleSkywalk();
+		break;
+	case DIK_COMMA:
+		CGame::GetInstance()->InitiateSwitchScene(1);
+		break;
+	case DIK_PERIOD:
+		CGame::GetInstance()->InitiateSwitchScene(4);
+		break;
+	case DIK_SLASH:
+		LPPLAYSCENE(CGame::GetInstance()->GetCurrentScene())->TeleportToMapEnd();
+		break;
 	}
-
 }
 
 void CSampleKeyHandler::KeyState(BYTE* states)

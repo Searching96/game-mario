@@ -41,6 +41,7 @@
 #include "FlyingKoopa.h"
 #include "HiddenCoinBrick.h"
 #include "FallingPlatform.h"
+#include "BuffRoulette.h"
 
 #include "SampleKeyEventHandler.h"
 
@@ -204,6 +205,10 @@ void CPlayScene::ReloadAssets()
 			section = SCENE_SECTION_UNKNOWN;
 			continue;
 		}
+		if (line == "[BORDER]") {
+			section = SCENE_SECTION_UNKNOWN;
+			continue;
+		}
 
 		// If it's another section type, skip it
 		if (line[0] == '[') {
@@ -273,6 +278,32 @@ void CPlayScene::_ParseSection_MARIO(string line)
 	return;
 }
 
+void CPlayScene::_ParseSection_BORDER(string line)
+{
+	vector<string> tokens = split(line);
+	if (tokens.size() < 5) { // Need id, x, y, width, height
+		DebugOut(L"[WARN] Invalid mario line format: %hs\n", line.c_str());
+		return;
+	}
+
+	int id;
+	float x, y, width, height;
+	try {
+		id = stoi(tokens[0]);
+		x = stof(tokens[1]);
+		y = stof(tokens[2]);
+		width = stof(tokens[3]);
+		height = stof(tokens[4]);
+	}
+	catch (const exception& e) {
+		DebugOut(L"[ERROR] Failed to parse basic Border data (id,x,y,width,height) for line: %hs. Exception: %hs\n", line.c_str(), e.what());
+		return;
+	}
+	borders.push_back(new CBorder(id, x, y, width, height));
+	return;
+}
+
+
 void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 {
 	if (targetChunk == nullptr) {
@@ -313,12 +344,12 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 	{
 		switch (object_type)
 		{
-		case OBJECT_TYPE_BORDER:
+		case OBJECT_TYPE_BUFF_ROULETTE:
 		{
-			float width = stof(tokens[4]); // Right boundary
-			float height = stof(tokens[5]); // Bottom boundary
-			obj = new CBorder(id, x, y, width, height);
-			borders.push_back(obj);
+			if (tokens.size() < 4) throw runtime_error("Insufficient params for BRICK");
+			zIndex = ZINDEX_ITEMS;
+			int next_scene = stoi(tokens[3]);
+			obj = new CBuffRoulette(id, x, y, INT_MAX, next_scene);
 			break;
 		}
 		case OBJECT_TYPE_FALLING_PLATFORM:
@@ -513,7 +544,7 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 			int height = stoi(tokens[5]);
 			int color = stoi(tokens[6]);
 			int bottomShadow = (tokens.size() >= 8) ? stoi(tokens[7]) : 0;
-			if (color == 5)
+			if (color == 6)
 				zIndex = 0;
 			obj = new CBox(id, x, y, zIndex, width, height, color, bottomShadow);
 			break;
@@ -874,6 +905,21 @@ void CPlayScene::UpdateCamera(CMario* mario, float cam_width, float cam_height) 
 	if (!mario) return; // Safety check
 	if (mario->GetIsEnteringPortal()) return; // Don't update camera if entering a portal
 
+	if (switchingScene)
+	{
+		float visible_world_cam_height = cam_height - HUD_BACKGROUND_HEIGHT + VIEWPORT_Y_OFFSET / 2.0f;
+
+		// Clamp camera to map boundaries
+		float minCamX = -VIEWPORT_X_OFFSET;
+		float maxCamX = (mapWidth > cam_width) ? (mapWidth - cam_width - VIEWPORT_X_OFFSET) : minCamX;
+		maxCamX = max(minCamX, maxCamX);
+		float minCamY = 0.0f;
+		float maxCamY = (mapHeight > visible_world_cam_height) ? (mapHeight - visible_world_cam_height) : minCamY;
+		maxCamY = max(minCamY, maxCamY);
+		CGame::GetInstance()->SetCamPos(maxCamX, maxCamY);
+		return;
+	}
+
 	CGame* game = CGame::GetInstance();
 	float cam_x, cam_y;
 	game->GetCamPos(cam_x, cam_y); // Current camera position
@@ -1032,6 +1078,13 @@ void CPlayScene::Update(DWORD dt)
 	DefeatEnemiesOutOfRange();
 	RespawnEnemiesInRange();
 
+	if (switchingScene)
+	{
+		float x, y;
+		player->GetPosition(x, y);
+		if (x > mapWidth) !switchingScene;
+	}
+
 	// --- Clean up ---
 	PurgeDeletedObjects(); // Handle objects marked for deletion
 }
@@ -1090,7 +1143,7 @@ void CPlayScene::Unload()
 	CSprites::GetInstance()->Clear();    // POTENTIALLY DANGEROUS if global
 
 	// Reset player pointer
-	player = nullptr;
+	//player = nullptr;
 
 	DebugOut(L"[INFO] Scene %d unloaded.\n", id);
 }
@@ -1325,6 +1378,15 @@ void CPlayScene::RespawnEnemiesInRange()
 			}
 		}
 	}
+}
+
+void CPlayScene::TeleportToMapEnd()
+{
+	CGame* game = CGame::GetInstance();
+	float cam_width = (float)game->GetBackBufferWidth();
+	float cam_height = (float)game->GetBackBufferHeight();
+	player->SetPosition(mapWidth - cam_width / 2, mapHeight - cam_height / 6);
+	game->SetCamPos(mapWidth - cam_width, mapHeight - cam_height);
 }
 
 // Keep IsGameObjectDeleted as is, used by PurgeDeletedObjects
