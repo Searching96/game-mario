@@ -16,6 +16,7 @@ class CPlayScene : public CScene
 {
 protected:
 	LPGAMEOBJECT player;
+	vector<LPGAMEOBJECT> borders;
 	vector<LPCHUNK> chunks;
 	LPCHUNK currentParsingChunk = nullptr;
 	wstring scene_file_path;

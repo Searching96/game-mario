@@ -74,14 +74,21 @@ void CBox::RenderBox(CSprites* s)
 			SPRITE_ID_WHITE_MIDDLE_LEFT, SPRITE_ID_WHITE_MIDDLE_CENTER, SPRITE_ID_WHITE_MIDDLE_RIGHT // Use middle row for bottom
 		};
 		break;
-	case 4: // Black
+	case 4: // Hill
+		sprites = {
+			SPRITE_ID_HILL_TOP_LEFT, SPRITE_ID_HILL_TOP_CENTER, SPRITE_ID_HILL_TOP_RIGHT,
+			SPRITE_ID_HILL_MIDDLE_LEFT, SPRITE_ID_HILL_MIDDLE_CENTER, SPRITE_ID_HILL_MIDDLE_RIGHT,
+			SPRITE_ID_HILL_BOTTOM_LEFT, SPRITE_ID_HILL_BOTTOM_CENTER, SPRITE_ID_HILL_BOTTOM_RIGHT
+		};
+		break;
+	case 5: // Black
 		sprites = {
 			SPRITE_ID_BLACK_TOP_LEFT, SPRITE_ID_BLACK_TOP_CENTER, SPRITE_ID_BLACK_TOP_RIGHT,
 			SPRITE_ID_BLACK_MIDDLE_LEFT, SPRITE_ID_BLACK_MIDDLE_CENTER, SPRITE_ID_BLACK_MIDDLE_RIGHT,
 			SPRITE_ID_BLACK_BOTTOM_LEFT, SPRITE_ID_BLACK_BOTTOM_CENTER, SPRITE_ID_BLACK_BOTTOM_RIGHT
 		};
 		break;
-	case 5: // Ending background
+	case 6: // Ending background
 		sprites = {
 			SPRITE_ID_ENDING_BORDER, SPRITE_ID_ENDING_BACKGROUND, SPRITE_ID_ENDING_BACKGROUND,
 			SPRITE_ID_ENDING_BORDER, SPRITE_ID_ENDING_BACKGROUND, SPRITE_ID_ENDING_BACKGROUND,
@@ -140,6 +147,8 @@ void CBox::RenderBox(CSprites* s)
 void CBox::RenderShadow(CSprites* s)
 {
 	if (width <= 0 || height <= 0) return;
+
+	if (color >= 4) return;
 
 	// Right edge shadow (always rendered, outside right border)
 	for (int j = 0; j < height; j++)

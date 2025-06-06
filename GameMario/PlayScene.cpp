@@ -52,6 +52,7 @@ using namespace std;
 #define SCENE_SECTION_SETTINGS 2
 #define SCENE_SECTION_MARIO	3
 #define SCENE_SECTION_CHUNK_OBJECT 4
+#define SCENE_SECTION_BORDER	5
 
 #define ASSETS_SECTION_UNKNOWN -1
 #define ASSETS_SECTION_SPRITES 1
@@ -317,6 +318,7 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 			float width = stof(tokens[4]); // Right boundary
 			float height = stof(tokens[5]); // Bottom boundary
 			obj = new CBorder(id, x, y, width, height);
+			borders.push_back(obj);
 			break;
 		}
 		case OBJECT_TYPE_FALLING_PLATFORM:
@@ -818,6 +820,7 @@ void CPlayScene::Load()
 			continue; // Move to next line after processing chunk header
 		}
 		if (line == "[MARIO]") { section = SCENE_SECTION_MARIO; continue; }
+		if (line == "[BORDER]") { section = SCENE_SECTION_BORDER; continue; }
 		// If it's another section type, reset currentParsingChunk
 		if (line[0] == '[') {
 			section = SCENE_SECTION_UNKNOWN;
@@ -1014,7 +1017,15 @@ void CPlayScene::Update(DWORD dt)
 		UpdateCamera(mario, cam_width, cam_height);
 	}
 	else {
-		float cam_x = current_cam_x + dt * CAMERA_STEADY_SPEED_X;
+		float cam_x_increase = dt * CAMERA_STEADY_SPEED_X;
+		float cam_x = current_cam_x + cam_x_increase;
+		for (auto border : borders)
+		{
+			if (border->GetId() != 9999) continue;
+			float x, y;
+			border->GetPosition(x, y);
+			border->SetPosition(x + cam_x_increase, y);
+		}
 		if (cam_x + cam_width > scrollCamXEnd)
 			cam_x = scrollCamXEnd - cam_width;
 		game->SetCamPos(cam_x, startCamY);
@@ -1069,6 +1080,7 @@ void CPlayScene::Unload()
 		}
 	}
 	chunks.clear(); // Clear the vector of pointers
+	borders.clear();
 
 	// Clear Assets (Important!) - Should be done *carefully* if assets are shared between scenes
 	// Assuming CAnimations/CSprites are scene-specific or managed elsewhere appropriately.

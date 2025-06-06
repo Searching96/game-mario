@@ -63,7 +63,17 @@
 #define SPRITE_ID_BLACK_BOTTOM_CENTER       1065320
 #define SPRITE_ID_BLACK_BOTTOM_RIGHT        1065330
 
-////----------------  BOX -------------------
+////----------------  HILL BOX -------------------
+#define SPRITE_ID_HILL_TOP_LEFT            1066110
+#define SPRITE_ID_HILL_TOP_CENTER          1066120
+#define SPRITE_ID_HILL_TOP_RIGHT           1066130
+#define SPRITE_ID_HILL_MIDDLE_LEFT         1066210
+#define SPRITE_ID_HILL_MIDDLE_CENTER       1066220
+#define SPRITE_ID_HILL_MIDDLE_RIGHT        1066230
+#define SPRITE_ID_HILL_BOTTOM_LEFT         1066310
+#define SPRITE_ID_HILL_BOTTOM_CENTER       1066320
+#define SPRITE_ID_HILL_BOTTOM_RIGHT        1066330
+
 
 //---------------- ENDING BACKGROUND -------------------
 #define SPRITE_ID_ENDING_BORDER			    1060001
@@ -77,7 +87,7 @@ class CBox : public CGameObject
 protected:
 	int width;				// Unit: cell 
 	int height;				// Unit: cell
-	int color; // 0: orange, 1: blue, 2: green, 3: white, 4: black, 5: ending
+	int color; // 0: orange, 1: blue, 2: green, 3: white, 4: hill, 5: black, 6: ending
 	int bottomShadow;
 public:
 	CBox(int id, float x, float y, int z, int width, int height, int color, int bottomShadow)  : CGameObject(id, x, y, z)
@@ -94,7 +104,7 @@ public:
 	void Update(DWORD dt) {}
 	void GetBoundingBox(float& l, float& t, float& r, float& b);
 	void RenderBoundingBox();
-	int IsBlocking() { return color >= 4 ? 0 : 1; }
+	int IsBlocking() { return color >= 5 ? 0 : 1; }
 
 	int IsDirectionColliable(float nx, float ny);
 };

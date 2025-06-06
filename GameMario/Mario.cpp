@@ -1245,8 +1245,6 @@ int CMario::GetAniIdBig()
 	if (aniId == -1) aniId = ID_ANI_MARIO_IDLE_RIGHT;
 
 	preAniId = aniId;
-	DebugOut(L"AniId = %d\n", aniId);
-
 
 	return aniId;
 }
