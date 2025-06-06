@@ -34,7 +34,7 @@ public:
 	void GetBoundingBox(float& l, float& t, float& r, float& b);
 	void RenderBoundingBox();
 	void GetOriginalPosition(float& x0, float& y0) { x0 = this->x0; y0 = this->y0; }
-	virtual int IsDirectionColliable(float nx, float ny) { return 1; }
+	int IsBlocking() const { return 1; }
 	bool IsDefeated() const { return isDefeated; }
 	void SetIsDefeated(bool isDefeated) { this->isDefeated = isDefeated; }
 	int GetOriginalChunkId() const { return originalChunkId; }

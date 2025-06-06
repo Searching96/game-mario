@@ -1630,6 +1630,7 @@ void CMario::SetState(int state)
 				SetState(MARIO_STATE_HOVER);
 			}
 		}
+		isOnFallingPlatform = false;
 		break;
 
 	case MARIO_STATE_RELEASE_JUMP:
