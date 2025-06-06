@@ -311,6 +311,13 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 	{
 		switch (object_type)
 		{
+		case OBJECT_TYPE_BORDER:
+		{
+			float width = stof(tokens[4]); // Right boundary
+			float height = stof(tokens[5]); // Bottom boundary
+			obj = new CBorder(id, x, y, width, height);
+			break;
+		}
 		case OBJECT_TYPE_GOOMBA:
 			zIndex = ZINDEX_ENEMIES;
 			obj = new CGoomba(id, x, y, zIndex, targetChunk->GetID());
@@ -372,7 +379,7 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 			int width = stoi(tokens[4]);
 			int height = stoi(tokens[5]);
 			int type = stoi(tokens[6]);
-				obj = new CPlatform(id, x, y, zIndex, width, height, type);
+			obj = new CPlatform(id, x, y, zIndex, width, height, type);
 			break;
 		}
 		case OBJECT_TYPE_SKY_PLATFORM:
@@ -381,7 +388,7 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 			if (tokens.size() < 6) throw runtime_error("Insufficient params for SKYPLATFORM");
 			int width = stoi(tokens[4]);
 			int height = stoi(tokens[5]);
-				obj = new CSkyPlatform(id, x, y, zIndex, width, height);
+			obj = new CSkyPlatform(id, x, y, zIndex, width, height);
 			break;
 		}
 		case OBJECT_TYPE_COIN_QBLOCK:

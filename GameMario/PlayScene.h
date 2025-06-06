@@ -7,6 +7,7 @@
 #include "Brick.h"
 #include "Mario.h"
 #include "Goomba.h"
+#include "Border.h"
 
 #include "Chunk.h"
 #include "SampleKeyEventHandler.h"
