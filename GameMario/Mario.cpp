@@ -137,12 +137,19 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				// this->entranceY is assumed to be the Y-coordinate of the top of the pipe Mario enters.
 				if (marioT > this->entranceY + 4)
 				{
-					LPPLAYSCENE(CGame::GetInstance()->GetCurrentScene())->LoadChunkWithX(targetX);
-					SetPosition(this->targetX, this->exitY - currentMarioHeight / 2.0f);
-					CGame::GetInstance()->SetCamPos(targetX, this->exitY - currentMarioHeight / 2.0f);
-
-					isEnteringPortal = 0; // Switch to exiting phase
-					if (exitDirection == 1) vy = -vy; // Reverse vertical speed if exiting upwards
+					isEnteringPortal = 0;
+					if (exitDirection == 0)
+					{
+						LPPLAYSCENE(CGame::GetInstance()->GetCurrentScene())->LoadChunkWithX(targetX);
+						SetPosition(this->targetX, this->exitY - currentMarioHeight / 2.0f);
+						CGame::GetInstance()->SetCamPos(targetX, this->exitY - currentMarioHeight / 2.0f);
+					}
+					else {
+						vy = -vy; // Reverse vertical speed if exiting upwards
+						LPPLAYSCENE(CGame::GetInstance()->GetCurrentScene())->LoadChunkWithX(targetX);
+						SetPosition(this->targetX, this->exitY + currentMarioHeight / 2.0f);
+						CGame::GetInstance()->SetCamPos(targetX, this->exitY + currentMarioHeight / 2.0f);
+					}
 				}
 			}
 			else // Phase 2: Exiting the destination portal (isEnteringPortal == 0)
@@ -165,12 +172,19 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				// this->entranceY is assumed to be the Y-coordinate of the bottom of the pipe Mario enters.
 				if (marioB < this->entranceY - 4)
 				{
-					LPPLAYSCENE(CGame::GetInstance()->GetCurrentScene())->LoadChunkWithX(targetX);
-					SetPosition(this->targetX, this->exitY + currentMarioHeight / 2.0f);
-					CGame::GetInstance()->SetCamPos(targetX, this->exitY + currentMarioHeight / 2.0f);
-
 					isEnteringPortal = 0;
-					if (exitDirection == 0) vy = -vy; // Reverse vertical speed if exiting downwards
+					if (exitDirection == 0)
+					{
+						vy = -vy; // Reverse vertical speed if exiting downwards
+						LPPLAYSCENE(CGame::GetInstance()->GetCurrentScene())->LoadChunkWithX(targetX);
+						SetPosition(this->targetX, this->exitY  - currentMarioHeight / 2.0f);
+						CGame::GetInstance()->SetCamPos(targetX, this->exitY - currentMarioHeight / 2.0f);
+					}
+					else {
+						LPPLAYSCENE(CGame::GetInstance()->GetCurrentScene())->LoadChunkWithX(targetX);
+						SetPosition(this->targetX, this->exitY + currentMarioHeight / 2.0f);
+						CGame::GetInstance()->SetCamPos(targetX, this->exitY + currentMarioHeight / 2.0f);
+					}
 
 				}
 			}

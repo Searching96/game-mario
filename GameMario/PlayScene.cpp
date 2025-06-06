@@ -1222,7 +1222,9 @@ void CPlayScene::Update(DWORD dt)
 				border->SetSpeed(0, 0);
 			}
 		}
-		game->SetCamPos(cam_x, startCamY);
+
+		if (mario_y > mapHeight) mario->SetState(MARIO_STATE_DIE_ON_BEING_KILLED);
+		else game->SetCamPos(cam_x, startCamY);
 	}
 
 	DefeatEnemiesOutOfRange();
@@ -1532,7 +1534,7 @@ void CPlayScene::RespawnEnemiesInRange()
 		else if (CFallingPlatform* fallingPlatform = dynamic_cast<CFallingPlatform*>(enemy))
 		{
 			fallingPlatform->GetOriginalPosition(eX0, eY0);
-			if (fallingPlatform->IsDefeated() && shouldRespawn(eX0))
+			if (fallingPlatform->IsDefeated() && eX0 <= camEndX + 20 && eX0 >= camEndX)
 			{
 				LPCHUNK originalChunk = GetChunk(fallingPlatform->GetOriginalChunkId());
 				if (originalChunk)
