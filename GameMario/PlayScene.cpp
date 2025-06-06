@@ -1089,7 +1089,7 @@ void CPlayScene::UpdateCamera(CMario* mario, float cam_width, float cam_height) 
 	}
 
 	// Clamp camera to map boundaries
-	float minCamX = -VIEWPORT_X_OFFSET;
+	float minCamX = cameraMode == 1 ? scrollCamXEnd - VIEWPORT_X_OFFSET + 16 : -VIEWPORT_X_OFFSET;
 	float maxCamX = (mapWidth > cam_width) ? (mapWidth - cam_width - VIEWPORT_X_OFFSET) : minCamX;
 	maxCamX = max(minCamX, maxCamX);
 	float minCamY = 0.0f;
@@ -1214,7 +1214,14 @@ void CPlayScene::Update(DWORD dt)
 			border->SetSpeed(CAMERA_STEADY_SPEED_X, 0);
 		}
 		if (cam_x + cam_width > scrollCamXEnd)
+		{
 			cam_x = scrollCamXEnd - cam_width;
+			for (auto border : borders)
+			{
+				if (border->GetId() != 9999) continue;
+				border->SetSpeed(0, 0);
+			}
+		}
 		game->SetCamPos(cam_x, startCamY);
 	}
 
