@@ -449,6 +449,8 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 			{
 				hasReachedPlatformAfterHover = true;
 			}
+			if (!dynamic_cast<CFallingPlatform*>(e->obj))
+				isOnFallingPlatform = false;
 		}
 		consecutiveEnemies = 0;
 	}
