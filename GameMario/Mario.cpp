@@ -539,8 +539,8 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 
 void CMario::OnCollisionWithBorder(LPCOLLISIONEVENT e)
 {
-	offsetX = e->nx > 0 ? 0.6f : -0.6f;
-	SetSpeed(0.05f, vy);
+	offsetX = e->nx > 0 ? 1.0f : -1.0f;
+	SetSpeed(0.02f, vy);
 }
 
 void CMario::OnCollisionWithBuffRoulette(LPCOLLISIONEVENT e)

@@ -4,7 +4,7 @@
 #define FLYING_KOOPA_STATE_FLYING_DOWN	1000
 #define FLYING_KOOPA_STATE_FLYING_UP	1100
 
-#define FLYING_KOOPA_MOVE_OFFSET		144.0f
+#define FLYING_KOOPA_MOVE_OFFSET		108.0f
 
 class CFlyingKoopa : public CGameObject
 {
