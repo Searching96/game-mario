@@ -49,3 +49,10 @@ void CBorder::GetBoundingBox(float& l, float& t, float& r, float& b)
 	r = x + width / 2;
 	b = y + height / 2;
 }
+
+void CBorder::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
+{
+	x += vx * dt;
+	CGameObject::Update(dt, coObjects);
+	CCollision::GetInstance()->Process(this, dt, coObjects);
+}

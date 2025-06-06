@@ -99,15 +99,17 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		}
 	}
 
+	SetPosition(x + offsetX, y + offsetY);
+	offsetX = 0;
+	offsetY = 0;
+
 	if (isTeleporting == 1)
 	{
 		float marioL, marioT, marioR, marioB;
 		GetBoundingBox(marioL, marioT, marioR, marioB);
 		float currentMarioHeight = marioB - marioT;
 
-		SetPosition(x + offsetX, y + offsetY);
-		offsetX = 0;
-		offsetY = 0;
+
 
 		if (vy > 0) // Mario is moving DOWN (exiting from a pipe above, sliding downwards)
 		{
@@ -509,6 +511,14 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 		OnCollisionWithBoomerang(e);
 	else if (dynamic_cast<CFallingPlatform*>(e->obj))
 		OnCollisionWithFallingPlatform(e);
+	else if (dynamic_cast<CBorder*>(e->obj))
+		OnCollisionWithBorder(e);
+}
+
+void CMario::OnCollisionWithBorder(LPCOLLISIONEVENT e)
+{
+	offsetX = 0.5f;
+	vx = 0.035f;
 }
 
 void CMario::OnCollisionWithGoomba(LPCOLLISIONEVENT e)

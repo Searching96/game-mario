@@ -12,6 +12,7 @@
 #include "CoinBrick.h"
 #include "ActivatorBrick.h"
 #include "WingedKoopa.h"
+#include "FallingPlatform.h"
 
 #include "debug.h"
 
@@ -134,7 +135,7 @@ void CCollision::SweptAABB(
 void CCollision::SweptAABB(float ml, float mt, float mr, float mb,
 	float dx, float dy,
 	float sl, float st, float sr, float sb,
-	float& t, float& nx, float& ny, 
+	float& t, float& nx, float& ny,
 	LPGAMEOBJECT objSrc, LPGAMEOBJECT objDest)
 {
 
@@ -189,9 +190,9 @@ void CCollision::SweptAABB(float ml, float mt, float mr, float mb,
 	}
 
 	// Dynamic koopa collision with other enemies
-	if (dynamic_cast<CKoopa*>(objSrc) 
-		&& (dynamic_cast<CGoomba*>(objDest) || dynamic_cast<CWingedGoomba*>(objDest) 
-			|| dynamic_cast<CPiranhaPlant*>(objDest) || dynamic_cast<CKoopa*>(objDest) 
+	if (dynamic_cast<CKoopa*>(objSrc)
+		&& (dynamic_cast<CGoomba*>(objDest) || dynamic_cast<CWingedGoomba*>(objDest)
+			|| dynamic_cast<CPiranhaPlant*>(objDest) || dynamic_cast<CKoopa*>(objDest)
 			|| dynamic_cast<CWingedKoopa*>(objDest)))
 	{
 		if (objSrc->GetState() == KOOPA_STATE_SHELL_DYNAMIC)
@@ -255,8 +256,8 @@ void CCollision::SweptAABB(float ml, float mt, float mr, float mb,
 	}
 
 	// Other enemies collide with held Koopa
-	if ((dynamic_cast<CGoomba*>(objSrc) || dynamic_cast<CWingedGoomba*>(objSrc) 
-			|| dynamic_cast<CPiranhaPlant*>(objSrc)) 
+	if ((dynamic_cast<CGoomba*>(objSrc) || dynamic_cast<CWingedGoomba*>(objSrc)
+		|| dynamic_cast<CPiranhaPlant*>(objSrc))
 		&& dynamic_cast<CKoopa*>(objDest))
 	{
 		if (dynamic_cast<CKoopa*>(objDest)->IsHeld() == 1)
@@ -286,7 +287,7 @@ void CCollision::SweptAABB(float ml, float mt, float mr, float mb,
 
 	// Other enemies collide with held Winged Koopa
 	if ((dynamic_cast<CGoomba*>(objSrc) || dynamic_cast<CWingedGoomba*>(objSrc)
-			|| dynamic_cast<CPiranhaPlant*>(objSrc))
+		|| dynamic_cast<CPiranhaPlant*>(objSrc))
 		&& dynamic_cast<CWingedKoopa*>(objDest))
 	{
 		if (dynamic_cast<CWingedKoopa*>(objDest)->IsHeld() == 1)
@@ -632,6 +633,19 @@ void CCollision::Process(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* co
 	{
 		LPCOLLISIONEVENT e = coEvents[i];
 		if (e->isDeleted) continue;
+
+		if (dynamic_cast<CBorder*>(e->obj) && dynamic_cast<CMario*>(objSrc))
+		{
+			objSrc->OnCollisionWith(e);
+			continue;
+		}
+
+
+		if (dynamic_cast<CFallingPlatform*>(e->obj) && dynamic_cast<CMario*>(objSrc))
+		{
+			objSrc->OnCollisionWith(e);
+			continue;
+		}
 
 		// Tail Whip collide with comsumable block 1
 		if ((dynamic_cast<CCoinQBlock*>(e->obj) || dynamic_cast<CBuffQBlock*>(e->obj) || dynamic_cast<CLifeBrick*>(e->obj))

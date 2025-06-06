@@ -1022,9 +1022,7 @@ void CPlayScene::Update(DWORD dt)
 		for (auto border : borders)
 		{
 			if (border->GetId() != 9999) continue;
-			float x, y;
-			border->GetPosition(x, y);
-			border->SetPosition(x + cam_x_increase, y);
+			border->SetSpeed(CAMERA_STEADY_SPEED_X, 0);
 		}
 		if (cam_x + cam_width > scrollCamXEnd)
 			cam_x = scrollCamXEnd - cam_width;

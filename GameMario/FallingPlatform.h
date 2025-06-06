@@ -40,6 +40,8 @@ public:
 	int GetOriginalChunkId() const { return originalChunkId; }
 	int GetWidth() const { return width; }
 
+	int IsDirectionCollidable(float nx, float ny) const { return 1; }
+
 	void SetState(int state);
 };
 
