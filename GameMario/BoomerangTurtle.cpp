@@ -3,11 +3,12 @@
 
 #include "PlayScene.h"
 
-CBoomerangTurtle::CBoomerangTurtle(int id, float x, float y, int z, int originalChunkId) : CGameObject(id, x, y, z)
+CBoomerangTurtle::CBoomerangTurtle(int id, float x, float y, int z, int originalChunkId, vector<CBoomerang*> boomerangList) : CGameObject(id, x, y, z)
 {
 	this->originalChunkId = originalChunkId;
 	this->ax = 0;
 	this->ay = BOOMERANG_TURTLE_GRAVITY;
+	this->boomerangList = boomerangList;
 	x0 = x;
 	y0 = y;
 	SetState(BOOMERANG_TURTLE_STATE_WALKING_LEFT);
@@ -45,10 +46,18 @@ void CBoomerangTurtle::OnCollisionWith(LPCOLLISIONEVENT e)
 void CBoomerangTurtle::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
 	// Debug out walkbetweenstart
-	DebugOutTitle(L"[BOOMERANG TURTLE] wbts: %llu, wats: %llu, ps: %llu, ip: %d\n", walkBetweenThrowsStart, walkAfterThrowsStart, prepareStart, isPreparing);
+	DebugOutTitle(L"[BOOMERANG TURTLE] wbts: %llu, wats: %llu, ps: %llu, ip: %d, bi: %d\n", walkBetweenThrowsStart, walkAfterThrowsStart, prepareStart, isPreparing, boomerangIndex);
 
 	if (isDefeated)
 		return;
+
+	for (int i = 0; i < boomerangList.size(); i++)
+	{
+		if (boomerangList[i]->IsIdling())
+		{
+			boomerangList[i]->SetPosition(x - 4, y - 10);
+		}
+	}
 
 	vy += ay * dt;
 	vx += ax * dt;
@@ -65,16 +74,25 @@ void CBoomerangTurtle::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	{
 		if ((GetTickCount64() - walkAfterThrowsStart > BOOMERANG_TURTLE_WALKING_TIMEOUT_2) && !isPreparing)
 		{
+			for (int i = 0; i < BOOMERANG_TURTLE_NUM_BOOMERANGS; i++)
+			{
+				boomerangList[i]->SetIsVisible(false);
+				boomerangList[i]->SetState(BOOMERANG_STATE_IDLING);
+			}
 			prepareStart = GetTickCount64();
 			isPreparing = true;
+			boomerangIndex = 0;
+			boomerangList[boomerangIndex]->SetIsVisible(true);
 		}
 	}
-	else
+	else if (walkAfterThrowsStart < walkBetweenThrowsStart)
 	{
 		if ((GetTickCount64() - walkBetweenThrowsStart > BOOMERANG_TURTLE_WALKING_TIMEOUT_1) && !isPreparing)
 		{
 			prepareStart = GetTickCount64();
 			isPreparing = true;
+			boomerangIndex = 1;
+			boomerangList[boomerangIndex]->SetIsVisible(true);
 		}
 	}
 
@@ -90,6 +108,7 @@ void CBoomerangTurtle::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			walkAfterThrowsStart = GetTickCount64();
 			isPreparing = false;
 		}
+		boomerangList[boomerangIndex]->SetState(BOOMERANG_STATE_SWINGING_UP);
 	}
 
 	if (fabs(x - x00) >= BOOMERANG_TURTLE_MOVE_OFFSET)
@@ -144,8 +163,6 @@ void CBoomerangTurtle::SetState(int state)
 		vy = -0.5f;
 		ay = BOOMERANG_TURTLE_GRAVITY;
 		isDead = 1;
-		walkAfterThrowsStart = GetTickCount64();
-		isPreparing = false;
 		break;
 	case BOOMERANG_TURTLE_STATE_DIE_LEFT:
 		dieStart = GetTickCount64();
@@ -153,15 +170,17 @@ void CBoomerangTurtle::SetState(int state)
 		vy = -0.5f;
 		ay = BOOMERANG_TURTLE_GRAVITY;
 		isDead = 1;
-		walkAfterThrowsStart = GetTickCount64();
-		isPreparing = false;
 		break;
 	case BOOMERANG_TURTLE_STATE_WALKING_RIGHT:
 		vx = BOOMERANG_TURTLE_WALKING_SPEED;
+		walkAfterThrowsStart = GetTickCount64();
+		isPreparing = false;
 		x00 = x;
 		break;
 	case BOOMERANG_TURTLE_STATE_WALKING_LEFT:
 		vx = -BOOMERANG_TURTLE_WALKING_SPEED;
+		walkAfterThrowsStart = GetTickCount64();
+		isPreparing = false;
 		x00 = x;
 		break;
 	}

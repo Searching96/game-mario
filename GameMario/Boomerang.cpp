@@ -9,7 +9,7 @@ CBoomerang::CBoomerang(int id, float x, float y, int z, int originalChunkId) : C
 	this->ay = 0;
 	x0 = x;
 	y0 = y;
-	SetState(BOOMERANG_STATE_SWINGING_UP);
+	SetState(BOOMERANG_STATE_IDLING);
 }
 
 void CBoomerang::GetBoundingBox(float& left, float& top, float& right, float& bottom)
@@ -58,18 +58,18 @@ void CBoomerang::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		isSwingingUp = false;
 		SetState(BOOMERANG_STATE_SWINGING_DOWN);
 	}
-	if ((isSwingingDown) && (y >= y00 + 12))
+	if ((isSwingingDown) && (y >= y00 + BOOMERANG_MAX_HEIGHT_DIFF_FROM_START))
 	{
-		y = y00 + 12;
+		y = y00 + BOOMERANG_MAX_HEIGHT_DIFF_FROM_START;
 		isSwingingDown = false;
 		SetState(BOOMERANG_STATE_HOMING);
 	}
-	if ((isHoming) && (x <= x00))
-	{
-		x = x00;
-		isHoming = false;
-		SetState(BOOMERANG_STATE_SWINGING_UP);
-	}
+	//if ((isHoming) && (x <= x00))
+	//{
+	//	x = x00;
+	//	isHoming = false;
+	//	SetState(BOOMERANG_STATE_SWINGING_UP);
+	//}
 
 	CGameObject::Update(dt, coObjects);
 	CCollision::GetInstance()->Process(this, dt, coObjects);
@@ -77,7 +77,11 @@ void CBoomerang::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 void CBoomerang::Render()
 {
+	if (!isVisible) return;
+
 	int aniId = ID_ANI_BOOMERANG_SWINGING;
+	if (isIdling)
+		aniId = ID_ANI_BOOMERANG_IDLING;
 	CAnimations::GetInstance()->Get(aniId)->Render(x, y);
 
 	//RenderBoundingBox();
@@ -93,6 +97,7 @@ void CBoomerang::SetState(int state)
 		vy = 0;
 		ax = 0;
 		ay = 0;
+		isIdling = true;
 		break;
 	case BOOMERANG_STATE_SWINGING_UP:
 		vx = BOOMERANG_SPEED_X;

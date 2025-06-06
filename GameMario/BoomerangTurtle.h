@@ -1,5 +1,6 @@
 #pragma once
 #include "GameObject.h"
+#include "Boomerang.h"
 
 #define BOOMERANG_TURTLE_GRAVITY				0.002f
 #define BOOMERANG_TURTLE_WALKING_SPEED			0.02f
@@ -27,9 +28,13 @@
 #define BOOMERANG_TURTLE_WALKING_TIMEOUT_2		6000	// timeout between the second throw towards the next 2-throw
 #define BOOMERANG_TURTLE_PREPARE_TIMEOUT		300
 
+#define BOOMERANG_TURTLE_NUM_BOOMERANGS			2
+
 class CBoomerangTurtle : public CGameObject
 {
 protected:
+	vector<CBoomerang*> boomerangList;
+
 	float ax;
 	float ay;
 
@@ -37,6 +42,8 @@ protected:
 	float y0;
 
 	float x00 = -1;
+
+	int boomerangIndex = 0;
 
 	ULONGLONG dieStart = 0;
 	ULONGLONG dieOnStompStart = 0;
@@ -62,7 +69,7 @@ protected:
 	virtual void OnCollisionWith(LPCOLLISIONEVENT e);
 
 public:
-	CBoomerangTurtle(int id, float x, float y, int z, int originalChunkId);
+	CBoomerangTurtle(int id, float x, float y, int z, int originalChunkId, vector<CBoomerang*> boomerangList);
 	virtual void SetState(int state);
 	int IsDead() { return isDead; }
 	int IsDefeated() { return isDefeated; }

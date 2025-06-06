@@ -537,7 +537,14 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 		{
 			zIndex = ZINDEX_ENEMIES;
 			if (tokens.size() < 4) throw runtime_error("Insufficient params for BOOMERANG_TURTLE");
-			obj = new CBoomerangTurtle(id, x, y, zIndex, targetChunk->GetID());
+			vector<CBoomerang*> boomerangList;
+			for (int i = 0; i < BOOMERANG_TURTLE_NUM_BOOMERANGS; i++)
+			{
+				CBoomerang* boomerang = new CBoomerang(DEPENDENT_ID, x, y, zIndex, targetChunk->GetID());
+				boomerangList.push_back(boomerang);
+				targetChunk->AddObject(boomerang);
+			}
+			obj = new CBoomerangTurtle(id, x, y, zIndex, targetChunk->GetID(), boomerangList);
 			targetChunk->AddEnemy(obj);
 			break;
 		}

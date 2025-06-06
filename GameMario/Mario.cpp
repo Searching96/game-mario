@@ -596,18 +596,24 @@ void CMario::OnCollisionWithHiddenCoinBrick(LPCOLLISIONEVENT e)
 void CMario::OnCollisionWithBoomerang(LPCOLLISIONEVENT e)
 {
 	if (untouchable) return;
+	CBoomerang* b = dynamic_cast<CBoomerang*>(e->obj);
 
-	switch (level)
-	{
-	case MARIO_LEVEL_TAIL:
-		SetState(MARIO_STATE_TAIL_DOWN);
-		break;
-	case MARIO_LEVEL_BIG:
-		SetState(MARIO_STATE_POWER_DOWN);
-		break;
-	case MARIO_LEVEL_SMALL:
-		SetState(MARIO_STATE_DIE_ON_BEING_KILLED);
-		break;
+	if (b)
+	{ 
+		if (!b->IsVisible()) return;
+
+		switch (level)
+		{
+		case MARIO_LEVEL_TAIL:
+			SetState(MARIO_STATE_TAIL_DOWN);
+			break;
+		case MARIO_LEVEL_BIG:
+			SetState(MARIO_STATE_POWER_DOWN);
+			break;
+		case MARIO_LEVEL_SMALL:
+			SetState(MARIO_STATE_DIE_ON_BEING_KILLED);
+			break;
+		}
 	}
 }
 
