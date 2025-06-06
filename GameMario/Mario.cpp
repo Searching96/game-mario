@@ -1196,6 +1196,9 @@ int CMario::GetAniIdSmall()
 		}
 	}
 
+	if (isTeleporting)
+		aniId = ID_ANI_MARIO_SMALL_ENTERING_PIPE;
+
 	if (aniId == -1) aniId = ID_ANI_MARIO_SMALL_IDLE_RIGHT;
 
 	return aniId;
@@ -1307,6 +1310,9 @@ int CMario::GetAniIdBig()
 	if (preAniId != ID_ANI_MARIO_JUMP_RUN_RIGHT && preAniId != ID_ANI_MARIO_JUMP_RUN_LEFT)
 		if (isOnPlatform == 0 && isHoldingKoopa == 0 && !isChangingLevel && vy > 0 && !isOnFallingPlatform)
 			aniId = (nx > 0) ? ID_ANI_MARIO_FALLING_RIGHT : ID_ANI_MARIO_FALLING_LEFT;
+
+	if (isTeleporting)
+		aniId = ID_ANI_MARIO_BIG_ENTERING_PIPE;
 
 	if (aniId == -1) aniId = ID_ANI_MARIO_IDLE_RIGHT;
 
