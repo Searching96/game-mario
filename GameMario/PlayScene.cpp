@@ -80,7 +80,7 @@ using namespace std;
 #define ZINDEX_BACKGROUND_SCENERY   20 // Bushes, Trees (behind pipes)
 #define ZINDEX_PLATFORMS            40 // Ground platforms, Sky Platforms (usually behind pipes/blocks)
 #define ZINDEX_PIRANHA_PLANT		45 // Piranha Plants behind pipes.
-#define ZINDEX_PIPES                50 // Standard Pipes
+#define ZINDEX_PIPES                89 // Standard Pipes
 #define ZINDEX_MUSHROOM             60 // Mushroom
 #define ZINDEX_HIDDEN_COIN			65 // Q-Block Coins
 #define ZINDEX_BLOCKS               70 // Bricks, Q-Blocks, Boxes
@@ -1113,7 +1113,7 @@ void CPlayScene::UpdateCamera(CMario* mario, float cam_width, float cam_height) 
 	}
 
 	// Set final camera position
-	game->SetCamPos(targetCamX, cam_y);
+	game->SetCamPos(targetCamX, targetCamY);
 	// Debug output
 	//DebugOut(L"Cam pos: %f, %f\n", cam_x, cam_y);
 }

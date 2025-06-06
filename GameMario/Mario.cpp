@@ -89,11 +89,19 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
 	// DebugOutTitle(L"hspl: %d", (int)hasReachedPlatformAfterHover);
 
-	if (isOnPlatform && isSwitchingScene) {
-		vx = MARIO_WALKING_SPEED;
+	if (isSwitchingScene) 
+	{
+		if (isOnPlatform)
+		{
+			vx = 0.08f;
+			x += vx * dt;
+		}
+		else
+		{
+			vx = 0;
+		}
 		vy = 0;
 		ay = 0;
-		x += vx * dt;
 		return;
 	}
 
@@ -450,7 +458,7 @@ void CMario::OnNoCollision(DWORD dt)
 
 void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 {
-	if (isTeleporting || (isSwitchingScene && isOnPlatform)) return;
+	if (isTeleporting) return;
 	if (e->ny != 0 && e->obj->IsBlocking())
 	{
 		vy = 0;
@@ -531,7 +539,8 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 
 void CMario::OnCollisionWithBorder(LPCOLLISIONEVENT e)
 {
-	offsetX = e->nx > 0 ? 0.5f : -0.5f;
+	offsetX = e->nx > 0 ? 0.6f : -0.6f;
+	SetSpeed(0.1f, vy);
 }
 
 void CMario::OnCollisionWithBuffRoulette(LPCOLLISIONEVENT e)
@@ -539,6 +548,7 @@ void CMario::OnCollisionWithBuffRoulette(LPCOLLISIONEVENT e)
 	CBuffRoulette* br = dynamic_cast<CBuffRoulette*>(e->obj);
 	if (br->GetState() != BUFF_STATE_USED)
 		br->SetState(BUFF_STATE_USED);
+	vx = 0;
 }
 
 void CMario::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
@@ -1527,6 +1537,7 @@ void CMario::SetState(int state)
 
 	case MARIO_STATE_RUNNING_RIGHT:
 		if (isSitting) break;
+		if (isSwitchingScene) break;
 		if (isOnPlatform && vx < 0 && isHoldingKoopa == 0) // If Mario is moving left, set state to brake
 		{
 			if (isOnPlatform)
@@ -1561,6 +1572,7 @@ void CMario::SetState(int state)
 
 	case MARIO_STATE_RUNNING_LEFT:
 		if (isSitting) break;
+		if (isSwitchingScene) break;
 		if (isOnPlatform && vx > 0 && isHoldingKoopa == 0) // If Mario is moving right, set state to brake
 		{
 			if (isOnPlatform)
@@ -1594,6 +1606,7 @@ void CMario::SetState(int state)
 
 	case MARIO_STATE_WALKING_RIGHT:
 		if (isSitting) break;
+		if (isSwitchingScene) break;
 		if (isOnPlatform && vx < 0 && isHoldingKoopa == 0) // If Mario is moving left, set state to brake
 		{
 			if (isOnPlatform)
@@ -1625,6 +1638,7 @@ void CMario::SetState(int state)
 
 	case MARIO_STATE_WALKING_LEFT:
 		if (isSitting) break;
+		if (isSwitchingScene) break;
 		if (isOnPlatform && vx > 0 && isHoldingKoopa == 0) // If Mario is moving right, set state to brake
 		{
 			if (isOnPlatform)
