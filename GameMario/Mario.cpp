@@ -30,6 +30,7 @@
 #include "Collision.h"
 #include "PlayScene.h"
 #include "FallingPlatform.h"
+#include "BuffRoulette.h"
 
 CMario::CMario(int id, float x, float y, int z) : CGameObject(id, x, y, z)
 {
@@ -86,6 +87,14 @@ CMario::~CMario()
 void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
 	// DebugOutTitle(L"hspl: %d", (int)hasReachedPlatformAfterHover);
+
+	if (isOnPlatform && isSwitchingScene) {
+		vx = MARIO_WALKING_SPEED;
+		vy = 0;
+		ay = 0;
+		x += vx * dt;
+		return;
+	}
 
 	// Track previous jump count to apply consistent jump impulse
 	static int lastJumpCount = 0;
@@ -329,8 +338,8 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		tailWhip->Update(dt, coObjects);
 	}
 
-	DebugOutTitle(L"vx=%f, ax=%f, mvx=%f, irn=%d, fx=%f, iop=%d, iof=%d\n",
-		vx, ax, maxVx, isRunning, frictionX, isOnPlatform, isOnFallingPlatform);
+	DebugOutTitle(L"vx=%f, ax=%f, mvx=%f, irn=%d, fx=%f, iop=%d, sc=%d, state=%d\n",
+		vx, ax, maxVx, isRunning, frictionX, isOnPlatform, isSwitchingScene, state);
 
 	// Process collisions
 	isOnPlatform = false;
@@ -440,7 +449,7 @@ void CMario::OnNoCollision(DWORD dt)
 
 void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 {
-	if (isTeleporting) return;
+	if (isTeleporting || (isSwitchingScene && isOnPlatform)) return;
 	if (e->ny != 0 && e->obj->IsBlocking())
 	{
 		vy = 0;
@@ -513,12 +522,20 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 		OnCollisionWithFallingPlatform(e);
 	else if (dynamic_cast<CBorder*>(e->obj))
 		OnCollisionWithBorder(e);
+	else if (dynamic_cast<CBuffRoulette*>(e->obj))
+		OnCollisionWithBuffRoulette(e);
 }
 
 void CMario::OnCollisionWithBorder(LPCOLLISIONEVENT e)
 {
-	offsetX = 0.5f;
-	vx = 0.035f;
+	offsetX = e->nx > 0 ? 0.5f : -0.5f;
+}
+
+void CMario::OnCollisionWithBuffRoulette(LPCOLLISIONEVENT e)
+{
+	CBuffRoulette* br = dynamic_cast<CBuffRoulette*>(e->obj);
+	if (br->GetState() != BUFF_STATE_USED)
+		br->SetState(BUFF_STATE_USED);
 }
 
 void CMario::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
@@ -1445,7 +1462,7 @@ void CMario::SetState(int state)
 	// DIE is the end state, cannot be changed! 
 	if (this->state == MARIO_STATE_DIE_ON_BEING_KILLED || this->state == MARIO_STATE_DIE_ON_FALLING) return;
 	if (CGame::GetInstance()->IsPaused()) return;
-	if (isTeleporting) return;
+	if (isTeleporting || isSwitchingScene) return;
 
 	int previousState = this->state;
 
@@ -1739,6 +1756,9 @@ void CMario::SetState(int state)
 		break;
 	case MARIO_STATE_RELEASE_RUN:
 		isRunning = 0;
+		break;
+	case MARIO_STATE_SWITCH_SCENE:
+		isSwitchingScene = true;
 		break;
 	}
 

@@ -90,6 +90,7 @@ public:
 	int GetLives() { return lives; }
 	void AddScore(int score) { this->score += score; }
 	int GetScore() { return score; }
+	void ResetTimer() { time = 300000; }
 	DWORD GetTime() { return time / 1000; } // Return time in seconds for display
 	void Reset() { time = 301000; lives = 3; score = 0; coins = 0; }
 	void Restart() { time = 301000; lives -= 1; coins = 0; }

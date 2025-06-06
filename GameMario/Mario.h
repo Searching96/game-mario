@@ -67,6 +67,8 @@ class CPortal;
 
 #define MARIO_STATE_TELEPORTING			1400
 
+#define MARIO_STATE_SWITCH_SCENE		1500
+
 #pragma region ANIMATION_ID
 // BIG MARIO
 #define ID_ANI_MARIO_IDLE_RIGHT 0
@@ -214,7 +216,9 @@ class CPortal;
 
 #pragma endregion
 
-#define GROUND_Y									160.0f
+#define MARIO_DEATH_DISTANCE 100.0f  // Distance behind scroll border before death
+#define BORDER_PUSH_FORCE 0.05f      // How strongly border pushes Mario
+#define MIN_SCROLL_SPEED 0.03f       // Minimum speed Mario must maintain in scroll zone
 
 #define	MARIO_LEVEL_SMALL							1
 #define	MARIO_LEVEL_BIG								2
@@ -263,7 +267,7 @@ class CMario : public CGameObject
 	bool hasReachedPlatformAfterHover = true;
 
 	float frictionX;
-	
+
 	int level;
 	bool untouchable;
 	ULONGLONG untouchableStart;
@@ -312,6 +316,7 @@ class CMario : public CGameObject
 	bool isChangingLevel = false;
 	bool isHoldingUpKey = false;
 	bool isSkywalking = false;
+	bool isSwitchingScene = false;
 
 	void OnCollisionWithGoomba(LPCOLLISIONEVENT e);
 	void OnCollisionWithCoin(LPCOLLISIONEVENT e);
@@ -336,6 +341,7 @@ class CMario : public CGameObject
 	void OnCollisionWithBoomerang(LPCOLLISIONEVENT e);
 	void OnCollisionWithFallingPlatform(LPCOLLISIONEVENT e);
 	void OnCollisionWithBorder(LPCOLLISIONEVENT e);
+	void OnCollisionWithBuffRoulette(LPCOLLISIONEVENT e);
 
 	int GetAniIdBig();
 	int GetAniIdSmall();
@@ -353,7 +359,7 @@ public:
 	void Render();
 	void SetState(int state);
 
-	int IsCollidable() { return (state != MARIO_STATE_DIE_ON_BEING_KILLED && state != MARIO_STATE_DIE_ON_FALLING && isTeleporting == 0); }
+	int IsCollidable() { return (state != MARIO_STATE_DIE_ON_BEING_KILLED && state != MARIO_STATE_DIE_ON_FALLING && !isTeleporting && !(isSwitchingScene && isOnPlatform)); }
 	int IsBlocking() { return 0; }
 
 	void OnNoCollision(DWORD dt);
@@ -389,10 +395,13 @@ public:
 	bool GetIsEnteringPortal() const { return isEnteringPortal; }
 	float GetYLevel() const { return yLevel; }
 
+	void SetIsSwitchingScene(bool isSwitchingScene) { this->isSwitchingScene = isSwitchingScene; }
+	bool GetIsSwitchingScene() const { return isSwitchingScene; }
+
 	void ToggleSkywalk() { isSkywalking = !isSkywalking; }
 	int GetNx() { return nx; }
 	float GetPMeter() const { return pMeter; }
-	//bool MaxPMeter() const { return fabs(vx) == MARIO_MAX_RUNNING_SPEED; }
+	bool GetIsMaxSpeed() const { return fabs(vx) == MARIO_MAX_RUNNING_SPEED; }
 	BOOLEAN IsOnPlatform() const { return isOnPlatform; }
 	BOOLEAN IsChangingLevel() const { return isChangingLevel; }
 	CTailWhip* GetTailWhip() const { return tailWhip; }
