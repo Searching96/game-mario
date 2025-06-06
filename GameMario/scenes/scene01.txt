@@ -37,6 +37,7 @@ assets\activator.txt
 assets\wingedkoopa.txt
 assets\boomerang.txt
 assets\boomerangturtle.txt
+assets\fallingplatform.txt
 
 [SCENE_SETTINGS]
 start_cam_x	0
@@ -128,6 +129,9 @@ cam_mode	0
 
 # Piranha
 35	9	360	376	0
+
+# Falling platform
+36	20	240	360	4
 
 # Pipe
 37	103	352	368	16	16	3	1090110	1090120	1090210	1090220

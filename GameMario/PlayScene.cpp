@@ -40,6 +40,7 @@
 #include "Boomerang.h"
 #include "FlyingKoopa.h"
 #include "HiddenCoinBrick.h"
+#include "FallingPlatform.h"
 
 #include "SampleKeyEventHandler.h"
 
@@ -318,22 +319,33 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 			obj = new CBorder(id, x, y, width, height);
 			break;
 		}
+		case OBJECT_TYPE_FALLING_PLATFORM:
+		{
+			zIndex = ZINDEX_PLATFORMS;
+			int width = stoi(tokens[4]);
+			obj = new CFallingPlatform(id, x, y, zIndex, targetChunk->GetID(), width);
+			targetChunk->AddEnemy(obj);  // Already present
+			break;
+		}
 		case OBJECT_TYPE_GOOMBA:
+		{
 			zIndex = ZINDEX_ENEMIES;
 			obj = new CGoomba(id, x, y, zIndex, targetChunk->GetID());
 			targetChunk->AddEnemy(obj);
 			break;
+		}
 		case OBJECT_TYPE_KOOPA:
+		{
 			zIndex = ZINDEX_ENEMIES;
 			obj = new CKoopa(id, x, y, zIndex, targetChunk->GetID());
 			targetChunk->AddEnemy(obj);
 			break;
+		}
 		case OBJECT_TYPE_PIRANHA_PLANT:
 		{
 			int type = stoi(tokens[4]); // Piranha plant type
 			zIndex = type == 0 ? ZINDEX_PIRANHA_PLANT : ZINDEX_PLATFORMS - 1;
 			obj = new CPiranhaPlant(id, x, y, zIndex, type, targetChunk->GetID());
-			targetChunk->AddObject(obj);
 			targetChunk->AddEnemy(obj);
 			return;
 		}
@@ -988,6 +1000,7 @@ void CPlayScene::Update(DWORD dt)
 
 			// Pass the comprehensive list
 			obj->Update(dt, &coObjects);
+
 		}
 	}
 
@@ -1137,6 +1150,11 @@ void CPlayScene::DefeatEnemiesOutOfRange()
 				if (!wingedGoomba->IsDefeated())
 					wingedGoomba->SetIsDefeated(true);
 			}
+			else if (CFallingPlatform* fallingPlatform = dynamic_cast<CFallingPlatform*>(enemy))
+			{
+				if (!fallingPlatform->IsDefeated())
+					fallingPlatform->SetIsDefeated(true);
+			}
 		}
 	}
 }
@@ -1278,6 +1296,21 @@ void CPlayScene::RespawnEnemiesInRange()
 					CWingedGoomba* newWingedGoomba = new CWingedGoomba(wingedGoomba->GetId(), eX0, eY0, wingedGoomba->GetZIndex(), wingedGoomba->GetOriginalChunkId());
 					originalChunk->AddObject(newWingedGoomba);
 					originalChunk->AddEnemy(newWingedGoomba);
+				}
+			}
+		}
+		else if (CFallingPlatform* fallingPlatform = dynamic_cast<CFallingPlatform*>(enemy))
+		{
+			fallingPlatform->GetOriginalPosition(eX0, eY0);
+			if (fallingPlatform->IsDefeated() && shouldRespawn(eX0))
+			{
+				LPCHUNK originalChunk = GetChunk(fallingPlatform->GetOriginalChunkId());
+				if (originalChunk)
+				{
+					originalChunk->RemoveObject(fallingPlatform);
+					CFallingPlatform* newFallingPlatform = new CFallingPlatform(fallingPlatform->GetId(), eX0, eY0, fallingPlatform->GetZIndex(), fallingPlatform->GetOriginalChunkId(), fallingPlatform->GetWidth());
+					originalChunk->AddObject(newFallingPlatform);
+					originalChunk->AddEnemy(newFallingPlatform);
 				}
 			}
 		}

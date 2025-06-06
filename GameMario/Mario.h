@@ -281,6 +281,7 @@ class CMario : public CGameObject
 	float yLevel;
 	float offsetX = 0;
 	float offsetY = 0;
+	bool isOnFallingPlatform = false;
 
 	bool powerUp = 0;
 	ULONGLONG powerUpStart = -1;
@@ -333,6 +334,7 @@ class CMario : public CGameObject
 	void OnCollisionWithFlyingKoopa(LPCOLLISIONEVENT e);
 	void OnCollisionWithHiddenCoinBrick(LPCOLLISIONEVENT e);
 	void OnCollisionWithBoomerang(LPCOLLISIONEVENT e);
+	void OnCollisionWithFallingPlatform(LPCOLLISIONEVENT e);
 
 	int GetAniIdBig();
 	int GetAniIdSmall();
