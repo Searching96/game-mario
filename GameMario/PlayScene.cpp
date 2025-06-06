@@ -313,15 +313,23 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 		switch (object_type)
 		{
 		case OBJECT_TYPE_GOOMBA:
+		{
 			zIndex = ZINDEX_ENEMIES;
-			obj = new CGoomba(id, x, y, zIndex, targetChunk->GetID());
+			CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+			int gNx = (player->GetNx() < 0) ? 1 : -1;
+			obj = new CGoomba(id, x, y, zIndex, targetChunk->GetID(), gNx);
 			targetChunk->AddEnemy(obj);
 			break;
+		}
 		case OBJECT_TYPE_KOOPA:
+		{
 			zIndex = ZINDEX_ENEMIES;
-			obj = new CKoopa(id, x, y, zIndex, targetChunk->GetID());
+			CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+			int kNx = (player->GetNx() > 0) ? 1 : -1;
+			obj = new CKoopa(id, x, y, zIndex, targetChunk->GetID(), kNx);
 			targetChunk->AddEnemy(obj);
 			break;
+		}
 		case OBJECT_TYPE_PIRANHA_PLANT:
 		{
 			int type = stoi(tokens[4]); // Piranha plant type
@@ -334,7 +342,9 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 		case OBJECT_TYPE_WINGED_GOOMBA:
 		{
 			zIndex = ZINDEX_ENEMIES;
-			obj = new CWingedGoomba(id, x, y, zIndex, targetChunk->GetID());
+			CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+			int wgNx = (player->GetNx() < 0) ? 1 : -1;
+			obj = new CWingedGoomba(id, x, y, zIndex, targetChunk->GetID(), wgNx);
 			targetChunk->AddEnemy(obj);
 			break;
 		}
@@ -520,10 +530,12 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 		case OBJECT_TYPE_WINGED_KOOPA:
 		{
 			zIndex = ZINDEX_ENEMIES;
-			int nx = (stoi(tokens[4]) > 0) ? 1 : -1;
-			bool isWinged = (stoi(tokens[5]) == 1);
+			CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+			int nx = (player->GetNx() < 0) ? 1 : -1;
+			bool isWinged = (stoi(tokens[4]) == 1);
 			obj = new CWingedKoopa(id, x, y, zIndex, targetChunk->GetID(), nx, isWinged);
 			targetChunk->AddEnemy(obj);
+			((CWingedKoopa*)obj)->SetIsInitiallyWinged(isWinged);
 			break;
 		}
 		case OBJECT_TYPE_BOOMERANG:
@@ -1188,7 +1200,9 @@ void CPlayScene::RespawnEnemiesInRange()
 				if (originalChunk)
 				{
 					originalChunk->RemoveObject(goomba);
-					CGoomba* newGoomba = new CGoomba(goomba->GetId(), eX0, eY0, goomba->GetZIndex(), goomba->GetOriginalChunkId());
+					CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+					int gNx = (player->GetNx() > 0) ? 1 : -1;
+					CGoomba* newGoomba = new CGoomba(goomba->GetId(), eX0, eY0, goomba->GetZIndex(), goomba->GetOriginalChunkId(), gNx);
 					originalChunk->AddObject(newGoomba);
 					originalChunk->AddEnemy(newGoomba);
 				}
@@ -1220,7 +1234,9 @@ void CPlayScene::RespawnEnemiesInRange()
 				LPCHUNK originalChunk = GetChunk(koopa->GetOriginalChunkId());
 				if (originalChunk) {
 					originalChunk->RemoveObject(koopa);
-					CKoopa* newKoopa = new CKoopa(koopa->GetId(), eX0, eY0, koopa->GetZIndex(), koopa->GetOriginalChunkId());
+					CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+					int kNx = (player->GetNx() < 0) ? 1 : -1;
+					CKoopa* newKoopa = new CKoopa(koopa->GetId(), eX0, eY0, koopa->GetZIndex(), koopa->GetOriginalChunkId(), kNx);
 					originalChunk->AddObject(newKoopa);
 					originalChunk->AddEnemy(newKoopa);
 				}
@@ -1251,10 +1267,12 @@ void CPlayScene::RespawnEnemiesInRange()
 			// If koopa is defeated, respawn it in its original chunk
 			if (wingedKoopa->IsDefeated()) {
 				LPCHUNK originalChunk = GetChunk(wingedKoopa->GetOriginalChunkId());
+				CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+				int wkNx = (player->GetNx() < 0) ? 1 : -1;
 				if (originalChunk) {
 					originalChunk->RemoveObject(wingedKoopa);
 					CWingedKoopa* newWingedKoopa = new CWingedKoopa(wingedKoopa->GetId(), eX0, eY0, wingedKoopa->GetZIndex(),
-						wingedKoopa->GetOriginalChunkId(), wingedKoopa->GetNx(), wingedKoopa->IsWinged());
+						wingedKoopa->GetOriginalChunkId(), wkNx, !(wingedKoopa->GetId() == 10005));
 					originalChunk->AddObject(newWingedKoopa);
 					originalChunk->AddEnemy(newWingedKoopa);
 				}
@@ -1284,7 +1302,9 @@ void CPlayScene::RespawnEnemiesInRange()
 				if (originalChunk)
 				{
 					originalChunk->RemoveObject(wingedGoomba);
-					CWingedGoomba* newWingedGoomba = new CWingedGoomba(wingedGoomba->GetId(), eX0, eY0, wingedGoomba->GetZIndex(), wingedGoomba->GetOriginalChunkId());
+					CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+					int wgNx = (player->GetNx() < 0) ? 1 : -1;
+					CWingedGoomba* newWingedGoomba = new CWingedGoomba(wingedGoomba->GetId(), eX0, eY0, wingedGoomba->GetZIndex(), wingedGoomba->GetOriginalChunkId(), wgNx);
 					originalChunk->AddObject(newWingedGoomba);
 					originalChunk->AddEnemy(newWingedGoomba);
 				}

@@ -82,7 +82,7 @@ protected:
 	bool CheckCollisionWithTerrain(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 
 public:
-	CKoopa(int id, float x, float y, int z, int originalChunkId);
+	CKoopa(int id, float x, float y, int z, int originalChunkId, int nx);
 	virtual void SetState(int state);
 	void StartShell();
 	bool IsHeld() { return isHeld; }

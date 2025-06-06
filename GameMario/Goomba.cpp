@@ -5,11 +5,12 @@
 #include "WingedGoomba.h"
 #include "WingedKoopa.h"
 
-CGoomba::CGoomba(int id, float x, float y, int z, int originalChunkId) : CGameObject(id, x, y, z)
+CGoomba::CGoomba(int id, float x, float y, int z, int originalChunkId, int nx) : CGameObject(id, x, y, z)
 {
 	this->originalChunkId = originalChunkId;
 	this->ax = 0;
 	this->ay = GOOMBA_GRAVITY;
+	this->nx = nx;
 	x0 = x;
 	y0 = y;
 	SetState(GOOMBA_STATE_WALKING);
@@ -172,7 +173,7 @@ void CGoomba::SetState(int state)
 		isDead = 1;
 		break;
 	case GOOMBA_STATE_WALKING: 
-		vx = -GOOMBA_WALKING_SPEED;
+		vx = (nx > 0) ? GOOMBA_WALKING_SPEED : -GOOMBA_WALKING_SPEED;
 		break;
 	}
 }

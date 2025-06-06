@@ -51,6 +51,7 @@ protected:
 	bool isKicked = false;  
 	bool isFlying = false; 
 	bool isWinged;
+	bool isInitiallyWinged;
 
 	ULONGLONG shellStart = -1;  
 	ULONGLONG dieStart = -1;  
@@ -99,8 +100,10 @@ public:
 	bool IsDefeated() { return isDefeated; }  
 	bool IsDead() { return isDead; }
 	bool IsWinged() { return isWinged; }
+	bool IsInitiallyWinged() { return isInitiallyWinged; }
 	void SetIsDefeated(bool isDefeated) { this->isDefeated = isDefeated; }  
 	void SetIsWinged(bool isWinged) { this->isWinged = isWinged; }
+	void SetIsInitiallyWinged(bool isInitiallyWinged) { this->isInitiallyWinged = isInitiallyWinged; }
 	int GetOriginalChunkId() { return originalChunkId; }
 	int GetNx() { return nx; }
 };

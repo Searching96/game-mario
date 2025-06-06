@@ -17,15 +17,16 @@
 
 #include "debug.h"
 
-CKoopa::CKoopa(int id, float x, float y, int z, int originalChunkId) : CGameObject(id, x, y, z)
+CKoopa::CKoopa(int id, float x, float y, int z, int originalChunkId, int nx) : CGameObject(id, x, y, z)
 {
 	this->originalChunkId = originalChunkId;
 	this->ax = 0;
 	this->ay = KOOPA_GRAVITY;
+	this->nx = nx;
 	x0 = x;
 	y0 = y;
 	shellStart = -1;
-	SetState(KOOPA_STATE_WALKING_LEFT);
+	SetState((nx > 0) ? KOOPA_STATE_WALKING_RIGHT : KOOPA_STATE_WALKING_LEFT);
 }
 
 void CKoopa::GetBoundingBox(float& left, float& top, float& right, float& bottom)

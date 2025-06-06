@@ -380,8 +380,9 @@ public:
 	bool IsPowerDown() const { return powerDown; }
 	bool IsTailDown() const { return tailDown; }
 	bool IsHovering() const { return isHovering; }
-	bool IsFlying() { return !isOnPlatform && (jumpCount > 1 || isHovering == 1); }
+	bool IsFlying() const { return !isOnPlatform && (jumpCount > 1 || isHovering == 1); }
 	bool IsRunning() const { return isRunning; }
+	bool IsSitting() const { return isSitting; }
 
 	bool GetIsTeleporting() const { return isTeleporting; }
 	bool GetIsEnteringPortal() const { return isEnteringPortal; }

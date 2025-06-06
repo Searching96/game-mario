@@ -7,11 +7,12 @@
 
 #include "debug.h"
 
-CWingedGoomba::CWingedGoomba(int id, float x, float y, int z, int originalChunkId) : CGameObject(id, x, y, z)
+CWingedGoomba::CWingedGoomba(int id, float x, float y, int z, int originalChunkId, int nx) : CGameObject(id, x, y, z)
 {
 	this->originalChunkId = originalChunkId;
 	this->ax = 0;
 	this->ay = WINGED_GOOMBA_GRAVITY;
+	this->nx = nx;
 	x0 = x;
 	y0 = y;
 	SetState(WINGED_GOOMBA_STATE_TRACKING);

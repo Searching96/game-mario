@@ -52,7 +52,7 @@ protected:
 	void OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e);
 
 public: 	
-	CGoomba(int id, float x, float y, int z, int originalChunkId);
+	CGoomba(int id, float x, float y, int z, int originalChunkId, int nx);
 	virtual void SetState(int state);
 	int IsDead() { return isDead; }
 	int IsDefeated() { return isDefeated; }

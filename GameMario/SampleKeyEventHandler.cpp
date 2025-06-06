@@ -32,7 +32,8 @@ void CSampleKeyHandler::OnKeyDown(int KeyCode)
 		break;
 	case DIK_A:
 		if (player->GetLevel() == MARIO_LEVEL_TAIL)
-			player->SetState(MARIO_STATE_TAIL_WHIP);
+			if (!player->IsSitting()) 
+				player->SetState(MARIO_STATE_TAIL_WHIP);
 		break;
 	case DIK_1:
 		player->SetLevel(MARIO_LEVEL_SMALL);
