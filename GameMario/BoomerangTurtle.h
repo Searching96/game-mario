@@ -67,6 +67,7 @@ protected:
 
 	virtual void OnNoCollision(DWORD dt);
 	virtual void OnCollisionWith(LPCOLLISIONEVENT e);
+	void OnCollisionWithBoomerang(LPCOLLISIONEVENT e);
 
 public:
 	CBoomerangTurtle(int id, float x, float y, int z, int originalChunkId, vector<CBoomerang*> boomerangList);

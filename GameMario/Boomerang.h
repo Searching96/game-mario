@@ -19,8 +19,10 @@
 
 #define BOOMERANG_SWING_UP_OFFSET						48.0f
 
-#define ID_ANI_BOOMERANG_SWINGING						200000
-#define ID_ANI_BOOMERANG_IDLING							201000
+#define ID_ANI_BOOMERANG_SWINGING_RIGHT					200000
+#define ID_ANI_BOOMERANG_SWINGING_LEFT					200010
+#define ID_ANI_BOOMERANG_IDLING_RIGHT					201000
+#define ID_ANI_BOOMERANG_IDLING_LEFT					201010
 
 #define BOOMERANG_MAX_HEIGHT_DIFF_FROM_START			10.0f
 
@@ -74,4 +76,6 @@ public:
 	bool IsIdling() { return isIdling; }
 	bool IsVisible() { return isVisible; }
 	void SetIsVisible(bool isVisible) { this->isVisible = isVisible; }
+	void SetNx(int nx) { this->nx = nx; }
+	int GetNx() { return nx; }
 };

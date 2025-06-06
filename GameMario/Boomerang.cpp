@@ -43,7 +43,10 @@ void CBoomerang::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		ay = 0;
 	
 	if (isSwingingDown && y >= y00 - 32)
-		ax -= BOOMERANG_ACCEL_DECREMENT_X;
+		if (nx < 0)
+			ax -= BOOMERANG_ACCEL_DECREMENT_X;
+		else if (nx > 0)
+			ax += BOOMERANG_ACCEL_DECREMENT_X;
 	else
 		ax = 0;
 
@@ -79,9 +82,10 @@ void CBoomerang::Render()
 {
 	if (!isVisible) return;
 
-	int aniId = ID_ANI_BOOMERANG_SWINGING;
+	int aniId = ID_ANI_BOOMERANG_SWINGING_RIGHT;
+	aniId = (nx > 0) ? ID_ANI_BOOMERANG_SWINGING_RIGHT : ID_ANI_BOOMERANG_SWINGING_LEFT;
 	if (isIdling)
-		aniId = ID_ANI_BOOMERANG_IDLING;
+		aniId = (nx > 0) ? ID_ANI_BOOMERANG_IDLING_RIGHT : ID_ANI_BOOMERANG_IDLING_LEFT;
 	CAnimations::GetInstance()->Get(aniId)->Render(x, y);
 
 	//RenderBoundingBox();
@@ -100,20 +104,20 @@ void CBoomerang::SetState(int state)
 		isIdling = true;
 		break;
 	case BOOMERANG_STATE_SWINGING_UP:
-		vx = BOOMERANG_SPEED_X;
+		vx = (nx < 0) ? BOOMERANG_SPEED_X : -BOOMERANG_SPEED_X;
 		vy = -0.09f;
 		ax = 0;
 		ay = BOOMERANG_GRAVITY;
 		StartSwingingUp();
 		break;
 	case BOOMERANG_STATE_SWINGING_DOWN:
-		vx = BOOMERANG_SPEED_X;
+		vx = (nx < 0) ? BOOMERANG_SPEED_X : -BOOMERANG_SPEED_X;
 		ax = 0;
 		ay = BOOMERANG_GRAVITY * 2;
 		StartSwingingDown();
 		break;
 	case BOOMERANG_STATE_HOMING:
-		vx = -BOOMERANG_SPEED_X;
+		vx = (nx < 0) ? -BOOMERANG_SPEED_X : BOOMERANG_SPEED_X;
 		vy = 0;
 		ax = 0;
 		ay = 0;

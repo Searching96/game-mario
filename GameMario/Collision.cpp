@@ -12,6 +12,8 @@
 #include "CoinBrick.h"
 #include "ActivatorBrick.h"
 #include "WingedKoopa.h"
+#include "Boomerang.h"
+#include "BoomerangTurtle.h"
 
 #include "debug.h"
 
@@ -147,10 +149,22 @@ void CCollision::SweptAABB(float ml, float mt, float mr, float mb,
 	t = -1.0f;			// no collision
 	nx = ny = 0.0f;
 
+	// Boomerang Turtle collied with Boomerang
+	if (dynamic_cast<CBoomerangTurtle*>(objSrc) && dynamic_cast<CBoomerang*>(objDest))
+	{
+		if (ml < sr && mr > sl && mt < sb && mb > st) 
+		{
+			t = 0.0f;
+			nx = ny = 0.0f;
+			return;
+		}
+	}
+
 	// Mario collide with Mushroom
 	if (dynamic_cast<CMario*>(objSrc) && dynamic_cast<CMushroom*>(objDest))
 	{
-		if (ml < sr && mr > sl && mt < sb && mb > st) {
+		if (ml < sr && mr > sl && mt < sb && mb > st) 
+		{
 			t = 0.0f;
 			nx = ny = 0.0f;
 			return;
@@ -159,7 +173,8 @@ void CCollision::SweptAABB(float ml, float mt, float mr, float mb,
 
 	// Tail Whip collide with everything thing
 	if (dynamic_cast<CTailWhip*>(objSrc)) {
-		if (ml < sr && mr > sl && mt < sb && mb > st) {
+		if (ml < sr && mr > sl && mt < sb && mb > st) 
+		{
 			t = 0.0f;
 			nx = ny = 0.0f;
 			return;

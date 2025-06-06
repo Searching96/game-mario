@@ -11,6 +11,7 @@ CBoomerangTurtle::CBoomerangTurtle(int id, float x, float y, int z, int original
 	this->boomerangList = boomerangList;
 	x0 = x;
 	y0 = y;
+	walkAfterThrowsStart = GetTickCount64();
 	SetState(BOOMERANG_TURTLE_STATE_WALKING_LEFT);
 }
 
@@ -41,21 +42,39 @@ void CBoomerangTurtle::OnCollisionWith(LPCOLLISIONEVENT e)
 			vx = -vx; // Turn around when hitting a wall
 		}
 	}
+
+	if (dynamic_cast<CBoomerang*>(e->obj))
+		OnCollisionWithBoomerang(e);
+}
+
+void CBoomerangTurtle::OnCollisionWithBoomerang(LPCOLLISIONEVENT e)
+{
+	CBoomerang* b = dynamic_cast<CBoomerang*>(e->obj);
+	if (b)
+	{
+		if (b->GetState() != BOOMERANG_STATE_HOMING) return;
+
+		b->SetIsVisible(false);
+		b->SetState(BOOMERANG_STATE_IDLING);
+	}
 }
 
 void CBoomerangTurtle::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
-	// Debug out walkbetweenstart
-	DebugOutTitle(L"[BOOMERANG TURTLE] wbts: %llu, wats: %llu, ps: %llu, ip: %d, bi: %d\n", walkBetweenThrowsStart, walkAfterThrowsStart, prepareStart, isPreparing, boomerangIndex);
+	//DebugOutTitle(L"[BOOMERANG TURTLE] wbts: %llu, wats: %llu, ps: %llu, ip: %d, bi: %d\n", walkBetweenThrowsStart, walkAfterThrowsStart, prepareStart, isPreparing, boomerangIndex);
+	DebugOutTitle(L"[BOOMERANG 0] ii = %d, iv = %d\n", boomerangList[0]->IsIdling(), boomerangList[0]->IsVisible());
 
 	if (isDefeated)
 		return;
-
+	
 	for (int i = 0; i < boomerangList.size(); i++)
 	{
 		if (boomerangList[i]->IsIdling())
 		{
-			boomerangList[i]->SetPosition(x - 4, y - 10);
+			if (nx < 0)
+				boomerangList[i]->SetPosition(x - 6, y - 14);
+			else if (nx > 0)
+				boomerangList[i]->SetPosition(x + 6, y - 14);
 		}
 	}
 
@@ -74,7 +93,7 @@ void CBoomerangTurtle::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	{
 		if ((GetTickCount64() - walkAfterThrowsStart > BOOMERANG_TURTLE_WALKING_TIMEOUT_2) && !isPreparing)
 		{
-			for (int i = 0; i < BOOMERANG_TURTLE_NUM_BOOMERANGS; i++)
+			for (int i = 0; i < boomerangList.size(); i++)
 			{
 				boomerangList[i]->SetIsVisible(false);
 				boomerangList[i]->SetState(BOOMERANG_STATE_IDLING);
@@ -108,6 +127,7 @@ void CBoomerangTurtle::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			walkAfterThrowsStart = GetTickCount64();
 			isPreparing = false;
 		}
+		boomerangList[boomerangIndex]->SetNx(nx);
 		boomerangList[boomerangIndex]->SetState(BOOMERANG_STATE_SWINGING_UP);
 	}
 
@@ -116,6 +136,26 @@ void CBoomerangTurtle::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		x00 = x;
 		vx = -vx;
 	}
+
+	int randomNum = rand() % 500;
+	if (randomNum == 499)
+	{
+		vy = -0.3f;
+	}
+
+
+	CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+	float mX, mY;
+	player->GetPosition(mX, mY);
+	if (mX < x && state != BOOMERANG_TURTLE_STATE_WALKING_RIGHT)
+	{
+		SetState(BOOMERANG_TURTLE_STATE_WALKING_RIGHT);
+	}
+	else if (mX > x && state != BOOMERANG_TURTLE_STATE_WALKING_LEFT)
+	{
+		SetState(BOOMERANG_TURTLE_STATE_WALKING_LEFT);
+	}
+
 
 	CGameObject::Update(dt, coObjects);
 	CCollision::GetInstance()->Process(this, dt, coObjects);
@@ -173,15 +213,19 @@ void CBoomerangTurtle::SetState(int state)
 		break;
 	case BOOMERANG_TURTLE_STATE_WALKING_RIGHT:
 		vx = BOOMERANG_TURTLE_WALKING_SPEED;
-		walkAfterThrowsStart = GetTickCount64();
 		isPreparing = false;
 		x00 = x;
+		nx = 1;
+		for (int i = 0; i < boomerangList.size(); i++)
+			if (boomerangList[i]->IsIdling()) boomerangList[i]->SetNx(nx);
 		break;
 	case BOOMERANG_TURTLE_STATE_WALKING_LEFT:
 		vx = -BOOMERANG_TURTLE_WALKING_SPEED;
-		walkAfterThrowsStart = GetTickCount64();
 		isPreparing = false;
 		x00 = x;
+		nx = -1;
+		for (int i = 0; i < boomerangList.size(); i++)
+			if (boomerangList[i]->IsIdling()) boomerangList[i]->SetNx(nx);
 		break;
 	}
 }
