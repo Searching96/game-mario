@@ -33,8 +33,7 @@ void CBoomerang::OnCollisionWith(LPCOLLISIONEVENT e)
 
 void CBoomerang::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
-	// Debug out vx, vy, ax, ay, state
-	DebugOutTitle(L"[BOOMERANG] Update: vx = %f, vy = %f, ax = %f, ay = %f, state = %d\n", vx, vy, ax, ay, state);
+	//DebugOutTitle(L"[BOOMERANG] Update: vx = %f, vy = %f, ax = %f, ay = %f, state = %d\n", vx, vy, ax, ay, state);
 
 	if (isSwingingUp)
 		ay += BOOMERANG_ACCEL_DECREMENT_Y;

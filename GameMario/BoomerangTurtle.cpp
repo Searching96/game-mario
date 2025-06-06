@@ -15,10 +15,10 @@ CBoomerangTurtle::CBoomerangTurtle(int id, float x, float y, int z, int original
 
 void CBoomerangTurtle::GetBoundingBox(float& left, float& top, float& right, float& bottom)
 {
-	left = x - GOOMBA_BBOX_WIDTH / 2;
-	top = y - GOOMBA_BBOX_HEIGHT / 2;
-	right = left + GOOMBA_BBOX_WIDTH;
-	bottom = top + GOOMBA_BBOX_HEIGHT;
+	left = x - BOOMERANG_TURTLE_BBOX_WIDTH / 2;
+	top = y - BOOMERANG_TURTLE_BBOX_HEIGHT / 2;
+	right = left + BOOMERANG_TURTLE_BBOX_WIDTH;
+	bottom = top + BOOMERANG_TURTLE_BBOX_HEIGHT;
 }
 
 void CBoomerangTurtle::OnNoCollision(DWORD dt)
@@ -44,6 +44,9 @@ void CBoomerangTurtle::OnCollisionWith(LPCOLLISIONEVENT e)
 
 void CBoomerangTurtle::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
+	// Debug out walkbetweenstart
+	DebugOutTitle(L"[BOOMERANG TURTLE] wbts: %llu, wats: %llu, ps: %llu, ip: %d\n", walkBetweenThrowsStart, walkAfterThrowsStart, prepareStart, isPreparing);
+
 	if (isDefeated)
 		return;
 
@@ -58,6 +61,43 @@ void CBoomerangTurtle::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		return;
 	}
 
+	if (walkAfterThrowsStart > walkBetweenThrowsStart)
+	{
+		if ((GetTickCount64() - walkAfterThrowsStart > BOOMERANG_TURTLE_WALKING_TIMEOUT_2) && !isPreparing)
+		{
+			prepareStart = GetTickCount64();
+			isPreparing = true;
+		}
+	}
+	else
+	{
+		if ((GetTickCount64() - walkBetweenThrowsStart > BOOMERANG_TURTLE_WALKING_TIMEOUT_1) && !isPreparing)
+		{
+			prepareStart = GetTickCount64();
+			isPreparing = true;
+		}
+	}
+
+	if ((GetTickCount64() - prepareStart > BOOMERANG_TURTLE_PREPARE_TIMEOUT) && isPreparing)
+	{
+		if (walkAfterThrowsStart > walkBetweenThrowsStart)
+		{
+			walkBetweenThrowsStart = GetTickCount64();
+			isPreparing = false;
+		}
+		else
+		{
+			walkAfterThrowsStart = GetTickCount64();
+			isPreparing = false;
+		}
+	}
+
+	if (fabs(x - x00) >= BOOMERANG_TURTLE_MOVE_OFFSET)
+	{
+		x00 = x;
+		vx = -vx;
+	}
+
 	CGameObject::Update(dt, coObjects);
 	CCollision::GetInstance()->Process(this, dt, coObjects);
 }
@@ -70,10 +110,20 @@ void CBoomerangTurtle::Render()
 
 	int aniId = ID_ANI_GOOMBA_WALKING;
 	if (state == BOOMERANG_TURTLE_STATE_WALKING_LEFT)
-		aniId = ID_ANI_BOOMERANG_TURTLE_WALKING_LEFT;
+	{
+		if (isPreparing)
+			aniId = ID_ANI_BOOMERANG_TURTLE_PREPARE_LEFT;
+		else
+			aniId = ID_ANI_BOOMERANG_TURTLE_WALKING_LEFT;
+	}
 	else if (state == BOOMERANG_TURTLE_STATE_WALKING_RIGHT)
-		aniId = ID_ANI_BOOMERANG_TURTLE_WALKING_RIGHT;
-	if (state == BOOMERANG_TURTLE_STATE_DIE_LEFT)
+	{
+		if (isPreparing)
+			aniId = ID_ANI_BOOMERANG_TURTLE_PREPARE_RIGHT;
+		else
+			aniId = ID_ANI_BOOMERANG_TURTLE_WALKING_RIGHT;
+	}
+	else if (state == BOOMERANG_TURTLE_STATE_DIE_LEFT)
 		aniId = ID_ANI_BOOMERANG_TURTLE_DIE_LEFT;
 	else if (state == BOOMERANG_TURTLE_STATE_DIE_RIGHT)
 		aniId = ID_ANI_BOOMERANG_TURTLE_DIE_RIGHT;
@@ -89,28 +139,30 @@ void CBoomerangTurtle::SetState(int state)
 	CGameObject::SetState(state);
 	switch (state)
 	{
-	case GOOMBA_STATE_DIE_ON_STOMP:
-		dieStart = GetTickCount64();
-		y += (GOOMBA_BBOX_HEIGHT - GOOMBA_BBOX_HEIGHT_DIE) / 2 - 3;
-		vx = 0;
-		vy = 0;
-		ay = 0;
-		isDead = 1;
-		break;
-	case GOOMBA_STATE_DIE_ON_TAIL_WHIP:
+	case BOOMERANG_TURTLE_STATE_DIE_RIGHT:
 		dieStart = GetTickCount64();
 		vy = -0.5f;
-		ay = GOOMBA_GRAVITY;
+		ay = BOOMERANG_TURTLE_GRAVITY;
 		isDead = 1;
+		walkAfterThrowsStart = GetTickCount64();
+		isPreparing = false;
 		break;
-	case GOOMBA_STATE_DIE_ON_HELD_KOOPA:
+	case BOOMERANG_TURTLE_STATE_DIE_LEFT:
 		dieStart = GetTickCount64();
-		vy = -0.35f;
-		ay = GOOMBA_GRAVITY;
+		vx = 0.5f;
+		vy = -0.5f;
+		ay = BOOMERANG_TURTLE_GRAVITY;
 		isDead = 1;
+		walkAfterThrowsStart = GetTickCount64();
+		isPreparing = false;
 		break;
-	case GOOMBA_STATE_WALKING:
-		vx = -GOOMBA_WALKING_SPEED;
+	case BOOMERANG_TURTLE_STATE_WALKING_RIGHT:
+		vx = BOOMERANG_TURTLE_WALKING_SPEED;
+		x00 = x;
+		break;
+	case BOOMERANG_TURTLE_STATE_WALKING_LEFT:
+		vx = -BOOMERANG_TURTLE_WALKING_SPEED;
+		x00 = x;
 		break;
 	}
 }

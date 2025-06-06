@@ -4,8 +4,8 @@
 #define BOOMERANG_TURTLE_GRAVITY				0.002f
 #define BOOMERANG_TURTLE_WALKING_SPEED			0.02f
 
-#define BOOMERANG_TURTLE_BBOX_WIDTH				20
-#define BOOMERANG_TURTLE_BBOX_HEIGHT			14
+#define BOOMERANG_TURTLE_BBOX_WIDTH				14
+#define BOOMERANG_TURTLE_BBOX_HEIGHT			18
 
 #define BOOMERANG_TURTLE_DIE_TIMEOUT			700
 
@@ -16,9 +16,16 @@
 
 #define ID_ANI_BOOMERANG_TURTLE_WALKING_LEFT	190000
 #define ID_ANI_BOOMERANG_TURTLE_WALKING_RIGHT	190010
+#define ID_ANI_BOOMERANG_TURTLE_PREPARE_LEFT	190100
+#define ID_ANI_BOOMERANG_TURTLE_PREPARE_RIGHT	190110
 #define ID_ANI_BOOMERANG_TURTLE_DIE_RIGHT		191000
 #define ID_ANI_BOOMERANG_TURTLE_DIE_LEFT		191010
 
+#define BOOMERANG_TURTLE_MOVE_OFFSET			48.0f
+
+#define BOOMERANG_TURTLE_WALKING_TIMEOUT_1		2000	// timeout between 2 consecutive throws
+#define BOOMERANG_TURTLE_WALKING_TIMEOUT_2		6000	// timeout between the second throw towards the next 2-throw
+#define BOOMERANG_TURTLE_PREPARE_TIMEOUT		300
 
 class CBoomerangTurtle : public CGameObject
 {
@@ -29,12 +36,18 @@ protected:
 	float x0;
 	float y0;
 
-	ULONGLONG dieStart = -1;
-	ULONGLONG dieOnStompStart = -1;
-	ULONGLONG dieOnWhipStart = -1;
+	float x00 = -1;
+
+	ULONGLONG dieStart = 0;
+	ULONGLONG dieOnStompStart = 0;
+	ULONGLONG dieOnWhipStart = 0;
+	ULONGLONG walkBetweenThrowsStart = 0;
+	ULONGLONG walkAfterThrowsStart = 0;
+	ULONGLONG prepareStart = 0;
 
 	bool isDead = false;
 	bool isDefeated = false;
+	bool isPreparing = false;
 
 	int originalChunkId;
 

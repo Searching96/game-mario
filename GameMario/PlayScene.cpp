@@ -40,6 +40,7 @@
 #include "Boomerang.h"
 #include "FlyingKoopa.h"
 #include "HiddenCoinBrick.h"
+#include "BoomerangTurtle.h"
 
 #include "SampleKeyEventHandler.h"
 
@@ -529,6 +530,14 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 		{
 			zIndex = ZINDEX_ENEMIES;
 			obj = new CBoomerang(id, x, y, zIndex, targetChunk->GetID());
+			targetChunk->AddEnemy(obj);
+			break;
+		}
+		case OBJECT_TYPE_BOOMERANG_TURTLE:
+		{
+			zIndex = ZINDEX_ENEMIES;
+			if (tokens.size() < 4) throw runtime_error("Insufficient params for BOOMERANG_TURTLE");
+			obj = new CBoomerangTurtle(id, x, y, zIndex, targetChunk->GetID());
 			targetChunk->AddEnemy(obj);
 			break;
 		}

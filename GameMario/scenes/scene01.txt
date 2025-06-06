@@ -102,6 +102,9 @@ cam_mode	0
 # Hidden Coin Brick
 0	19	160	352
 
+# Boomerang Turtle
+0	17	160	360
+
 # Activator Brick
 #1414	110	208	352
 #1415	110	224	352
