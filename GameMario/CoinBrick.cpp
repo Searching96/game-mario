@@ -57,6 +57,7 @@ void CCoinBrick::SetState(int state)
 			LPCHUNK chunk = ((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetChunk(originalChunkId);
 			chunk->SetIsObjectDeleted(this->GetId(), true);
 			isDeleted = true;
+			CParticle::GenerateParticleInChunk(this, 5);
 			break;
 		}
 		case COIN_BRICK_STATE_REVEALED:
