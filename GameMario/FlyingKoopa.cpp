@@ -189,17 +189,6 @@ void CFlyingKoopa::SetState(int state)
 {
 	if (isDead == 1) return;
 
-	//// If transitioning from shell to walking state
-	//if ((this->state == KOOPA_STATE_SHELL_STATIC || this->state == KOOPA_STATE_SHELL_DYNAMIC) &&
-	//	(state == KOOPA_STATE_WALKING_LEFT || state == KOOPA_STATE_WALKING_RIGHT))
-	//{
-	//	// Adjust y position to account for hitbox difference
-	//	// In shell: hitbox is centered (height/2 above and below y)
-	//	// In walking: hitbox extends from bottom up
-	//	float heightDifference = (KOOPA_TEXTURE_HEIGHT - KOOPA_BBOX_HEIGHT) / 2.0f;
-	//	y -= heightDifference; // Move Koopa up to compensate
-	//}
-
 	switch (state)
 	{
 		case FLYING_KOOPA_STATE_FLYING_DOWN:
@@ -220,24 +209,12 @@ void CFlyingKoopa::SetState(int state)
 			ay = 0;
 			break;
 		}
-		case KOOPA_STATE_DIE_ON_COLLIDE_WITH_ENEMY:
-		{
-			dieStart = GetTickCount64();
-			CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
-			CParticle::GenerateParticleInChunk(this, 0, 100);
-			CGame::GetInstance()->GetGameState()->AddScore(100);
-			vx = (player->GetNx() > 0) ? 0.2f : -0.2f;
-			vy = -0.35f;
-			ax = 0;
-			ay = KOOPA_GRAVITY;
-			isDead = 1;
-			break;
-		}
 		case KOOPA_STATE_DIE_ON_COLLIDE_WITH_DYNAMIC_KOOPA:
 		{
 			dieStart = GetTickCount64();
 			vy = -0.5f;
 			ay = KOOPA_GRAVITY;
+			isWinged = 0;
 			isDead = 1;
 			break;
 		}
@@ -246,6 +223,7 @@ void CFlyingKoopa::SetState(int state)
 			dieStart = GetTickCount64();
 			vy = -0.35f;
 			ay = KOOPA_GRAVITY;
+			isWinged = 0;
 			isDead = 1;
 			break;
 		}

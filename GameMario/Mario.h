@@ -357,7 +357,7 @@ public:
 	void OnNoCollision(DWORD dt);
 	void OnCollisionWith(LPCOLLISIONEVENT e);
 
-	void CalculateScore(LPGAMEOBJECT obj);
+	void CalculateScore(LPGAMEOBJECT obj, bool isCalledByTail = false);
 	void Teleport(CPortal* portal);
 
 	void GetBoundingBox(float& left, float& top, float& right, float& bottom);

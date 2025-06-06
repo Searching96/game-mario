@@ -1869,7 +1869,7 @@ int EnemiesToPoints(int enemies)
 	}
 }
 
-void CMario::CalculateScore(LPGAMEOBJECT obj)
+void CMario::CalculateScore(LPGAMEOBJECT obj, bool isCalledByTail)
 {
 	if (obj == nullptr || dynamic_cast<CMario*>(obj)) return;
 	int point = 0;
@@ -1879,7 +1879,8 @@ void CMario::CalculateScore(LPGAMEOBJECT obj)
 		|| dynamic_cast<CWingedGoomba*>(obj)
 		|| dynamic_cast<CPiranhaPlant*>(obj)
 		|| dynamic_cast<CWingedKoopa*>(obj)
-		|| dynamic_cast<CFlyingKoopa*>(obj))
+		|| dynamic_cast<CFlyingKoopa*>(obj)
+		|| (dynamic_cast<CBoomerangTurtle*>(obj) && isCalledByTail))
 	{
 		consecutiveEnemies += 1;
 		point = EnemiesToPoints(consecutiveEnemies);

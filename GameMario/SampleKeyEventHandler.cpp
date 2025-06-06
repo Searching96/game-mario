@@ -10,6 +10,7 @@ void CSampleKeyHandler::OnKeyDown(int KeyCode)
 {
 	//DebugOut(L"[INFO] KeyDown: %d\n", KeyCode);
 	CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+	CGame* game = CGame::GetInstance();
 
 	float x, y;
 	player->GetPosition(x, y);
@@ -36,18 +37,26 @@ void CSampleKeyHandler::OnKeyDown(int KeyCode)
 				player->SetState(MARIO_STATE_TAIL_WHIP);
 		break;
 	case DIK_1:
-		player->SetLevel(MARIO_LEVEL_SMALL);
+		if (!game->IsPaused()) 
+			player->SetLevel(MARIO_LEVEL_SMALL);
 		break;
 	case DIK_2:
-		player->SetPosition(x, y - MARIO_BIG_BBOX_HEIGHT / 2);
-		player->SetLevel(MARIO_LEVEL_BIG);
+		if (!game->IsPaused())
+		{
+			player->SetPosition(x, y - MARIO_BIG_BBOX_HEIGHT / 2);
+			player->SetLevel(MARIO_LEVEL_BIG);
+		}
 		break;
 	case DIK_3:
-		player->SetPosition(x, y - MARIO_BIG_BBOX_HEIGHT / 2);
-		player->SetLevel(MARIO_LEVEL_TAIL);
+		if (!game->IsPaused())
+		{
+			player->SetPosition(x, y - MARIO_BIG_BBOX_HEIGHT / 2);
+			player->SetLevel(MARIO_LEVEL_TAIL);
+		}
 		break;
 	case DIK_0:
-		player->SetState(MARIO_STATE_DIE_ON_BEING_KILLED);
+		if (!game->IsPaused())
+			player->SetState(MARIO_STATE_DIE_ON_BEING_KILLED);
 		break;
 	}
 }

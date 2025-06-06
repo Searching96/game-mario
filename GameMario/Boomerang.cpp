@@ -34,13 +34,11 @@ void CBoomerang::OnCollisionWith(LPCOLLISIONEVENT e)
 void CBoomerang::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
 	//DebugOutTitle(L"[BOOMERANG] Update: vx = %f, vy = %f, ax = %f, ay = %f, state = %d\n", vx, vy, ax, ay, state);
-
 	if (isSwingingUp)
-		ay += BOOMERANG_ACCEL_DECREMENT_Y;
+		ay = ay;
 	else if (isSwingingDown)
 		ay -= BOOMERANG_ACCEL_DECREMENT_Y;
-	else if (isHoming)
-		ay = 0;
+
 	
 	if (isSwingingDown && y >= y00 - 32)
 		if (nx < 0)
@@ -67,12 +65,6 @@ void CBoomerang::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		isSwingingDown = false;
 		SetState(BOOMERANG_STATE_HOMING);
 	}
-	//if ((isHoming) && (x <= x00))
-	//{
-	//	x = x00;
-	//	isHoming = false;
-	//	SetState(BOOMERANG_STATE_SWINGING_UP);
-	//}
 
 	CGameObject::Update(dt, coObjects);
 	CCollision::GetInstance()->Process(this, dt, coObjects);
@@ -105,7 +97,7 @@ void CBoomerang::SetState(int state)
 		break;
 	case BOOMERANG_STATE_SWINGING_UP:
 		vx = (nx < 0) ? BOOMERANG_SPEED_X : -BOOMERANG_SPEED_X;
-		vy = -0.09f;
+		vy = -0.07f;
 		ax = 0;
 		ay = BOOMERANG_GRAVITY;
 		StartSwingingUp();

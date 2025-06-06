@@ -14,6 +14,8 @@
 #include "WingedKoopa.h"
 #include "Boomerang.h"
 #include "BoomerangTurtle.h"
+#include "HiddenCoinBrick.h"
+#include "FlyingKoopa.h"
 
 #include "debug.h"
 
@@ -90,7 +92,7 @@ void CCollision::SweptAABB(
 
 	if (dx == 0)
 	{
-		tx_entry = -9999999.0f;
+		tx_entry = -99999999.0f;
 		tx_exit = 99999999.0f;
 	}
 	else
@@ -207,7 +209,7 @@ void CCollision::SweptAABB(float ml, float mt, float mr, float mb,
 	if (dynamic_cast<CKoopa*>(objSrc) 
 		&& (dynamic_cast<CGoomba*>(objDest) || dynamic_cast<CWingedGoomba*>(objDest) 
 			|| dynamic_cast<CPiranhaPlant*>(objDest) || dynamic_cast<CKoopa*>(objDest) 
-			|| dynamic_cast<CWingedKoopa*>(objDest)))
+			|| dynamic_cast<CWingedKoopa*>(objDest) || dynamic_cast<CFlyingKoopa*>(objDest)))
 	{
 		if (objSrc->GetState() == KOOPA_STATE_SHELL_DYNAMIC)
 		{
@@ -238,7 +240,7 @@ void CCollision::SweptAABB(float ml, float mt, float mr, float mb,
 	}
 
 	// Koopa collide with bouncing blocks
-	if (dynamic_cast<CKoopa*>(objSrc) && (dynamic_cast<CBuffQBlock*>(objDest) || dynamic_cast<CCoinQBlock*>(objDest) || dynamic_cast<CLifeBrick*>(objDest)))
+	if (dynamic_cast<CKoopa*>(objSrc) && (dynamic_cast<CBuffQBlock*>(objDest) || dynamic_cast<CCoinQBlock*>(objDest) || dynamic_cast<CLifeBrick*>(objDest) || dynamic_cast<CHiddenCoinBrick*>(objDest)))
 	{
 		CKoopa* k = dynamic_cast<CKoopa*>(objSrc);
 		bool isAbleToBounce = (k->GetState() == KOOPA_STATE_WALKING_LEFT || k->GetState() == KOOPA_STATE_WALKING_RIGHT || k->GetState() == KOOPA_STATE_SHELL_STATIC);
@@ -649,7 +651,7 @@ void CCollision::Process(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* co
 		if (e->isDeleted) continue;
 
 		// Tail Whip collide with comsumable block 1
-		if ((dynamic_cast<CCoinQBlock*>(e->obj) || dynamic_cast<CBuffQBlock*>(e->obj) || dynamic_cast<CLifeBrick*>(e->obj))
+		if ((dynamic_cast<CCoinQBlock*>(e->obj) || dynamic_cast<CBuffQBlock*>(e->obj) || dynamic_cast<CLifeBrick*>(e->obj) || dynamic_cast<CHiddenCoinBrick*>(e->obj))
 			&& dynamic_cast<CTailWhip*>(objSrc))
 		{
 			objSrc->OnCollisionWith(e);
@@ -662,7 +664,7 @@ void CCollision::Process(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* co
 			continue;
 		}
 		// Koopa or Winged Koopa collide with consumable block 1
-		if ((dynamic_cast<CCoinQBlock*>(e->obj) || dynamic_cast<CBuffQBlock*>(e->obj) || dynamic_cast<CLifeBrick*>(e->obj))
+		if ((dynamic_cast<CCoinQBlock*>(e->obj) || dynamic_cast<CBuffQBlock*>(e->obj) || dynamic_cast<CLifeBrick*>(e->obj) || dynamic_cast<CHiddenCoinBrick*>(e->obj))
 			&& (dynamic_cast<CKoopa*>(objSrc) || dynamic_cast<CWingedKoopa*>(objSrc)))
 		{
 			if (e->obj->GetState() != QUESTIONBLOCK_STATE_NOT_HIT && objSrc->GetState() != KOOPA_STATE_SHELL_DYNAMIC)

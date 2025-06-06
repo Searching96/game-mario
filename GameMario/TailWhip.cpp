@@ -12,6 +12,7 @@
 #include "ActivatorBrick.h"
 #include "WingedKoopa.h"
 #include "BoomerangTurtle.h"
+#include "HiddenCoinBrick.h"
 
 #include "PlayScene.h"
 
@@ -109,6 +110,8 @@ void CTailWhip::OnCollisionWith(LPCOLLISIONEVENT e)
 		OnCollisionWithWingedKoopa(e);
 	else if (dynamic_cast<CBoomerangTurtle*>(e->obj))
 		OnCollisionWithBooomerangTurtle(e);
+	else if (dynamic_cast<CHiddenCoinBrick*>(e->obj))
+		OnCollisionWithHiddenCoinBrick(e);
 }
 
 void CTailWhip::OnCollisionWithBuffQBlock(LPCOLLISIONEVENT e)
@@ -171,6 +174,8 @@ void CTailWhip::OnCollisionWithCoinBrick(LPCOLLISIONEVENT e)
 	CCoinBrick* cb = dynamic_cast<CCoinBrick*>(e->obj);
 	if (cb)
 	{
+		if (cb->IsRevealed()) return;
+
 		cb->SetState(COIN_BRICK_STATE_BREAK);
 		CParticle::GenerateParticleInChunk(cb, 5);
 	}
@@ -257,7 +262,7 @@ void CTailWhip::OnCollisionWithWingedKoopa(LPCOLLISIONEVENT e)
 		wk->StartShell();
 		wk->SetState(KOOPA_STATE_SHELL_STATIC);
 		float knockbackVx = (this->nx > 0) ? 0.075f : -0.075f;
-		float knockbackVy = -0.5f;
+		float knockbackVy = -0.35f;
 		wk->SetIsFlying(true);
 		wk->SetIsReversed(true);
 		wk->SetSpeed(knockbackVx, knockbackVy);
@@ -271,8 +276,21 @@ void CTailWhip::OnCollisionWithBooomerangTurtle(LPCOLLISIONEVENT e)
 	{
 		if (bt->IsDead() == 1 || bt->IsDefeated() == 1) return;
 
-		bt->SetState((nx > 0) ? BOOMERANG_TURTLE_STATE_DIE_RIGHT : BOOMERANG_TURTLE_STATE_DIE_LEFT);
+		bt->SetState((nx > 0) ? BOOMERANG_TURTLE_STATE_DIE_BY_TAIL_RIGHT : BOOMERANG_TURTLE_STATE_DIE_BY_TAIL_LEFT);
 		vy = -MARIO_JUMP_DEFLECT_SPEED;
+
+		CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+		player->CalculateScore(bt, true);
+		CParticle::GenerateParticleInChunk(bt, 3);
+	}
+}
+
+void CTailWhip::OnCollisionWithHiddenCoinBrick(LPCOLLISIONEVENT e)
+{
+	CHiddenCoinBrick* hcb = dynamic_cast<CHiddenCoinBrick*>(e->obj);
+	if (hcb && !hcb->IsHit() && hcb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
+	{
+		hcb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
 	}
 }
 

@@ -63,7 +63,10 @@ void CWingedKoopa::OnCollisionWith(LPCOLLISIONEVENT e)
 	if (e->ny < 0)
 	{
 		if (isWinged)
+		{
 			vy = WINGED_KOOPA_BOUNCING_SPEED_Y;
+			ay = WINGED_KOOPA_GRAVITY / 1.5;
+		}
 		else
 			vy = 0;
 	}
@@ -562,6 +565,9 @@ void CWingedKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		}
 		return;
 	}
+
+	if (isWinged)
+		ay -= WINGED_KOOPA_GRAVITY_DECREMENT;
 
 	vy += ay * dt;
 	vx += ax * dt;

@@ -11,7 +11,7 @@ CBoomerangTurtle::CBoomerangTurtle(int id, float x, float y, int z, int original
 	this->boomerangList = boomerangList;
 	x0 = x;
 	y0 = y;
-	walkAfterThrowsStart = GetTickCount64();
+	walkAfterThrowsStart = GetTickCount64() - 2000;
 	SetState(BOOMERANG_TURTLE_STATE_WALKING_LEFT);
 }
 
@@ -186,9 +186,9 @@ void CBoomerangTurtle::Render()
 		else
 			aniId = ID_ANI_BOOMERANG_TURTLE_WALKING_RIGHT;
 	}
-	else if (state == BOOMERANG_TURTLE_STATE_DIE_LEFT)
+	else if (state == BOOMERANG_TURTLE_STATE_DIE_LEFT || state == BOOMERANG_TURTLE_STATE_DIE_BY_TAIL_LEFT)
 		aniId = ID_ANI_BOOMERANG_TURTLE_DIE_LEFT;
-	else if (state == BOOMERANG_TURTLE_STATE_DIE_RIGHT)
+	else if (state == BOOMERANG_TURTLE_STATE_DIE_RIGHT || state == BOOMERANG_TURTLE_STATE_DIE_BY_TAIL_RIGHT)
 		aniId = ID_ANI_BOOMERANG_TURTLE_DIE_RIGHT;
 
 	CAnimations::GetInstance()->Get(aniId)->Render(x, y);
@@ -213,6 +213,20 @@ void CBoomerangTurtle::SetState(int state)
 		dieStart = GetTickCount64();
 		vx = 0.0f;
 		vy = -0.2f;
+		ay = BOOMERANG_TURTLE_GRAVITY;
+		isDead = 1;
+		break;
+	case BOOMERANG_TURTLE_STATE_DIE_BY_TAIL_RIGHT:
+		dieStart = GetTickCount64();
+		vx = 0.0f;
+		vy = -0.5f;
+		ay = BOOMERANG_TURTLE_GRAVITY;
+		isDead = 1;
+		break;
+	case BOOMERANG_TURTLE_STATE_DIE_BY_TAIL_LEFT:
+		dieStart = GetTickCount64();
+		vx = 0.0f;
+		vy = -0.5f;
 		ay = BOOMERANG_TURTLE_GRAVITY;
 		isDead = 1;
 		break;

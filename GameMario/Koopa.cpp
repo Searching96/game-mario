@@ -12,6 +12,8 @@
 #include "CoinBrick.h"
 #include "ActivatorBrick.h"
 #include "WingedKoopa.h"
+#include "HiddenCoinBrick.h"
+#include "FlyingKoopa.h"
 
 #include "PlayScene.h"
 
@@ -93,6 +95,10 @@ void CKoopa::OnCollisionWith(LPCOLLISIONEVENT e)
 		OnCollisionWithKoopa(e);
 	else if (dynamic_cast<CWingedKoopa*>(e->obj))
 		OnCollisionWithWingedKoopa(e);
+	else if (dynamic_cast<CHiddenCoinBrick*>(e->obj))
+		OnCollisionWithHiddenCoinBrick(e);
+	else if (dynamic_cast<CFlyingKoopa*>(e->obj))
+		OnCollisionWithFlyingKoopa(e);
 }
 
 void CKoopa::OnCollisionWithQuestionBlock(LPCOLLISIONEVENT e)
@@ -229,6 +235,59 @@ void CKoopa::OnCollisionWithCoinBrick(LPCOLLISIONEVENT e)
 		if (e->nx != 0)
 		{
 			cb->SetState(COIN_BRICK_STATE_BREAK);
+		}
+	}
+}
+
+
+void CKoopa::OnCollisionWithHiddenCoinBrick(LPCOLLISIONEVENT e)
+{
+	CHiddenCoinBrick* hcb = dynamic_cast<CHiddenCoinBrick*>(e->obj);
+	bool isAbleToBounce = (state == KOOPA_STATE_WALKING_LEFT || state == KOOPA_STATE_WALKING_RIGHT || state == KOOPA_STATE_SHELL_STATIC);
+	if (isAbleToBounce)
+	{
+		if (e->obj->GetState() != QUESTIONBLOCK_STATE_NOT_HIT)
+		{
+			int preState = state;
+			this->StartShell();
+			this->SetState(KOOPA_STATE_SHELL_STATIC);
+			float knockbackVx = (preState == KOOPA_STATE_WALKING_RIGHT) ? 0.1f : -0.1f; // Bounce left for walking left and shell static
+			float knockbackVy = -0.5f;
+			this->SetIsFlying(true);
+			this->SetIsReversed(true);
+			this->SetSpeed(knockbackVx, knockbackVy);
+		}
+		return;
+	}
+
+	//bool isAbleToBounce = (state == KOOPA_STATE_WALKING_LEFT || state == KOOPA_STATE_WALKING_RIGHT || state == KOOPA_STATE_SHELL_STATIC);
+	//if (isAbleToBounce)
+	//{
+	//	bool isHit = dynamic_cast<CCoinQBlock*>(e->obj)
+	//		? dynamic_cast<CCoinQBlock*>(e->obj)->IsHit()
+	//		: dynamic_cast<CBuffQBlock*>(e->obj)->IsHit();
+	//	bool isBouncing = dynamic_cast<CCoinQBlock*>(e->obj)
+	//		? (dynamic_cast<CCoinQBlock*>(e->obj)->GetState() != QUESTIONBLOCK_STATE_NOT_HIT)
+	//		: (dynamic_cast<CBuffQBlock*>(e->obj)->GetState() != QUESTIONBLOCK_STATE_NOT_HIT);
+	//	if (isBouncing && !isHit)
+	//	{
+	//		int preState = state;
+	//		this->StartShell();
+	//		this->SetState(KOOPA_STATE_SHELL_STATIC);
+	//		float knockbackVx = (preState == KOOPA_STATE_WALKING_RIGHT) ? 0.1f : -0.1f; // Bounce left for walking left and shell static
+	//		float knockbackVy = -0.5f;
+	//		this->SetIsFlying(true);
+	//		this->SetIsReversed(true);
+	//		this->SetSpeed(knockbackVx, knockbackVy);
+	//	}
+	//	return;
+	//}
+
+	if (state == KOOPA_STATE_SHELL_DYNAMIC)
+	{
+		if (e->nx != 0)
+		{
+			hcb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
 		}
 	}
 }
@@ -376,6 +435,21 @@ void CKoopa::OnCollisionWithWingedKoopa(LPCOLLISIONEVENT e)
 		{
 			this->SetState((vx > 0) ? KOOPA_STATE_WALKING_LEFT : KOOPA_STATE_WALKING_RIGHT);
 			wk->SetState((wk->GetNx() > 0) ? KOOPA_STATE_WALKING_LEFT : KOOPA_STATE_WALKING_RIGHT);
+		}
+		return;
+	}
+}
+
+
+
+void CKoopa::OnCollisionWithFlyingKoopa(LPCOLLISIONEVENT e)
+{
+	CFlyingKoopa* fk = dynamic_cast<CFlyingKoopa*>(e->obj);
+	if (this->state == KOOPA_STATE_SHELL_DYNAMIC && fk->GetState() != KOOPA_STATE_SHELL_DYNAMIC)
+	{
+		if (fk->IsDead() == 0)
+		{
+			fk->SetState(KOOPA_STATE_DIE_ON_COLLIDE_WITH_DYNAMIC_KOOPA);
 		}
 		return;
 	}

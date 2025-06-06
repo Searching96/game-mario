@@ -2,10 +2,10 @@
 #include "GameObject.h"
 
 #define BOOMERANG_GRAVITY								0.0001f
-#define BOOMERANG_SPEED_X								0.075f
+#define BOOMERANG_SPEED_X								0.1f
 
 #define BOOMERANG_ACCEL_DECREMENT_Y						0.000001f
-#define BOOMERANG_ACCEL_DECREMENT_X						0.000018f
+#define BOOMERANG_ACCEL_DECREMENT_X						0.000022f
 
 #define BOOMERANG_BBOX_WIDTH							16
 #define BOOMERANG_BBOX_HEIGHT							16
