@@ -2,9 +2,11 @@
 #include "Textures.h"
 #include "Game.h"
 #include "Debug.h"
+#include "Chunk.h"
+#include "PlayScene.h"
 
 #define FALLING_PLATFORM_GRAVITY 0.0003f
-#define FALLING_PLATFORM_VX 0.03f
+#define FALLING_PLATFORM_VX 0.035f
 
 CFallingPlatform::CFallingPlatform(int id, float x, float y, int z, int originalChunkId, int width) : CGameObject(id, x, y, z)
 {
@@ -21,6 +23,9 @@ CFallingPlatform::CFallingPlatform(int id, float x, float y, int z, int original
 
 void CFallingPlatform::Render() {
 	if (this->width <= 0) return;
+
+	if (isDefeated == 1)
+		return;
 	CSprites* s = CSprites::GetInstance();
 
 	// Draw left edge
@@ -40,6 +45,10 @@ void CFallingPlatform::Render() {
 }
 
 void CFallingPlatform::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects) {
+
+	if (isDefeated == 1)
+		return;
+
 	// Apply gravity and move platform when active
 	if (state == FALLING_PLATFORM_STATE_ACTIVE)
 	{
@@ -48,6 +57,10 @@ void CFallingPlatform::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects) {
 		// Check if platform should be marked complete after timeout
 		if (GetTickCount64() - fallStart > FALLING_PLATFORM_TIMEOUT) {
 			SetState(FALLING_PLATFORM_STATE_COMPLETE);
+			LPCHUNK chunk = ((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetChunk(originalChunkId);
+			chunk->SetIsObjectDeleted(this->GetId(), true);
+			isDeleted = true;
+			return;
 		}
 	}
 
@@ -106,7 +119,6 @@ void CFallingPlatform::SetState(int state)
 		break;
 	case FALLING_PLATFORM_STATE_COMPLETE:
 		// Make platform "defeated" so it can respawn
-		isDefeated = true;
 		break;
 	}
 }
