@@ -1435,7 +1435,7 @@ void CPlayScene::RespawnEnemiesInRange()
 				{
 					originalChunk->RemoveObject(goomba);
 					CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
-					int gNx = (player->GetNx() > 0) ? 1 : -1;
+					int gNx = (player->GetNx() < 0) ? 1 : -1;
 					CGoomba* newGoomba = new CGoomba(goomba->GetId(), eX0, eY0, goomba->GetZIndex(), goomba->GetOriginalChunkId(), gNx);
 					originalChunk->AddObject(newGoomba);
 					originalChunk->AddEnemy(newGoomba);
@@ -1485,7 +1485,7 @@ void CPlayScene::RespawnEnemiesInRange()
 				if (originalChunk) {
 					originalChunk->RemoveObject(koopa);
 					CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
-					int kNx = (player->GetNx() < 0) ? 1 : -1;
+					int kNx = (player->GetNx() > 0) ? 1 : -1;
 					CKoopa* newKoopa = new CKoopa(koopa->GetId(), eX0, eY0, koopa->GetZIndex(), koopa->GetOriginalChunkId(), kNx);
 					originalChunk->AddObject(newKoopa);
 					originalChunk->AddEnemy(newKoopa);

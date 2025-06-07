@@ -2,6 +2,7 @@
 #include "Mario.h"
 #include "PlayScene.h"
 #include "CoinBrick.h"
+#include "BuffRoulette.h"
 
 void CChunk::Update(DWORD dt, std::vector<LPGAMEOBJECT>* coObjects)
 {
@@ -15,7 +16,15 @@ void CChunk::Update(DWORD dt, std::vector<LPGAMEOBJECT>* coObjects)
 void CChunk::AddObject(LPGAMEOBJECT obj)
 {
 	if (obj != nullptr)
+	{
+		if (dynamic_cast<CBuffRoulette*>(obj))
+			for (LPGAMEOBJECT it : objects)
+			{
+				if (dynamic_cast<CBuffRoulette*>(it))
+					it->Delete();
+			}
 		objects.push_back(obj);
+	}
 }
 
 void CChunk::AddEnemy(LPGAMEOBJECT obj)
