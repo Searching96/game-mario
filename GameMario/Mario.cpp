@@ -630,7 +630,7 @@ void CMario::OnCollisionWithCoin(LPCOLLISIONEVENT e)
 void CMario::OnCollisionWithPortal(LPCOLLISIONEVENT e)
 {
 	CPortal* p = (CPortal*)e->obj;
-	if ((e->ny < 0 && p->GetEnterDirection() == 0 && isSitting) || (e->ny > 0 && p->GetEnterDirection() == 1 && isHoldingUpKey))
+	if ((e->ny < 0 && p->GetEnterDirection() == 0 && canTeleport) || (e->ny > 0 && p->GetEnterDirection() == 1 && isHoldingUpKey))
 		p->Teleport(this);
 }
 
@@ -1767,17 +1767,16 @@ void CMario::SetState(int state)
 
 	case MARIO_STATE_SIT:
 		if (isMoving == 1) break;
+		if (level != MARIO_LEVEL_SMALL) break;
 		if (isHoldingKoopa == 1) break;
+		if (isOnPlatform)
 		{
-			if (isOnPlatform)
-				if (level != MARIO_LEVEL_SMALL)
-				{
-					state = MARIO_STATE_IDLE;
-					vx = 0; vy = 0.0f;
-					y += MARIO_SIT_HEIGHT_ADJUST;
-				}
+			state = MARIO_STATE_IDLE;
+			vx = 0; vy = 0.0f;
+			y += MARIO_SIT_HEIGHT_ADJUST;
 			isSitting = true;
 		}
+		canTeleport = true;
 		break;
 
 	case MARIO_STATE_SIT_RELEASE:
@@ -1787,6 +1786,7 @@ void CMario::SetState(int state)
 			state = MARIO_STATE_IDLE;
 			y -= MARIO_SIT_HEIGHT_ADJUST;
 		}
+		canTeleport = false;
 		break;
 
 	case MARIO_STATE_IDLE:
