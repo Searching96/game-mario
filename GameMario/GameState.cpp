@@ -38,9 +38,16 @@ void CGameState::Update(DWORD dt) {
 		}
 	}
 	if (cardAnnounceStart != -1 && GetTickCount64() - cardAnnounceStart > CARD_ANNOUNCE_TIMEOUT) {
-		cardAnnounceStart = -1;
-		newCard = 0;
+		ResetAnnouncement();
 	}
+
+
+}
+
+void CGameState::ResetAnnouncement()
+{
+	cardAnnounceStart = -1;
+	newCard = 0;
 }
 
 // Helper function to draw numbers right-aligned

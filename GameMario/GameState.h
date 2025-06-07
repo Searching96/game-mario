@@ -75,7 +75,7 @@ private:
 	DWORD time; // Remaining time in MILLISECONDS
 	DWORD marioDeathStart;
 	int newCard = 0;
-	DWORD cardAnnounceStart = - 1; // Start time for card announcement
+	DWORD cardAnnounceStart = -1; // Start time for card announcement
 	int score;
 	int coins; // Added coins
 	int collected_cards[3]; // Added card storage (0: empty, 1: Mush, 2: Flower, 3: Star)
@@ -94,7 +94,10 @@ public:
 	}
 
 	void Update(DWORD dt);
-	void SetScene(LPSCENE scene) { current_scene = scene; }
+	void SetScene(LPSCENE scene) {
+		current_scene = scene;
+		ResetAnnouncement();
+	}
 	void SetLives(int lives) { this->lives = lives; }
 	void AddLives() { this->lives += 1; }
 	int GetLives() { return lives; }
@@ -114,6 +117,8 @@ public:
 	}
 
 	void RenderHUD();
+
+	void ResetAnnouncement();
 };
 
 typedef CGameState* LPGAMESTATE;
