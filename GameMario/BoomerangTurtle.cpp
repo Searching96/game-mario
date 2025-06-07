@@ -147,8 +147,8 @@ void CBoomerangTurtle::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		vx = -vx;
 	}
 
-	int randomNum = rand() % 500;
-	if (randomNum == 499)
+	int randomNum = rand() % 300;
+	if (randomNum == 299)
 	{
 		vy = -0.3f;
 	}

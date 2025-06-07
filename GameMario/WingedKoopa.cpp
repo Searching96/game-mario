@@ -15,6 +15,7 @@
 #include "PlayScene.h"
 
 #include "debug.h"
+#include "FallPitch.h"
 
 CWingedKoopa::CWingedKoopa(int id, float x, float y, int z, int originalChunkId, int nx, bool isWinged) : CGameObject(id, x, y, z)
 {
@@ -32,22 +33,22 @@ CWingedKoopa::CWingedKoopa(int id, float x, float y, int z, int originalChunkId,
 		SetState(WINGED_KOOPA_STATE_MOVING_LEFT);
 }
 
-void CWingedKoopa::GetBoundingBox(float& left, float& top, float& right, float& bottom)  
-{  
-   if (state == WINGED_KOOPA_STATE_MOVING_LEFT || state == WINGED_KOOPA_STATE_MOVING_RIGHT)  
-   {  
-       left = x - WINGED_KOOPA_BBOX_WIDTH / 2;  
-       right = left + WINGED_KOOPA_BBOX_WIDTH;  
-       bottom = y + WINGED_KOOPA_TEXTURE_HEIGHT / 2;  
-       top = bottom - WINGED_KOOPA_BBOX_HEIGHT;  
-   }  
-   else // Shell states (including being held, dynamic, static)  
-   {  
-       left = x - WINGED_KOOPA_BBOX_WIDTH / 2;  
-       top = y - WINGED_KOOPA_BBOX_HEIGHT / 2;  
-       right = left + WINGED_KOOPA_BBOX_WIDTH;  
-       bottom = top + WINGED_KOOPA_BBOX_HEIGHT;  
-   }  
+void CWingedKoopa::GetBoundingBox(float& left, float& top, float& right, float& bottom)
+{
+	if (state == WINGED_KOOPA_STATE_MOVING_LEFT || state == WINGED_KOOPA_STATE_MOVING_RIGHT)
+	{
+		left = x - WINGED_KOOPA_BBOX_WIDTH / 2;
+		right = left + WINGED_KOOPA_BBOX_WIDTH;
+		bottom = y + WINGED_KOOPA_TEXTURE_HEIGHT / 2;
+		top = bottom - WINGED_KOOPA_BBOX_HEIGHT;
+	}
+	else // Shell states (including being held, dynamic, static)  
+	{
+		left = x - WINGED_KOOPA_BBOX_WIDTH / 2;
+		top = y - WINGED_KOOPA_BBOX_HEIGHT / 2;
+		right = left + WINGED_KOOPA_BBOX_WIDTH;
+		bottom = top + WINGED_KOOPA_BBOX_HEIGHT;
+	}
 }
 
 void CWingedKoopa::OnNoCollision(DWORD dt)
@@ -102,6 +103,14 @@ void CWingedKoopa::OnCollisionWith(LPCOLLISIONEVENT e)
 		OnCollisionWithWingedKoopa(e);
 	else if (dynamic_cast<CKoopa*>(e->obj))
 		OnCollisionWithKoopa(e);
+	else if (dynamic_cast<CFallPitch*>(e->obj))
+		OnCollisionWIthFallPitch(e);
+}
+
+void CWingedKoopa::OnCollisionWIthFallPitch(LPCOLLISIONEVENT e)
+{
+	CFallPitch* fp = dynamic_cast<CFallPitch*>(e->obj);
+	this->SetIsDefeated(true);
 }
 
 void CWingedKoopa::OnCollisionWithQuestionBlock(LPCOLLISIONEVENT e)
@@ -360,7 +369,10 @@ void CWingedKoopa::OnCollisionWithWingedKoopa(LPCOLLISIONEVENT e)
 {
 	if (this == e->obj)
 		return;
+
 	CWingedKoopa* wk = dynamic_cast<CWingedKoopa*>(e->obj);
+	if (wk->IsDefeated())
+		return;
 	if (wk->IsHeld())
 	{
 		CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
@@ -579,7 +591,7 @@ void CWingedKoopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		vx = (isWinged ? WINGED_KOOPA_BOUNCING_SPEED_X : WINGED_KOOPA_WALKING_SPEED);
 	}
 	else if (state == WINGED_KOOPA_STATE_MOVING_LEFT) {
-		vx = (isWinged ? -WINGED_KOOPA_BOUNCING_SPEED_X : - WINGED_KOOPA_WALKING_SPEED);
+		vx = (isWinged ? -WINGED_KOOPA_BOUNCING_SPEED_X : -WINGED_KOOPA_WALKING_SPEED);
 	}
 
 	CGameObject::Update(dt, coObjects);
@@ -639,7 +651,7 @@ void CWingedKoopa::Render()
 	{
 		if (wingState == 0)
 		{
-			if (nx > 0) 
+			if (nx > 0)
 				CAnimations::GetInstance()->Get(ID_ANI_WING_FLAP_LEFT)->Render(x - WINGED_KOOPA_BBOX_WIDTH / 2 + 1, y - GOOMBA_BBOX_HEIGHT / 2);
 			else
 				CAnimations::GetInstance()->Get(ID_ANI_WING_FLAP_RIGHT)->Render(x + WINGED_KOOPA_BBOX_WIDTH / 2, y - GOOMBA_BBOX_HEIGHT / 2);
@@ -722,7 +734,7 @@ void CWingedKoopa::SetState(int state)
 		if (this->state == WINGED_KOOPA_STATE_SHELL_STATIC && vy != 0)
 			return;
 		isKicked = false;
-		vx = (isWinged ? -WINGED_KOOPA_BOUNCING_SPEED_X : - WINGED_KOOPA_WALKING_SPEED);
+		vx = (isWinged ? -WINGED_KOOPA_BOUNCING_SPEED_X : -WINGED_KOOPA_WALKING_SPEED);
 		nx = -1;
 		break;
 	case WINGED_KOOPA_STATE_MOVING_RIGHT:

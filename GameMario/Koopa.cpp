@@ -213,6 +213,7 @@ void CKoopa::OnCollisionWithLifeBrick(LPCOLLISIONEVENT e)
 void CKoopa::OnCollisionWithCoinBrick(LPCOLLISIONEVENT e)
 {
 	CCoinBrick* cb = dynamic_cast<CCoinBrick*>(e->obj);
+	if (cb->IsRevealed()) return;
 	bool isAbleToBounce = (state == KOOPA_STATE_WALKING_LEFT || state == KOOPA_STATE_WALKING_RIGHT || state == KOOPA_STATE_SHELL_STATIC);
 	if (isAbleToBounce)
 	{
