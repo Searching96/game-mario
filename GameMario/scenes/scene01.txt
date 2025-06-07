@@ -58,8 +58,8 @@ cam_mode	0
 0	2816	216	16	432
 
 # Brick stair border
-0	1663	392	16	64
-0	1601	392	16	64
+0	1664	394	16	64
+0	1600	394	16	64
 
 # Right hidden map border
 0	2370	552	16	128

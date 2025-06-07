@@ -444,7 +444,7 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 		}
 		case OBJECT_TYPE_SKY_PLATFORM:
 		{
-			zIndex = ZINDEX_PLATFORMS;
+			zIndex = ZINDEX_BLOCKS + 1;
 			if (tokens.size() < 6) throw runtime_error("Insufficient params for SKYPLATFORM");
 			int width = stoi(tokens[4]);
 			int height = stoi(tokens[5]);
@@ -1089,7 +1089,7 @@ void CPlayScene::UpdateCamera(CMario* mario, float cam_width, float cam_height) 
 	}
 
 	// Clamp camera to map boundaries
-	float minCamX = cameraMode == 1 ? scrollCamXEnd - VIEWPORT_X_OFFSET + 16 : -VIEWPORT_X_OFFSET;
+	float minCamX = cameraMode == 1 ? scrollCamXEnd - VIEWPORT_X_OFFSET + 20 : -VIEWPORT_X_OFFSET;
 	float maxCamX = (mapWidth > cam_width) ? (mapWidth - cam_width - VIEWPORT_X_OFFSET) : minCamX;
 	maxCamX = max(minCamX, maxCamX);
 	float minCamY = 0.0f;
@@ -1208,10 +1208,14 @@ void CPlayScene::Update(DWORD dt)
 	else {
 		float cam_x_increase = dt * CAMERA_STEADY_SPEED_X;
 		float cam_x = current_cam_x + cam_x_increase;
+		float minLeftBorder = D3D10_FLOAT32_MAX;
 		for (auto border : borders)
 		{
 			if (border->GetId() != 9999) continue;
 			border->SetSpeed(CAMERA_STEADY_SPEED_X, 0);
+			float border_x, border_y;
+			border->GetPosition(border_x, border_y);
+			if (border_x < minLeftBorder) minLeftBorder = border_x;
 		}
 		if (cam_x + cam_width > scrollCamXEnd)
 		{
@@ -1223,7 +1227,7 @@ void CPlayScene::Update(DWORD dt)
 			}
 		}
 
-		if (mario_y > mapHeight) mario->SetState(MARIO_STATE_DIE_ON_BEING_KILLED);
+		if (mario_y > mapHeight || mario_x < minLeftBorder) mario->SetState(MARIO_STATE_DIE_ON_BEING_KILLED);
 		else game->SetCamPos(cam_x, startCamY);
 	}
 
@@ -1575,8 +1579,20 @@ void CPlayScene::TeleportToMapEnd()
 	CGame* game = CGame::GetInstance();
 	float cam_width = (float)game->GetBackBufferWidth();
 	float cam_height = (float)game->GetBackBufferHeight();
-	player->SetPosition(mapWidth - cam_width / 2, mapHeight - cam_height / 6);
-	game->SetCamPos(mapWidth - cam_width, mapHeight - cam_height);
+	float mapEnd, mario_x, mario_y;
+	if (cameraMode == 1)
+	{
+		mapEnd = scrollCamXEnd;
+		mario_x = mapEnd - cam_width / 3;
+		mario_y = mapHeight - cam_height;
+	}
+	else {
+		mapEnd = mapWidth;
+		mario_x = mapEnd - cam_width / 2;
+		mario_y = mapHeight - cam_height / 6;
+	}
+	player->SetPosition(mario_x, mario_y);
+	game->SetCamPos(mapEnd - cam_width, mapHeight - cam_height);
 }
 
 // Keep IsGameObjectDeleted as is, used by PurgeDeletedObjects

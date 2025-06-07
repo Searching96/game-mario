@@ -41,7 +41,7 @@ void CFallingPlatform::Render() {
 		s->Get(ID_SPRITE_FALLING_PLATFORM_RIGHT)->Draw(x + (width - 1) * FALLING_PLATFORM_CELL_WIDTH, y);
 	}
 
-	RenderBoundingBox(); // Uncomment for debugging
+	//RenderBoundingBox(); // Uncomment for debugging
 }
 
 void CFallingPlatform::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects) {

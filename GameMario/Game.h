@@ -63,6 +63,7 @@ class CGame
 	int next_scene = -1;
 	float gameSpeed = 1.0f;
 	float prevGameSpeed = 1.0f;
+	bool isStopppingAnimation = false;
 	LPGAMESTATE gameState = nullptr;
 
 	void _ParseSection_SETTINGS(string line);
@@ -116,6 +117,8 @@ public:
 	void IncreaseGameSpeed();
 	void PauseGame();
 	bool IsPaused() { return isPaused; }
+	void StopAnimation(bool isStoppping) { isStopppingAnimation = isStoppping; }
+	bool IsStoppingAnimation() const { return isStopppingAnimation; }
 
 	void SetPointSamplerState();
 

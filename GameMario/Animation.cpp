@@ -32,8 +32,9 @@ void CAnimation::Render(float x, float y)
         // Get game state
         bool isPaused = CGame::GetInstance()->IsPaused();
         float gameSpeed = CGame::GetInstance()->GetGameSpeed();
+		bool isStoppingAnimation = CGame::GetInstance()->IsStoppingAnimation();
 
-        if (!isPaused && gameSpeed > 0.0f)
+        if (!isPaused && gameSpeed > 0.0f && !isStoppingAnimation)
         {
             // Calculate elapsed time
             static LARGE_INTEGER frequency;

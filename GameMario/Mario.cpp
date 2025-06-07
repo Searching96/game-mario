@@ -164,6 +164,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 					isTeleporting = 0;
 					SetState(MARIO_STATE_IDLE);
 					zIndex = 100;
+					CGame::GetInstance()->StopAnimation(false);
 				}
 			}
 		}
@@ -200,6 +201,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 					isTeleporting = 0;
 					SetState(MARIO_STATE_IDLE);
 					zIndex = 100;
+					CGame::GetInstance()->StopAnimation(false);
 				}
 			}
 		}
@@ -464,6 +466,7 @@ void CMario::Teleport(CPortal* portal)
 	}
 	zIndex = 50 - 1; // Temporary adjust mario's zIndex to be lower than portal.
 	SetState(MARIO_STATE_TELEPORTING);
+	CGame::GetInstance()->StopAnimation(true);
 }
 
 void CMario::OnNoCollision(DWORD dt)
