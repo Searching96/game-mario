@@ -1208,10 +1208,14 @@ void CPlayScene::Update(DWORD dt)
 	else {
 		float cam_x_increase = dt * CAMERA_STEADY_SPEED_X;
 		float cam_x = current_cam_x + cam_x_increase;
+		float minLeftBorder = D3D10_FLOAT32_MAX;
 		for (auto border : borders)
 		{
 			if (border->GetId() != 9999) continue;
 			border->SetSpeed(CAMERA_STEADY_SPEED_X, 0);
+			float border_x, border_y;
+			border->GetPosition(border_x, border_y);
+			if (border_x < minLeftBorder) minLeftBorder = border_x;
 		}
 		if (cam_x + cam_width > scrollCamXEnd)
 		{
@@ -1223,7 +1227,7 @@ void CPlayScene::Update(DWORD dt)
 			}
 		}
 
-		if (mario_y > mapHeight) mario->SetState(MARIO_STATE_DIE_ON_BEING_KILLED);
+		if (mario_y > mapHeight || mario_x < minLeftBorder) mario->SetState(MARIO_STATE_DIE_ON_BEING_KILLED);
 		else game->SetCamPos(cam_x, startCamY);
 	}
 
