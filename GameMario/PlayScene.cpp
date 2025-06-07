@@ -444,7 +444,7 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 		}
 		case OBJECT_TYPE_SKY_PLATFORM:
 		{
-			zIndex = ZINDEX_PLATFORMS;
+			zIndex = ZINDEX_BLOCKS + 1;
 			if (tokens.size() < 6) throw runtime_error("Insufficient params for SKYPLATFORM");
 			int width = stoi(tokens[4]);
 			int height = stoi(tokens[5]);
