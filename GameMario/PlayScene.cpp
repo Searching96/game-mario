@@ -1040,7 +1040,7 @@ void CPlayScene::UpdateCamera(CMario* mario, float cam_width, float cam_height) 
 	//float windowRight = cam_width / 2 + CAMERA_WINDOW_HORIZONTAL_ZONE / 2;
 
 	//// Calculate target horizontal position using window push
-	float targetCamX = mario_x - cam_width/2; // Default: don't move
+	float targetCamX = mario_x - cam_width / 2; // Default: don't move
 	//if (mario_screen_x < windowLeft) {
 	//	// Mario is too far left on screen - move camera left
 	//	targetCamX = mario_x - windowLeft;
@@ -1378,7 +1378,11 @@ void CPlayScene::DefeatEnemiesOutOfRange()
 				if (!wingedGoomba->IsDefeated())
 					wingedGoomba->SetIsDefeated(true);
 			}
-			else if (CFallingPlatform* fallingPlatform = dynamic_cast<CFallingPlatform*>(enemy))
+		}
+
+		if (CFallingPlatform* fallingPlatform = dynamic_cast<CFallingPlatform*>(enemy))
+		{
+			if (eX > camEndX + DEFEAT_RANGE)
 			{
 				if (!fallingPlatform->IsDefeated())
 					fallingPlatform->SetIsDefeated(true);
