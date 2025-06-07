@@ -79,4 +79,5 @@ public:
 	void SetIsDefeated(int defeated) { isDefeated = defeated; }
 	void GetOriginalPosition(float& x0, float& y0) { x0 = this->x0; y0 = this->y0; }
 	int GetOriginalChunkId() { return originalChunkId; }
+	vector<CBoomerang*> GetBoomerangList() { return boomerangList; }
 };

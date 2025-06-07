@@ -71,7 +71,7 @@ void CKoopa::OnCollisionWith(LPCOLLISIONEVENT e)
 			vx = -vx;
 			nx = -nx;
 		}
-		else
+		else if (state != KOOPA_STATE_SHELL_STATIC)
 		{
 			this->SetState((vx > 0) ? KOOPA_STATE_WALKING_LEFT : KOOPA_STATE_WALKING_RIGHT);
 		}

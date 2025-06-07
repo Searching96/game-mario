@@ -1379,6 +1379,11 @@ void CPlayScene::DefeatEnemiesOutOfRange()
 				if (!fallingPlatform->IsDefeated())
 					fallingPlatform->SetIsDefeated(true);
 			}
+			else if (CBoomerangTurtle* boomerangTurtle = dynamic_cast<CBoomerangTurtle*>(enemy))
+			{
+				if (!boomerangTurtle->IsDefeated())
+					boomerangTurtle->SetIsDefeated(true);
+			}
 		}
 	}
 }
@@ -1426,6 +1431,22 @@ void CPlayScene::RespawnEnemiesInRange()
 					CGoomba* newGoomba = new CGoomba(goomba->GetId(), eX0, eY0, goomba->GetZIndex(), goomba->GetOriginalChunkId(), gNx);
 					originalChunk->AddObject(newGoomba);
 					originalChunk->AddEnemy(newGoomba);
+				}
+			}
+		}
+		else if (CBoomerangTurtle* boomerangTurtle = dynamic_cast<CBoomerangTurtle*>(enemy))
+		{
+			boomerangTurtle->GetOriginalPosition(eX0, eY0);
+			if (boomerangTurtle->IsDefeated() && shouldRespawn(eX0))
+			{
+				LPCHUNK originalChunk = GetChunk(boomerangTurtle->GetOriginalChunkId());
+				if (originalChunk)
+				{
+					originalChunk->RemoveObject(boomerangTurtle);
+					CBoomerangTurtle* newBoomerangTurtle = new CBoomerangTurtle(boomerangTurtle->GetId(), eX0, eY0, boomerangTurtle->GetZIndex(),
+						boomerangTurtle->GetOriginalChunkId(), boomerangTurtle->GetBoomerangList());
+					originalChunk->AddObject(newBoomerangTurtle);
+					originalChunk->AddEnemy(newBoomerangTurtle);
 				}
 			}
 		}

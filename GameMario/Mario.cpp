@@ -1121,6 +1121,8 @@ void CMario::OnCollisionWithWingedGoomba(LPCOLLISIONEVENT e)
 void CMario::OnCollisionWithFallingPlatform(LPCOLLISIONEVENT e)
 {
 	CFallingPlatform* fp = dynamic_cast<CFallingPlatform*>(e->obj);
+	if (e->nx != 0)
+		offsetX = e->nx > 0 ? 1.0f : -1.0f;
 	if (e->ny < 0)
 	{
 		if (fp->GetState() != FALLING_PLATFORM_STATE_ACTIVE)
