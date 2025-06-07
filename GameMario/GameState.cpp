@@ -37,6 +37,10 @@ void CGameState::Update(DWORD dt) {
 			}
 		}
 	}
+	if (cardAnnounceStart != -1 && GetTickCount64() - cardAnnounceStart > CARD_ANNOUNCE_TIMEOUT) {
+		cardAnnounceStart = -1;
+		newCard = 0;
+	}
 }
 
 // Helper function to draw numbers right-aligned
@@ -72,9 +76,11 @@ void CGameState::AddCard(int card_type) {
 	for (int i = 0; i < 3; ++i) {
 		if (collected_cards[i] == 0) { // Find first empty slot
 			collected_cards[i] = card_type;
+			newCard = card_type; // Set new card type
 			break;
 		}
 	}
+	cardAnnounceStart = GetTickCount64();
 	// If all slots are full, maybe overwrite the first, or do nothing
 }
 
@@ -211,5 +217,24 @@ void CGameState::RenderHUD()
 		float pause_background_x = cam_x + screen_width / 2;
 		float pause_background_y = cam_y + screen_height / 2;
 		s->Get(ID_SPRITE_PAUSE)->Draw(pause_background_x, pause_background_y);
+	}
+
+	if (cardAnnounceStart != -1 && newCard != 0) {
+		// Draw the card announcement
+		float announce_x = cam_x + screen_width / 2;
+		float announce_y = cam_y + 32;
+
+		s->Get((ID_SPRITE_COURSE_CLEAR))->Draw(announce_x - 16, announce_y); // Draw the announcement background
+
+		s->Get(ID_SPRITE_CARD_ANNOUNCE)->Draw(announce_x - 24, announce_y + 30); // Draw the card announce sprite
+
+		int announce_sprite_id = -1;
+		switch (newCard) {
+		case 1: announce_sprite_id = ID_SPRITE_CARD_MUSHROOM; break;
+		case 2: announce_sprite_id = ID_SPRITE_CARD_FLOWER; break;
+		case 3: announce_sprite_id = ID_SPRITE_CARD_STAR; break;
+		}
+		if (announce_sprite_id != -1 && s->Get(announce_sprite_id)) // Check if sprite exists
+			s->Get(announce_sprite_id)->Draw(announce_x - 16 + 100, announce_y + 32);
 	}
 }

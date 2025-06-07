@@ -50,8 +50,16 @@
 #define ID_SPRITE_CARD_FLOWER 1120052     // Flower card
 #define ID_SPRITE_CARD_STAR 1120053       // Star card
 
-//Pause
+// Pause
 #define ID_SPRITE_PAUSE	1120060
+
+// Course clear
+#define ID_SPRITE_COURSE_CLEAR 1120070 // Course clear sprite
+
+// Card announcement
+#define ID_SPRITE_CARD_ANNOUNCE 1120080 // Card announcement sprite
+
+#define CARD_ANNOUNCE_TIMEOUT 4000
 
 // --- Other Constants ---
 #define HUD_MAX_SCORE_DIGITS 7
@@ -66,6 +74,8 @@ private:
 	int lives;
 	DWORD time; // Remaining time in MILLISECONDS
 	DWORD marioDeathStart;
+	int newCard = 0;
+	DWORD cardAnnounceStart = - 1; // Start time for card announcement
 	int score;
 	int coins; // Added coins
 	int collected_cards[3]; // Added card storage (0: empty, 1: Mush, 2: Flower, 3: Star)
