@@ -211,6 +211,8 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			SetState(MARIO_STATE_IDLE);
 		}
 
+		canTeleport = false;
+
 		// Apply Mario's movement into/out of the pipe
 		x += vx * dt;
 		y += vy * dt;
@@ -1767,7 +1769,8 @@ void CMario::SetState(int state)
 
 	case MARIO_STATE_SIT:
 		if (isMoving == 1) break;
-		if (level != MARIO_LEVEL_SMALL) break;
+		canTeleport = true;
+		if (level == MARIO_LEVEL_SMALL) break;
 		if (isHoldingKoopa == 1) break;
 		if (isOnPlatform)
 		{
@@ -1776,7 +1779,6 @@ void CMario::SetState(int state)
 			y += MARIO_SIT_HEIGHT_ADJUST;
 			isSitting = true;
 		}
-		canTeleport = true;
 		break;
 
 	case MARIO_STATE_SIT_RELEASE:
@@ -1786,7 +1788,6 @@ void CMario::SetState(int state)
 			state = MARIO_STATE_IDLE;
 			y -= MARIO_SIT_HEIGHT_ADJUST;
 		}
-		canTeleport = false;
 		break;
 
 	case MARIO_STATE_IDLE:
