@@ -251,7 +251,7 @@ class CPortal;
 #define MARIO_BRAKE_TIMEOUT							500
 #define MARIO_KICK_TIMEOUT							150
 #define MARIO_UNTOUCHABLE_RENDER_INTERVAL			75
-#define MARIO_TAIL_WHIP_TIMEOUT						305
+#define MARIO_TAIL_WHIP_TIMEOUT						310
 #define MARIO_PMETER_MAX_TIMEOUT					4000
 #define MARIO_DEATH_ANI_TIMEOUT						1500
 
@@ -312,11 +312,13 @@ class CMario : public CGameObject
 	bool isRendering = true;
 	ULONGLONG lastRenderTime = -1;
 
-	bool isHoldingKoopa = 0;
 	int jumpCount = 0;
-	bool isMoving = 0;
-	bool isRunning = 0;
-	bool isJumpButtonHeld = 0;
+
+	bool isPushingByBorder = false;
+	bool isHoldingKoopa = false;
+	bool isMoving = false;
+	bool isRunning = false;
+	bool isJumpButtonHeld = false;
 	bool isChangingLevel = false;
 	bool isHoldingUpKey = false;
 	bool isSkywalking = false;

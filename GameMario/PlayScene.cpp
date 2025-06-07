@@ -96,7 +96,7 @@ using namespace std;
 #define DEPENDENT_ID				9999	// ID for objects those are not listed in text file and initiate via another object initiation
 #define ACTIVATOR_BASE_ID			10000
 
-#define SPAWN_CAMERA_BUFFER			20.0f
+#define SPAWN_CAMERA_BUFFER			10.0f
 
 CPlayScene::CPlayScene(int id, LPCWSTR filePath) :
 	CScene(id, filePath)

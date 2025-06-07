@@ -105,7 +105,7 @@ void CSampleKeyHandler::OnKeyUp(int KeyCode)
 		DebugOut(L"[INFO] Reloading assets...\n");
 		CGame::GetInstance()->ReloadAssets();
 		break;
-	case DIK_Y:
+	case DIK_E:
 		DebugOut(L"[INFO] Toggling sky walking mode...\n");
 		mario->ToggleSkywalk();
 		break;

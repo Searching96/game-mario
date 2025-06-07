@@ -105,6 +105,9 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		return;
 	}
 
+	if (isPushingByBorder)
+		isPushingByBorder = false;
+
 	// Track previous jump count to apply consistent jump impulse
 	static int lastJumpCount = 0;
 	int prevJumpCount = lastJumpCount;
@@ -555,6 +558,7 @@ void CMario::OnCollisionWithBorder(LPCOLLISIONEVENT e)
 {
 	offsetX = e->nx > 0 ? 1.0f : -1.0f;
 	SetSpeed(0.02f, vy);
+	isPushingByBorder = true;
 }
 
 void CMario::OnCollisionWithBuffRoulette(LPCOLLISIONEVENT e)
@@ -1635,6 +1639,11 @@ void CMario::SetState(int state)
 	case MARIO_STATE_WALKING_RIGHT:
 		if (isSitting) break;
 		if (isSwitchingScene) break;
+		if (isPushingByBorder)
+		{
+			vx = 0.075f;
+			break;
+		}
 		if (isOnPlatform && vx < 0 && isHoldingKoopa == 0) // If Mario is moving left, set state to brake
 		{
 			if (isOnPlatform)
