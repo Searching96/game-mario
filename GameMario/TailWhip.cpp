@@ -49,7 +49,7 @@ void CTailWhip::Render()
 	//// Don't render if not whipping
 	//if (notWhipping == 1) return;
 
-	if (notWhipping == 1) RenderBoundingBox(); // Debug only
+	//if (notWhipping == 1) RenderBoundingBox(); // Debug only
 }
 
 void CTailWhip::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)

@@ -92,12 +92,16 @@ public:
 	int GetScore() { return score; }
 	void ResetTimer() { time = 300000; }
 	DWORD GetTime() { return time / 1000; } // Return time in seconds for display
-	void Reset() { time = 301000; lives = 3; score = 0; coins = 0; }
+	void Reset() { time = 301000; lives = 3; score = 0; coins = 0; ResetCards(); }
 	void Restart() { time = 301000; lives -= 1; coins = 0; }
 	void AddCoin() { this->coins = min(this->coins + 1, 99); } // Max 99 coins
 	int GetCoins() { return coins; }
 	void AddCard(int card_type); // Logic to add a card
 	int* GetCards() { return collected_cards; }
+	void ResetCards() {
+		for (int i = 0; i < 3; i++)
+			collected_cards[i] = 0;
+	}
 
 	void RenderHUD();
 };

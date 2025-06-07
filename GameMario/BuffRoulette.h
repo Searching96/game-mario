@@ -24,7 +24,7 @@ class CBuffRoulette :
     public CGameObject
 {
 private:
-    int type; // 0: mushroom, 1: flower, 2: star
+    int type; // 1: mushroom, 2: flower, 3: star
     DWORD lastTypeSwitch;
     DWORD usedStart = -1;
     int next_scene;
