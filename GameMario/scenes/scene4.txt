@@ -347,7 +347,7 @@ scroll_cam_x_end	2044
 15	101	2432	96	3	3	5
 
 #Boomerang turtle
-0	17	2096	160
+0	17	2296	174
 
 #Buff roulette
 277	111	2448	112	1

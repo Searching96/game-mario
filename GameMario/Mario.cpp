@@ -361,8 +361,8 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		tailWhip->Update(dt, coObjects);
 	}
 
-	DebugOutTitle(L"vx=%f, ax=%f, mvx=%f, irn=%d, fx=%f, iop=%d, sc=%d, state=%d\n",
-		vx, ax, maxVx, isRunning, frictionX, isOnPlatform, isSwitchingScene, state);
+	//DebugOutTitle(L"vx=%f, ax=%f, mvx=%f, irn=%d, fx=%f, iop=%d, sc=%d, state=%d\n",
+	//	vx, ax, maxVx, isRunning, frictionX, isOnPlatform, isSwitchingScene, state);
 
 	// Process collisions
 	isOnPlatform = false;
@@ -644,6 +644,8 @@ void CMario::OnCollisionWithHiddenCoinBrick(LPCOLLISIONEVENT e)
 	CHiddenCoinBrick* hcb = dynamic_cast<CHiddenCoinBrick*>(e->obj);
 	if (hcb)
 	{
+		if (e->nx != 0)
+			offsetX = e->nx > 0 ? 1.0f : -1.0f;
 		if (e->ny > 0 && e->nx == 0 && !hcb->IsHit() && hcb->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
 		{
 			hcb->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
@@ -751,6 +753,8 @@ void CMario::OnCollisionWithActivatorBrick(LPCOLLISIONEVENT e)
 	CActivatorBrick* ab = dynamic_cast<CActivatorBrick*>(e->obj);
 	if (ab)
 	{
+		if (e->nx != 0)
+			offsetX = e->nx > 0 ? 1.0f : -1.0f;
 		if (e->ny > 0 && e->nx == 0 && !ab->IsHit() && ab->GetState() == QUESTIONBLOCK_STATE_NOT_HIT)
 		{
 			ab->SetState(QUESTIONBLOCK_STATE_BOUNCE_UP);
@@ -763,6 +767,8 @@ void CMario::OnCollisionWithCoinBrick(LPCOLLISIONEVENT e)
 	CCoinBrick* cb = dynamic_cast<CCoinBrick*>(e->obj);
 	if (cb)
 	{
+		if (e->nx != 0)
+			offsetX = e->nx > 0 ? 2.0f : -2.0f;
 		if (cb->IsRevealed())
 		{
 			cb->SetState(COIN_BRICK_STATE_CONSUMED);
@@ -1691,7 +1697,7 @@ void CMario::SetState(int state)
 	case MARIO_STATE_JUMP:
 		if (isSkywalking)
 		{
-			vy = -MARIO_JUMP_SPEED_Y * 0.8;
+			vy = -MARIO_JUMP_SPEED_Y;
 			isJumpButtonHeld = 1;
 			return;
 		}

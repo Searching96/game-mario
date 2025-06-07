@@ -49,32 +49,52 @@ void CTailWhip::Render()
 	//// Don't render if not whipping
 	//if (notWhipping == 1) return;
 
-	RenderBoundingBox(); // Debug only
+	if (notWhipping == 1) RenderBoundingBox(); // Debug only
 }
 
 void CTailWhip::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
-	if (notWhipping == 0) // Only update timers if active 
-	{ 
-		if (whipSpin >= 2) 
+	//if (notWhipping == 0) // Only update timers if active 
+	//{ 
+	//	if (whipSpin >= 2) 
+	//	{
+	//		whipSpin = 0;
+	//		SetState(TAIL_STATE_NOT_WHIPPING);
+	//	}
+	//	else if (whippingLeft == 1) 
+	//	{
+	//		if (GetTickCount64() - whipLeftStart > TAIL_WHIP_LEFT_TIME) 
+	//		{
+	//			whippingLeft = 0;
+	//			SetState(TAIL_STATE_WHIPPING_RIGHT); // Transition state
+	//		}
+	//	}
+	//	else if (whippingRight == 1) 
+	//	{
+	//		if (GetTickCount64() - whipRightStart > TAIL_WHIP_RIGHT_TIME) 
+	//		{
+	//			whippingRight = 0;
+	//			SetState(TAIL_STATE_WHIPPING_LEFT); // Transition state
+	//		}
+	//	}
+	//}
+
+	if (notWhipping == 0)
+	{
+		if (whippingLeft == 1)
 		{
-			whipSpin = 0;
-			SetState(TAIL_STATE_NOT_WHIPPING);
-		}
-		else if (whippingLeft == 1) 
-		{
-			if (GetTickCount64() - whipLeftStart > TAIL_WHIP_LEFT_TIME) 
+			if (GetTickCount64() - whipLeftStart > TAIL_WHIP_LEFT_TIME)
 			{
 				whippingLeft = 0;
-				SetState(TAIL_STATE_WHIPPING_RIGHT); // Transition state
+				SetState(TAIL_STATE_NOT_WHIPPING); // Transition state
 			}
 		}
-		else if (whippingRight == 1) 
+		else if (whippingRight == 1)
 		{
-			if (GetTickCount64() - whipRightStart > TAIL_WHIP_RIGHT_TIME) 
+			if (GetTickCount64() - whipRightStart > TAIL_WHIP_RIGHT_TIME)
 			{
 				whippingRight = 0;
-				SetState(TAIL_STATE_WHIPPING_LEFT); // Transition state
+				SetState(TAIL_STATE_NOT_WHIPPING); // Transition state
 			}
 		}
 	}

@@ -12,7 +12,7 @@ CBoomerangTurtle::CBoomerangTurtle(int id, float x, float y, int z, int original
 	x0 = x;
 	y0 = y;
 	walkAfterThrowsStart = GetTickCount64() - 2000;
-	SetState(BOOMERANG_TURTLE_STATE_WALKING_LEFT);
+	SetState(BOOMERANG_TURTLE_STATE_WALKING_RIGHT);
 }
 
 void CBoomerangTurtle::GetBoundingBox(float& left, float& top, float& right, float& bottom)
@@ -62,11 +62,17 @@ void CBoomerangTurtle::OnCollisionWithBoomerang(LPCOLLISIONEVENT e)
 void CBoomerangTurtle::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
 	//DebugOutTitle(L"[BOOMERANG TURTLE] wbts: %llu, wats: %llu, ps: %llu, ip: %d, bi: %d\n", walkBetweenThrowsStart, walkAfterThrowsStart, prepareStart, isPreparing, boomerangIndex);
-	DebugOutTitle(L"[BOOMERANG 0] ii = %d, iv = %d\n", boomerangList[0]->IsIdling(), boomerangList[0]->IsVisible());
+	//DebugOutTitle(L"[BOOMERANG 0] ii = %d, iv = %d\n", boomerangList[0]->IsIdling(), boomerangList[0]->IsVisible());
 
 	if (isDefeated)
 		return;
 	
+	CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+	float mX, mY;
+	player->GetPosition(mX, mY);
+	int camWidth = CGame::GetInstance()->GetBackBufferWidth();
+	if (mX + camWidth < x) return;
+
 	for (int i = 0; i < boomerangList.size(); i++)
 	{
 		if (boomerangList[i]->IsIdling())
@@ -147,10 +153,6 @@ void CBoomerangTurtle::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		vy = -0.3f;
 	}
 
-
-	CMario* player = (CMario*)((LPPLAYSCENE)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
-	float mX, mY;
-	player->GetPosition(mX, mY);
 	if (mX < x && state != BOOMERANG_TURTLE_STATE_WALKING_RIGHT)
 	{
 		SetState(BOOMERANG_TURTLE_STATE_WALKING_RIGHT);
