@@ -280,6 +280,7 @@ class CMario : public CGameObject
 	ULONGLONG pMeterMax = -1;
 	int consecutiveEnemies;
 
+	bool canTeleport = false;
 	bool isTeleporting = false;
 	bool isEnteringPortal = false;
 	int exitDirection = 0; // 0 for down, 1 for up
