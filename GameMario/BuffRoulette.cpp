@@ -56,7 +56,7 @@ void CBuffRoulette::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		}
 	}
 
-	DebugOut(L"[BUFF] Type: %d, State: %d, lastTypeSwitch: %d, usedStart : %d\n", type, state, lastTypeSwitch, usedStart);
+	//DebugOut(L"[BUFF] Type: %d, State: %d, lastTypeSwitch: %d, usedStart : %d\n", type, state, lastTypeSwitch, usedStart);
 
 	y += vy * dt;
 

@@ -1558,8 +1558,20 @@ void CPlayScene::TeleportToMapEnd()
 	CGame* game = CGame::GetInstance();
 	float cam_width = (float)game->GetBackBufferWidth();
 	float cam_height = (float)game->GetBackBufferHeight();
-	player->SetPosition(mapWidth - cam_width / 2, mapHeight - cam_height / 6);
-	game->SetCamPos(mapWidth - cam_width, mapHeight - cam_height);
+	float mapEnd, mario_x, mario_y;
+	if (cameraMode == 1)
+	{
+		mapEnd = scrollCamXEnd;
+		mario_x = mapEnd - cam_width / 3;
+		mario_y = mapHeight - cam_height;
+	}
+	else {
+		mapEnd = mapWidth;
+		mario_x = mapEnd - cam_width / 2;
+		mario_y = mapHeight - cam_height / 6;
+	}
+	player->SetPosition(mario_x, mario_y);
+	game->SetCamPos(mapEnd - cam_width, mapHeight - cam_height);
 }
 
 // Keep IsGameObjectDeleted as is, used by PurgeDeletedObjects

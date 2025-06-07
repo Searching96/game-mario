@@ -741,7 +741,7 @@ void CGame::ReloadAssets()
 
 		if (line[0] == '#') continue;	// skip comment lines	
 
-		if (line == "[SETTINGS]") { section = GAME_FILE_SECTION_SETTINGS; continue; }
+		if (line == "[SETTINGS]") { section = GAME_FILE_SECTION_UNKNOWN; continue; }
 		if (line == "[TEXTURES]") { section = GAME_FILE_SECTION_TEXTURES; continue; }
 
 		// Skip scenes section - don't reload scenes
