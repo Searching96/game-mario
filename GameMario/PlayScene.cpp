@@ -363,7 +363,7 @@ void CPlayScene::_ParseSection_CHUNK_OBJECTS(string line, LPCHUNK targetChunk)
 		}
 		case OBJECT_TYPE_FALLING_PLATFORM:
 		{
-			zIndex = ZINDEX_PLATFORMS;
+			zIndex = ZINDEX_BLOCKS + 1;
 			int width = stoi(tokens[4]);
 			obj = new CFallingPlatform(id, x, y, zIndex, targetChunk->GetID(), width);
 			targetChunk->AddEnemy(obj);  // Already present
@@ -1378,6 +1378,11 @@ void CPlayScene::DefeatEnemiesOutOfRange()
 				if (!wingedGoomba->IsDefeated())
 					wingedGoomba->SetIsDefeated(true);
 			}
+			else if (CBoomerangTurtle* boomerangTurtle = dynamic_cast<CBoomerangTurtle*>(enemy))
+			{
+				if (!boomerangTurtle->IsDefeated())
+					boomerangTurtle->SetIsDefeated(true);
+			}
 		}
 
 		if (CFallingPlatform* fallingPlatform = dynamic_cast<CFallingPlatform*>(enemy))
@@ -1386,11 +1391,6 @@ void CPlayScene::DefeatEnemiesOutOfRange()
 			{
 				if (!fallingPlatform->IsDefeated())
 					fallingPlatform->SetIsDefeated(true);
-			}
-			else if (CBoomerangTurtle* boomerangTurtle = dynamic_cast<CBoomerangTurtle*>(enemy))
-			{
-				if (!boomerangTurtle->IsDefeated())
-					boomerangTurtle->SetIsDefeated(true);
 			}
 		}
 	}
