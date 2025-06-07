@@ -89,7 +89,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
 	// DebugOutTitle(L"hspl: %d", (int)hasReachedPlatformAfterHover);
 
-	if (isSwitchingScene) 
+	if (isSwitchingScene)
 	{
 		if (isOnPlatform)
 		{
@@ -181,7 +181,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 					{
 						vy = -vy; // Reverse vertical speed if exiting downwards
 						LPPLAYSCENE(CGame::GetInstance()->GetCurrentScene())->LoadChunkWithX(targetX);
-						SetPosition(this->targetX, this->exitY  - currentMarioHeight / 2.0f);
+						SetPosition(this->targetX, this->exitY - currentMarioHeight / 2.0f);
 						CGame::GetInstance()->SetCamPos(targetX, this->exitY - currentMarioHeight / 2.0f);
 					}
 					else {
@@ -459,10 +459,10 @@ void CMario::Teleport(CPortal* portal)
 	if (marioL < portalL) offsetX = portalL - marioL;
 	if (marioR > portalR) offsetX = portalR - marioR - 1;
 	if (isDescending) {
-		if (marioB > portalT) offsetY = portalT - marioB + 2;
+		if (marioB > portalT) offsetY = portalT - marioB + 3;
 	}
 	else {
-		if (marioT < portalB) offsetY = marioT - portalB - 2;
+		if (marioT < portalB) offsetY = marioT - portalB - 3;
 	}
 	zIndex = 50 - 1; // Temporary adjust mario's zIndex to be lower than portal.
 	SetState(MARIO_STATE_TELEPORTING);
@@ -666,7 +666,7 @@ void CMario::OnCollisionWithBoomerang(LPCOLLISIONEVENT e)
 	CBoomerang* b = dynamic_cast<CBoomerang*>(e->obj);
 
 	if (b)
-	{ 
+	{
 		if (!b->IsVisible()) return;
 
 		switch (level)
@@ -1762,12 +1762,15 @@ void CMario::SetState(int state)
 	case MARIO_STATE_SIT:
 		if (isMoving == 1) break;
 		if (isHoldingKoopa == 1) break;
-		if (isOnPlatform && level != MARIO_LEVEL_SMALL)
 		{
-			state = MARIO_STATE_IDLE;
+			if (isOnPlatform)
+				if (level != MARIO_LEVEL_SMALL)
+				{
+					state = MARIO_STATE_IDLE;
+					vx = 0; vy = 0.0f;
+					y += MARIO_SIT_HEIGHT_ADJUST;
+				}
 			isSitting = true;
-			vx = 0; vy = 0.0f;
-			y += MARIO_SIT_HEIGHT_ADJUST;
 		}
 		break;
 
