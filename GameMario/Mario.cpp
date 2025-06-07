@@ -1367,21 +1367,24 @@ int CMario::GetAniIdTail()
 {
 	static int preAniId = -1;
 	int aniId = -1;
-	if (!isOnPlatform && !isOnFallingPlatform)
+	if (!isOnPlatform)
 	{
-		if (pMeter == 1.0f)
+		if (!isOnFallingPlatform)
 		{
-			if (nx >= 0)
-				aniId = ID_ANI_MARIO_TAIL_JUMP_RUN_RIGHT;
+			if (pMeter == 1.0f)
+			{
+				if (nx >= 0)
+					aniId = ID_ANI_MARIO_TAIL_JUMP_RUN_RIGHT;
+				else
+					aniId = ID_ANI_MARIO_TAIL_JUMP_RUN_LEFT;
+			}
 			else
-				aniId = ID_ANI_MARIO_TAIL_JUMP_RUN_LEFT;
-		}
-		else
-		{
-			if (nx >= 0)
-				aniId = ID_ANI_MARIO_TAIL_JUMP_WALK_RIGHT;
-			else
-				aniId = ID_ANI_MARIO_TAIL_JUMP_WALK_LEFT;
+			{
+				if (nx >= 0)
+					aniId = ID_ANI_MARIO_TAIL_JUMP_WALK_RIGHT;
+				else
+					aniId = ID_ANI_MARIO_TAIL_JUMP_WALK_LEFT;
+			}
 		}
 	}
 	else

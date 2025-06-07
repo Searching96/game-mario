@@ -398,6 +398,7 @@ public:
 	bool IsFlying() const { return !isOnPlatform && (jumpCount > 1 || isHovering == 1); }
 	bool IsRunning() const { return isRunning; }
 	bool IsSitting() const { return isSitting; }
+	bool IsTailWhipping() const { return isTailWhipping; }
 
 	bool GetIsTeleporting() const { return isTeleporting; }
 	bool GetIsEnteringPortal() const { return isEnteringPortal; }

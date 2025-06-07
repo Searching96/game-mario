@@ -20,6 +20,8 @@ void CSampleKeyHandler::OnKeyDown(int KeyCode)
 	case DIK_DOWN:
 		if (player->IsChangingLevel())
 			return;
+		if (player->IsTailWhipping())
+			return;
 		player->SetState(MARIO_STATE_SIT);
 		break;
 	case DIK_UP:
