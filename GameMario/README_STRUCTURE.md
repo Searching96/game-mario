@@ -1,10 +1,5 @@
 # GameMario Project Structure
 
-## Reorganized Code Structure
-
-Dự án đã được tổ chức lại theo cấu trúc module hóa để dễ bảo trì và phát triển.
-
-### 📁 Folder Structure
 
 ```
 GameMario/
@@ -92,58 +87,3 @@ GameMario/
 ├── scenes/                   # Scene configuration files
 ├── textures/                 # Texture files
 └── Debug/                    # Build output
-```
-
-### 🎯 Design Principles
-
-#### **Engine Layer**
-- **Reusable**: Không phụ thuộc vào game logic
-- **Low-level**: Rendering, physics math, input abstraction
-- **Testable**: Có thể test độc lập
-
-#### **Game Layer**
-- **Game-specific**: Chứa logic game Mario
-- **High-level**: Gameplay rules, AI, progression
-- **Entity-based**: Organized by game object types
-
-#### **Systems Layer**
-- **Cross-cutting**: Utilities dùng chung
-- **Game logic**: Collision handling, fall detection
-
-### 🔧 Migration Notes
-
-#### **Include Paths**
-Để sử dụng cấu trúc mới, update include paths:
-
-```cpp
-// Old way
-#include "Sprite.h"
-#include "Mario.h"
-
-// New way  
-#include "src/engine/rendering/Sprite.h"
-#include "src/entities/player/Mario.h"
-```
-
-#### **Visual Studio Filters**
-Project filters cần được update để reflect cấu trúc folder mới.
-
-#### **Build Configuration**
-- Add `src/` to include directories
-- Update file paths in .vcxproj if needed
-
-### 🚀 Benefits
-
-1. **Better Organization**: Files grouped by responsibility
-2. **Easier Navigation**: Clear folder hierarchy
-3. **Reduced Coupling**: Engine vs game separation
-4. **Scalability**: Easy to add new entities/systems
-5. **Team Development**: Clear ownership boundaries
-
-### 📝 Next Steps
-
-1. Update Visual Studio project filters
-2. Update include paths in project settings
-3. Test build with new structure
-4. Gradually migrate to use new file locations
-5. Remove old files after successful migration
