@@ -1,0 +1,36 @@
+#include "engine/rendering/Sprites.h"
+#include "core/Game.h"
+#include "debug/debug.h"
+
+CSprites* CSprites::__instance = nullptr;
+
+CSprites* CSprites::GetInstance()
+{
+	if (__instance == nullptr) __instance = new CSprites();
+	return __instance;
+}
+
+void CSprites::Add(int id, int left, int top, int right, int bottom, LPTEXTURE tex)
+{
+	LPSPRITE s = new CSprite(id, left, top, right, bottom, tex);
+	sprites[id] = s;
+}
+
+LPSPRITE CSprites::Get(int id)
+{
+	return sprites[id];
+}
+
+/*
+	Clear all loaded sprites
+*/
+void CSprites::Clear()
+{
+	for (auto x : sprites)
+	{
+		LPSPRITE s = x.second;
+		delete s;
+	}
+
+	sprites.clear();
+}
